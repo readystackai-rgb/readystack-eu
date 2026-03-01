@@ -607,16 +607,17 @@
         }
       };
 
-      // Sign out clears everything
+      // Sign out clears session but preserves app state (video, names, mapping)
 /* MARKER_222 */
       const handleSignOut = () => {
+        persistAppState();                       // save in-flight work before clearing session
         setRsSession(null);
         setRsSheetId(null);
         setShowUserMenu(false);
         localStorage.removeItem('rs_session');
         localStorage.removeItem('rs_email');
         localStorage.removeItem('rs_sheet_id');
-        localStorage.removeItem('rs_app_state');
+        // NOTE: rs_app_state intentionally NOT removed — preserves user work across logout/login
       };
 
       const handleDeleteDistrict = async (sheetId) => {
