@@ -138,17 +138,18 @@
 
 /* MARKER_200 */
     const ReadyStackLogo = ({ size = 24 }) => (
-      <div className="p-1 rounded-full flex items-center justify-center overflow-hidden transition-all duration-300">
-        <img
-          src="https://lh3.googleusercontent.com/d/1-cfFYPbbR6LgEbtV7J9__PNewwAnIZim"
-          alt="ReadyStack"
-          style={{ width: size, height: size, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = 'https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png';
-            e.target.style.filter = 'brightness(0) invert(1)';
-          }}
-        />
+      <div className="flex items-center justify-center overflow-hidden transition-all duration-300">
+        <svg viewBox="0 0 100 100" width={size} height={size} fill="white">
+          {/* Fox ears */}
+          <polygon points="20,45 35,10 50,40" opacity="0.9"/>
+          <polygon points="80,45 65,10 50,40" opacity="0.9"/>
+          {/* Fox face */}
+          <ellipse cx="50" cy="55" rx="32" ry="28" opacity="0.95"/>
+          {/* Chevron stripes */}
+          <path d="M30,50 L50,62 L70,50" fill="none" stroke="#020617" strokeWidth="4" opacity="0.8"/>
+          <path d="M30,58 L50,70 L70,58" fill="none" stroke="#020617" strokeWidth="4" opacity="0.8"/>
+          <path d="M30,66 L50,78 L70,66" fill="none" stroke="#020617" strokeWidth="4" opacity="0.8"/>
+        </svg>
       </div>
     );
 
