@@ -341,9 +341,9 @@
 
       const [mapping, setMapping] = useState({
         sources: [
-          { ven: 'LinkedIn', lab: 'Organic Post', type: 'linkedin', ga4Count: 18420 },
           { ven: 'YouTube', lab: 'Strategy Video', type: 'youtube', ga4Count: 18420 },
-          { ven: 'Substack', lab: 'Newsletter Feed', type: 'substack', ga4Count: 18420 }
+          { ven: 'Substack', lab: 'Newsletter', type: 'substack', ga4Count: 18420 },
+          { ven: 'Reddit', lab: 'Discussion', type: 'reddit', ga4Count: 18420 }
         ],
         learning: [], selecting: [], executing: [], expanding: [], angels: []
       });
@@ -373,7 +373,7 @@
         const url = youtubeInput.trim();
         if (!url) return;
         const platform = searchPlatform || 'youtube';
-        const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
         // Check one-per-platform limit
         const existingPlatform = mapping.sources?.find(s => s.type === platform);
         if (existingPlatform) {
@@ -387,9 +387,7 @@
           const pathParts = parsed.pathname.split('/').filter(Boolean);
           displayName = decodeURIComponent(pathParts.pop() || parsed.hostname);
           // Extract author from URL patterns
-          if (platform === 'linkedin' && pathParts.length >= 2 && pathParts[0] === 'in') {
-            authorName = decodeURIComponent(pathParts[1]).replace(/-/g, ' ');
-          } else if (platform === 'substack') {
+          if (platform === 'substack') {
             authorName = parsed.hostname.split('.')[0].replace(/-/g, ' ');
           } else if (platform === 'reddit' && pathParts.length >= 2 && pathParts[0] === 'u') {
             authorName = pathParts[1];
@@ -434,9 +432,9 @@
         setSearchError(null);
         setPlatformResults([]);
 
-        const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
         const platformName = platformLabels[platform] || platform;
-        const siteHints = { linkedin: 'linkedin.com', substack: 'substack.com', reddit: 'reddit.com' };
+        const siteHints = { substack: 'substack.com', reddit: 'reddit.com' };
 
         try {
           const systemPrompt = `You are a content search assistant. Search for ${platformName} articles, posts, or threads about the given topic. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string), url (string - must be a real ${siteHints[platform]} URL), snippet (string - 1-2 sentence description). Return ONLY the JSON array, no other text. If you cannot find real URLs, construct plausible ${siteHints[platform]} URLs based on the topic and known authors in the space.`;
@@ -495,7 +493,7 @@
         setSearchError(null);
         setPlatformResults([]);
 
-        const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
 
         try {
           const systemPrompt = `You are a URL metadata resolver. Given a URL, extract the article/post metadata. Return a JSON object with: title (string), author (string), snippet (string - brief description of the content). Return ONLY the JSON object, no other text. If you don't know the exact content, infer from the URL structure.`;
@@ -548,8 +546,8 @@
 
       // Choose a platform search result (non-YouTube)
       const choosePlatformResult = (result) => {
-        const platform = result.platform || searchPlatform || 'linkedin';
-        const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+        const platform = result.platform || searchPlatform || 'substack';
+        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
 
         // Check one-per-platform limit
         const existingPlatform = mapping.sources?.find(s => s.type === platform);
@@ -1160,7 +1158,7 @@
 
 /* MARKER_226 */
       const handleSourceUpdate = (idx, key, val) => { setMapping(prev => { const next = [...prev.sources]; next[idx] = {...next[idx], [key]: val}; return { ...prev, sources: next }; }); };
-      const addSource = () => { setMapping(prev => ({ ...prev, sources: [...prev.sources, { ven: '', lab: 'New Source', type: 'linkedin', ga4Count: 18420, isManual: true }] })); };
+      const addSource = () => { setMapping(prev => ({ ...prev, sources: [...prev.sources, { ven: '', lab: 'New Source', type: 'substack', ga4Count: 18420, isManual: true }] })); };
       const removeSource = (idx) => { setMapping(prev => ({ ...prev, sources: prev.sources.filter((_, i) => i !== idx) })); };
       const handlePatternUpdate = (stageId, idx, key, val) => { setMapping(prev => { const next = [...(prev[stageId] || [])]; if (next[idx]) next[idx] = {...next[idx], [key]: val}; return { ...prev, [stageId]: next }; }); };
       
@@ -1498,9 +1496,9 @@
                         setIsSearchPanelOpen(true);
                         setMapping({
                           sources: [
-                            { ven: 'LinkedIn', lab: 'Organic Post', type: 'linkedin', ga4Count: 18420 },
                             { ven: 'YouTube', lab: 'Strategy Video', type: 'youtube', ga4Count: 18420 },
-                            { ven: 'Substack', lab: 'Newsletter Feed', type: 'substack', ga4Count: 18420 }
+                            { ven: 'Substack', lab: 'Newsletter', type: 'substack', ga4Count: 18420 },
+                            { ven: 'Reddit', lab: 'Discussion', type: 'reddit', ga4Count: 18420 }
                           ],
                           learning: [], selecting: [], executing: [], expanding: [], angels: []
                         });
@@ -1726,7 +1724,6 @@
                   <div className="flex gap-1 justify-center">
                     {[
                       { id: 'youtube', label: 'YouTube', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor" stroke="none"/></svg> },
-                      { id: 'linkedin', label: 'LinkedIn', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg> },
                       { id: 'substack', label: 'Substack', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M4 4h16"/><path d="M4 8h16"/><path d="M4 12l8 6 8-6"/></svg> },
                       { id: 'reddit', label: 'Reddit', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10"/><path d="M16.5 14.5c-.7.7-2 1.5-4.5 1.5s-3.8-.8-4.5-1.5"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="15" cy="11" r="1" fill="currentColor"/><path d="M17 8l2-2"/><circle cx="19.5" cy="5.5" r="1"/></svg> }
                     ].map(p => {
@@ -1908,7 +1905,7 @@
                     {/* ── LinkedIn / Substack / Reddit Tab Content ── */}
                     {(searchPlatform || 'youtube') !== 'youtube' && (() => {
                       const platform = searchPlatform;
-                      const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+                      const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
                       const existingSource = mapping.sources?.find(s => s.type === platform && s.url);
 
                       return (
@@ -2103,9 +2100,9 @@
                                     <div className="col-span-2 space-y-2 relative">
                                         <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest">TYPE</label>
                                         <select value={src.type} onChange={(e) => handleSourceUpdate(i, 'type', e.target.value)} className="w-full bg-[#0f172a] border border-slate-800 rounded-lg p-3 text-xs text-white focus:border-indigo-500 outline-none transition-colors appearance-none">
-                                            <option value="linkedin">LinkedIn</option>
                                             <option value="youtube">YouTube</option>
                                             <option value="substack">Substack</option>
+                                            <option value="reddit">Reddit</option>
                                             <option value="article">Article</option>
                                         </select>
                                         <div className="absolute right-3 top-[34px] pointer-events-none text-slate-500">
