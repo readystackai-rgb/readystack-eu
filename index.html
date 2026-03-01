@@ -2045,7 +2045,9 @@
                                 >
                                   <div className="flex gap-4">
                                     <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
-                                      <span className="text-white/30 text-[10px] font-black uppercase">{(result.platform || platform).substring(0, 2)}</span>
+                                      {(result.platform || platform) === 'substack' && <SubstackIcon size={14} className="text-orange-400" />}
+                                      {(result.platform || platform) === 'reddit' && <RedditIcon size={14} className="text-orange-500" />}
+                                      {!['substack', 'reddit'].includes(result.platform || platform) && <span className="text-white/30 text-[10px] font-black uppercase">{(result.platform || platform).substring(0, 2)}</span>}
                                     </div>
                                     <div className="flex-grow space-y-1 min-w-0">
                                       <h5 className="text-white text-xs font-medium line-clamp-2 leading-tight">{result.title}</h5>
@@ -2099,7 +2101,7 @@
                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/15 transition-all text-[9px] text-slate-400 uppercase font-black tracking-widest"
                                       >
                                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                        View
+                                        {(result.platform || platform) === 'substack' ? 'Visit Profile' : (result.platform || platform) === 'reddit' ? 'View Thread' : 'View'}
                                       </a>
                                     )}
                                     <button
