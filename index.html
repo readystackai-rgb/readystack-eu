@@ -348,25 +348,67 @@
         learning: [], selecting: [], executing: [], expanding: [], angels: []
       });
 
+      // Auto-populate a cited creator into the first empty Partner slot
+      const autoPopulatePartner = (creatorName) => {
+        if (!creatorName || !creatorName.trim()) return;
+        const name = creatorName.trim();
+        setStoryParticipants(prev => {
+          // Don't add if already present in any category
+          const allNames = [...prev.homies, ...prev.besties, ...prev.pursuits].map(n => n.toLowerCase().trim());
+          if (allNames.includes(name.toLowerCase())) return prev;
+          // Find first empty Partner slot
+          const emptyIdx = prev.homies.findIndex(h => !h.trim());
+          if (emptyIdx === -1) {
+            // All slots full — expand the array
+            return { ...prev, homies: [...prev.homies, name] };
+          }
+          const next = [...prev.homies];
+          next[emptyIdx] = name;
+          return { ...prev, homies: next };
+        });
+      };
+
       // Handle non-YouTube platform URL submissions
       const handlePlatformUrl = () => {
         const url = youtubeInput.trim();
         if (!url) return;
         const platform = searchPlatform || 'youtube';
         const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+        // Check one-per-platform limit
+        const existingPlatform = mapping.sources?.find(s => s.type === platform);
+        if (existingPlatform) {
+          alert(`You already have a ${platformLabels[platform] || platform} source. One per platform.`);
+          return;
+        }
         let displayName = url;
+        let authorName = '';
         try {
           const parsed = new URL(url.startsWith('http') ? url : 'https://' + url);
-          displayName = decodeURIComponent(parsed.pathname.split('/').filter(Boolean).pop() || parsed.hostname);
+          const pathParts = parsed.pathname.split('/').filter(Boolean);
+          displayName = decodeURIComponent(pathParts.pop() || parsed.hostname);
+          // Extract author from URL patterns
+          if (platform === 'linkedin' && pathParts.length >= 2 && pathParts[0] === 'in') {
+            authorName = decodeURIComponent(pathParts[1]).replace(/-/g, ' ');
+          } else if (platform === 'substack') {
+            authorName = parsed.hostname.split('.')[0].replace(/-/g, ' ');
+          } else if (platform === 'reddit' && pathParts.length >= 2 && pathParts[0] === 'u') {
+            authorName = pathParts[1];
+          } else if (pathParts.length > 0) {
+            // Fallback: use first meaningful path segment as author hint
+            authorName = decodeURIComponent(pathParts[0]).replace(/-/g, ' ');
+          }
         } catch(e) {}
         const newSource = {
           ven: platformLabels[platform] || platform,
           lab: displayName.replace(/-/g, ' ').substring(0, 40),
           type: platform,
           url: url.startsWith('http') ? url : 'https://' + url,
+          author: authorName,
           ga4Count: 0
         };
         setMapping(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
+        // Auto-populate author into Partners (Residents Step 2)
+        if (authorName) autoPopulatePartner(authorName);
         setYoutubeInput('');
         setSearchPlatform('youtube');
       };
@@ -753,6 +795,26 @@
         setSelectedVideoData(video);
         setIsSearchPanelOpen(false);
         setIsGeneratingStory(true);
+        // Auto-populate YouTube channel creator into Partners
+        if (video.snippet?.channelTitle) autoPopulatePartner(video.snippet.channelTitle);
+        // Update YouTube source in mapping with actual video data
+        setMapping(prev => {
+          const ytIdx = prev.sources.findIndex(s => s.type === 'youtube');
+          const ytSource = {
+            ven: 'YouTube',
+            lab: (video.snippet?.title || 'Strategy Video').substring(0, 40),
+            type: 'youtube',
+            url: `https://www.youtube.com/watch?v=${video.id}`,
+            author: video.snippet?.channelTitle || '',
+            ga4Count: parseInt(video.statistics?.viewCount) || 18420
+          };
+          if (ytIdx >= 0) {
+            const next = [...prev.sources];
+            next[ytIdx] = ytSource;
+            return { ...prev, sources: next };
+          }
+          return { ...prev, sources: [ytSource, ...prev.sources] };
+        });
         try {
             let contentText = `Title: ${video.snippet.title}\nDescription: ${video.snippet.description}`;
             const transcript = await getTranscript(video.id);
@@ -880,7 +942,19 @@
         const allParticipants = categories.flatMap(cat => cat.items.map((n, i) => ({ name: n.trim() || `${cat.prefix} ${i + 1}`, groupId: cat.groupId })));
         if (new Set(allParticipants.map(n => n.name.toLowerCase())).size !== allParticipants.length) { setStoryError("Duplicate names detected. Unique residents only."); return; }
         
-        const rsLearning = [{ ven: 'ReadyStack', lab: 'Process Walkthrough', platform: 'youtube', dedicated: true, internal: true, ga4Count: 1200, pat: youtubeEmbedUrl }];
+        // Build referral resources from cited Strategy sources
+        const citedSourceResources = (mapping.sources || [])
+          .filter(s => s.url || s.type === 'youtube')
+          .map(s => ({
+            ven: s.author || s.ven || s.lab,
+            lab: s.lab || 'Cited Source',
+            platform: s.type || 'youtube',
+            ga4Count: s.ga4Count || 1000,
+            pat: s.url || '',
+            isCitedSource: true
+          }));
+
+        const rsLearning = [{ ven: 'ReadyStack', lab: 'Process Walkthrough', platform: 'youtube', dedicated: true, internal: true, ga4Count: 1200, pat: youtubeEmbedUrl }, ...citedSourceResources];
         const rsSelecting = [{ ven: 'ReadyStack', lab: 'Interactive Tour', platform: 'tour', dedicated: true, internal: true, ga4Count: 2300 }];
         const rsExecuting = [ { ven: 'ReadyStack', lab: 'Copy ReadyStack', platform: 'starting', dedicated: true, internal: true, ga4Count: 3400 }, { ven: 'ReadyStack', lab: 'Upload Data', platform: 'uploads', dedicated: true, internal: true, ga4Count: 1200 }, { id: 'rs-api', ven: 'ReadyStack', lab: 'ReadyStack Activation', platform: 'api_config', dedicated: true, internal: true, ga4Count: 4500 }, { id: 'rs-commerce', ven: 'ReadyStack', lab: 'ReadyStack Checkout', platform: 'commerce', dedicated: true, internal: true, price: 1200, ga4Count: 1200 } ];
         const rsExpanding = [ { ven: 'ReadyStack', lab: 'Shares ReadyStack', platform: 'network_invite', dedicated: true, internal: true, ga4Count: 1200 }, { ven: 'ReadyStack', lab: 'Check ReadyStack Earnings', platform: 'deposits', dedicated: true, internal: true, ga4Count: 2300 }, { ven: 'ReadyStack', lab: 'Schedules ReadyStack Onboarding', platform: 'success', dedicated: true, internal: true, ga4Count: 3400 } ];
