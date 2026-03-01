@@ -347,7 +347,7 @@
       const [isNarrativePlaying, setIsNarrativePlaying] = useState(false);
       const narrativeInterval = useRef(null);
 
-      const [storyParticipants, setStoryParticipants] = useState({ homies: ['', '', '', '', '', ''], besties: ['', '', ''] });
+      const [storyParticipants, setStoryParticipants] = useState({ homies: [{name:'',product:''},{name:'',product:''},{name:'',product:''},{name:'',product:''},{name:'',product:''},{name:'',product:''}], besties: [{name:'',product:''},{name:'',product:''},{name:'',product:''}] });
       const [storyError, setStoryError] = useState(null);
       const [angelChoices, setAngelChoices] = useState({ observe: false, awareness: false, invest: false });
       const [angelAmounts, setAngelAmounts] = useState({ observe: 10000, awareness: 25000, invest: 100000 });
@@ -376,16 +376,16 @@
         const name = creatorName.trim();
         setStoryParticipants(prev => {
           // Don't add if already present in any category
-          const allNames = [...prev.homies, ...prev.besties].map(n => n.toLowerCase().trim());
+          const allNames = [...prev.homies, ...prev.besties].map(n => (n.name || '').toLowerCase().trim());
           if (allNames.includes(name.toLowerCase())) return prev;
           // Find first empty Partner slot
-          const emptyIdx = prev.homies.findIndex(h => !h.trim());
+          const emptyIdx = prev.homies.findIndex(h => !(h.name || '').trim());
           if (emptyIdx === -1) {
             // All slots full — expand the array
-            return { ...prev, homies: [...prev.homies, name] };
+            return { ...prev, homies: [...prev.homies, {name: name, product: ''}] };
           }
           const next = [...prev.homies];
-          next[emptyIdx] = name;
+          next[emptyIdx] = {name: name, product: ''};
           return { ...prev, homies: next };
         });
       };
@@ -1145,7 +1145,7 @@
         const target = typeof targetTab === 'string' ? targetTab : 'mapper';
         setStoryError(null);
         const categories = [ { items: storyParticipants.homies, prefix: 'Partner', groupId: 'homie' }, { items: storyParticipants.besties, prefix: 'Customer', groupId: 'bestie' } ];
-        const allParticipants = categories.flatMap(cat => cat.items.map((n, i) => ({ name: n.trim() || `${cat.prefix} ${i + 1}`, groupId: cat.groupId })));
+        const allParticipants = categories.flatMap(cat => cat.items.map((n, i) => ({ name: (n.name || '').trim() || `${cat.prefix} ${i + 1}`, groupId: cat.groupId })));
         if (new Set(allParticipants.map(n => n.name.toLowerCase())).size !== allParticipants.length) { setStoryError("Duplicate names detected. Unique residents only."); return; }
         
         // Build referral resources from cited Strategy sources
@@ -2225,11 +2225,11 @@
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                                     Visit Profile
                                   </button>
-                                  <button onClick={() => { const addToCategory = (name, category) => { setStoryParticipants(prev => { const arr = [...prev[category]]; const emptyIdx = arr.findIndex(h => !h.trim()); if (emptyIdx === -1) { return { ...prev, [category]: [...arr, name] }; } arr[emptyIdx] = name; return { ...prev, [category]: arr }; }); }; addToCategory(a.name, 'homies'); }} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                                  <button onClick={() => { const addToCategory = (name, category) => { setStoryParticipants(prev => { const arr = [...prev[category]]; const emptyIdx = arr.findIndex(h => !(h.name || '').trim()); if (emptyIdx === -1) { return { ...prev, [category]: [...arr, {name: name, product: ''}] }; } arr[emptyIdx] = {name: name, product: ''}; return { ...prev, [category]: arr }; }); }; addToCategory(a.name, 'homies'); }} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                     Add as Partner
                                   </button>
-                                  <button onClick={() => { const addToCategory = (name, category) => { setStoryParticipants(prev => { const arr = [...prev[category]]; const emptyIdx = arr.findIndex(h => !h.trim()); if (emptyIdx === -1) { return { ...prev, [category]: [...arr, name] }; } arr[emptyIdx] = name; return { ...prev, [category]: arr }; }); }; addToCategory(a.name, 'besties'); }} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                                  <button onClick={() => { const addToCategory = (name, category) => { setStoryParticipants(prev => { const arr = [...prev[category]]; const emptyIdx = arr.findIndex(h => !(h.name || '').trim()); if (emptyIdx === -1) { return { ...prev, [category]: [...arr, {name: name, product: ''}] }; } arr[emptyIdx] = {name: name, product: ''}; return { ...prev, [category]: arr }; }); }; addToCategory(a.name, 'besties'); }} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                     Add as Customer
                                   </button>
@@ -2242,11 +2242,21 @@
                     <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
                         <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
                             <h5 className="text-xs font-black text-white/70 uppercase tracking-widest text-center">PARTNERS<br/><span className="text-[9px] opacity-50 italic">ADJACENT CREWS</span></h5>
-                            {storyParticipants.homies.map((val, i) => (<input key={i} placeholder={`Partner ${i+1}`} value={val} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.homies]; next[i] = v; return {...prev, homies: next}; }); }} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />))}
+                            {storyParticipants.homies.map((p, i) => (
+                            <div key={i} className="flex gap-2">
+                              <input placeholder={`Partner ${i+1}`} value={p.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.homies]; next[i] = {...next[i], name: v}; return {...prev, homies: next}; }); }} className="flex-1 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />
+                              <input placeholder="product / service" value={p.product} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.homies]; next[i] = {...next[i], product: v}; return {...prev, homies: next}; }); }} className="flex-1 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:border-white/30 outline-none shadow-inner" />
+                            </div>
+                          ))}
                         </div>
                         <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
                             <h5 className="text-xs font-black text-white/70 uppercase tracking-widest text-center">CUSTOMERS<br/><span className="text-[9px] opacity-50 italic">ACTIVE RESIDENTS</span></h5>
-                            {storyParticipants.besties.map((val, i) => (<input key={i} placeholder={`Customer ${i+1}`} value={val} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.besties]; next[i] = v; return {...prev, besties: next}; }); }} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />))}
+                            {storyParticipants.besties.map((p, i) => (
+                            <div key={i} className="flex gap-2">
+                              <input placeholder={`Customer ${i+1}`} value={p.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.besties]; next[i] = {...next[i], name: v}; return {...prev, besties: next}; }); }} className="flex-1 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />
+                              <input placeholder="product / service" value={p.product} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.besties]; next[i] = {...next[i], product: v}; return {...prev, besties: next}; }); }} className="flex-1 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:border-white/30 outline-none shadow-inner" />
+                            </div>
+                          ))}
                         </div>
 
                         <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
@@ -2369,7 +2379,7 @@
                           return (
                             <div key={idx} className="bg-[#0f172a] p-6 rounded-2xl border border-slate-800 grid grid-cols-12 gap-4 items-center shadow-xl text-left group">
                               <div className={`col-span-10 grid ${(p.platform === 'commerce' || p.platform === 'partner_checkout') ? 'grid-cols-4' : 'grid-cols-3'} gap-4 text-left`}>
-                                <div className="space-y-1 text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Partner</label><input list={`residents-list-${stage.id}-${idx}`} className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left" value={p.ven} placeholder="partner name" onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'ven', e.target.value)} /><datalist id={`residents-list-${stage.id}-${idx}`}>{[...storyParticipants.homies, ...storyParticipants.besties].filter(n => n.trim()).map((name, ni) => (<option key={ni} value={name} />))}</datalist></div>
+                                <div className="space-y-1 text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Partner</label><input list={`residents-list-${stage.id}-${idx}`} className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left" value={p.ven} placeholder="partner name" onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'ven', e.target.value)} /><datalist id={`residents-list-${stage.id}-${idx}`}>{[...storyParticipants.homies, ...storyParticipants.besties].filter(n => (n.name || '').trim()).map((p, ni) => (<option key={ni} value={p.name} />))}</datalist></div>
                                 <div className="space-y-1 text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Location / Action</label><select className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] outline-none text-left" value={p.platform} onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'platform', e.target.value)}>{stage.id === 'learning' && ( <><option value="youtube">YouTube</option><option value="substack">Substack</option><option value="miro">Miro</option><option value="webinar">Webinar</option></> )}{stage.id === 'selecting' && ( <><option value="marketplace">Marketplace</option><option value="tour">Interactive Tour</option><option value="demo">Live Demo</option><option value="trial">Trial Page</option><option value="reviews_pricing">Reviews Pricing</option><option value="youtube">YouTube</option><option value="substack">Substack</option><option value="miro">Miro</option><option value="webinar">Webinar</option></> )}{stage.id === 'executing' && ( <><option value="webinar">Watch Tutorial</option><option value="partner_checkout">Partner Checkout</option><option value="api_config">API Configuration</option><option value="field_map">Field Mapping</option><option value="asset_deploy">Asset Deployment</option><option value="workspace_init">Workspace Initialization</option><option value="user_prov">User Provisioning</option><option value="onboarding">Onboarding</option></> )}{stage.id === 'expanding' && (<><optgroup label="Network Growth"><option value="affiliate">Affiliate sign up</option><option value="partner_invite">Partner Invite</option><option value="team_upgrade">Team Seat Upgrade</option><option value="community_spotlight">Community Spotlight</option></optgroup><optgroup label="Financial Value"><option value="revenue_share">Revenue Share Dashboard</option><option value="royalty_report">Royalty Report</option><option value="dividend_payout">Dividend Payout</option><option value="deposits">Check ReadyStack Earnings</option></optgroup><optgroup label="Strategic Scale"><option value="growth_audit">Growth Audit</option><option value="market_expansion">Market Expansion Plan</option><option value="beta_access">Feature Beta Access</option><option value="case_study">Case Study Spotlight</option></optgroup></>)}</select></div>
                                 {(p.platform === 'commerce' || p.platform === 'partner_checkout') && (<div className="space-y-1 text-left animate-fade-in"><label className="text-[8px] font-black uppercase text-emerald-400 text-left tracking-widest">Pending Dollar Value</label><input type="number" step="10" className="w-full bg-[#0a0f1e] border border-emerald-500/30 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left shadow-inner focus:border-emerald-50 outline-none" value={p.price || 0} onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'price', parseInt(e.target.value))} /></div>)}
                                 <div className="space-y-1 text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Asset URL</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left shadow-inner" value={p.pat} placeholder="https://..." onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'pat', e.target.value)} /></div>
@@ -2378,7 +2388,7 @@
                             </div>
                           );
                         })}
-                        <button onClick={() => addPattern(stage.id)} className="flex items-center gap-2 text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-6 hover:text-indigo-300 transition-all text-left text-left">+ Point of Interest</button>
+                        
                       </div>
                     </div>
                   )})}
