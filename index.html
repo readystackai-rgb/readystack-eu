@@ -305,6 +305,7 @@
       const [isRailOpen, setIsRailOpen] = useState(true);
       
 /* MARKER_211 */
+      const [searchPlatform, setSearchPlatform] = useState('youtube');
       const [youtubeInput, setYoutubeInput] = useState('');
       const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState('');
       const [selectedVideoData, setSelectedVideoData] = useState(null);
@@ -346,6 +347,29 @@
         ],
         learning: [], selecting: [], executing: [], expanding: [], angels: []
       });
+
+      // Handle non-YouTube platform URL submissions
+      const handlePlatformUrl = () => {
+        const url = youtubeInput.trim();
+        if (!url) return;
+        const platform = searchPlatform || 'youtube';
+        const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+        let displayName = url;
+        try {
+          const parsed = new URL(url.startsWith('http') ? url : 'https://' + url);
+          displayName = decodeURIComponent(parsed.pathname.split('/').filter(Boolean).pop() || parsed.hostname);
+        } catch(e) {}
+        const newSource = {
+          ven: platformLabels[platform] || platform,
+          lab: displayName.replace(/-/g, ' ').substring(0, 40),
+          type: platform,
+          url: url.startsWith('http') ? url : 'https://' + url,
+          ga4Count: 0
+        };
+        setMapping(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
+        setYoutubeInput('');
+        setSearchPlatform('youtube');
+      };
 
       const ytApiKey = "AIzaSyDCUc877CDBxRntQwctrKTFfjQ8rhPruss";
       const CLOUD_FUNCTION_URL = "https://us-central1-gen-lang-client-0769430147.cloudfunctions.net/advisor";
@@ -1303,7 +1327,7 @@
               
               <div className="space-y-3 flex-grow whitespace-nowrap overflow-hidden">
                 {[ 
-                  { id: 'youtube', num: 1, label: 'Featured YouTube' }, 
+                  { id: 'youtube', num: 1, label: 'Strategy' }, 
                   { id: 'intro', num: 2, label: 'Residents' },
                   { id: 'mapper', num: 3, label: 'District Map' }, 
                   { id: 'observatory', num: 4, label: 'View District Flow' }, 
@@ -1445,15 +1469,35 @@
             {activeTab === 'youtube' && (
               <div className="max-w-5xl mx-auto animate-fade-in space-y-8 text-left pt-16 pb-10">
                   <div className="text-center space-y-4 mb-10">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter">FEATURED YOUTUBE</h3>
-                      <p className="text-slate-400 italic text-sm">Search for authority or paste an embed code to anchor your District.</p>
+                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter">STRATEGY</h3>
+                      <p className="text-slate-400 italic text-sm">Cite source materials to anchor your District. One per platform.</p>
                   </div>
                   
                   <div className="bg-[#020617]/50 p-8 rounded-[32px] border border-white/5 shadow-inner space-y-8">
                       {isSearchPanelOpen ? (
                         <div className="space-y-8">
                           <div className="space-y-3 max-w-2xl mx-auto">
-                              <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic">YouTube Search or Embed Link</label>
+                              <div className="flex gap-2 mb-4 justify-center">
+                              {[
+                                { id: 'youtube', label: 'YouTube', color: '#ff0000' },
+                                { id: 'linkedin', label: 'LinkedIn', color: '#0a66c2' },
+                                { id: 'substack', label: 'Substack', color: '#ff6719' },
+                                { id: 'reddit', label: 'Reddit', color: '#ff4500' }
+                              ].map(platform => {
+                                const isSelected = (searchPlatform || 'youtube') === platform.id;
+                                return (
+                                  <button
+                                    key={platform.id}
+                                    onClick={() => { setSearchPlatform(platform.id); setSearchResults([]); setSearchError(null); }}
+                                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${isSelected ? 'text-white border-white/30' : 'text-slate-500 border-white/5 hover:border-white/20 hover:text-slate-300'}`}
+                                    style={isSelected ? { backgroundColor: platform.color + '20', borderColor: platform.color + '60' } : {}}
+                                  >
+                                    {platform.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic">{(searchPlatform || 'youtube') === 'youtube' ? 'YouTube Search or Embed Link' : (searchPlatform || 'youtube') === 'linkedin' ? 'LinkedIn Article or Profile URL' : (searchPlatform || 'youtube') === 'substack' ? 'Substack Article URL' : 'Reddit Thread URL'}</label>
                               <div className="flex gap-3">
                                   <input 
                                     type="text" 
@@ -1461,14 +1505,14 @@
                                     onChange={(e) => setYoutubeInput(e.target.value)} 
                                     onKeyDown={(e) => e.key === 'Enter' && searchYouTube()}
                                     className="flex-grow bg-[#0f172a] border border-slate-800 rounded-xl p-4 text-xs text-white focus:border-indigo-500 outline-none transition-colors" 
-                                    placeholder="Search strategy..." 
+                                    placeholder={(searchPlatform || 'youtube') === 'youtube' ? 'Search strategy...' : 'Paste URL...'} 
                                   />
                                   <button 
-                                    onClick={() => searchYouTube()} 
+                                    onClick={() => (searchPlatform || 'youtube') === 'youtube' ? searchYouTube() : handlePlatformUrl()} 
                                     disabled={isSearching}
                                     className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-8 rounded-xl text-white font-black uppercase tracking-widest text-[10px] transition-all border border-white/10"
                                   >
-                                    {isSearching ? 'Searching...' : 'Search / Resolve'}
+                                    {isSearching ? 'Searching...' : (searchPlatform || 'youtube') === 'youtube' ? 'Search / Resolve' : 'Add Source'}
                                   </button>
                               </div>
                           </div>
