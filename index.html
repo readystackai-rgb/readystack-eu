@@ -1075,7 +1075,7 @@
            - Bad examples: "The Ultimate Growth Machine", "Revolutionary Marketing Platform", "Unstoppable Revenue Engine"
         3. Problem: One paragraph on the core problem being solved and who feels it.
         4. Resident: The ideal resident profile (who should own/deploy this).
-        5. Network: 3 Partners, 3 Customers, 3 Shared Targets.
+        5. Network: 3 Partners, 3 Customers, 3 Guests.
         6. Checklist: 5-6 specific, actionable steps to take after watching.
         7. Automations: 3-5 automations with Trigger, Action, and Outcome.
         8. Narrative: 2-3 paragraphs telling the story of how this ReadyStack turns ideas into a compounding commercial asset.
@@ -1144,7 +1144,7 @@
       const buildStoryDistrict = (targetTab) => {
         const target = typeof targetTab === 'string' ? targetTab : 'mapper';
         setStoryError(null);
-        const categories = [ { items: storyParticipants.homies, prefix: 'Partner', groupId: 'homie' }, { items: storyParticipants.besties, prefix: 'Customer', groupId: 'bestie' }, { items: storyParticipants.pursuits, prefix: 'Shared Target', groupId: 'pursuit' } ];
+        const categories = [ { items: storyParticipants.homies, prefix: 'Partner', groupId: 'homie' }, { items: storyParticipants.besties, prefix: 'Customer', groupId: 'bestie' }, { items: storyParticipants.pursuits, prefix: 'Guest', groupId: 'pursuit' } ];
         const allParticipants = categories.flatMap(cat => cat.items.map((n, i) => ({ name: n.trim() || `${cat.prefix} ${i + 1}`, groupId: cat.groupId })));
         if (new Set(allParticipants.map(n => n.name.toLowerCase())).size !== allParticipants.length) { setStoryError("Duplicate names detected. Unique residents only."); return; }
         
@@ -1874,7 +1874,7 @@
                                       <ul className="space-y-1.5">{videoStory.network?.customers?.map((c, i) => <li key={i} className="text-[10px] text-slate-400 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{c}</span></li>)}</ul>
                                     </div>
                                     <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                      <p className="text-[9px] font-black text-white/40 uppercase mb-2">Shared Targets</p>
+                                      <p className="text-[9px] font-black text-white/40 uppercase mb-2">Guests</p>
                                       <ul className="space-y-1.5">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-[10px] text-slate-400 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{t}</span></li>)}</ul>
                                     </div>
                                   </div>
@@ -2213,17 +2213,33 @@
                           </div>
                           <div className="flex flex-wrap gap-3">
                             {citedAuthors.map((a, i) => (
-                              <div key={i} className="flex items-center gap-2.5 bg-[#020617] border border-white/10 rounded-xl px-4 py-2.5">
-                                {a.platform === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-red-400 shrink-0"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
-                                {a.platform === 'substack' && <SubstackIcon size={12} className="text-orange-400 shrink-0" />}
-                                {a.platform === 'reddit' && <RedditIcon size={12} className="text-orange-500 shrink-0" />}
-                                <span className="text-[10px] font-bold text-white">{a.name}</span>
+                              <div key={i} className="relative group">
+                                <div className="flex items-center gap-2.5 bg-[#020617] border border-white/10 rounded-xl px-4 py-2.5 cursor-pointer transition-all hover:border-white/20">
+                                  {a.platform === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-red-400 shrink-0"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
+                                  {a.platform === 'substack' && <SubstackIcon size={12} className="text-orange-400 shrink-0" />}
+                                  {a.platform === 'reddit' && <RedditIcon size={12} className="text-orange-500 shrink-0" />}
+                                  <span className="text-[10px] font-bold text-white">{a.name}</span>
+                                </div>
+                                <div className="absolute top-full left-0 mt-2 z-50 bg-[#0f172a] border border-white/10 rounded-xl p-2 shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity w-48">
+                                  <button onClick={() => window.open(a.url, '_blank')} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                    Visit Profile
+                                  </button>
+                                  <button onClick={() => { const addToCategory = (name, category) => { setStoryParticipants(prev => { const arr = [...prev[category]]; const emptyIdx = arr.findIndex(h => !h.trim()); if (emptyIdx === -1) { return { ...prev, [category]: [...arr, name] }; } arr[emptyIdx] = name; return { ...prev, [category]: arr }; }); }; addToCategory(a.name, 'homies'); }} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Add as Partner
+                                  </button>
+                                  <button onClick={() => { const addToCategory = (name, category) => { setStoryParticipants(prev => { const arr = [...prev[category]]; const emptyIdx = arr.findIndex(h => !h.trim()); if (emptyIdx === -1) { return { ...prev, [category]: [...arr, name] }; } arr[emptyIdx] = name; return { ...prev, [category]: arr }; }); }; addToCategory(a.name, 'besties'); }} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Add as Customer
+                                  </button>
+                                  <button onClick={() => { const addToCategory = (name, category) => { setStoryParticipants(prev => { const arr = [...prev[category]]; const emptyIdx = arr.findIndex(h => !h.trim()); if (emptyIdx === -1) { return { ...prev, [category]: [...arr, name] }; } arr[emptyIdx] = name; return { ...prev, [category]: arr }; }); }; addToCategory(a.name, 'pursuits'); }} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Add as Guest
+                                  </button>
+                                </div>
                               </div>
                             ))}
-                          </div>
-                          <p className="text-[9px] text-slate-500 italic mt-3">These voices anchor your district. Invite them to participate via Invite Residents.</p>
-                        </div>
-                      );
                     })()}
 
                     <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -2236,8 +2252,8 @@
                             {storyParticipants.besties.map((val, i) => (<input key={i} placeholder={`Customer ${i+1}`} value={val} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.besties]; next[i] = v; return {...prev, besties: next}; }); }} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />))}
                         </div>
                         <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
-                            <h5 className="text-xs font-black text-white/70 uppercase tracking-widest text-center">SHARED TARGETS<br/><span className="text-[9px] opacity-50 italic text-center">WHO YOU BOTH WANT TO REACH</span></h5>
-                            {storyParticipants.pursuits.map((val, i) => (<input key={i} placeholder={`Shared Target ${i+1}`} value={val} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.pursuits]; next[i] = v; return {...prev, pursuits: next}; }); }} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />))}
+                            <h5 className="text-xs font-black text-white/70 uppercase tracking-widest text-center">GUESTS<br/><span className="text-[9px] opacity-50 italic text-center">PEOPLE YOU'D BOTH WELCOME</span></h5>
+                            {storyParticipants.pursuits.map((val, i) => (<input key={i} placeholder={`Guest ${i+1}`} value={val} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.pursuits]; next[i] = v; return {...prev, pursuits: next}; }); }} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />))}
                         </div>
                         <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
                             <h5 className="text-xs font-black text-white/70 uppercase tracking-widest text-center">ANGELS<br/><span className="text-[9px] opacity-50 italic">DISTRICT CAPITAL</span></h5>
