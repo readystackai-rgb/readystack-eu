@@ -396,10 +396,14 @@
         if (!url) return;
         const platform = searchPlatform || 'youtube';
         const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
-        // Check one-per-platform limit
-        const existingPlatform = mapping.sources?.find(s => s.type === platform);
-        if (existingPlatform) {
-          alert(`You already have a ${platformLabels[platform] || platform} source. One per platform.`);
+        // Check platform limits
+        const existingCount = (mapping.sources || []).filter(s => s.type === platform).length;
+        if (platform === 'youtube' && existingCount > 0) {
+          alert(`You already have a YouTube source. One per platform.`);
+          return;
+        }
+        if ((platform === 'substack' || platform === 'reddit') && existingCount >= 6) {
+          alert(`Maximum 6 sources per platform.`);
           return;
         }
         let displayName = url;
@@ -427,8 +431,6 @@
           ga4Count: 0
         };
         setMapping(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
-        // Auto-populate author into Partners (Residents Step 2)
-        if (authorName) autoPopulatePartner(authorName);
         setYoutubeInput('');
         setSearchPlatform('youtube');
       };
@@ -580,35 +582,26 @@
         const platform = result.platform || searchPlatform || 'substack';
         const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
 
-        // Check one-per-platform limit
-        const existingPlatform = mapping.sources?.find(s => s.type === platform);
-        if (existingPlatform) {
-          // Replace existing source for this platform
-          setMapping(prev => ({
-            ...prev,
-            sources: prev.sources.map(s => s.type === platform ? {
-              ven: platformLabels[platform] || platform,
-              lab: (result.title || 'Source').substring(0, 40),
-              type: platform,
-              url: result.url,
-              author: result.author || '',
-              ga4Count: 0
-            } : s)
-          }));
-        } else {
-          const newSource = {
-            ven: platformLabels[platform] || platform,
-            lab: (result.title || 'Source').substring(0, 40),
-            type: platform,
-            url: result.url,
-            author: result.author || '',
-            ga4Count: 0
-          };
-          setMapping(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
+        // Check platform limits
+        const existingCount = (mapping.sources || []).filter(s => s.type === platform).length;
+        if (platform === 'youtube' && existingCount > 0) {
+          alert(`You already have a YouTube source. One per platform.`);
+          return;
         }
-
-        // Auto-populate author into Partners
-        if (result.author) autoPopulatePartner(result.author);
+        if ((platform === 'substack' || platform === 'reddit') && existingCount >= 6) {
+          alert(`Maximum 6 sources per platform.`);
+          return;
+        }
+        
+        const newSource = {
+          ven: platformLabels[platform] || platform,
+          lab: (result.title || 'Source').substring(0, 40),
+          type: platform,
+          url: result.url,
+          author: result.author || '',
+          ga4Count: 0
+        };
+        setMapping(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
 
         // Close search, reset
         setPlatformResults([]);
@@ -1010,8 +1003,6 @@
         setSelectedVideoData(video);
         setIsSearchPanelOpen(false);
         setIsGeneratingStory(true);
-        // Auto-populate YouTube channel creator into Partners
-        if (video.snippet?.channelTitle) autoPopulatePartner(video.snippet.channelTitle);
         // Update YouTube source in mapping with actual video data
         setMapping(prev => {
           const ytIdx = prev.sources.findIndex(s => s.type === 'youtube');
@@ -2211,7 +2202,7 @@
 
                     {/* Cited Values and Voices — auto-populated from Values and Voices */}
                     {(() => {
-                      const citedAuthors = (mapping.sources || []).filter(s => s.author || s.ven).map(s => ({ name: s.author || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
+                      const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
                       if (citedAuthors.length === 0) return null;
                       return (
                         <div className="bg-[#0f172a]/60 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
@@ -2230,7 +2221,7 @@
                               </div>
                             ))}
                           </div>
-                          <p className="text-[9px] text-slate-500 italic mt-3">These voices anchor your district. Add them as Partners below, or invite them to participate via Connect.</p>
+                          <p className="text-[9px] text-slate-500 italic mt-3">These voices anchor your district. Invite them to participate via Invite Residents.</p>
                         </div>
                       );
                     })()}
@@ -2430,7 +2421,7 @@
                   </div>
 
                   {(() => {
-                    const citedAuthors = (mapping.sources || []).filter(s => s.author || s.ven).map(s => ({ name: s.author || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
+                    const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
                     if (citedAuthors.length === 0) {
                       return (
                         <div className="text-center py-16">
