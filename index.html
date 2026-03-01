@@ -413,6 +413,181 @@
         setSearchPlatform('youtube');
       };
 
+      // Platform search results (non-YouTube)
+      const [platformResults, setPlatformResults] = useState([]);
+      const [isPlatformSearching, setIsPlatformSearching] = useState(false);
+
+      // Search non-YouTube platforms via cloud function (Gemini-powered)
+      const searchPlatformContent = async () => {
+        const query = youtubeInput.trim();
+        if (!query) return;
+        const platform = searchPlatform || 'youtube';
+        if (platform === 'youtube') { searchYouTube(); return; }
+
+        // If it looks like a URL, resolve it directly instead of searching
+        if (query.startsWith('http') || query.includes('.com/') || query.includes('.co/')) {
+          resolvePlatformUrl(query);
+          return;
+        }
+
+        setIsPlatformSearching(true);
+        setSearchError(null);
+        setPlatformResults([]);
+
+        const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+        const platformName = platformLabels[platform] || platform;
+        const siteHints = { linkedin: 'linkedin.com', substack: 'substack.com', reddit: 'reddit.com' };
+
+        try {
+          const systemPrompt = `You are a content search assistant. Search for ${platformName} articles, posts, or threads about the given topic. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string), url (string - must be a real ${siteHints[platform]} URL), snippet (string - 1-2 sentence description). Return ONLY the JSON array, no other text. If you cannot find real URLs, construct plausible ${siteHints[platform]} URLs based on the topic and known authors in the space.`;
+
+          const response = await fetch(CLOUD_FUNCTION_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              task: 'generateStory',
+              systemPrompt: systemPrompt,
+              userQuery: `Find ${platformName} content about: ${query}`
+            })
+          });
+          const result = await response.json();
+          const text = (result.text || '').trim();
+
+          // Parse JSON from response (handle markdown code blocks)
+          let parsed = [];
+          try {
+            const jsonStr = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            parsed = JSON.parse(jsonStr);
+          } catch(e) {
+            // Try to extract array from response
+            const match = text.match(/\[[\s\S]*\]/);
+            if (match) {
+              try { parsed = JSON.parse(match[0]); } catch(e2) {}
+            }
+          }
+
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setPlatformResults(parsed.map((r, i) => ({
+              id: `${platform}-${i}-${Date.now()}`,
+              title: r.title || 'Untitled',
+              author: r.author || 'Unknown',
+              url: r.url || '',
+              snippet: r.snippet || '',
+              platform: platform
+            })));
+          } else {
+            setSearchError(`No ${platformName} results found. Try a different query or paste a URL directly.`);
+          }
+        } catch (err) {
+          setSearchError(`Search failed. Try pasting a ${platformName} URL directly.`);
+        } finally {
+          setIsPlatformSearching(false);
+        }
+      };
+
+      // Resolve a pasted platform URL into rich metadata
+      const resolvePlatformUrl = async (inputUrl) => {
+        const platform = searchPlatform || 'youtube';
+        const url = inputUrl || youtubeInput.trim();
+        if (!url) return;
+
+        setIsPlatformSearching(true);
+        setSearchError(null);
+        setPlatformResults([]);
+
+        const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+
+        try {
+          const systemPrompt = `You are a URL metadata resolver. Given a URL, extract the article/post metadata. Return a JSON object with: title (string), author (string), snippet (string - brief description of the content). Return ONLY the JSON object, no other text. If you don't know the exact content, infer from the URL structure.`;
+
+          const response = await fetch(CLOUD_FUNCTION_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              task: 'generateStory',
+              systemPrompt: systemPrompt,
+              userQuery: `Extract metadata from this URL: ${url}`
+            })
+          });
+          const result = await response.json();
+          const text = (result.text || '').trim();
+
+          let parsed = {};
+          try {
+            const jsonStr = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            parsed = JSON.parse(jsonStr);
+          } catch(e) {
+            const match = text.match(/\{[\s\S]*\}/);
+            if (match) {
+              try { parsed = JSON.parse(match[0]); } catch(e2) {}
+            }
+          }
+
+          setPlatformResults([{
+            id: `${platform}-resolved-${Date.now()}`,
+            title: parsed.title || url,
+            author: parsed.author || '',
+            url: url.startsWith('http') ? url : 'https://' + url,
+            snippet: parsed.snippet || '',
+            platform: platform
+          }]);
+        } catch (err) {
+          // Fallback: still show the URL as a selectable result
+          setPlatformResults([{
+            id: `${platform}-fallback-${Date.now()}`,
+            title: url,
+            author: '',
+            url: url.startsWith('http') ? url : 'https://' + url,
+            snippet: 'Paste URL resolved',
+            platform: platform
+          }]);
+        } finally {
+          setIsPlatformSearching(false);
+        }
+      };
+
+      // Choose a platform search result (non-YouTube)
+      const choosePlatformResult = (result) => {
+        const platform = result.platform || searchPlatform || 'linkedin';
+        const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+
+        // Check one-per-platform limit
+        const existingPlatform = mapping.sources?.find(s => s.type === platform);
+        if (existingPlatform) {
+          // Replace existing source for this platform
+          setMapping(prev => ({
+            ...prev,
+            sources: prev.sources.map(s => s.type === platform ? {
+              ven: platformLabels[platform] || platform,
+              lab: (result.title || 'Source').substring(0, 40),
+              type: platform,
+              url: result.url,
+              author: result.author || '',
+              ga4Count: 0
+            } : s)
+          }));
+        } else {
+          const newSource = {
+            ven: platformLabels[platform] || platform,
+            lab: (result.title || 'Source').substring(0, 40),
+            type: platform,
+            url: result.url,
+            author: result.author || '',
+            ga4Count: 0
+          };
+          setMapping(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
+        }
+
+        // Auto-populate author into Partners
+        if (result.author) autoPopulatePartner(result.author);
+
+        // Close search, reset
+        setPlatformResults([]);
+        setYoutubeInput('');
+        setSearchPlatform('youtube');
+        setIsSearchPanelOpen(false);
+      };
+
       const ytApiKey = "AIzaSyDCUc877CDBxRntQwctrKTFfjQ8rhPruss";
       const CLOUD_FUNCTION_URL = "https://us-central1-gen-lang-client-0769430147.cloudfunctions.net/advisor";
 
@@ -1541,213 +1716,296 @@
 
 {/* MARKER_110 */}
             {activeTab === 'youtube' && (
-              <div className="max-w-5xl mx-auto animate-fade-in space-y-8 text-left pt-16 pb-10">
-                  <div className="text-center space-y-4 mb-10">
+              <div className="max-w-5xl mx-auto animate-fade-in space-y-6 text-left pt-16 pb-10">
+                  <div className="text-center space-y-3 mb-6">
                       <h3 className="text-3xl font-black text-white uppercase tracking-tighter">STRATEGY</h3>
-                      <p className="text-slate-400 italic text-sm">Cite source materials to anchor your District. One per platform.</p>
+                      <p className="text-slate-500 italic text-xs">Cite one source per platform to anchor your District.</p>
                   </div>
-                  
-                  <div className="bg-[#020617]/50 p-8 rounded-[32px] border border-white/5 shadow-inner space-y-8">
-                      {isSearchPanelOpen ? (
-                        <div className="space-y-8">
-                          <div className="space-y-3 max-w-2xl mx-auto">
-                              <div className="flex gap-2 mb-4 justify-center">
-                              {[
-                                { id: 'youtube', label: 'YouTube', color: '#ff0000' },
-                                { id: 'linkedin', label: 'LinkedIn', color: '#0a66c2' },
-                                { id: 'substack', label: 'Substack', color: '#ff6719' },
-                                { id: 'reddit', label: 'Reddit', color: '#ff4500' }
-                              ].map(platform => {
-                                const isSelected = (searchPlatform || 'youtube') === platform.id;
-                                return (
-                                  <button
-                                    key={platform.id}
-                                    onClick={() => { setSearchPlatform(platform.id); setSearchResults([]); setSearchError(null); }}
-                                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${isSelected ? 'text-white border-white/30' : 'text-slate-500 border-white/5 hover:border-white/20 hover:text-slate-300'}`}
-                                    style={isSelected ? { backgroundColor: platform.color + '20', borderColor: platform.color + '60' } : {}}
-                                  >
-                                    {platform.label}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic">{(searchPlatform || 'youtube') === 'youtube' ? 'YouTube Search or Embed Link' : (searchPlatform || 'youtube') === 'linkedin' ? 'LinkedIn Article or Profile URL' : (searchPlatform || 'youtube') === 'substack' ? 'Substack Article URL' : 'Reddit Thread URL'}</label>
-                              <div className="flex gap-3">
-                                  <input 
-                                    type="text" 
-                                    value={youtubeInput} 
-                                    onChange={(e) => setYoutubeInput(e.target.value)} 
-                                    onKeyDown={(e) => e.key === 'Enter' && searchYouTube()}
-                                    className="flex-grow bg-[#0f172a] border border-slate-800 rounded-xl p-4 text-xs text-white focus:border-indigo-500 outline-none transition-colors" 
-                                    placeholder={(searchPlatform || 'youtube') === 'youtube' ? 'Search strategy...' : 'Paste URL...'} 
-                                  />
-                                  <button 
-                                    onClick={() => (searchPlatform || 'youtube') === 'youtube' ? searchYouTube() : handlePlatformUrl()} 
-                                    disabled={isSearching}
-                                    className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-8 rounded-xl text-white font-black uppercase tracking-widest text-[10px] transition-all border border-white/10"
-                                  >
-                                    {isSearching ? 'Searching...' : (searchPlatform || 'youtube') === 'youtube' ? 'Search / Resolve' : 'Add Source'}
-                                  </button>
+
+                  {/* ── Platform Tabs — always visible ── */}
+                  <div className="flex gap-1 justify-center">
+                    {[
+                      { id: 'youtube', label: 'YouTube', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor" stroke="none"/></svg> },
+                      { id: 'linkedin', label: 'LinkedIn', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg> },
+                      { id: 'substack', label: 'Substack', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M4 4h16"/><path d="M4 8h16"/><path d="M4 12l8 6 8-6"/></svg> },
+                      { id: 'reddit', label: 'Reddit', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10"/><path d="M16.5 14.5c-.7.7-2 1.5-4.5 1.5s-3.8-.8-4.5-1.5"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="15" cy="11" r="1" fill="currentColor"/><path d="M17 8l2-2"/><circle cx="19.5" cy="5.5" r="1"/></svg> }
+                    ].map(p => {
+                      const isActive = (searchPlatform || 'youtube') === p.id;
+                      const hasSource = mapping.sources?.some(s => s.type === p.id && s.url);
+                      return (
+                        <button
+                          key={p.id}
+                          onClick={() => { setSearchPlatform(p.id); setSearchResults([]); setPlatformResults([]); setSearchError(null); setYoutubeInput(''); }}
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${isActive ? 'text-white bg-white/10 border-white/20' : hasSource ? 'text-white/60 border-white/10 bg-white/5' : 'text-slate-600 border-transparent hover:text-slate-400 hover:border-white/10'}`}
+                        >
+                          {p.icon}
+                          {p.label}
+                          {hasSource && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 text-white/40"><polyline points="20 6 9 17 4 12"/></svg>}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="bg-[#020617]/50 p-8 rounded-[32px] border border-white/5 shadow-inner space-y-6">
+
+                    {/* ── YouTube Tab Content ── */}
+                    {(searchPlatform || 'youtube') === 'youtube' && (
+                      <div className="space-y-6">
+                        {/* YouTube: selected video view */}
+                        {youtubeEmbedUrl && !isSearchPanelOpen ? (
+                          <div className="space-y-8 animate-fade-in">
+                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5">
+                              <div className="lg:col-span-3 space-y-4">
+                                <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black">
+                                  <iframe src={youtubeEmbedUrl} title="YouTube Preview" frameBorder="0" allowFullScreen className="w-full h-full"></iframe>
+                                </div>
+                                <div className="flex gap-2">
+                                  <button onClick={() => setIsSearchPanelOpen(true)} className="flex-grow py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-500 font-black text-[9px] uppercase tracking-widest transition-all border border-white/5">Change</button>
+                                  <button onClick={generateStoryFromVideo} disabled={isGeneratingStory || !selectedVideoData} className="flex-grow py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 font-black text-[9px] uppercase tracking-widest transition-all border border-white/5 disabled:opacity-30">{isGeneratingStory ? 'Thinking...' : 'Analyze'}</button>
+                                </div>
                               </div>
-                          </div>
-
-                          {searchError && (
-                            <div className="max-w-2xl mx-auto bg-red-500/10 border border-red-500/30 p-4 rounded-xl text-red-400 text-[10px] font-black uppercase tracking-widest text-center">
-                              {searchError}
+                              <div className="lg:col-span-2 space-y-4 pt-1 text-left">
+                                <h4 className="text-sm font-bold text-white italic">In this ReadyStack</h4>
+                                {videoStory && videoStory.checklist ? (
+                                  <ul className="space-y-3 text-slate-400 text-xs italic animate-fade-in">
+                                    {videoStory.checklist.map((item, idx) => (
+                                      <li key={idx} className="flex items-start gap-2">
+                                        <div className="w-1 h-1 rounded-full bg-white/30 mt-1.5 flex-shrink-0"></div>
+                                        <span>{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-xs text-white/20 italic">Run analysis to populate...</p>
+                                )}
+                              </div>
                             </div>
-                          )}
 
-                          {searchResults.length > 0 && (
-                            <div className="grid gap-4 max-w-3xl mx-auto animate-fade-in">
-                              {searchResults.map(video => {
-                                const blacklistReason = getBlacklistReason(video);
-                                const visionResult = visionResults[video.id];
-                                const isFlagged = blacklistReason || (visionResult && visionResult.startsWith("FAIL"));
-                                const reason = blacklistReason || (visionResult && visionResult.split("FAIL")[1]?.trim());
-
-                                return (
-                                  <div 
-                                    key={video.id} 
-                                    className={`flex gap-6 p-5 bg-[#0f172a] border border-white/5 rounded-3xl transition-all group relative overflow-hidden ${isFlagged ? 'opacity-40 border-amber-500/20 grayscale-[0.5]' : 'hover:border-indigo-500/50 cursor-pointer shadow-xl'}`}
-                                    onClick={() => !isFlagged && chooseVideo(video)}
-                                  >
-                                    <img src={video.snippet.thumbnails.medium.url} className="w-40 aspect-video rounded-xl object-cover shadow-2xl" />
-                                    <div className="flex-grow text-left space-y-2">
-                                      <h5 className="text-white font-bold text-[13px] line-clamp-2 italic leading-tight">{video.snippet.title}</h5>
-                                      <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{video.snippet.channelTitle}</p>
-                                      
-                                      {isFlagged ? (
-                                        <div className="bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg inline-flex items-center gap-2">
-                                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-                                          <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest italic">Flagged: {reason || "Quality Standards"}</span>
-                                        </div>
-                                      ) : (
-                                        <div className="flex items-center gap-4">
-                                          <span className="text-[10px] font-black text-emerald-400 tabular-nums">{(parseInt(video.statistics?.viewCount || "0")).toLocaleString()} VIEWS</span>
-                                          {visionResult === "PASS" && <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">Verified Signal</span>}
-                                        </div>
-                                      )}
+                            {videoStory && (
+                              <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl animate-fade-in space-y-6 text-left">
+                                <div className="space-y-3 border-b border-white/5 pb-4">
+                                  <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">ReadyStack Brief</p>
+                                  <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter">{videoStory.title}</h4>
+                                  <p className="text-xs text-slate-400 italic leading-relaxed">{videoStory.narrative}</p>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                  <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
+                                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-2">Core Problem</p>
+                                    <p className="text-[11px] text-slate-400 leading-relaxed">{videoStory.problem}</p>
+                                  </div>
+                                  <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
+                                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-2">Ideal Resident</p>
+                                    <p className="text-[11px] text-slate-400 leading-relaxed">{videoStory.resident}</p>
+                                  </div>
+                                </div>
+                                <div className="space-y-3">
+                                  <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Network Map Seed</p>
+                                  <div className="grid md:grid-cols-3 gap-3">
+                                    <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
+                                      <p className="text-[9px] font-black text-white/40 uppercase mb-2">Partners</p>
+                                      <ul className="space-y-1.5">{videoStory.network?.partners?.map((p, i) => <li key={i} className="text-[10px] text-slate-400 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{p}</span></li>)}</ul>
+                                    </div>
+                                    <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
+                                      <p className="text-[9px] font-black text-white/40 uppercase mb-2">Customers</p>
+                                      <ul className="space-y-1.5">{videoStory.network?.customers?.map((c, i) => <li key={i} className="text-[10px] text-slate-400 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{c}</span></li>)}</ul>
+                                    </div>
+                                    <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
+                                      <p className="text-[9px] font-black text-white/40 uppercase mb-2">Shared Targets</p>
+                                      <ul className="space-y-1.5">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-[10px] text-slate-400 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{t}</span></li>)}</ul>
                                     </div>
                                   </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="space-y-10 animate-fade-in">
-                          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 bg-[#0f172a]/50 p-8 rounded-3xl border border-white/5 shadow-2xl">
-                              <div className="lg:col-span-3 space-y-5">
-                                  <div className="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
-                                      <iframe src={youtubeEmbedUrl} title="YouTube Preview" frameBorder="0" allowFullScreen className="w-full h-full"></iframe>
-                                  </div>
-                                  <div className="flex gap-3">
-                                    <button onClick={() => setIsSearchPanelOpen(true)} className="flex-grow py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 font-black text-[10px] uppercase tracking-widest transition-all">Change Video</button>
-                                    <button onClick={generateStoryFromVideo} disabled={isGeneratingStory || !selectedVideoData} className="flex-grow py-3 rounded-xl bg-indigo-600/20 border border-indigo-500/50 text-indigo-300 font-black text-[10px] uppercase tracking-widest transition-all hover:bg-indigo-600/40 disabled:opacity-50">{isGeneratingStory ? 'Strategist is Thinking...' : 'Analyze Story & Theme'}</button>
-                                  </div>
-                              </div>
-                              <div className="lg:col-span-2 space-y-5 pt-2 text-left">
-                                  <h4 className="text-xl font-bold text-white mb-6 italic tracking-tight">In this ReadyStack</h4>
-                                  {videoStory && videoStory.checklist ? (
-                                    <ul className="space-y-4 text-indigo-300 text-sm italic animate-fade-in">
-                                      {videoStory.checklist.map((item, idx) => (
-                                        <li key={idx} className="flex items-start gap-3">
-                                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0"></div>
-                                          <span>{item}</span>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                  <div className="space-y-3">
+                                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Actions</p>
+                                    <ul className="space-y-2">
+                                      {videoStory.checklist?.map((c, i) => (
+                                        <li key={i} className="text-[11px] text-slate-400 flex items-start gap-2 bg-[#0f172a]/30 p-2.5 rounded-lg border border-white/5">
+                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 text-white/30 shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                          <span>{c}</span>
                                         </li>
                                       ))}
                                     </ul>
-                                  ) : (
-                                    <ul className="space-y-4 text-white/20 text-sm italic">
-                                      <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 rounded-full bg-white/20"></div> Run analysis to populate...</li>
-                                    </ul>
-                                  )}
-                                  <a
-                                    href="https://mks.bridgemailsystem.com/pms/loginS.jsp"
-                                    target="_top"
-                                    className="inline-block mt-6 text-[9px] font-black text-white/30 uppercase tracking-widest hover:text-white/50 transition-all"
-                                  >
-                                    Edit in Studio →
-                                  </a>
+                                  </div>
+                                  <div className="space-y-3">
+                                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Automations</p>
+                                    <div className="space-y-2">
+                                      {videoStory.automations?.map((a, i) => (
+                                        <div key={i} className="bg-[#0f172a]/50 p-3 rounded-lg border border-white/5 text-[10px] space-y-0.5">
+                                          <div className="flex gap-1.5"><span className="font-black text-white/30 w-12">TRIGGER</span> <span className="text-slate-400">{a.trigger}</span></div>
+                                          <div className="flex gap-1.5"><span className="font-black text-white/30 w-12">ACTION</span> <span className="text-slate-400">{a.action}</span></div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2 pt-3 border-t border-white/5">
+                                  {videoStory.ctas?.map((cta, i) => <span key={i} className="px-4 py-2 bg-white/5 border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-500">{cta}</span>)}
+                                </div>
                               </div>
+                            )}
                           </div>
-
-                          {videoStory && (
-                            <div className="bg-indigo-500/5 border border-indigo-500/20 p-8 rounded-[32px] animate-fade-in space-y-8 text-left">
-                              <div className="space-y-4 border-b border-white/10 pb-6">
-                                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-1">ReadyStack Brief</p>
-                                <h4 className="text-3xl font-black text-white uppercase italic tracking-tighter">{videoStory.title}</h4>
-                                <p className="text-sm text-slate-300 italic leading-relaxed">{videoStory.narrative}</p>
+                        ) : (
+                          /* YouTube: search view */
+                          <div className="space-y-6">
+                            <div className="space-y-2 max-w-2xl mx-auto">
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={youtubeInput}
+                                  onChange={(e) => setYoutubeInput(e.target.value)}
+                                  onKeyDown={(e) => e.key === 'Enter' && searchYouTube()}
+                                  className="flex-grow bg-[#0f172a] border border-white/10 rounded-xl p-3.5 text-xs text-white focus:border-white/30 outline-none transition-colors placeholder-slate-600"
+                                  placeholder="Search YouTube or paste a video link..."
+                                />
+                                <button
+                                  onClick={searchYouTube}
+                                  disabled={isSearching}
+                                  className="bg-white/10 hover:bg-white/15 disabled:opacity-30 px-6 rounded-xl text-white font-black uppercase tracking-widest text-[9px] transition-all border border-white/10"
+                                >
+                                  {isSearching ? '...' : 'Search'}
+                                </button>
                               </div>
+                            </div>
 
-                              <div className="grid md:grid-cols-2 gap-6">
-                                <div className="bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5 shadow-inner">
-                                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic mb-3">Core Problem</p>
-                                  <p className="text-xs text-slate-300 leading-relaxed">{videoStory.problem}</p>
-                                </div>
-                                <div className="bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5 shadow-inner">
-                                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic mb-3">Ideal Resident Profile</p>
-                                  <p className="text-xs text-slate-300 leading-relaxed">{videoStory.resident}</p>
-                                </div>
+                            {searchError && (
+                              <p className="text-center text-red-400/60 text-[10px] italic">{searchError}</p>
+                            )}
+
+                            {searchResults.length > 0 && (
+                              <div className="grid gap-3 max-w-3xl mx-auto animate-fade-in">
+                                {searchResults.map(video => {
+                                  const blacklistReason = getBlacklistReason(video);
+                                  const visionResult = visionResults[video.id];
+                                  const isFlagged = blacklistReason || (visionResult && visionResult.startsWith("FAIL"));
+                                  const reason = blacklistReason || (visionResult && visionResult.split("FAIL")[1]?.trim());
+                                  return (
+                                    <div
+                                      key={video.id}
+                                      className={`flex gap-4 p-4 bg-[#0f172a] border border-white/5 rounded-xl transition-all ${isFlagged ? 'opacity-30' : 'hover:border-white/20 cursor-pointer'}`}
+                                      onClick={() => !isFlagged && chooseVideo(video)}
+                                    >
+                                      <img src={video.snippet.thumbnails.medium.url} className="w-32 aspect-video rounded-lg object-cover" />
+                                      <div className="flex-grow text-left space-y-1.5">
+                                        <h5 className="text-white text-xs font-medium line-clamp-2 leading-tight">{video.snippet.title}</h5>
+                                        <p className="text-[9px] text-slate-600 uppercase font-black tracking-widest">{video.snippet.channelTitle}</p>
+                                        {isFlagged ? (
+                                          <p className="text-[8px] text-amber-500/60 italic">Flagged: {reason || "Quality Standards"}</p>
+                                        ) : (
+                                          <p className="text-[9px] text-slate-600 tabular-nums">{(parseInt(video.statistics?.viewCount || "0")).toLocaleString()} views</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                              <div className="space-y-4">
-                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic">Network Map Seed</p>
-                                <div className="grid md:grid-cols-3 gap-4">
-                                  <div className="bg-[#0f172a]/50 p-5 rounded-2xl border border-[#5b4eff]/20">
-                                    <p className="text-[10px] font-black text-[#5b4eff] uppercase mb-3">Partners</p>
-                                    <ul className="space-y-2">{videoStory.network?.partners?.map((p, i) => <li key={i} className="text-[11px] text-slate-300 flex items-start gap-2"><span className="text-[#5b4eff] mt-0.5">▹</span><span className="leading-tight">{p}</span></li>)}</ul>
-                                  </div>
-                                  <div className="bg-[#0f172a]/50 p-5 rounded-2xl border border-[#ff2a1a]/20">
-                                    <p className="text-[10px] font-black text-[#ff2a1a] uppercase mb-3">Customers</p>
-                                    <ul className="space-y-2">{videoStory.network?.customers?.map((c, i) => <li key={i} className="text-[11px] text-slate-300 flex items-start gap-2"><span className="text-[#ff2a1a] mt-0.5">▹</span><span className="leading-tight">{c}</span></li>)}</ul>
-                                  </div>
-                                  <div className="bg-[#0f172a]/50 p-5 rounded-2xl border border-[#ffd666]/20">
-                                    <p className="text-[10px] font-black text-[#ffd666] uppercase mb-3">Shared Targets</p>
-                                    <ul className="space-y-2">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-[11px] text-slate-300 flex items-start gap-2"><span className="text-[#ffd666] mt-0.5">▹</span><span className="leading-tight">{t}</span></li>)}</ul>
-                                  </div>
-                                </div>
+                    {/* ── LinkedIn / Substack / Reddit Tab Content ── */}
+                    {(searchPlatform || 'youtube') !== 'youtube' && (() => {
+                      const platform = searchPlatform;
+                      const platformLabels = { linkedin: 'LinkedIn', substack: 'Substack', reddit: 'Reddit' };
+                      const existingSource = mapping.sources?.find(s => s.type === platform && s.url);
+
+                      return (
+                        <div className="space-y-6">
+                          {/* Show existing source if selected */}
+                          {existingSource && (
+                            <div className="max-w-2xl mx-auto bg-[#0f172a]/50 border border-white/10 rounded-xl p-4 flex items-center gap-4 animate-fade-in">
+                              <div className="flex-grow text-left">
+                                <p className="text-xs text-white font-medium">{existingSource.lab}</p>
+                                <p className="text-[9px] text-slate-600 truncate">{existingSource.author ? `${existingSource.author} · ` : ''}{existingSource.url}</p>
                               </div>
+                              <button
+                                onClick={() => { setMapping(prev => ({ ...prev, sources: prev.sources.filter(s => s.type !== platform) })); }}
+                                className="text-slate-600 hover:text-white/40 transition-all text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/5 hover:border-white/10"
+                              >
+                                Replace
+                              </button>
+                            </div>
+                          )}
 
-                              <div className="grid md:grid-cols-2 gap-6">
-                                 <div className="space-y-4">
-                                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic">Action Checklist</p>
-                                   <ul className="space-y-3">
-                                     {videoStory.checklist?.map((c, i) => (
-                                       <li key={i} className="text-xs text-slate-300 flex items-start gap-3 bg-[#0f172a]/30 p-3 rounded-xl border border-white/5">
-                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                         <span className="leading-relaxed">{c}</span>
-                                       </li>
-                                     ))}
-                                   </ul>
-                                 </div>
-                                 <div className="space-y-4">
-                                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic">Recommended Automations</p>
-                                   <div className="space-y-3">
-                                     {videoStory.automations?.map((a, i) => (
-                                       <div key={i} className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5 text-[11px] space-y-1">
-                                         <div className="flex gap-2"><span className="font-black text-indigo-400 w-14">TRIGGER:</span> <span className="text-slate-300">{a.trigger}</span></div>
-                                         <div className="flex gap-2"><span className="font-black text-emerald-400 w-14">ACTION:</span> <span className="text-slate-300">{a.action}</span></div>
-                                         <div className="flex gap-2 pt-1 border-t border-white/5 mt-1"><span className="font-black text-fuchsia-400 w-14">OUTCOME:</span> <span className="text-slate-300 italic">{a.outcome}</span></div>
-                                       </div>
-                                     ))}
-                                   </div>
-                                 </div>
-                              </div>
-
-                              <div className="space-y-3 pt-4 border-t border-white/10">
-                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic">Suggested CTAs</p>
-                                <div className="flex flex-wrap gap-3">
-                                  {videoStory.ctas?.map((cta, i) => <span key={i} className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-300 hover:bg-white/10 transition-colors cursor-default shadow-lg">{cta}</span>)}
-                                </div>
+                          {/* Search input */}
+                          {!existingSource && (
+                            <div className="space-y-2 max-w-2xl mx-auto">
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={youtubeInput}
+                                  onChange={(e) => setYoutubeInput(e.target.value)}
+                                  onKeyDown={(e) => e.key === 'Enter' && searchPlatformContent()}
+                                  className="flex-grow bg-[#0f172a] border border-white/10 rounded-xl p-3.5 text-xs text-white focus:border-white/30 outline-none transition-colors placeholder-slate-600"
+                                  placeholder={`Search ${platformLabels[platform]} or paste a URL...`}
+                                />
+                                <button
+                                  onClick={searchPlatformContent}
+                                  disabled={isPlatformSearching}
+                                  className="bg-white/10 hover:bg-white/15 disabled:opacity-30 px-6 rounded-xl text-white font-black uppercase tracking-widest text-[9px] transition-all border border-white/10"
+                                >
+                                  {isPlatformSearching ? '...' : 'Search'}
+                                </button>
                               </div>
                             </div>
                           )}
+
+                          {searchError && (
+                            <p className="text-center text-red-400/60 text-[10px] italic">{searchError}</p>
+                          )}
+
+                          {/* Platform search results */}
+                          {platformResults.length > 0 && (
+                            <div className="grid gap-3 max-w-3xl mx-auto animate-fade-in">
+                              {platformResults.map(result => (
+                                <div
+                                  key={result.id}
+                                  className="flex gap-4 p-4 bg-[#0f172a] border border-white/5 rounded-xl transition-all hover:border-white/20 cursor-pointer text-left"
+                                  onClick={() => choosePlatformResult(result)}
+                                >
+                                  <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
+                                    <span className="text-white/30 text-[10px] font-black uppercase">{(result.platform || platform).substring(0, 2)}</span>
+                                  </div>
+                                  <div className="flex-grow space-y-1">
+                                    <h5 className="text-white text-xs font-medium line-clamp-2 leading-tight">{result.title}</h5>
+                                    {result.author && <p className="text-[9px] text-slate-600 uppercase font-black tracking-widest">{result.author}</p>}
+                                    {result.snippet && <p className="text-[10px] text-slate-500 italic line-clamp-2">{result.snippet}</p>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Empty state */}
+                          {!existingSource && platformResults.length === 0 && !isPlatformSearching && !searchError && (
+                            <div className="text-center py-8">
+                              <p className="text-slate-600 text-xs italic">Search for {platformLabels[platform]} content or paste a direct URL.</p>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      <div className="py-6 text-center mt-4 border-t border-white/5 pt-8">
-                        <button onClick={() => setActiveTab('intro')} disabled={!youtubeEmbedUrl} className={`brand-glow-btn px-12 py-4 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[11px] shadow-2xl transition-all ${!youtubeEmbedUrl ? 'opacity-50 cursor-not-allowed bg-slate-900 border-slate-800' : 'bg-[#020617]'}`}>CONFIRM & CONTINUE</button>
+                      );
+                    })()}
+
+                    {/* ── Selected Sources Summary ── */}
+                    {mapping.sources?.some(s => s.url) && (
+                      <div className="border-t border-white/5 pt-5 mt-2">
+                        <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-3">Cited Sources</p>
+                        <div className="flex flex-wrap gap-2">
+                          {mapping.sources.filter(s => s.url).map((s, i) => (
+                            <div key={i} className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-lg px-3 py-2">
+                              <span className="text-[8px] font-black text-slate-600 uppercase">{s.ven}</span>
+                              <span className="text-[10px] text-white/60 truncate max-w-[200px]">{s.lab}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
+                    )}
+
+                    <div className="pt-4 text-center border-t border-white/5">
+                      <button onClick={() => setActiveTab('intro')} disabled={!youtubeEmbedUrl} className={`px-10 py-3.5 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[10px] transition-all border ${!youtubeEmbedUrl ? 'opacity-30 cursor-not-allowed bg-[#020617] border-white/5' : 'bg-white/10 border-white/10 hover:bg-white/15'}`}>Continue to Residents</button>
+                    </div>
                   </div>
               </div>
             )}
