@@ -650,6 +650,8 @@
               if (snap.activeTab) setActiveTab(snap.activeTab);
               if (snap.isSearchPanelOpen === false) setIsSearchPanelOpen(false);
               if (snap.storyParticipants) setStoryParticipants(snap.storyParticipants);
+              if (snap.angelChoices) setAngelChoices(snap.angelChoices);
+              if (snap.angelAmounts) setAngelAmounts(snap.angelAmounts);
               if (snap.mapping) setMapping(snap.mapping);
               restoredFromOAuthRef.current = true;
             } catch (e) {
@@ -712,6 +714,8 @@
         if (activeTab !== 'youtube') snapshot.activeTab = activeTab;
         if (!isSearchPanelOpen) snapshot.isSearchPanelOpen = false;
         if (storyParticipants) snapshot.storyParticipants = storyParticipants;
+        if (angelChoices) snapshot.angelChoices = angelChoices;
+        if (angelAmounts) snapshot.angelAmounts = angelAmounts;
         if (mapping) snapshot.mapping = mapping;
         if (Object.keys(snapshot).length > 0) {
           localStorage.setItem('rs_app_state', JSON.stringify(snapshot));
@@ -762,7 +766,10 @@
               sheetId      : rsSheetId || undefined,
               videoData    : selectedVideoData || null,
               youtubeEmbedUrl: youtubeEmbedUrl || '',
-              videoStory   : videoStory || null
+              videoStory   : videoStory || null,
+              storyParticipants,
+              angelChoices,
+              angelAmounts
             }
           }, overrideSessionId);
           if (result.sheetId) {
@@ -838,6 +845,10 @@
           } else {
             setVideoStory(null);
           }
+
+          if (state.storyParticipants) setStoryParticipants(state.storyParticipants);
+          if (state.angelChoices) setAngelChoices(state.angelChoices);
+          if (state.angelAmounts) setAngelAmounts(state.angelAmounts);
 
           setRsSheetId(sheetId);
           localStorage.setItem('rs_sheet_id', sheetId);
@@ -1946,6 +1957,12 @@
                                   {isPlatformSearching ? '...' : 'Search'}
                                 </button>
                               </div>
+                            </div>
+                          )}
+
+                          {isPlatformSearching && (
+                            <div className="max-w-2xl mx-auto py-6 animate-pulse">
+                              <p className="text-center text-white/40 text-[9px] font-black uppercase tracking-widest">Searching {platformLabels[platform] || platform}...</p>
                             </div>
                           )}
 
