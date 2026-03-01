@@ -152,6 +152,11 @@
       </div>
     );
 
+    const DistrictSquareIcon = ({ size = 12 }) => (
+      <div style={{ width: size, height: size, backgroundColor: '#000', borderRadius: '2px' }} />
+    );
+
+
     const AngelIcon = ({ size = 14, className = "" }) => (
       <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
         <path d="M12 1.5a4 1.5 0 1 0 0 3 4 1.5 0 1 0 0-3Z" opacity="0.8" />
@@ -199,7 +204,7 @@
           lucide.createIcons({ nameAttr: 'data-lucide' });
         }
       }, [type, iconName, size]);
-      if (type === 'gateway') return <ReadyStackLogo size={size} />;
+      if (type === 'gateway') return <ReadyStackLogo size={size} variant="light" />;
       if (['observer', 'awareness', 'seed'].includes(type)) return <AngelIcon size={size} className={className} />;
       if (type === 'substack') return <SubstackIcon size={size} className={className} />;
       return <span ref={containerRef} className={`inline-flex items-center justify-center pointer-events-none ${className}`} style={{ width: size, height: size }} />;
@@ -1692,6 +1697,7 @@
                   />
                 ) : (
                   <div className="flex items-center gap-2">
+                    <DistrictSquareIcon size={14} />
                     <span
                       onClick={() => setIsEditingName(true)}
                       className={`text-base font-medium cursor-pointer hover:bg-white/5 px-1 py-0.5 rounded transition-all truncate max-w-[240px] block ${
