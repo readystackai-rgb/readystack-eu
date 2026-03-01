@@ -1626,7 +1626,7 @@
               <div className="mb-8 whitespace-nowrap">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">District Setup</h3>
                 <div className="w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-white/5">
-                  <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-500" style={{ width: `${Math.max(12.5, (['youtube', 'intro', 'mapper', 'connect', 'observatory', 'looker', 'g4', 'automation'].indexOf(activeTab) + 1) * 12.5)}%` }}></div>
+                  <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-500" style={{ width: `${Math.max(12.5, (['youtube', 'intro', 'mapper', 'observatory', 'connect', 'looker', 'g4', 'automation'].indexOf(activeTab) + 1) * 12.5)}%` }}></div>
                 </div>
               </div>
               
@@ -1635,14 +1635,14 @@
                   { id: 'youtube', num: 1, label: 'Featured Voices', icon: 'mic' },
                   { id: 'intro', num: 2, label: 'Residents', icon: 'users' },
                   { id: 'mapper', num: 3, label: 'District Map', icon: 'map' },
-                  { id: 'connect', num: 4, label: 'Connect', icon: 'send' },
-                  { id: 'observatory', num: 5, label: 'District Flow', icon: 'git-branch' },
+                  { id: 'observatory', num: 4, label: 'Audience Flow', icon: 'git-branch' },
+                  { id: 'connect', num: 5, label: 'Connect', icon: 'send' },
                   { id: 'looker', num: 6, label: 'Looker', icon: 'bar-chart-2' },
                   { id: 'g4', num: 7, label: 'GA4', icon: 'activity' },
                   { id: 'automation', num: 8, label: 'Automation', icon: 'zap' }
                 ].map(step => {
                   const isActive = activeTab === step.id;
-                  const railOrder = ['youtube', 'intro', 'mapper', 'connect', 'observatory', 'looker', 'g4', 'automation'];
+                  const railOrder = ['youtube', 'intro', 'mapper', 'observatory', 'connect', 'looker', 'g4', 'automation'];
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
 
@@ -2221,9 +2221,11 @@
                           </div>
                           <div className="flex flex-wrap gap-3">
                             {citedAuthors.map((a, i) => (
-                              <div key={i} className="flex items-center gap-2 bg-[#020617] border border-white/10 rounded-xl px-4 py-2.5">
+                              <div key={i} className="flex items-center gap-2.5 bg-[#020617] border border-white/10 rounded-xl px-4 py-2.5">
+                                {a.platform === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-red-400 shrink-0"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
+                                {a.platform === 'substack' && <SubstackIcon size={12} className="text-orange-400 shrink-0" />}
+                                {a.platform === 'reddit' && <RedditIcon size={12} className="text-orange-500 shrink-0" />}
                                 <span className="text-[10px] font-bold text-white">{a.name}</span>
-                                <span className="text-[8px] text-slate-500 uppercase tracking-wider">{a.platform}</span>
                               </div>
                             ))}
                           </div>
@@ -2412,7 +2414,7 @@
                 </div>
 
                 <div className="py-6 text-center">
-                    <button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">VIEW DISTRICT FLOW</button>
+                    <button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">VIEW AUDIENCE FLOW</button>
                 </div>
               </div>
             )}
@@ -2444,7 +2446,12 @@
                         {citedAuthors.map((a, i) => (
                           <div key={i} className="bg-[#0f172a]/60 p-6 rounded-[32px] border border-white/5 shadow-inner flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white font-black text-sm">{a.name.charAt(0).toUpperCase()}</div>
+                              <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white">
+                                {a.platform === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-red-400"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
+                                {a.platform === 'substack' && <SubstackIcon size={18} className="text-orange-400" />}
+                                {a.platform === 'reddit' && <RedditIcon size={18} className="text-orange-500" />}
+                                {!['youtube','substack','reddit'].includes(a.platform) && <span className="font-black text-sm">{a.name.charAt(0).toUpperCase()}</span>}
+                              </div>
                               <div className="text-left">
                                 <p className="text-sm font-bold text-white">{a.name}</p>
                                 <p className="text-[10px] text-slate-500 uppercase tracking-wider">{a.platform}{a.url ? ` \u2022 ` : ''}{a.url && <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors">View source</a>}</p>
@@ -2470,7 +2477,7 @@
                   })()}
 
                   <div className="text-center py-6">
-                    <button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to District Flow</button>
+                    <button onClick={() => setActiveTab('looker')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Looker</button>
                   </div>
                 </div>
               </div>
