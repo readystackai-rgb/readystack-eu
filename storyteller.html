@@ -854,8 +854,27 @@
       const buildStoryDistrict = (targetTab) => {
         const target = typeof targetTab === 'string' ? targetTab : 'mapper';
         setStoryError(null);
-        const categories = [ { items: storyParticipants.homies, prefix: 'Partner', groupId: 'homie' }, { items: storyParticipants.besties, prefix: 'Customer', groupId: 'bestie' }, { items: storyParticipants.pursuits, prefix: 'Shared Target', groupId: 'pursuit' } ];
-        const allParticipants = categories.flatMap(cat => cat.items.map((n, i) => ({ name: n.trim() || `${cat.prefix} ${i + 1}`, groupId: cat.groupId })));
+
+        // Build participants from residentAssignments (flat model)
+        const wnthItems = videoStory?.automations || [];
+        const assignedResidents = [];
+        wnthItems.forEach((a, i) => {
+          const name = (residentAssignments[`wnth-${i}`] || '').trim();
+          if (name) assignedResidents.push({ name, groupId: 'resident', task: a.action });
+        });
+        additionalWNTH.forEach((item, i) => {
+          const name = (residentAssignments[`add-wnth-${i}`] || '').trim();
+          if (name && item.action.trim()) assignedResidents.push({ name, groupId: 'resident', task: item.action });
+        });
+
+        // Fallback: if no WNTH assignments, try legacy storyParticipants
+        let allParticipants;
+        if (assignedResidents.length > 0) {
+          allParticipants = assignedResidents;
+        } else {
+          const categories = [ { items: storyParticipants.homies, prefix: 'Resident', groupId: 'resident' }, { items: storyParticipants.besties, prefix: 'Resident', groupId: 'resident' }, { items: storyParticipants.pursuits, prefix: 'Resident', groupId: 'resident' } ];
+          allParticipants = categories.flatMap(cat => cat.items.map((n, i) => ({ name: n.trim() || `${cat.prefix} ${i + 1}`, groupId: cat.groupId })));
+        }
         if (new Set(allParticipants.map(n => n.name.toLowerCase())).size !== allParticipants.length) { setStoryError("Duplicate names detected. Unique residents only."); return; }
         
         const rsLearning = [{ ven: 'ReadyStack', lab: 'Process Walkthrough', platform: 'youtube', dedicated: true, internal: true, ga4Count: 1200, pat: youtubeEmbedUrl }];
