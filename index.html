@@ -2184,7 +2184,7 @@
 
                     {/* Cited Values and Voices — auto-populated from Values and Voices */}
                     {(() => {
-                      const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
+                      const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.lab || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
                       if (citedAuthors.length === 0) return null;
                       return (
                         <div className="bg-[#0f172a]/60 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
@@ -2203,10 +2203,10 @@
                                   <span className="text-[10px] font-bold text-white">{a.name}</span>
                                 </div>
                                 <div className="absolute top-full left-0 mt-2 z-50 bg-[#0f172a] border border-white/10 rounded-xl p-2 shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity w-48">
-                                  <button onClick={() => window.open(a.url, '_blank')} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                                  {a.url && <button onClick={() => window.open(a.url, '_blank')} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                                     Visit Profile
-                                  </button>
+                                  </button>}
                                   <button onClick={() => { const addToCategory = (name, category) => { setStoryParticipants(prev => { const arr = [...prev[category]]; const emptyIdx = arr.findIndex(h => !(h.name || '').trim()); if (emptyIdx === -1) { return { ...prev, [category]: [...arr, {name: name, product: ''}] }; } arr[emptyIdx] = {name: name, product: ''}; return { ...prev, [category]: arr }; }); }; addToCategory(a.name, 'homies'); }} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                     Add as Partner
@@ -2425,7 +2425,7 @@
                   </div>
 
                   {(() => {
-                    const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
+                    const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.lab || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
                     if (citedAuthors.length === 0) {
                       return (
                         <div className="text-center py-16">
