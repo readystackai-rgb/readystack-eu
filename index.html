@@ -1658,8 +1658,8 @@
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
 
-                  // Sequential unlock check
-                  const isLocked = stepIndex > 3 && mapping.learning.length === 0;
+                  // Sequential unlock: lock everything after Residents until Residents is complete
+                  const isLocked = stepIndex >= 2 && mapping.learning.length === 0;
                   const isCompleted = stepIndex < currentIndex;
                   
                   const RailIcon = ({ name, cls }) => {
@@ -1690,8 +1690,6 @@
                       <div key={step.id} onClick={() => {
                         if (activeTab === 'intro') {
                             buildStoryDistrict(step.id);
-                        } else if (step.id === 'mapper' && mapping.learning.length === 0) {
-                            buildStoryDistrict('mapper');
                         } else {
                             setActiveTab(step.id);
                         }
