@@ -3,731 +3,267 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ReadyStack — Join the District</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <title>Pricing — ReadyStack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;900&display=swap');
+
     :root {
-      --bg: #06080f;
-      --surface: #0d1120;
-      --surface2: #141828;
-      --border: rgba(255,255,255,0.07);
+      --purple-header: linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%);
       --accent: #7c8cff;
-      --accent2: #a78bfa;
-      --gold: #f0c060;
-      --green: #34d399;
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --resident: #7c8cff;
-      --automator: #a78bfa;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
+    html { width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      line-height: 1.6;
-      min-height: 100vh;
-      overflow-x: hidden;
+      background-color: #020617;
+      margin: 0; padding: 0; width: 100%;
+      color: #cbd5e1;
+      font-family: 'Inter', sans-serif;
     }
 
-    /* Background atmosphere */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -20%;
-      left: -10%;
-      width: 70vw;
-      height: 70vw;
-      background: radial-gradient(circle, rgba(124,140,255,0.05) 0%, transparent 65%);
-      pointer-events: none;
-      z-index: 0;
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #020617; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
+    .animate-delay-1 { animation-delay: 0.1s; }
+    .animate-delay-2 { animation-delay: 0.2s; }
+    .animate-delay-3 { animation-delay: 0.3s; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -20%;
-      right: -10%;
-      width: 60vw;
-      height: 60vw;
-      background: radial-gradient(circle, rgba(167,139,250,0.04) 0%, transparent 65%);
-      pointer-events: none;
-      z-index: 0;
-    }
+    a { color: #7c8cff; text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #a5b4fc; }
 
-    /* Header */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(6,8,15,0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 20px;
-      color: #fff;
-      letter-spacing: -0.02em;
-    }
-
-    .logo span {
-      color: var(--accent);
-    }
-
-    .tagline-small {
-      font-size: 11px;
-      font-weight: 400;
-      color: var(--muted);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 32px;
-      align-items: center;
-    }
-
-    .nav-links a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--text); }
-
-    /* Hero */
-    .hero {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      padding: 100px 40px 80px;
-      max-width: 860px;
-      margin: 0 auto;
-    }
-
-    .eyebrow {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--accent);
-      border: 1px solid rgba(124,140,255,0.25);
-      padding: 6px 16px;
-      border-radius: 100px;
-      margin-bottom: 32px;
-      background: rgba(124,140,255,0.05);
-    }
-
-    h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(40px, 6vw, 72px);
-      font-weight: 800;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-      color: #fff;
-      margin-bottom: 24px;
-    }
-
-    h1 em {
-      font-style: italic;
-      color: var(--accent);
-    }
-
-    .hero-sub {
-      font-size: 18px;
-      color: var(--muted);
-      max-width: 560px;
-      margin: 0 auto 16px;
-      line-height: 1.7;
-      font-weight: 300;
-    }
-
-    .hero-note {
-      font-size: 13px;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    /* Divider */
-    .divider {
-      width: 1px;
-      height: 60px;
-      background: linear-gradient(to bottom, transparent, var(--border), transparent);
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Pricing grid */
-    .pricing-section {
-      position: relative;
-      z-index: 1;
-      padding: 60px 40px 100px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      align-items: start;
-    }
-
-    @media (max-width: 720px) {
-      .pricing-grid { grid-template-columns: 1fr; }
-      header { padding: 16px 20px; }
-      .nav-links { display: none; }
-      .hero { padding: 60px 20px 40px; }
-      .pricing-section { padding: 40px 20px 80px; }
-    }
-
-    /* Cards */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 40px;
+    .brand-glow-btn {
       position: relative;
       overflow: hidden;
-      transition: border-color 0.3s, transform 0.3s;
+      transition: all 0.3s ease;
     }
-
-    .card::before {
+    .brand-glow-btn::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent)), transparent);
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 50%, #7c8cff 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
       opacity: 0.6;
+      transition: opacity 0.3s;
     }
-
-    .card:hover {
-      border-color: rgba(124,140,255,0.2);
-      transform: translateY(-3px);
-    }
-
-    .card-featured {
-      --card-accent: var(--automator);
-      border-color: rgba(167,139,250,0.2);
-      background: linear-gradient(160deg, rgba(167,139,250,0.06) 0%, var(--surface) 60%);
-    }
-
-    .card-featured:hover {
-      border-color: rgba(167,139,250,0.35);
-    }
-
-    .badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 100px;
-      margin-bottom: 20px;
-    }
-
-    .badge-resident {
-      background: rgba(124,140,255,0.1);
-      color: var(--resident);
-      border: 1px solid rgba(124,140,255,0.2);
-    }
-
-    .badge-automator {
-      background: rgba(167,139,250,0.12);
-      color: var(--automator);
-      border: 1px solid rgba(167,139,250,0.25);
-    }
-
-    .plan-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 26px;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-    }
-
-    .plan-descriptor {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 28px;
-      font-style: italic;
-    }
-
-    .price-row {
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-      margin-bottom: 6px;
-    }
-
-    .price-amount {
-      font-family: 'Syne', sans-serif;
-      font-size: 52px;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: -0.03em;
-      line-height: 1;
-    }
-
-    .price-period {
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 400;
-    }
-
-    .price-note {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 32px;
-      font-style: italic;
-    }
-
-    .price-note strong {
-      color: var(--automator);
-      font-style: normal;
-      font-weight: 600;
-    }
-
-    /* Features */
-    .features-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .feature-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 13px;
-      margin-bottom: 36px;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      font-size: 13.5px;
-      color: var(--text);
-      line-height: 1.5;
-    }
-
-    .feature-item .check {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: rgba(124,140,255,0.12);
-      border: 1px solid rgba(124,140,255,0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .card-featured .feature-item .check {
-      background: rgba(167,139,250,0.12);
-      border-color: rgba(167,139,250,0.3);
-    }
-
-    .check svg {
-      width: 10px;
-      height: 10px;
-    }
-
-    .feature-item .check-resident svg { stroke: var(--resident); }
-    .feature-item .check-automator svg { stroke: var(--automator); }
-
-    .feature-bold {
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .feature-dim {
-      color: var(--muted);
-    }
-
-    /* Section dividers inside card */
-    .feature-section {
-      margin-bottom: 20px;
-    }
-
-    .feature-section-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-      margin-top: 20px;
-    }
-
-    /* CTA button */
-    .cta-btn {
-      width: 100%;
-      padding: 16px 24px;
-      border-radius: 14px;
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: none;
-      outline: none;
-    }
-
-    .cta-resident {
-      background: rgba(124,140,255,0.1);
-      border: 1px solid rgba(124,140,255,0.25);
-      color: var(--resident);
-    }
-
-    .cta-resident:hover {
-      background: rgba(124,140,255,0.18);
-      border-color: rgba(124,140,255,0.5);
-      transform: translateY(-1px);
-    }
-
-    .cta-automator {
-      background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%);
-      color: #fff;
-      box-shadow: 0 8px 32px -8px rgba(124,140,255,0.4);
-    }
-
-    .cta-automator:hover {
-      box-shadow: 0 12px 40px -8px rgba(124,140,255,0.6);
+    .brand-glow-btn:hover::before { opacity: 1; }
+    .brand-glow-btn:hover {
+      box-shadow: 0 0 30px rgba(124,140,255,0.15), 0 0 60px rgba(124,140,255,0.05);
       transform: translateY(-2px);
     }
 
-    /* Commercial note */
-    .commercial-note {
-      margin-top: 12px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-      font-style: italic;
+    .card-glow { transition: all 0.3s ease; }
+    .card-glow:hover {
+      border-color: rgba(124,140,255,0.2) !important;
+      box-shadow: 0 0 40px rgba(124,140,255,0.06);
     }
 
-    /* Trust strip */
-    .trust-strip {
-      position: relative;
-      z-index: 1;
-      border-top: 1px solid var(--border);
-      padding: 48px 40px;
-      text-align: center;
-      max-width: 720px;
-      margin: 0 auto;
-    }
-
-    .trust-strip p {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.8;
-    }
-
-    .trust-strip strong {
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    /* Dividend callout */
-    .dividend-callout {
-      position: relative;
-      z-index: 1;
-      margin: 0 auto 80px;
-      max-width: 720px;
-      padding: 0 40px;
-    }
-
-    .dividend-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 32px 40px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .dividend-box::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      opacity: 0.5;
-    }
-
-    .dividend-box .gold-eyebrow {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 12px;
-    }
-
-    .dividend-box h3 {
-      font-family: 'Syne', sans-serif;
-      font-size: 22px;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 10px;
-      letter-spacing: -0.02em;
-    }
-
-    .dividend-box p {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.7;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .dividend-box p strong {
-      color: var(--gold);
-      font-weight: 500;
+    .card-featured-glow { transition: all 0.3s ease; }
+    .card-featured-glow:hover {
+      border-color: rgba(167,139,250,0.3) !important;
+      box-shadow: 0 0 50px rgba(167,139,250,0.08);
     }
   </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <div class="logo">Ready<span>Stack</span></div>
-    <div class="tagline-small">Ideas worth running</div>
-  </div>
-  <nav class="nav-links">
-    <a href="#">District</a>
-    <a href="#">How It Works</a>
-    <a href="#">Dark GTM</a>
-  </nav>
-</header>
-
-<section class="hero">
-  <div class="eyebrow">Membership</div>
-  <h1>Join the<br/><em>District.</em></h1>
-  <p class="hero-sub">
-    Build your Market Relationship infrastructure. Be present in the dark — with your partners, your shared targets, and your future customers — before they ever raise their hand.
-  </p>
-  <p class="hero-note">Month to month. No commitment. Cancel anytime.</p>
-</section>
-
-<div class="divider"></div>
-
-<section class="pricing-section">
-  <div class="pricing-grid">
-
-    <!-- Resident -->
-    <div class="card">
-      <div class="badge badge-resident">Resident</div>
-      <div class="plan-name">Resident</div>
-      <div class="plan-descriptor">Build your District. Enter the market.</div>
-      <div class="price-row">
-        <span class="price-amount">$50</span>
-        <span class="price-period">/mo</span>
+  <!-- HEADER -->
+  <header style="background: var(--purple-header);" class="border-b border-white/10 w-full sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div class="w-12 h-10 flex-shrink-0 flex items-center justify-center">
+          <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width:24px;height:24px;object-fit:contain;" />
+        </div>
+        <span class="text-xl font-bold text-white tracking-tight leading-none" style="font-family: 'Poppins', sans-serif;">ReadyStack</span>
       </div>
-      <div class="price-note">Flat rate. Everything included.</div>
-
-      <div class="features-label">What you get</div>
-
-      <div class="feature-section">
-        <div class="feature-section-label">Your District</div>
-        <ul class="feature-list">
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">Dark Market District</span> — your online profile held in common with Partners, Customers, and Shared Targets</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">Storyteller Mode</span> — build your District narrative across Learning, Selecting, Executing, and Expanding</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">District Map</span> — visualize your network of Partners, Citizens, Tourists, and Patrons</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">C-Suite Case Mode</span> — model projected traffic, revenue, and Partner bounties for stakeholder presentation</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">District Observatory</span> — track buyer journey signals across all four phases</span>
-          </li>
-        </ul>
-      </div>
-
-      <div class="feature-section">
-        <div class="feature-section-label">Expert Identification</div>
-        <ul class="feature-list">
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">20 Niche Expert IDs /mo</span> — identify the right Partners and Shared Targets for your District</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span>Email address discovery</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span>Invitation templates and outreach flows</span>
-          </li>
-        </ul>
-      </div>
-
-      <div class="feature-section">
-        <div class="feature-section-label">Earnings</div>
-        <ul class="feature-list">
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">40% lifetime income</span> on every Citizen you bring into the commons</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span>Earnings dashboard and deposit tracking</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span>Stripe Connected Account for direct payouts</span>
-          </li>
-        </ul>
-      </div>
-
-      <button class="cta-btn cta-resident" onclick="console.log('Resident signup')">
-        Join as Resident →
-      </button>
-      <div class="commercial-note">No buyer. No seller. Just a common pursuit.</div>
+      <a href="https://readystack.ai" class="text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">&larr; Back to Home</a>
     </div>
+  </header>
 
-    <!-- Resident Automator -->
-    <div class="card card-featured">
-      <div class="badge badge-automator">Full Access</div>
-      <div class="plan-name">Resident Automator</div>
-      <div class="plan-descriptor">Scale your District without scaling your effort.</div>
-      <div class="price-row">
-        <span class="price-amount">$50</span>
-        <span class="price-period">/mo</span>
+  <!-- HERO -->
+  <section class="max-w-3xl mx-auto px-8 pt-24 pb-16 text-center animate-fade-in">
+    <p class="text-[9px] font-black uppercase tracking-[0.4em] text-indigo-400 italic mb-6" style="font-family:'Poppins',sans-serif;">Membership</p>
+    <h1 class="text-white font-black text-[48px] md:text-[64px] uppercase italic tracking-tighter leading-[0.95] mb-6" style="font-family:'Poppins',sans-serif;">
+      Join the<br/><span class="text-indigo-400">District.</span>
+    </h1>
+    <p class="text-[15px] text-slate-400 leading-relaxed max-w-xl mx-auto mb-4">
+      Build your Market Relationship infrastructure. Be present in the dark — with your partners, your shared targets, and your future customers — before they ever raise their hand.
+    </p>
+    <p class="text-[11px] text-slate-600 italic font-medium">Month to month. No commitment. Cancel anytime.</p>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="w-px h-16 bg-gradient-to-b from-transparent via-white/10 to-transparent mx-auto"></div>
+
+  <!-- PRICING GRID -->
+  <section class="max-w-5xl mx-auto px-6 pb-24">
+    <div class="grid md:grid-cols-2 gap-6 items-start">
+
+      <!-- RESIDENT -->
+      <div class="animate-fade-in animate-delay-1 bg-[#0f172a]/50 rounded-[32px] border border-white/5 p-10 relative overflow-hidden card-glow" style="box-shadow: 0 0 60px rgba(0,0,0,0.4);">
+        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
+
+        <div class="inline-block bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 mb-5">
+          <span class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-400" style="font-family:'Poppins',sans-serif;">Resident</span>
+        </div>
+        <h2 class="text-white font-black text-[24px] uppercase italic tracking-tight leading-none mb-2" style="font-family:'Poppins',sans-serif;">Resident</h2>
+        <p class="text-[12px] text-slate-500 italic mb-8">Build your District. Enter the market.</p>
+
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="text-white font-black text-[48px] leading-none tracking-tighter" style="font-family:'Poppins',sans-serif;">$50</span>
+          <span class="text-[13px] text-slate-500 font-medium">/mo</span>
+        </div>
+        <p class="text-[11px] text-slate-600 italic mb-10">Flat rate. Everything included.</p>
+
+        <!-- Your District -->
+        <div class="mb-8">
+          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Your District</div>
+          <div class="space-y-3.5">
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Dark Market District</strong> — your online profile held in common with Partners, Customers, and Shared Targets</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Storyteller Mode</strong> — build your District narrative across Learning, Selecting, Executing, and Expanding</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">District Map</strong> — visualize your network of Partners, Citizens, Tourists, and Patrons</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">C-Suite Case Mode</strong> — model projected traffic, revenue, and Partner bounties for stakeholder presentation</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">District Observatory</strong> — track buyer journey signals across all four phases</span></div>
+          </div>
+        </div>
+
+        <!-- Expert Identification -->
+        <div class="mb-8">
+          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Expert Identification</div>
+          <div class="space-y-3.5">
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">20 Niche Expert IDs /mo</strong> — identify the right Partners and Shared Targets for your District</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Email address discovery</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Invitation templates and outreach flows</span></div>
+          </div>
+        </div>
+
+        <!-- Earnings -->
+        <div class="mb-10">
+          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Earnings</div>
+          <div class="space-y-3.5">
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">40% lifetime income</strong> on every Citizen you bring into the commons</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Earnings dashboard and deposit tracking</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Stripe Connected Account for direct payouts</span></div>
+          </div>
+        </div>
+
+        <button class="brand-glow-btn w-full bg-[#020617] py-4 rounded-xl text-indigo-400 uppercase font-black tracking-[0.15em] text-[12px]" style="font-family:'Poppins',sans-serif;" onclick="console.log('Resident signup')">
+          Join as Resident &rarr;
+        </button>
+        <p class="text-[10px] text-slate-600 italic text-center mt-4">No buyer. No seller. Just a common pursuit.</p>
       </div>
-      <div class="price-note"><strong>+ Pay As You Go</strong> — only pay for what you run</div>
 
-      <div class="features-label">Everything in Resident, plus</div>
+      <!-- RESIDENT AUTOMATOR -->
+      <div class="animate-fade-in animate-delay-2 bg-[#0f172a]/50 rounded-[32px] border border-purple-500/15 p-10 relative overflow-hidden card-featured-glow" style="box-shadow: 0 0 60px rgba(0,0,0,0.4); background: linear-gradient(160deg, rgba(167,139,250,0.04) 0%, rgba(15,23,42,0.5) 40%);">
+        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
 
-      <div class="feature-section">
-        <div class="feature-section-label">Automation</div>
-        <ul class="feature-list">
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">Unlimited Expert Identification</span> — no monthly cap, run as large as your District needs</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">Full Hosted Automation Flows</span> — Tasks and Agents running on your behalf across all District phases</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">Mass Email Outreach</span> — reach Partners, Shared Targets, and Tourists at scale</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">Data Hosting</span> — your District data stored, managed, and queryable</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span>Zapier and Webhook integration — connect your District to your existing stack</span>
-          </li>
-        </ul>
+        <div class="inline-block bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-1.5 mb-5">
+          <span class="text-[9px] font-black uppercase tracking-[0.2em] text-purple-400" style="font-family:'Poppins',sans-serif;">Full Access</span>
+        </div>
+        <h2 class="text-white font-black text-[24px] uppercase italic tracking-tight leading-none mb-2" style="font-family:'Poppins',sans-serif;">Resident Automator</h2>
+        <p class="text-[12px] text-slate-500 italic mb-8">Scale your District without scaling your effort.</p>
+
+        <div class="flex items-baseline gap-1 mb-1">
+          <span class="text-white font-black text-[48px] leading-none tracking-tighter" style="font-family:'Poppins',sans-serif;">$50</span>
+          <span class="text-[13px] text-slate-500 font-medium">/mo</span>
+        </div>
+        <p class="text-[11px] text-slate-600 italic mb-10"><strong class="text-purple-400 not-italic font-bold">+ Pay As You Go</strong> — only pay for what you run</p>
+
+        <div class="mb-5">
+          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Everything in Resident, plus</div>
+        </div>
+
+        <!-- Automation -->
+        <div class="mb-8">
+          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Automation</div>
+          <div class="space-y-3.5">
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Unlimited Expert Identification</strong> — no monthly cap, run as large as your District needs</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Full Hosted Automation Flows</strong> — Tasks and Agents running on your behalf across all District phases</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Mass Email &amp; Newsletters</strong> — reach Partners, Shared Targets, and Tourists at scale via Makesbridge</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Data Hosting</strong> — your District data stored, managed, and queryable</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Zapier and Webhook integration — connect your District to your existing stack</span></div>
+          </div>
+        </div>
+
+        <!-- Intelligence -->
+        <div class="mb-8">
+          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Intelligence</div>
+          <div class="space-y-3.5">
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Projection vs Actual overlay</strong> — compare C-Suite Case Mode projections against live GA4 District data</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Dark GTM signal tracking across LinkedIn, YouTube, Substack, and Reddit</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Angel Observer dashboard — invite investors to watch your District before they commit</span></div>
+          </div>
+        </div>
+
+        <!-- Support -->
+        <div class="mb-10">
+          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Support</div>
+          <div class="space-y-3.5">
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Priority onboarding</strong> — your Connected Account set up within 1 business day</span></div>
+            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Dedicated ReadyStack team support</span></div>
+          </div>
+        </div>
+
+        <button class="w-full py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[12px] transition-all duration-300" style="font-family:'Poppins',sans-serif; background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%); box-shadow: 0 8px 32px -8px rgba(124,140,255,0.4);" onmouseover="this.style.boxShadow='0 12px 40px -8px rgba(124,140,255,0.6)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 8px 32px -8px rgba(124,140,255,0.4)'; this.style.transform='translateY(0)';" onclick="console.log('Automator signup')">
+          Start Automating &rarr;
+        </button>
+        <p class="text-[10px] text-slate-600 italic text-center mt-4">Pay only for what you run. Stop anytime.</p>
       </div>
 
-      <div class="feature-section">
-        <div class="feature-section-label">Intelligence</div>
-        <ul class="feature-list">
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">Projection vs Actual overlay</span> — compare C-Suite Case Mode projections against live GA4 District data</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span>Dark GTM signal tracking across LinkedIn, YouTube, Substack, and Reddit</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span>Angel Observer dashboard — invite investors to watch your District before they commit</span>
-          </li>
-        </ul>
-      </div>
-
-      <div class="feature-section">
-        <div class="feature-section-label">Support</div>
-        <ul class="feature-list">
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span><span class="feature-bold">Priority onboarding</span> — your Connected Account set up within 1 business day</span>
-          </li>
-          <li class="feature-item">
-            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <span>Dedicated ReadyStack team support</span>
-          </li>
-        </ul>
-      </div>
-
-      <button class="cta-btn cta-automator" onclick="console.log('Automator signup')">
-        Start Automating →
-      </button>
-      <div class="commercial-note">Pay only for what you run. Stop anytime.</div>
     </div>
+  </section>
 
+  <!-- DIVIDEND CALLOUT -->
+  <div class="max-w-3xl mx-auto px-6 pb-20 animate-fade-in animate-delay-3">
+    <div class="bg-[#0f172a]/50 rounded-[32px] border border-white/5 p-10 text-center relative overflow-hidden" style="box-shadow: 0 0 60px rgba(0,0,0,0.4);">
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent"></div>
+      <p class="text-[9px] font-black uppercase tracking-[0.3em] text-amber-400 mb-4" style="font-family:'Poppins',sans-serif;">The Dividend</p>
+      <h3 class="text-white font-black text-[22px] uppercase italic tracking-tight leading-tight mb-4" style="font-family:'Poppins',sans-serif;">Share your District. Earn for life.</h3>
+      <p class="text-[14px] text-slate-400 leading-relaxed max-w-lg mx-auto">
+        Every Member earns <strong class="text-amber-400 font-semibold">40% lifetime income</strong> on every Citizen they introduce to the commons —
+        whether they're across the street or across the world. Not a referral bonus. A permanent financial stake
+        in something that grows.
+      </p>
+    </div>
   </div>
-</section>
 
-<!-- Dividend callout -->
-<div class="dividend-callout">
-  <div class="dividend-box">
-    <div class="gold-eyebrow">The Dividend</div>
-    <h3>Share your District. Earn for life.</h3>
-    <p>
-      Every Member earns <strong>40% lifetime income</strong> on every Citizen they introduce to the commons —
-      whether they're across the street or across the world. Not a referral bonus. A permanent financial stake
-      in something that grows. The most powerful networking tool ever invented isn't a dinner. It's a dividend.
+  <!-- TRUST STRIP -->
+  <div class="border-t border-white/5 py-12 px-8 text-center max-w-2xl mx-auto">
+    <p class="text-[13px] text-slate-500 leading-relaxed">
+      <strong class="text-slate-300 font-medium">Month to month. No contracts. No lock-in.</strong><br/>
+      ReadyStack is the infrastructure of Market Relationship Management — the appropriate atmosphere
+      you take part in to be present in the dark, with your partners, your shared targets,
+      and your future customers, before they ever raise their hand.
     </p>
   </div>
-</div>
 
-<!-- Trust strip -->
-<div class="trust-strip">
-  <p>
-    <strong>Month to month. No contracts. No lock-in.</strong><br/>
-    ReadyStack is the infrastructure of Market Relationship Management — the appropriate atmosphere
-    you take part in to be present in the dark, with your partners, your shared targets,
-    and your future customers, before they ever raise their hand.
-  </p>
-</div>
+  <!-- FOOTER -->
+  <footer class="border-t border-white/5 mt-8">
+    <div class="max-w-6xl mx-auto px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center space-x-2">
+        <div class="bg-white p-1 rounded-full flex items-center justify-center border border-white/20 overflow-hidden">
+          <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width:16px;height:16px;object-fit:contain;" />
+        </div>
+        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500" style="font-family:'Poppins',sans-serif;">ReadyStack — A Makesbridge Technology Product</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="https://readystack.ai/privacy-policy" class="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Privacy Policy</a>
+        <a href="https://readystack.ai/terms-of-service" class="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Terms of Service</a>
+        <span class="text-[9px] font-black uppercase tracking-widest text-slate-600" style="font-family:'Poppins',sans-serif;">&copy; 2026 Makesbridge Technology, Inc.</span>
+      </div>
+    </div>
+  </footer>
 
 </body>
 </html>
