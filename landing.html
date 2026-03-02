@@ -43,182 +43,194 @@
     }
 
     @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 8px rgba(124,140,255,0.3); }
-      50% { box-shadow: 0 0 20px rgba(124,140,255,0.6); }
+      0%, 100% { box-shadow: 0 0 12px rgba(124,140,255,0.2); }
+      50% { box-shadow: 0 0 28px rgba(124,140,255,0.4); }
     }
 
-    @keyframes dataFlow {
-      0% { offset-distance: 0%; opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { offset-distance: 100%; opacity: 0; }
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
     }
 
-    @keyframes float {
-      0%, 100% { transform: translate(-50%, -50%) translateY(0); }
-      50% { transform: translate(-50%, -50%) translateY(-6px); }
+    @keyframes blink {
+      50% { border-color: transparent; }
     }
 
-    /* ─── HERO VISUALIZATION ─── */
-    .hero-vis {
-      position: relative;
-      width: 100%;
-      max-width: 900px;
-      height: 520px;
-      margin: 0 auto;
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .node {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 10;
-    }
-    .node:hover {
-      transform: translate(-50%, -50%) scale(1.2);
-    }
-    .node:hover .node-label {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    @keyframes lineReveal {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
-    .node-label {
-      position: absolute;
-      bottom: -28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(4px);
-      white-space: nowrap;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-family: 'Poppins', sans-serif;
-      opacity: 0;
-      transition: all 0.25s ease;
-      pointer-events: none;
-    }
-
-    .node-tooltip {
-      position: absolute;
-      bottom: -56px;
-      left: 50%;
-      transform: translateX(-50%) translateY(4px);
-      white-space: nowrap;
-      font-size: 11px;
-      color: #94a3b8;
-      font-family: 'Inter', sans-serif;
-      opacity: 0;
-      transition: all 0.25s ease;
-      pointer-events: none;
-    }
-    .node:hover .node-tooltip {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .flow-bead {
-      offset-path: var(--flow-path);
-      animation: dataFlow var(--flow-speed, 4s) linear infinite;
-      animation-delay: var(--flow-delay, 0s);
-    }
-
-    /* ─── DISTRICT CENTER NODE ─── */
-    .district-node {
-      width: 88px;
-      height: 88px;
-      background: radial-gradient(circle, rgba(124,140,255,0.15) 0%, rgba(124,140,255,0.03) 70%);
-      border: 2px solid rgba(124,140,255,0.35);
-      animation: pulseGlow 3s ease-in-out infinite;
+    @keyframes mapPulse {
+      0%, 100% { stroke-opacity: 0.15; }
+      50% { stroke-opacity: 0.4; }
     }
 
     /* ─── BUTTONS ─── */
     .brand-glow-btn {
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
+      position: relative; overflow: hidden; transition: all 0.3s ease;
     }
     .brand-glow-btn::before {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: inherit;
-      padding: 1px;
+      content: ''; position: absolute; inset: -1px; border-radius: inherit; padding: 1px;
       background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 50%, #7c8cff 100%);
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      opacity: 0.6;
-      transition: opacity 0.3s;
+      -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0.6; transition: opacity 0.3s;
     }
     .brand-glow-btn:hover::before { opacity: 1; }
-    .brand-glow-btn:hover {
-      box-shadow: 0 0 30px rgba(124,140,255,0.15), 0 0 60px rgba(124,140,255,0.05);
-      transform: translateY(-2px);
-    }
+    .brand-glow-btn:hover { box-shadow: 0 0 30px rgba(124,140,255,0.15); transform: translateY(-2px); }
 
     .primary-btn {
       transition: all 0.3s ease;
       background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%);
       box-shadow: 0 8px 32px -8px rgba(124,140,255,0.4);
     }
-    .primary-btn:hover {
-      box-shadow: 0 12px 40px -8px rgba(124,140,255,0.6);
-      transform: translateY(-2px);
+    .primary-btn:hover { box-shadow: 0 12px 40px -8px rgba(124,140,255,0.6); transform: translateY(-2px); }
+
+    /* ─── INTERACTIVE DEMO ─── */
+    .demo-container {
+      max-width: 780px;
+      margin: 0 auto;
+      min-height: 420px;
+      position: relative;
     }
+
+    .demo-step { display: none; animation: fadeIn 0.4s ease-out forwards; }
+    .demo-step.active { display: block; }
+
+    .step-indicator {
+      display: flex; gap: 4px; justify-content: center; margin-bottom: 24px;
+    }
+    .step-dot {
+      width: 32px; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.08);
+      transition: all 0.3s ease;
+    }
+    .step-dot.active { background: #7c8cff; width: 48px; }
+    .step-dot.done { background: rgba(124,140,255,0.3); }
+
+    .demo-shell {
+      background: rgba(15,23,42,0.5);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 80px rgba(0,0,0,0.4);
+    }
+    .demo-titlebar {
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 12px 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    .demo-body { padding: 28px 28px 32px; }
+
+    /* Search input */
+    .search-input {
+      background: rgba(2,6,23,0.6); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 14px 18px; color: white;
+      font-size: 15px; font-family: 'Inter', sans-serif; width: 100%;
+      outline: none; transition: border-color 0.3s;
+    }
+    .search-input:focus { border-color: rgba(124,140,255,0.3); }
+
+    /* YouTube cards */
+    .yt-card {
+      background: rgba(2,6,23,0.5); border: 1.5px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 14px; cursor: pointer;
+      transition: all 0.25s ease; position: relative;
+    }
+    .yt-card:hover { border-color: rgba(124,140,255,0.2); background: rgba(15,23,42,0.5); }
+    .yt-card.selected { border-color: rgba(124,140,255,0.5); background: rgba(124,140,255,0.06); }
+    .yt-card.selected::after {
+      content: ''; position: absolute; top: 8px; right: 8px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #7c8cff;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='2,6 5,9 10,3' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: center; background-size: 12px;
+    }
+
+    /* Resident chips */
+    .resident-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(2,6,23,0.5); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 10px 14px; transition: all 0.25s ease;
+    }
+    .resident-chip.added { border-color: rgba(124,140,255,0.3); background: rgba(124,140,255,0.06); }
+
+    .add-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(124,140,255,0.08); border: 1px dashed rgba(124,140,255,0.25);
+      border-radius: 10px; padding: 10px 14px; cursor: pointer;
+      transition: all 0.25s ease; color: #7c8cff; font-size: 13px;
+    }
+    .add-btn:hover { background: rgba(124,140,255,0.15); border-color: rgba(124,140,255,0.4); }
+
+    /* Analysis lines */
+    .analysis-line {
+      opacity: 0; animation: lineReveal 0.3s ease-out forwards;
+    }
+
+    /* Map nodes */
+    .map-node {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px; border-radius: 50%;
+      transition: all 0.3s ease; position: relative;
+    }
+    .map-node.center {
+      width: 64px; height: 64px;
+      background: rgba(124,140,255,0.1); border: 2px solid rgba(124,140,255,0.35);
+      animation: pulseGlow 2.5s ease-in-out infinite;
+    }
+
+    /* next button */
+    .next-btn {
+      background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%);
+      color: white; border: none; border-radius: 10px;
+      padding: 10px 24px; font-weight: 800; font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.15em;
+      font-family: 'Poppins', sans-serif; cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px -4px rgba(124,140,255,0.4);
+    }
+    .next-btn:hover { box-shadow: 0 8px 28px -4px rgba(124,140,255,0.5); transform: translateY(-1px); }
+
+    .ghost-btn {
+      background: transparent; color: #64748b; border: none;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; font-family: 'Poppins', sans-serif;
+      cursor: pointer; padding: 10px 16px; transition: color 0.2s;
+    }
+    .ghost-btn:hover { color: #94a3b8; }
 
     /* ─── SECTION CARDS ─── */
     .section-card {
-      background: rgba(15,23,42,0.3);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 32px;
-      overflow: hidden;
-      transition: all 0.3s ease;
+      background: rgba(15,23,42,0.3); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 32px; overflow: hidden; transition: all 0.3s ease;
     }
-    .section-card:hover {
-      border-color: rgba(124,140,255,0.15);
-      box-shadow: 0 0 40px rgba(124,140,255,0.04);
-    }
+    .section-card:hover { border-color: rgba(124,140,255,0.15); box-shadow: 0 0 40px rgba(124,140,255,0.04); }
 
-    /* ─── NARRATIVE STEP NUMBERS ─── */
     .step-num {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 900;
-      font-size: 13px;
-      flex-shrink: 0;
-    }
-
-    /* ─── RESPONSIVE HERO ─── */
-    @media (max-width: 768px) {
-      .hero-vis { height: 360px; }
-      .node { width: 44px; height: 44px; }
-      .node svg, .node img { width: 18px !important; height: 18px !important; }
-      .district-node { width: 68px; height: 68px; }
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 13px; flex-shrink: 0;
     }
   </style>
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════ HEADER ═══════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
   <header style="background: var(--purple-header);" class="border-b border-white/10 w-full sticky top-0 z-50 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
       <a href="landing.html" class="flex items-center space-x-2 no-underline">
         <div class="w-12 h-10 flex-shrink-0 flex items-center justify-center">
           <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width:24px;height:24px;object-fit:contain;" />
         </div>
-        <span class="text-xl font-bold text-white tracking-tight leading-none" style="font-family: 'Poppins', sans-serif;">ReadyStack</span>
+        <span class="text-xl font-bold text-white tracking-tight leading-none" style="font-family:'Poppins',sans-serif;">ReadyStack</span>
       </a>
       <nav class="hidden md:flex items-center gap-8">
         <a href="pricing.html" class="text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Pricing</a>
@@ -230,140 +242,340 @@
     </div>
   </header>
 
-  <!-- ═══════════════════════════════════════════ HERO ═══════════════════════════════════════════ -->
-  <section class="max-w-5xl mx-auto px-6 pt-20 pb-4">
-    <div class="text-center mb-4 animate-fade-in">
+  <!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+  <section class="max-w-5xl mx-auto px-6 pt-16 pb-4">
+    <div class="text-center mb-10 animate-fade-in">
       <p class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-5" style="font-family:'Poppins',sans-serif;">Market Relationship Management</p>
-      <h1 class="text-white font-black text-[40px] md:text-[58px] uppercase italic tracking-tighter leading-[0.92] mb-6" style="font-family:'Poppins',sans-serif;">
-        90% of Buying<br/>Happens in the Dark.<br/><span class="text-indigo-400">Build Where It Happens.</span>
+      <h1 class="text-white font-black text-[36px] md:text-[52px] uppercase italic tracking-tighter leading-[0.92] mb-5" style="font-family:'Poppins',sans-serif;">
+        Build a District.<br/><span class="text-indigo-400">See How It Works.</span>
       </h1>
-      <p class="text-[15px] text-slate-400 leading-relaxed max-w-xl mx-auto mb-2">
-        ReadyStack is the operating system for Dark GTM — where districts, creators, vendors, and residents map, collaborate, and earn in the markets that matter, before buyers ever raise their hand.
+      <p class="text-[14px] text-slate-500 leading-relaxed max-w-lg mx-auto">
+        Walk through building a real district — from search to map — in 60 seconds.
       </p>
     </div>
 
-    <!-- ─── ANIMATED TOURIST FLOW VISUALIZATION ─── -->
-    <div class="hero-vis animate-fade-in animate-delay-2">
+    <!-- ═══ INTERACTIVE DEMO ═══ -->
+    <div class="demo-container animate-fade-in animate-delay-2">
 
-      <svg class="absolute inset-0 w-full h-full" viewBox="0 0 900 520" fill="none" preserveAspectRatio="xMidYMid meet" style="pointer-events:none;">
-        <!-- Flow paths from outer nodes to center district -->
-        <!-- YouTube → District -->
-        <path id="flow1" d="M 130 120 C 230 120, 320 220, 450 260" stroke="rgba(124,140,255,0.12)" stroke-width="1.5" fill="none"/>
-        <circle r="3" fill="#7c8cff" opacity="0.8"><animateMotion dur="3.5s" repeatCount="indefinite"><mpath href="#flow1"/></animateMotion></circle>
-        <circle r="3" fill="#7c8cff" opacity="0.5"><animateMotion dur="3.5s" repeatCount="indefinite" begin="1.2s"><mpath href="#flow1"/></animateMotion></circle>
-
-        <!-- LinkedIn → District -->
-        <path id="flow2" d="M 160 340 C 260 330, 330 280, 450 260" stroke="rgba(124,140,255,0.12)" stroke-width="1.5" fill="none"/>
-        <circle r="3" fill="#a78bfa" opacity="0.8"><animateMotion dur="4s" repeatCount="indefinite"><mpath href="#flow2"/></animateMotion></circle>
-        <circle r="3" fill="#a78bfa" opacity="0.5"><animateMotion dur="4s" repeatCount="indefinite" begin="1.5s"><mpath href="#flow2"/></animateMotion></circle>
-
-        <!-- Podcast → District -->
-        <path id="flow3" d="M 80 230 C 180 230, 300 250, 450 260" stroke="rgba(124,140,255,0.12)" stroke-width="1.5" fill="none"/>
-        <circle r="3" fill="#7c8cff" opacity="0.7"><animateMotion dur="3.8s" repeatCount="indefinite" begin="0.5s"><mpath href="#flow3"/></animateMotion></circle>
-
-        <!-- Newsletter → District -->
-        <path id="flow4" d="M 200 450 C 300 420, 380 340, 450 260" stroke="rgba(124,140,255,0.12)" stroke-width="1.5" fill="none"/>
-        <circle r="3" fill="#a78bfa" opacity="0.7"><animateMotion dur="4.2s" repeatCount="indefinite" begin="0.8s"><mpath href="#flow4"/></animateMotion></circle>
-
-        <!-- District → Resident (right side outputs) -->
-        <path id="flow5" d="M 450 260 C 550 240, 620 180, 740 140" stroke="rgba(251,191,36,0.15)" stroke-width="1.5" fill="none"/>
-        <circle r="3" fill="#fbbf24" opacity="0.8"><animateMotion dur="3.2s" repeatCount="indefinite" begin="0.3s"><mpath href="#flow5"/></animateMotion></circle>
-        <circle r="3" fill="#fbbf24" opacity="0.5"><animateMotion dur="3.2s" repeatCount="indefinite" begin="1.8s"><mpath href="#flow5"/></animateMotion></circle>
-
-        <!-- District → Automation -->
-        <path id="flow6" d="M 450 260 C 560 270, 640 300, 760 310" stroke="rgba(251,191,36,0.15)" stroke-width="1.5" fill="none"/>
-        <circle r="3" fill="#fbbf24" opacity="0.7"><animateMotion dur="3.6s" repeatCount="indefinite" begin="1s"><mpath href="#flow6"/></animateMotion></circle>
-
-        <!-- District → Dividends -->
-        <path id="flow7" d="M 450 260 C 540 310, 620 380, 720 430" stroke="rgba(251,191,36,0.15)" stroke-width="1.5" fill="none"/>
-        <circle r="3" fill="#fbbf24" opacity="0.8"><animateMotion dur="3.4s" repeatCount="indefinite" begin="0.6s"><mpath href="#flow7"/></animateMotion></circle>
-      </svg>
-
-      <!-- ─── INPUT NODES (left side — content sources flowing IN) ─── -->
-      <!-- YouTube -->
-      <div class="node" style="left: 14%; top: 23%; background: rgba(255,0,0,0.08); border: 1.5px solid rgba(255,0,0,0.25);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#ef4444"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
-        <span class="node-label text-red-400">YouTube</span>
-        <span class="node-tooltip">Content discovery</span>
+      <!-- Step indicators -->
+      <div class="step-indicator" id="stepIndicator">
+        <div class="step-dot active" data-step="0"></div>
+        <div class="step-dot" data-step="1"></div>
+        <div class="step-dot" data-step="2"></div>
+        <div class="step-dot" data-step="3"></div>
+        <div class="step-dot" data-step="4"></div>
+        <div class="step-dot" data-step="5"></div>
       </div>
 
-      <!-- Podcasts -->
-      <div class="node" style="left: 9%; top: 44%; background: rgba(168,85,247,0.08); border: 1.5px solid rgba(168,85,247,0.25);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round"><path d="M12 1a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5v-3a7 7 0 0 1 14 0v3h-2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z"/></svg>
-        <span class="node-label text-purple-400">Podcasts</span>
-        <span class="node-tooltip">Expert voices</span>
-      </div>
-
-      <!-- LinkedIn -->
-      <div class="node" style="left: 18%; top: 65%; background: rgba(59,130,246,0.08); border: 1.5px solid rgba(59,130,246,0.25);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#3b82f6"><path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5v-9h3zM6.5 8.2A1.7 1.7 0 1 1 6.5 4.8a1.7 1.7 0 0 1 0 3.4zM19 19h-3v-4.4c0-1.1-.4-1.8-1.3-1.8-.7 0-1.2.5-1.4 1-.1.2-.1.4-.1.7V19h-3s0-8.1 0-9h3v1.3a3 3 0 0 1 2.7-1.5c2 0 3.1 1.3 3.1 4V19z"/></svg>
-        <span class="node-label text-blue-400">LinkedIn</span>
-        <span class="node-tooltip">Professional networks</span>
-      </div>
-
-      <!-- Newsletters -->
-      <div class="node" style="left: 22%; top: 87%; background: rgba(16,185,129,0.08); border: 1.5px solid rgba(16,185,129,0.25);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/></svg>
-        <span class="node-label text-emerald-400">Newsletters</span>
-        <span class="node-tooltip">Industry intel</span>
-      </div>
-
-      <!-- ─── CENTER: DISTRICT ─── -->
-      <div class="node district-node" style="left: 50%; top: 50%;">
-        <div class="text-center">
-          <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width:28px;height:28px;object-fit:contain;" />
+      <div class="demo-shell">
+        <div class="demo-titlebar">
+          <div class="demo-dot" style="background:#ff5f57;"></div>
+          <div class="demo-dot" style="background:#ffbd2e;"></div>
+          <div class="demo-dot" style="background:#28c840;"></div>
+          <span class="text-[10px] text-slate-600 ml-3 font-medium" id="titlebarText" style="font-family:'Poppins',sans-serif;">ReadyStack — District Composer</span>
         </div>
-        <span class="node-label text-indigo-300" style="opacity:1; transform: translateX(-50%) translateY(0); bottom: -24px; font-size: 11px;">Your District</span>
-      </div>
 
-      <!-- ─── OUTPUT NODES (right side — value flowing OUT) ─── -->
-      <!-- Residents -->
-      <div class="node" style="left: 82%; top: 27%; background: rgba(124,140,255,0.08); border: 1.5px solid rgba(124,140,255,0.25);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c8cff" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg>
-        <span class="node-label text-indigo-300">Residents</span>
-        <span class="node-tooltip">Creators, partners, customers</span>
-      </div>
+        <div class="demo-body">
 
-      <!-- Automation -->
-      <div class="node" style="left: 84%; top: 60%; background: rgba(167,139,250,0.08); border: 1.5px solid rgba(167,139,250,0.25);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-        <span class="node-label text-purple-300">Execution</span>
-        <span class="node-tooltip">Flows, agents, outreach</span>
-      </div>
+          <!-- ══════ STEP 0: SEARCH ══════ -->
+          <div class="demo-step active" id="step0">
+            <p class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 mb-3" style="font-family:'Poppins',sans-serif;">Step 1 — Discover</p>
+            <p class="text-white font-bold text-[16px] mb-5">Start with a search. Find the content shaping your market.</p>
 
-      <!-- Dividends -->
-      <div class="node" style="left: 80%; top: 83%; background: rgba(251,191,36,0.08); border: 1.5px solid rgba(251,191,36,0.25);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        <span class="node-label text-amber-400">Dividends</span>
-        <span class="node-tooltip">Lifetime earnings</span>
-      </div>
+            <div class="relative mb-6">
+              <input type="text" class="search-input" id="searchInput" placeholder="Search YouTube, podcasts, newsletters..." readonly />
+              <div class="absolute right-4 top-1/2 -translate-y-1/2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+            </div>
 
-      <!-- Flow direction labels -->
-      <div class="absolute left-[2%] top-[6%] animate-fade-in animate-delay-3 hidden md:block">
-        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-600" style="font-family:'Poppins',sans-serif;">Content In</p>
-      </div>
-      <div class="absolute right-[2%] top-[6%] animate-fade-in animate-delay-4 hidden md:block">
-        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-amber-400/40" style="font-family:'Poppins',sans-serif;">Value Out</p>
-      </div>
-    </div>
+            <div id="searchResults" style="display:none;">
+              <p class="text-[10px] text-slate-500 mb-3 font-medium">YouTube results for "seth godin"</p>
+              <div class="space-y-2" id="ytResults"></div>
+            </div>
 
-    <!-- Hero CTA -->
-    <div class="text-center mt-8 mb-4 animate-fade-in animate-delay-3">
-      <a href="index.html" class="primary-btn inline-block px-10 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[12px] no-underline" style="font-family:'Poppins',sans-serif;">
-        Build a District Free &rarr;
-      </a>
-      <p class="text-[11px] text-slate-600 italic mt-4">No signup. No account. Just build.</p>
-    </div>
+            <div class="flex items-center justify-between mt-6">
+              <span class="text-[10px] text-slate-600 italic" id="searchHint">Watch the search...</span>
+              <button class="next-btn" id="nextBtn0" style="display:none;" onclick="goStep(1)">Select Content &rarr;</button>
+            </div>
+          </div>
+
+          <!-- ══════ STEP 1: SELECT CONTENT ══════ -->
+          <div class="demo-step" id="step1">
+            <p class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 mb-3" style="font-family:'Poppins',sans-serif;">Step 2 — Select</p>
+            <p class="text-white font-bold text-[16px] mb-5">Click to select the content that matters. These become your district's foundation.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="selectGrid">
+              <div class="yt-card selected" onclick="this.classList.toggle('selected')">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#ef4444"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-[13px] text-white font-semibold leading-tight">This is Marketing</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Seth Godin — 2.1M views</p>
+                  </div>
+                </div>
+              </div>
+              <div class="yt-card selected" onclick="this.classList.toggle('selected')">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#ef4444"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-[13px] text-white font-semibold leading-tight">The Practice: Shipping Creative Work</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Seth Godin — 890K views</p>
+                  </div>
+                </div>
+              </div>
+              <div class="yt-card" onclick="this.classList.toggle('selected')">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M12 1a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5v-3a7 7 0 0 1 14 0v3h-2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-[13px] text-white font-semibold leading-tight">Akimbo: A Podcast from Seth Godin</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Podcast — 340 episodes</p>
+                  </div>
+                </div>
+              </div>
+              <div class="yt-card" onclick="this.classList.toggle('selected')">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-[13px] text-white font-semibold leading-tight">Seth's Blog — Daily Newsletter</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Substack — 1M+ subscribers</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between mt-6">
+              <button class="ghost-btn" onclick="goStep(0)">&larr; Back</button>
+              <button class="next-btn" onclick="goStep(2)">Analyze &rarr;</button>
+            </div>
+          </div>
+
+          <!-- ══════ STEP 2: AI ANALYSIS ══════ -->
+          <div class="demo-step" id="step2">
+            <p class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 mb-3" style="font-family:'Poppins',sans-serif;">Step 3 — Analyze</p>
+            <p class="text-white font-bold text-[16px] mb-5">ReadyStack AI extracts themes, experts, and jobs-to-be-done.</p>
+
+            <div class="bg-[#020617]/60 rounded-xl border border-white/5 p-5 mb-4" id="analysisBox">
+              <p class="text-[10px] font-black uppercase tracking-[0.15em] text-indigo-400 mb-4" style="font-family:'Poppins',sans-serif;">AI Extraction</p>
+              <div class="space-y-3" id="analysisLines"></div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 mb-4" id="themeChips" style="display:none;">
+              <div class="bg-indigo-500/8 border border-indigo-500/15 rounded-lg px-3 py-2 text-center">
+                <p class="text-[10px] text-indigo-400 font-bold">Permission Marketing</p>
+              </div>
+              <div class="bg-purple-500/8 border border-purple-500/15 rounded-lg px-3 py-2 text-center">
+                <p class="text-[10px] text-purple-400 font-bold">Tribe Building</p>
+              </div>
+              <div class="bg-amber-500/8 border border-amber-500/15 rounded-lg px-3 py-2 text-center">
+                <p class="text-[10px] text-amber-400 font-bold">Smallest Viable Audience</p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between mt-6">
+              <button class="ghost-btn" onclick="goStep(1)">&larr; Back</button>
+              <button class="next-btn" id="nextBtn2" style="display:none;" onclick="goStep(3)">Add Residents &rarr;</button>
+            </div>
+          </div>
+
+          <!-- ══════ STEP 3: ADD RESIDENTS ══════ -->
+          <div class="demo-step" id="step3">
+            <p class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 mb-3" style="font-family:'Poppins',sans-serif;">Step 4 — Residents</p>
+            <p class="text-white font-bold text-[16px] mb-2">Who belongs in this district? Add partners, creators, and customers.</p>
+            <p class="text-[12px] text-slate-500 mb-5">Click to add. These become your district's residents.</p>
+
+            <div class="mb-5">
+              <p class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-600 mb-3" style="font-family:'Poppins',sans-serif;">Suggested from analysis</p>
+              <div class="flex flex-wrap gap-2">
+                <div class="resident-chip added">
+                  <div class="w-6 h-6 rounded-full bg-red-500/15 flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="#ef4444"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></div>
+                  <span class="text-[12px] text-white font-medium">Seth Godin</span>
+                  <span class="text-[9px] text-indigo-400 font-bold uppercase">YouTuber</span>
+                </div>
+                <div class="resident-chip added">
+                  <div class="w-6 h-6 rounded-full bg-orange-500/15 flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/></svg></div>
+                  <span class="text-[12px] text-white font-medium">Lenny Rachitsky</span>
+                  <span class="text-[9px] text-amber-400 font-bold uppercase">Substacker</span>
+                </div>
+                <div class="resident-chip" onclick="this.classList.add('added')" style="cursor:pointer;">
+                  <div class="w-6 h-6 rounded-full bg-orange-600/15 flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="#ea580c"><circle cx="12" cy="12" r="10"/><path d="M16 12.5c0-1-.8-1.5-2.2-2L12.5 10c-.8-.3-1-.5-1-1s.5-.8 1.2-.8c.8 0 1.3.3 1.7.8l1.3-1c-.5-.8-1.5-1.3-2.5-1.4V5.5h-1.5v1c-1.5.2-2.5 1.2-2.5 2.5s1 2 2.5 2.5l1 .4c.8.3 1 .6 1 1.1s-.5 1-1.3 1c-1 0-1.6-.5-2-1.2l-1.4.8c.5 1 1.5 1.7 2.7 1.8v1.1h1.5v-1c1.5-.3 2.5-1.3 2.5-2.7z" fill="#020617"/></svg></div>
+                  <span class="text-[12px] text-slate-400 font-medium">r/marketing mod</span>
+                  <span class="text-[9px] text-orange-400 font-bold uppercase">Redditor</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-5">
+              <p class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-600 mb-3" style="font-family:'Poppins',sans-serif;">Add more</p>
+              <div class="flex flex-wrap gap-2">
+                <div class="add-btn" onclick="this.innerHTML='<span class=\'text-[12px] text-white\'>+ Added</span>'; this.style.borderColor='rgba(124,140,255,0.4)'; this.style.borderStyle='solid';">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span class="text-[12px]">YouTuber</span>
+                </div>
+                <div class="add-btn" onclick="this.innerHTML='<span class=\'text-[12px] text-white\'>+ Added</span>'; this.style.borderColor='rgba(124,140,255,0.4)'; this.style.borderStyle='solid';">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span class="text-[12px]">Substacker</span>
+                </div>
+                <div class="add-btn" onclick="this.innerHTML='<span class=\'text-[12px] text-white\'>+ Added</span>'; this.style.borderColor='rgba(124,140,255,0.4)'; this.style.borderStyle='solid';">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span class="text-[12px]">Redditor</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between mt-6">
+              <button class="ghost-btn" onclick="goStep(2)">&larr; Back</button>
+              <button class="next-btn" onclick="goStep(4)">Invite Angels &rarr;</button>
+            </div>
+          </div>
+
+          <!-- ══════ STEP 4: INVITE ANGELS ══════ -->
+          <div class="demo-step" id="step4">
+            <p class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 mb-3" style="font-family:'Poppins',sans-serif;">Step 5 — Angels</p>
+            <p class="text-white font-bold text-[16px] mb-2">Invite investors to watch your district grow.</p>
+            <p class="text-[12px] text-slate-500 mb-5">Angel Observers see your district's traction — content engagement, resident growth, automation metrics — without interfering.</p>
+
+            <div class="space-y-3 mb-5">
+              <div class="flex items-center gap-3 bg-[#020617]/40 rounded-xl border border-amber-400/15 p-4">
+                <div class="w-8 h-8 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center flex-shrink-0">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-[13px] text-white font-medium">Sarah Chen</p>
+                  <p class="text-[10px] text-slate-500">Angel Investor — SaaS / MarTech</p>
+                </div>
+                <span class="text-[9px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full">Invited</span>
+              </div>
+
+              <div class="flex items-center gap-3 bg-[#020617]/40 rounded-xl border border-white/5 p-4">
+                <div class="w-8 h-8 rounded-full bg-slate-500/10 border border-slate-500/20 flex items-center justify-center flex-shrink-0">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <input type="text" placeholder="Add angel name..." class="flex-1 bg-transparent text-[13px] text-white outline-none placeholder-slate-600" onfocus="this.parentElement.style.borderColor='rgba(251,191,36,0.25)'" onblur="this.parentElement.style.borderColor='rgba(255,255,255,0.05)'" />
+                <button class="text-[9px] font-bold uppercase tracking-wider text-slate-500 hover:text-amber-400 bg-slate-500/10 hover:bg-amber-400/10 px-2.5 py-1 rounded-full transition-all" onclick="this.textContent='Invited'; this.className='text-[9px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full';">Invite</button>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-600 italic mb-4">Angels see your district dashboard. They can't edit. They watch your traction build.</p>
+
+            <div class="flex items-center justify-between mt-6">
+              <button class="ghost-btn" onclick="goStep(3)">&larr; Back</button>
+              <button class="next-btn" onclick="goStep(5)">View District Map &rarr;</button>
+            </div>
+          </div>
+
+          <!-- ══════ STEP 5: DISTRICT MAP ══════ -->
+          <div class="demo-step" id="step5">
+            <p class="text-[9px] font-black uppercase tracking-[0.25em] text-indigo-400 mb-3" style="font-family:'Poppins',sans-serif;">Your District</p>
+            <p class="text-white font-bold text-[16px] mb-5">Your district is live. Content, residents, and angels — all connected.</p>
+
+            <!-- Mini district map -->
+            <div class="relative bg-[#020617]/60 rounded-2xl border border-white/5 p-6 mb-4" style="min-height: 260px;">
+              <svg class="absolute inset-0 w-full h-full" viewBox="0 0 700 260" fill="none" style="pointer-events:none;">
+                <!-- connections from center to nodes -->
+                <line x1="350" y1="130" x2="120" y2="60" stroke="#7c8cff" stroke-width="1" opacity="0.2"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/></line>
+                <line x1="350" y1="130" x2="580" y2="50" stroke="#7c8cff" stroke-width="1" opacity="0.2"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="3.5s" repeatCount="indefinite"/></line>
+                <line x1="350" y1="130" x2="140" y2="200" stroke="#a78bfa" stroke-width="1" opacity="0.2"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="2.8s" repeatCount="indefinite"/></line>
+                <line x1="350" y1="130" x2="560" y2="210" stroke="#fbbf24" stroke-width="1" opacity="0.15"><animate attributeName="opacity" values="0.1;0.25;0.1" dur="4s" repeatCount="indefinite"/></line>
+                <line x1="350" y1="130" x2="200" y2="130" stroke="#7c8cff" stroke-width="1" opacity="0.2"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="3.2s" repeatCount="indefinite"/></line>
+                <line x1="350" y1="130" x2="510" y2="130" stroke="#10b981" stroke-width="1" opacity="0.2"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="2.5s" repeatCount="indefinite"/></line>
+              </svg>
+
+              <!-- Center: District -->
+              <div class="absolute" style="left:50%; top:50%; transform:translate(-50%,-50%);">
+                <div class="map-node center">
+                  <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="RS" style="width:22px;height:22px;" />
+                </div>
+                <p class="text-[9px] text-indigo-300 font-bold text-center mt-1 uppercase tracking-wider" style="font-family:'Poppins',sans-serif;">District</p>
+              </div>
+
+              <!-- Seth Godin -->
+              <div class="absolute" style="left:15%; top:15%; transform:translate(-50%,-50%);">
+                <div class="map-node" style="background:rgba(239,68,68,0.08); border:1.5px solid rgba(239,68,68,0.25);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#ef4444"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
+                </div>
+                <p class="text-[9px] text-slate-400 text-center mt-1 font-medium">Seth Godin</p>
+              </div>
+
+              <!-- Lenny -->
+              <div class="absolute" style="left:80%; top:12%; transform:translate(-50%,-50%);">
+                <div class="map-node" style="background:rgba(249,115,22,0.08); border:1.5px solid rgba(249,115,22,0.25);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/></svg>
+                </div>
+                <p class="text-[9px] text-slate-400 text-center mt-1 font-medium">Lenny R.</p>
+              </div>
+
+              <!-- Podcast -->
+              <div class="absolute" style="left:26%; top:50%; transform:translate(-50%,-50%);">
+                <div class="map-node" style="background:rgba(168,85,247,0.08); border:1.5px solid rgba(168,85,247,0.25);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M12 1a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5v-3a7 7 0 0 1 14 0v3h-2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z"/></svg>
+                </div>
+                <p class="text-[9px] text-slate-400 text-center mt-1 font-medium">Akimbo</p>
+              </div>
+
+              <!-- Newsletter -->
+              <div class="absolute" style="left:70%; top:50%; transform:translate(-50%,-50%);">
+                <div class="map-node" style="background:rgba(16,185,129,0.08); border:1.5px solid rgba(16,185,129,0.25);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/></svg>
+                </div>
+                <p class="text-[9px] text-slate-400 text-center mt-1 font-medium">Newsletter</p>
+              </div>
+
+              <!-- Redditor -->
+              <div class="absolute" style="left:17%; top:80%; transform:translate(-50%,-50%);">
+                <div class="map-node" style="background:rgba(234,88,12,0.08); border:1.5px solid rgba(234,88,12,0.25);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#ea580c"><circle cx="12" cy="12" r="10"/></svg>
+                </div>
+                <p class="text-[9px] text-slate-400 text-center mt-1 font-medium">r/marketing</p>
+              </div>
+
+              <!-- Angel -->
+              <div class="absolute" style="left:78%; top:82%; transform:translate(-50%,-50%);">
+                <div class="map-node" style="background:rgba(251,191,36,0.08); border:1.5px solid rgba(251,191,36,0.25);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+                </div>
+                <p class="text-[9px] text-amber-400/60 text-center mt-1 font-medium">Sarah Chen</p>
+                <p class="text-[8px] text-amber-400/40 text-center uppercase tracking-wider">Angel</p>
+              </div>
+            </div>
+
+            <!-- URL bar -->
+            <div class="bg-[#020617]/60 rounded-xl border border-indigo-500/15 p-3 flex items-center gap-3 mb-5">
+              <div class="w-5 h-5 rounded bg-indigo-500/15 flex items-center justify-center flex-shrink-0">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7c8cff" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+              </div>
+              <p class="text-[12px] text-slate-400 font-mono" id="districtUrl">readystack.ai/district/<span class="text-indigo-400">permission-marketing-seth-godin</span></p>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <button class="ghost-btn" onclick="goStep(4)">&larr; Back</button>
+              <a href="index.html" class="next-btn inline-block no-underline text-center" style="text-decoration:none;">
+                Build Yours Free &rarr;
+              </a>
+            </div>
+          </div>
+
+        </div><!-- /demo-body -->
+      </div><!-- /demo-shell -->
+    </div><!-- /demo-container -->
+
+    <p class="text-[11px] text-slate-600 italic text-center mt-6">No signup. No account. Just build.</p>
   </section>
 
   <!-- ═══════════════════════════ DIVIDER ═══════════════════════════ -->
   <div class="w-px h-20 bg-gradient-to-b from-transparent via-white/10 to-transparent mx-auto"></div>
 
-  <!-- ═══════════════════════════════════════════ SECTION 1: DARK GTM ═══════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════ SECTION 1: DARK GTM ═══════════════════════════════ -->
   <section class="max-w-4xl mx-auto px-6 pb-20">
     <div class="section-card p-10 md:p-14" style="box-shadow: 0 0 60px rgba(0,0,0,0.3);">
-      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-500/20 to-transparent"></div>
-
       <div class="flex items-start gap-5 mb-8">
         <div class="step-num bg-slate-500/10 border border-slate-500/20 text-slate-400">1</div>
         <div>
@@ -371,12 +583,10 @@
           <h2 class="text-white font-black text-[26px] md:text-[32px] uppercase italic tracking-tight leading-[0.95]" style="font-family:'Poppins',sans-serif;">Dark GTM</h2>
         </div>
       </div>
-
       <div class="md:pl-[52px]">
         <p class="text-[15px] text-slate-400 leading-relaxed mb-8">
-          Your buyers are researching, evaluating, and deciding — right now — in places your CRM will never see. YouTube deep-dives. Podcast rabbit holes. LinkedIn threads. Private Slack channels. Newsletter forwards. By the time someone fills out a form, 90% of the decision is already made.
+          Your buyers are researching, evaluating, and deciding — right now — in places your CRM will never see. YouTube deep-dives. Podcast rabbit holes. LinkedIn threads. By the time someone fills out a form, 90% of the decision is already made.
         </p>
-
         <div class="grid md:grid-cols-3 gap-4 mb-8">
           <div class="bg-[#020617]/40 rounded-xl border border-white/5 p-5">
             <p class="text-white font-black text-[28px] tracking-tighter leading-none mb-1" style="font-family:'Poppins',sans-serif;">90%</p>
@@ -391,7 +601,6 @@
             <p class="text-[11px] text-slate-500">content pieces consumed before first contact</p>
           </div>
         </div>
-
         <p class="text-[13px] text-slate-500 leading-relaxed">
           Traditional go-to-market waits for the hand-raise. Dark GTM maps the terrain before the hand goes up — finding the content, experts, and relationships that shape decisions while they're still forming.
         </p>
@@ -399,14 +608,12 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════ DIVIDER ═══════════════════════════ -->
+  <!-- ═══════════════════ DIVIDER ═══════════════════ -->
   <div class="w-px h-16 bg-gradient-to-b from-transparent via-indigo-500/20 to-transparent mx-auto"></div>
 
-  <!-- ═══════════════════════════════════════════ SECTION 2: SOCIETY MEDIA ═══════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════ SECTION 2: SOCIETY MEDIA ═══════════════════════════════ -->
   <section class="max-w-4xl mx-auto px-6 pb-20">
     <div class="section-card p-10 md:p-14" style="box-shadow: 0 0 60px rgba(0,0,0,0.3);">
-      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
-
       <div class="flex items-start gap-5 mb-8">
         <div class="step-num bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">2</div>
         <div>
@@ -414,35 +621,28 @@
           <h2 class="text-white font-black text-[26px] md:text-[32px] uppercase italic tracking-tight leading-[0.95]" style="font-family:'Poppins',sans-serif;">Society Media</h2>
         </div>
       </div>
-
       <div class="md:pl-[52px]">
         <p class="text-[15px] text-slate-400 leading-relaxed mb-8">
           Society Media is Market Relationship Management — where districts, creators, vendors, and residents build, collaborate, and earn together. Not a feed. Not an algorithm. A structured operating system for the relationships that drive real market outcomes.
         </p>
-
         <div class="space-y-5 mb-8">
           <div class="flex items-start gap-4">
             <div class="w-1 h-1 rounded-full bg-indigo-400 mt-2.5 flex-shrink-0"></div>
-            <p class="text-[14px] text-slate-300 leading-relaxed"><strong class="text-white">Districts</strong> — the core unit. A structured market narrative blending content, experts, jobs-to-be-done, and workflows into one investable, shareable entity.</p>
+            <p class="text-[14px] text-slate-300 leading-relaxed"><strong class="text-white">Districts</strong> — the core unit. A structured market narrative blending content, experts, jobs-to-be-done, and workflows.</p>
           </div>
           <div class="flex items-start gap-4">
             <div class="w-1 h-1 rounded-full bg-indigo-400 mt-2.5 flex-shrink-0"></div>
-            <p class="text-[14px] text-slate-300 leading-relaxed"><strong class="text-white">Residents</strong> — creators, vendors, members, and angels who live in districts, contribute to them, and earn from them.</p>
-          </div>
-          <div class="flex items-start gap-4">
-            <div class="w-1 h-1 rounded-full bg-indigo-400 mt-2.5 flex-shrink-0"></div>
-            <p class="text-[14px] text-slate-300 leading-relaxed"><strong class="text-white">Tourists</strong> — visitors exploring solutions. They wade in, experience the district, and decide whether to stay.</p>
+            <p class="text-[14px] text-slate-300 leading-relaxed"><strong class="text-white">Residents</strong> — creators, partners, and customers who live in districts, contribute to them, and earn from them.</p>
           </div>
           <div class="flex items-start gap-4">
             <div class="w-1 h-1 rounded-full bg-amber-400 mt-2.5 flex-shrink-0"></div>
-            <p class="text-[14px] text-slate-300 leading-relaxed"><strong class="text-amber-400">Lifetime Dividends</strong> — residents earn 40% and founders earn 20% of automation revenue. Not once. Forever.</p>
+            <p class="text-[14px] text-slate-300 leading-relaxed"><strong class="text-amber-400">Lifetime Dividends</strong> — residents earn 40% and founders earn 20% of automation revenue. Forever.</p>
           </div>
         </div>
-
         <div class="bg-[#020617]/40 rounded-xl border border-amber-400/10 p-5 max-w-sm">
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            <strong class="text-amber-400 font-semibold">Example:</strong> A resident shares a district generating $1,000/mo in automation revenue.
-            <br/><span class="text-amber-400 font-bold">Their dividend: $400/mo. For life.</span>
+            <strong class="text-amber-400 font-semibold">Example:</strong> $1,000/mo in automation revenue.
+            <br/><span class="text-amber-400 font-bold">Your dividend: $400/mo. For life.</span>
             <br/><span class="text-slate-600 text-[10px]">$57,600 over 12 years from one district.</span>
           </p>
         </div>
@@ -450,14 +650,12 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════ DIVIDER ═══════════════════════════ -->
+  <!-- ═══════════════════ DIVIDER ═══════════════════ -->
   <div class="w-px h-16 bg-gradient-to-b from-transparent via-purple-500/20 to-transparent mx-auto"></div>
 
-  <!-- ═══════════════════════════════════════════ SECTION 3: THE DISTRICT ═══════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════ SECTION 3: THE DISTRICT ═══════════════════════════════ -->
   <section class="max-w-4xl mx-auto px-6 pb-20">
     <div class="section-card p-10 md:p-14" style="box-shadow: 0 0 60px rgba(0,0,0,0.3);">
-      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
-
       <div class="flex items-start gap-5 mb-8">
         <div class="step-num bg-purple-500/10 border border-purple-500/20 text-purple-400">3</div>
         <div>
@@ -465,84 +663,37 @@
           <h2 class="text-white font-black text-[26px] md:text-[32px] uppercase italic tracking-tight leading-[0.95]" style="font-family:'Poppins',sans-serif;">The District</h2>
         </div>
       </div>
-
       <div class="md:pl-[52px]">
         <p class="text-[15px] text-slate-400 leading-relaxed mb-8">
-          A district is what you build on ReadyStack. It's not a dashboard. It's not a report. It's a living market entity — your expertise, your network, your content, and your workflows, structured into something you can share, automate, and earn from.
+          A district is what you build. It's a living market entity — your expertise, your network, your content, and your workflows, structured into something you can share, automate, and earn from.
         </p>
-
         <div class="grid md:grid-cols-2 gap-4 mb-8">
           <div class="bg-[#020617]/40 rounded-xl border border-white/5 p-5">
             <p class="text-[10px] font-black uppercase tracking-[0.15em] text-purple-400 mb-2" style="font-family:'Poppins',sans-serif;">Storyteller</p>
-            <p class="text-[13px] text-slate-400 leading-relaxed">Map the qualitative story. Discover content, tag experts, plot relationships. The visual, narrative lens.</p>
+            <p class="text-[13px] text-slate-400 leading-relaxed">Map the qualitative story. Discover content, tag experts, plot relationships.</p>
           </div>
           <div class="bg-[#020617]/40 rounded-xl border border-white/5 p-5">
             <p class="text-[10px] font-black uppercase tracking-[0.15em] text-indigo-400 mb-2" style="font-family:'Poppins',sans-serif;">Case Mode</p>
-            <p class="text-[13px] text-slate-400 leading-relaxed">Validate with numbers. Model the business case, project outcomes, track against real analytics. The quantitative lens.</p>
+            <p class="text-[13px] text-slate-400 leading-relaxed">Validate with numbers. Model the business case, project outcomes, track against analytics.</p>
           </div>
           <div class="bg-[#020617]/40 rounded-xl border border-white/5 p-5">
             <p class="text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400 mb-2" style="font-family:'Poppins',sans-serif;">Exhibition</p>
-            <p class="text-[13px] text-slate-400 leading-relaxed">Publish your district. Share your market narrative. Invite tourists to wade in and explore.</p>
+            <p class="text-[13px] text-slate-400 leading-relaxed">Publish your district. Share your market narrative. Invite tourists to wade in.</p>
           </div>
           <div class="bg-[#020617]/40 rounded-xl border border-white/5 p-5">
             <p class="text-[10px] font-black uppercase tracking-[0.15em] text-amber-400 mb-2" style="font-family:'Poppins',sans-serif;">Execution Studio</p>
-            <p class="text-[13px] text-slate-400 leading-relaxed">Run automation, send outreach, deploy agents. Scale your district without scaling effort.</p>
+            <p class="text-[13px] text-slate-400 leading-relaxed">Run automation, send outreach, deploy agents. Scale without scaling effort.</p>
           </div>
         </div>
-
         <div class="flex flex-col sm:flex-row gap-4 items-start">
-          <a href="index.html" class="primary-btn inline-block px-8 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[11px] no-underline" style="font-family:'Poppins',sans-serif;">
-            Build a District &rarr;
-          </a>
-          <a href="pricing.html" class="brand-glow-btn inline-block bg-[#020617] px-8 py-4 rounded-xl text-slate-400 uppercase font-black tracking-[0.15em] text-[11px] no-underline" style="font-family:'Poppins',sans-serif;">
-            View Pricing
-          </a>
+          <a href="index.html" class="primary-btn inline-block px-8 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[11px] no-underline" style="font-family:'Poppins',sans-serif;">Build a District &rarr;</a>
+          <a href="pricing.html" class="brand-glow-btn inline-block bg-[#020617] px-8 py-4 rounded-xl text-slate-400 uppercase font-black tracking-[0.15em] text-[11px] no-underline" style="font-family:'Poppins',sans-serif;">View Pricing</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════════ DIVIDER ═══════════════════════════ -->
-  <div class="w-px h-16 bg-gradient-to-b from-transparent via-white/10 to-transparent mx-auto"></div>
-
-  <!-- ═══════════════════════════════════════════ HOW IT WORKS ═══════════════════════════════════════════ -->
-  <section class="max-w-3xl mx-auto px-6 pb-20 text-center">
-    <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4" style="font-family:'Poppins',sans-serif;">The Flow</p>
-    <h2 class="text-white font-black text-[26px] md:text-[32px] uppercase italic tracking-tight leading-[0.95] mb-12" style="font-family:'Poppins',sans-serif;">Tourist &rarr; Resident</h2>
-
-    <div class="space-y-6 text-left max-w-xl mx-auto">
-      <div class="flex items-start gap-5">
-        <div class="step-num bg-slate-500/10 border border-slate-500/20 text-slate-500 text-[11px]">1</div>
-        <div>
-          <p class="text-white font-bold text-[14px] mb-1">Discover</p>
-          <p class="text-[13px] text-slate-500 leading-relaxed">Find a video, a podcast, a thread. ReadyStack AI analyzes it and starts building your district.</p>
-        </div>
-      </div>
-      <div class="flex items-start gap-5">
-        <div class="step-num bg-slate-500/10 border border-slate-500/20 text-slate-500 text-[11px]">2</div>
-        <div>
-          <p class="text-white font-bold text-[14px] mb-1">Compose</p>
-          <p class="text-[13px] text-slate-500 leading-relaxed">Blend content, experts, workflows, and relationships into a structured market narrative. Your district takes shape.</p>
-        </div>
-      </div>
-      <div class="flex items-start gap-5">
-        <div class="step-num bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px]">3</div>
-        <div>
-          <p class="text-white font-bold text-[14px] mb-1">Exhibit</p>
-          <p class="text-[13px] text-slate-500 leading-relaxed">Publish and share your district. Invite tourists to wade in. Build your audience of practitioners.</p>
-        </div>
-      </div>
-      <div class="flex items-start gap-5">
-        <div class="step-num bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px]">4</div>
-        <div>
-          <p class="text-white font-bold text-[14px] mb-1">Earn</p>
-          <p class="text-[13px] text-slate-500 leading-relaxed">Become a Resident. Earn lifetime dividends on automation revenue as your district grows and others run on it.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════ FINAL CTA ═══════════════════════════ -->
+  <!-- ═══════════════════ FINAL CTA ═══════════════════ -->
   <section class="border-t border-white/5 py-20 px-6 text-center">
     <h2 class="text-white font-black text-[28px] md:text-[36px] uppercase italic tracking-tight leading-[0.95] mb-4" style="font-family:'Poppins',sans-serif;">
       Start in the Dark.
@@ -551,17 +702,13 @@
       Build a district. Map your market. No signup required. Upgrade when you're ready to earn.
     </p>
     <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
-      <a href="index.html" class="primary-btn inline-block px-10 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[12px] no-underline" style="font-family:'Poppins',sans-serif;">
-        Build a District Free &rarr;
-      </a>
-      <a href="pricing.html" class="brand-glow-btn inline-block bg-[#020617] px-10 py-4 rounded-xl text-slate-400 uppercase font-black tracking-[0.15em] text-[12px] no-underline" style="font-family:'Poppins',sans-serif;">
-        View Pricing
-      </a>
+      <a href="index.html" class="primary-btn inline-block px-10 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[12px] no-underline" style="font-family:'Poppins',sans-serif;">Build a District Free &rarr;</a>
+      <a href="pricing.html" class="brand-glow-btn inline-block bg-[#020617] px-10 py-4 rounded-xl text-slate-400 uppercase font-black tracking-[0.15em] text-[12px] no-underline" style="font-family:'Poppins',sans-serif;">View Pricing</a>
     </div>
     <p class="text-[11px] text-slate-600 italic mt-6">No account. No commitment. Just build.</p>
   </section>
 
-  <!-- ═══════════════════════════════════════════ FOOTER ═══════════════════════════════════════════ -->
+  <!-- ═══════════════════ FOOTER ═══════════════════ -->
   <footer class="border-t border-white/5 mt-8">
     <div class="max-w-6xl mx-auto px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="flex items-center space-x-2">
@@ -578,6 +725,125 @@
       </div>
     </div>
   </footer>
+
+  <!-- ═══════════════════════════════ JAVASCRIPT ═══════════════════════════════ -->
+  <script>
+    let currentStep = 0;
+    const totalSteps = 6;
+
+    function goStep(n) {
+      // Hide current
+      document.getElementById('step' + currentStep).classList.remove('active');
+      // Show new
+      currentStep = n;
+      document.getElementById('step' + n).classList.add('active');
+      // Update dots
+      document.querySelectorAll('.step-dot').forEach((dot, i) => {
+        dot.className = 'step-dot' + (i === n ? ' active' : (i < n ? ' done' : ''));
+      });
+      // Update titlebar
+      const titles = [
+        'ReadyStack — District Composer',
+        'ReadyStack — Select Content',
+        'ReadyStack — AI Analysis',
+        'ReadyStack — Add Residents',
+        'ReadyStack — Angel Observer',
+        'ReadyStack — District Map'
+      ];
+      document.getElementById('titlebarText').textContent = titles[n];
+      // Trigger step-specific animations
+      if (n === 2) runAnalysis();
+    }
+
+    // ─── STEP 0: Auto-type search ───
+    (function initSearch() {
+      const input = document.getElementById('searchInput');
+      const query = 'seth godin';
+      let i = 0;
+      setTimeout(() => {
+        const typeInterval = setInterval(() => {
+          if (i <= query.length) {
+            input.value = query.substring(0, i);
+            i++;
+          } else {
+            clearInterval(typeInterval);
+            // Show results after typing
+            setTimeout(() => {
+              document.getElementById('searchResults').style.display = 'block';
+              document.getElementById('searchResults').style.animation = 'fadeIn 0.4s ease-out forwards';
+              // Build YT result cards
+              const results = [
+                { title: 'This is Marketing — Seth Godin', views: '2.1M views', time: '18:42' },
+                { title: 'The Practice: Shipping Creative Work', views: '890K views', time: '24:16' },
+                { title: 'Stop Stealing Dreams — TEDx', views: '3.4M views', time: '17:51' },
+              ];
+              const container = document.getElementById('ytResults');
+              results.forEach((r, idx) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 bg-[#020617]/40 rounded-lg border border-white/5 p-3';
+                div.style.animation = 'slideUp 0.3s ease-out forwards';
+                div.style.animationDelay = (idx * 0.12) + 's';
+                div.style.opacity = '0';
+                div.innerHTML = `
+                  <div class="w-8 h-8 rounded bg-red-500/15 flex items-center justify-center flex-shrink-0">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#ef4444"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-[12px] text-white font-medium">${r.title}</p>
+                    <p class="text-[10px] text-slate-500">${r.views} · ${r.time}</p>
+                  </div>
+                `;
+                container.appendChild(div);
+              });
+              // Show next button
+              setTimeout(() => {
+                document.getElementById('nextBtn0').style.display = 'inline-block';
+                document.getElementById('nextBtn0').style.animation = 'fadeIn 0.3s ease-out forwards';
+                document.getElementById('searchHint').textContent = '3 results found';
+              }, 600);
+            }, 400);
+          }
+        }, 80);
+      }, 1200);
+    })();
+
+    // ─── STEP 2: Analysis animation ───
+    function runAnalysis() {
+      const lines = [
+        { icon: '🎯', label: 'JTBD', text: '"Help me find and serve my smallest viable audience"', color: '#7c8cff' },
+        { icon: '👤', label: 'Expert', text: 'Seth Godin — Permission Marketing, Tribe Leadership', color: '#a78bfa' },
+        { icon: '📌', label: 'Theme', text: 'Marketing as an act of generosity, not interruption', color: '#7c8cff' },
+        { icon: '🔗', label: 'Connection', text: 'Links to: Lenny Rachitsky, Tim Ferriss, Brian Clark', color: '#10b981' },
+        { icon: '💡', label: 'Workflow', text: 'Audience → Trust → Permission → Enrollment', color: '#fbbf24' },
+      ];
+      const container = document.getElementById('analysisLines');
+      container.innerHTML = '';
+      lines.forEach((line, idx) => {
+        setTimeout(() => {
+          const div = document.createElement('div');
+          div.className = 'analysis-line flex items-start gap-3';
+          div.style.animationDelay = '0s';
+          div.innerHTML = `
+            <span class="text-[14px] flex-shrink-0 mt-0.5">${line.icon}</span>
+            <div>
+              <span class="text-[9px] font-black uppercase tracking-[0.15em] mr-2" style="color:${line.color}; font-family:'Poppins',sans-serif;">${line.label}</span>
+              <span class="text-[12px] text-slate-400">${line.text}</span>
+            </div>
+          `;
+          container.appendChild(div);
+          // After last line, show themes + next
+          if (idx === lines.length - 1) {
+            setTimeout(() => {
+              document.getElementById('themeChips').style.display = 'grid';
+              document.getElementById('themeChips').style.animation = 'fadeIn 0.4s ease-out forwards';
+              document.getElementById('nextBtn2').style.display = 'inline-block';
+              document.getElementById('nextBtn2').style.animation = 'fadeIn 0.3s ease-out forwards';
+            }, 400);
+          }
+        }, idx * 500);
+      });
+    }
+  </script>
 
 </body>
 </html>
