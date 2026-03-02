@@ -7,7 +7,6 @@
   <title>ReadyStack Engagement Utility</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-/* MARKER_0 */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;700;900&display=swap');
 
     :root {
@@ -124,7 +123,6 @@
       70%  { box-shadow: 0 0 0 10px rgba(124, 140, 255, 0); }
       100% { box-shadow: 0 0 0 0 rgba(124, 140, 255, 0); }
     }
-/* MARKER_99 */
   </style>
 </head>
 <body>
@@ -136,7 +134,6 @@
   <script type="text/babel">
     const { useState, useRef, useMemo, useEffect } = React;
 
-/* MARKER_200 */
     const ReadyStackLogo = ({ size = 24, variant = 'light' }) => (
       <div className="flex items-center justify-center overflow-hidden transition-all duration-300">
         <img 
@@ -288,7 +285,6 @@
         </div>
       );
     };
-/* MARKER_209 */
 
     const stages = [
       { id: 'learning', label: 'LEARNING', color: '#ff2a1a' },
@@ -300,7 +296,6 @@
     const App = () => {
 
 
-/* MARKER_210 */
       const CONTENT_BLACKLIST = [
         { terms: ["exposed","unbelievable","wait for it","you won't believe","crazy","insane"], reason: "Content does not meet quality standards." },
         { terms: ["prank","challenge","reaction","vlog","daily life","storytime","grwm"], reason: "Content does not meet standards of trust." },
@@ -326,7 +321,6 @@
       const [isLiveData, setIsLiveData] = useState(false);
       const [isRailOpen, setIsRailOpen] = useState(true);
       
-/* MARKER_211 */
       const [searchPlatform, setSearchPlatform] = useState('youtube');
       const [youtubeInput, setYoutubeInput] = useState('');
       const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState('');
@@ -341,7 +335,6 @@
       const [storyOutline, setStoryOutline] = useState(null);
       const [isGeneratingStory, setIsGeneratingStory] = useState(false);
 
-/* MARKER_212 */
       const [videoStory, setVideoStory] = useState(null);
       const [playbackProgress, setPlaybackProgress] = useState(0);
       const [isNarrativePlaying, setIsNarrativePlaying] = useState(false);
@@ -351,7 +344,6 @@
       const [storyError, setStoryError] = useState(null);
       const [angelChoices, setAngelChoices] = useState({ observe: false, awareness: false, invest: false });
       const [angelAmounts, setAngelAmounts] = useState({ observe: 10000, awareness: 25000, invest: 100000 });
-/* MARKER_213 */
       const [rsSession, setRsSession] = useState(null);       // { sessionId, email }
       const [rsSheetId, setRsSheetId] = useState(null);       // active district Sheet ID
       const [isSaving, setIsSaving] = useState(false);
@@ -623,7 +615,6 @@
       const ytApiKey = "AIzaSyDCUc877CDBxRntQwctrKTFfjQ8rhPruss";
       const CLOUD_FUNCTION_URL = "https://us-central1-gen-lang-client-0769430147.cloudfunctions.net/advisor";
 
-/* MARKER_214 */
       useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [activeTab]);
 
       useEffect(() => {
@@ -659,7 +650,6 @@
         }
       }, [rsSession]);
 
-/* MARKER_215 */
       useEffect(() => {
         const params    = new URLSearchParams(window.location.search);
         const sessionId = params.get('rs_session');
@@ -708,7 +698,6 @@
       const closeTimeoutRef = useRef(null);
       const restoredFromOAuthRef = useRef(false);
 
-/* MARKER_216 */
       const fetchWithRetry = async (url, options = {}, retries = 5, backoff = 1000) => {
         try {
           const response = await fetch(url, options);
@@ -724,7 +713,6 @@
       };
 
       // Generic POST to the advisor Cloud Function
-/* MARKER_217 */
       const callAdvisor = async (task, data = {}, overrideSessionId = null) => {
         const sid  = overrideSessionId || rsSession?.sessionId;
         const body = { task, ...data, ...(sid ? { sessionId: sid } : {}) };
@@ -738,7 +726,6 @@
         return json;
       };
 
-/* MARKER_218 */
       const persistAppState = () => {
         const snapshot = {};
         if (selectedVideoData) snapshot.selectedVideoData = selectedVideoData;
@@ -757,7 +744,6 @@
       };
 
       // Start Google OAuth flow
-/* MARKER_219 */
       const initiateGoogleAuth = async () => {
         persistAppState();
         const returnUrl   = window.location.href;
@@ -771,7 +757,6 @@
       };
 
       // Perform save
-/* MARKER_220 */
       const triggerSave = async (overrideSessionId) => {
         setIsSaving(true);
         try {
@@ -834,7 +819,6 @@
       };
 
       // Fetch district list
-/* MARKER_221 */
       const triggerOpen = async (overrideSessionId) => {
         setIsOpening(true);
         try {
@@ -892,7 +876,6 @@
       };
 
       // Sign out clears session but preserves app state (video, names, mapping)
-/* MARKER_222 */
       const handleSignOut = () => {
         persistAppState();                       // save in-flight work before clearing session
         setRsSession(null);
@@ -959,7 +942,6 @@
         } catch (e) { setVisionResults(prev => ({ ...prev, [videoId]: "PASS" })); }
       };
 
-/* MARKER_223 */
       const searchYouTube = async (pageToken = null) => {
         if (!youtubeInput.trim()) return;
         const directId = extractVideoId(youtubeInput);
@@ -1062,7 +1044,6 @@
         } catch (err) { console.error("Metadata failure", err); }
       };
 
-/* MARKER_224 */
       const generateStoryFromVideo = async () => {
         if (!selectedVideoData) return;
         setIsGeneratingStory(true);
@@ -1150,7 +1131,6 @@
       const handleNodeLeave = () => { closeTimeoutRef.current = setTimeout(() => { setHoveredNode(null); }, 1200); };
       const handleTooltipEnter = () => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); };
 
-/* MARKER_225 */
       const buildStoryDistrict = (targetTab) => {
         const target = typeof targetTab === 'string' ? targetTab : 'mapper';
         setStoryError(null);
@@ -1199,7 +1179,6 @@
         setActiveTab(target);
       };
 
-/* MARKER_226 */
       const handleSourceUpdate = (idx, key, val) => { setMapping(prev => { const next = [...prev.sources]; next[idx] = {...next[idx], [key]: val}; return { ...prev, sources: next }; }); };
       const addSource = () => { setMapping(prev => ({ ...prev, sources: [...prev.sources, { ven: '', lab: 'New Source', type: 'substack', ga4Count: 18420, isManual: true }] })); };
       const removeSource = (idx) => { setMapping(prev => ({ ...prev, sources: prev.sources.filter((_, i) => i !== idx) })); };
@@ -1220,7 +1199,6 @@
       const addStartupToScout = (idx) => { setMapping(prev => { const next = [...(prev.angels || [])]; const defaultStartup = (prev.learning && prev.learning.length > 0) ? prev.learning[0].ven : 'Partner A'; next[idx] = {...next[idx], startups: [...(next[idx].startups || []), defaultStartup]}; return { ...prev, angels: next }; }); };
       const removeStartupFromScout = (idx, sIdx) => { setMapping(prev => { const next = [...(prev.angels || [])]; next[idx] = {...next[idx], startups: next[idx].startups.filter((_, i) => i !== sIdx)}; return { ...prev, angels: next }; }); };
 
-/* MARKER_227 */
       const handleDragStart = (e, stageId, index) => { setDraggedItem({ stageId, index }); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', index); };
       const handleDragEnd = () => { setDraggedItem(null); };
       const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
@@ -1228,7 +1206,6 @@
 
       const copyUrl = (text, id) => { const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); setUrlCopied(id); setTimeout(() => setUrlCopied(null), 2000); };
 
-/* MARKER_228 */
       const nodes = useMemo(() => {
         const items = []; const centerX = 600;
         const narrativeScale = obsMode === 'narrative' ? (1 + (playbackProgress * 0.05)) : 1;
@@ -1287,12 +1264,10 @@
         
         return { items, flows: allFlows, scaledTraffic, hangtimeVal: 4.5, searchingVal: 1.2, finance: { districtDividendsAmount: Math.round(rsGrossRevenue * 0.6), snapshotRevenueItems, totalSnapshotARR: snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0), investmentInItems: (mapping.angels || []).filter(a => a.platform !== 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), pendingInvestmentItems: (mapping.angels || []).filter(a => a.platform === 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), totalFinanceCapital: Math.round(rsGrossRevenue * 0.6) + snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0) }, counts: { buying: Math.round(scaledTraffic * 0.005), sharing: Math.round(scaledTraffic * 0.003), retention: Math.round(scaledTraffic * 0.004) }, probs: { buying: 82, sharing: 64, retention: 71 } };
       }, [mapping, lookerPeriod, obsMode, playbackProgress]);
-/* MARKER_229 */
 
       return (
       
         <div className="min-h-screen w-full bg-[#020617] text-slate-300 font-sans text-[13px] animate-fade-in text-left">
-       {/* MARKER_100 */}
           {hoveredNode && (
             <div 
               className="fixed z-[1000] bg-[#0b1224]/98 backdrop-blur-3xl border border-white/20 p-6 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.9)] animate-fade-in flex flex-col gap-6 w-[340px] pointer-events-auto" 
@@ -1445,7 +1420,6 @@
               )}
             </div>
           )}
-{/* MARKER_109 */}
           <header className="rs-header sticky top-0 z-[100] shadow-2xl" style={{ width: '100%', left: 0, right: 0, boxSizing: 'border-box' }}>
             <div className="w-full px-6 py-4 flex justify-between items-center">
               <div className="flex items-center space-x-2">
@@ -1789,7 +1763,6 @@
                 </button>
               </div>
 
-{/* MARKER_110 */}
             {activeTab === 'youtube' && (
               <div className="max-w-5xl mx-auto animate-fade-in space-y-6 text-left pt-16 pb-10">
                   <div className="text-center space-y-3 mb-6">
@@ -2200,7 +2173,6 @@
                   </div>
               </div>
             )}
-{/* MARKER_119 */}
             {activeTab === 'intro' && (
               <div className="max-w-7xl mx-auto animate-fade-in pt-16">
                 <div className="space-y-10">
@@ -2285,7 +2257,6 @@
                 </div>
               </div>
             )}
-{/* MARKER_129 */}
 
             {activeTab === 'mapper' && (
               <div className="space-y-10 animate-fade-in text-left pt-16">
@@ -2505,7 +2476,6 @@
               </div>
             )}
 
-{/* MARKER_130 */}
 
             {activeTab === 'observatory' && (
               <div className="space-y-5 animate-fade-in font-sans text-left relative pt-16">
@@ -2636,10 +2606,8 @@
                 </div>
               </div>
             )}
-{/* MARKER_139 */}
 
 
-{/* MARKER_140 */}
             {activeTab === 'looker' && (
               <div className="space-y-12 animate-fade-in text-left font-sans pt-16">
                 <div className="flex justify-between items-center border-b border-white/5 pb-10">
@@ -2669,9 +2637,7 @@
                 </div>
               </div>
             )}
-{/* MARKER_149 */}
 
-{/* MARKER_150 */}
             {activeTab === 'g4' && (
               <div className="bg-white rounded-[40px] shadow-2xl overflow-hidden animate-fade-in text-left font-sans pt-16">
                 <div className="bg-[#f8f9fa] border-b border-slate-200 px-10 py-6 flex justify-between items-center">
@@ -2690,7 +2656,6 @@
             )}
 
             </div>
-{/* MARKER_199 */}
 
 
           </main>
