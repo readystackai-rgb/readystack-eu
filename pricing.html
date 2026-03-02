@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReadyStack — Join the District</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080f;
+      --surface: #0d1120;
+      --surface2: #141828;
+      --border: rgba(255,255,255,0.07);
+      --accent: #7c8cff;
+      --accent2: #a78bfa;
+      --gold: #f0c060;
+      --green: #34d399;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --resident: #7c8cff;
+      --automator: #a78bfa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background atmosphere */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 70vw;
+      height: 70vw;
+      background: radial-gradient(circle, rgba(124,140,255,0.05) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(167,139,250,0.04) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6,8,15,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .tagline-small {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 100px 40px 80px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(124,140,255,0.25);
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 32px;
+      background: rgba(124,140,255,0.05);
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(40px, 6vw, 72px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 24px;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 16px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .hero-note {
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Divider */
+    .divider {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--border), transparent);
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Pricing grid */
+    .pricing-section {
+      position: relative;
+      z-index: 1;
+      padding: 60px 40px 100px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 720px) {
+      .pricing-grid { grid-template-columns: 1fr; }
+      header { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 60px 20px 40px; }
+      .pricing-section { padding: 40px 20px 80px; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent)), transparent);
+      opacity: 0.6;
+    }
+
+    .card:hover {
+      border-color: rgba(124,140,255,0.2);
+      transform: translateY(-3px);
+    }
+
+    .card-featured {
+      --card-accent: var(--automator);
+      border-color: rgba(167,139,250,0.2);
+      background: linear-gradient(160deg, rgba(167,139,250,0.06) 0%, var(--surface) 60%);
+    }
+
+    .card-featured:hover {
+      border-color: rgba(167,139,250,0.35);
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    .badge-resident {
+      background: rgba(124,140,255,0.1);
+      color: var(--resident);
+      border: 1px solid rgba(124,140,255,0.2);
+    }
+
+    .badge-automator {
+      background: rgba(167,139,250,0.12);
+      color: var(--automator);
+      border: 1px solid rgba(167,139,250,0.25);
+    }
+
+    .plan-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .plan-descriptor {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .price-amount {
+      font-family: 'Syne', sans-serif;
+      font-size: 52px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .price-period {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .price-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      font-style: italic;
+    }
+
+    .price-note strong {
+      color: var(--automator);
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    /* Features */
+    .features-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      margin-bottom: 36px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 13.5px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .feature-item .check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(124,140,255,0.12);
+      border: 1px solid rgba(124,140,255,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .card-featured .feature-item .check {
+      background: rgba(167,139,250,0.12);
+      border-color: rgba(167,139,250,0.3);
+    }
+
+    .check svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    .feature-item .check-resident svg { stroke: var(--resident); }
+    .feature-item .check-automator svg { stroke: var(--automator); }
+
+    .feature-bold {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .feature-dim {
+      color: var(--muted);
+    }
+
+    /* Section dividers inside card */
+    .feature-section {
+      margin-bottom: 20px;
+    }
+
+    .feature-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      margin-top: 20px;
+    }
+
+    /* CTA button */
+    .cta-btn {
+      width: 100%;
+      padding: 16px 24px;
+      border-radius: 14px;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      outline: none;
+    }
+
+    .cta-resident {
+      background: rgba(124,140,255,0.1);
+      border: 1px solid rgba(124,140,255,0.25);
+      color: var(--resident);
+    }
+
+    .cta-resident:hover {
+      background: rgba(124,140,255,0.18);
+      border-color: rgba(124,140,255,0.5);
+      transform: translateY(-1px);
+    }
+
+    .cta-automator {
+      background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%);
+      color: #fff;
+      box-shadow: 0 8px 32px -8px rgba(124,140,255,0.4);
+    }
+
+    .cta-automator:hover {
+      box-shadow: 0 12px 40px -8px rgba(124,140,255,0.6);
+      transform: translateY(-2px);
+    }
+
+    /* Commercial note */
+    .commercial-note {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Trust strip */
+    .trust-strip {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 48px 40px;
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .trust-strip p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .trust-strip strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* Dividend callout */
+    .dividend-callout {
+      position: relative;
+      z-index: 1;
+      margin: 0 auto 80px;
+      max-width: 720px;
+      padding: 0 40px;
+    }
+
+    .dividend-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dividend-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0.5;
+    }
+
+    .dividend-box .gold-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    .dividend-box h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .dividend-box p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .dividend-box p strong {
+      color: var(--gold);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Ready<span>Stack</span></div>
+    <div class="tagline-small">Ideas worth running</div>
+  </div>
+  <nav class="nav-links">
+    <a href="#">District</a>
+    <a href="#">How It Works</a>
+    <a href="#">Dark GTM</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">Membership</div>
+  <h1>Join the<br/><em>District.</em></h1>
+  <p class="hero-sub">
+    Build your Market Relationship infrastructure. Be present in the dark — with your partners, your shared targets, and your future customers — before they ever raise their hand.
+  </p>
+  <p class="hero-note">Month to month. No commitment. Cancel anytime.</p>
+</section>
+
+<div class="divider"></div>
+
+<section class="pricing-section">
+  <div class="pricing-grid">
+
+    <!-- Resident -->
+    <div class="card">
+      <div class="badge badge-resident">Resident</div>
+      <div class="plan-name">Resident</div>
+      <div class="plan-descriptor">Build your District. Enter the market.</div>
+      <div class="price-row">
+        <span class="price-amount">$50</span>
+        <span class="price-period">/mo</span>
+      </div>
+      <div class="price-note">Flat rate. Everything included.</div>
+
+      <div class="features-label">What you get</div>
+
+      <div class="feature-section">
+        <div class="feature-section-label">Your District</div>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">Dark Market District</span> — your online profile held in common with Partners, Customers, and Shared Targets</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">Storyteller Mode</span> — build your District narrative across Learning, Selecting, Executing, and Expanding</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">District Map</span> — visualize your network of Partners, Citizens, Tourists, and Patrons</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">C-Suite Case Mode</span> — model projected traffic, revenue, and Partner bounties for stakeholder presentation</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">District Observatory</span> — track buyer journey signals across all four phases</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="feature-section">
+        <div class="feature-section-label">Expert Identification</div>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">20 Niche Expert IDs /mo</span> — identify the right Partners and Shared Targets for your District</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Email address discovery</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Invitation templates and outreach flows</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="feature-section">
+        <div class="feature-section-label">Earnings</div>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">40% lifetime income</span> on every Citizen you bring into the commons</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Earnings dashboard and deposit tracking</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-resident"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Stripe Connected Account for direct payouts</span>
+          </li>
+        </ul>
+      </div>
+
+      <button class="cta-btn cta-resident" onclick="console.log('Resident signup')">
+        Join as Resident →
+      </button>
+      <div class="commercial-note">No buyer. No seller. Just a common pursuit.</div>
+    </div>
+
+    <!-- Resident Automator -->
+    <div class="card card-featured">
+      <div class="badge badge-automator">Full Access</div>
+      <div class="plan-name">Resident Automator</div>
+      <div class="plan-descriptor">Scale your District without scaling your effort.</div>
+      <div class="price-row">
+        <span class="price-amount">$50</span>
+        <span class="price-period">/mo</span>
+      </div>
+      <div class="price-note"><strong>+ Pay As You Go</strong> — only pay for what you run</div>
+
+      <div class="features-label">Everything in Resident, plus</div>
+
+      <div class="feature-section">
+        <div class="feature-section-label">Automation</div>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">Unlimited Expert Identification</span> — no monthly cap, run as large as your District needs</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">Full Hosted Automation Flows</span> — Tasks and Agents running on your behalf across all District phases</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">Mass Email Outreach</span> — reach Partners, Shared Targets, and Tourists at scale</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">Data Hosting</span> — your District data stored, managed, and queryable</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Zapier and Webhook integration — connect your District to your existing stack</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="feature-section">
+        <div class="feature-section-label">Intelligence</div>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">Projection vs Actual overlay</span> — compare C-Suite Case Mode projections against live GA4 District data</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Dark GTM signal tracking across LinkedIn, YouTube, Substack, and Reddit</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Angel Observer dashboard — invite investors to watch your District before they commit</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="feature-section">
+        <div class="feature-section-label">Support</div>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><span class="feature-bold">Priority onboarding</span> — your Connected Account set up within 1 business day</span>
+          </li>
+          <li class="feature-item">
+            <span class="check"><svg viewBox="0 0 12 12" fill="none" class="check-automator"><polyline points="2,6 5,9 10,3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Dedicated ReadyStack team support</span>
+          </li>
+        </ul>
+      </div>
+
+      <button class="cta-btn cta-automator" onclick="console.log('Automator signup')">
+        Start Automating →
+      </button>
+      <div class="commercial-note">Pay only for what you run. Stop anytime.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Dividend callout -->
+<div class="dividend-callout">
+  <div class="dividend-box">
+    <div class="gold-eyebrow">The Dividend</div>
+    <h3>Share your District. Earn for life.</h3>
+    <p>
+      Every Member earns <strong>40% lifetime income</strong> on every Citizen they introduce to the commons —
+      whether they're across the street or across the world. Not a referral bonus. A permanent financial stake
+      in something that grows. The most powerful networking tool ever invented isn't a dinner. It's a dividend.
+    </p>
+  </div>
+</div>
+
+<!-- Trust strip -->
+<div class="trust-strip">
+  <p>
+    <strong>Month to month. No contracts. No lock-in.</strong><br/>
+    ReadyStack is the infrastructure of Market Relationship Management — the appropriate atmosphere
+    you take part in to be present in the dark, with your partners, your shared targets,
+    and your future customers, before they ever raise their hand.
+  </p>
+</div>
+
+</body>
+</html>
