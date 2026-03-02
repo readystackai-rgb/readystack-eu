@@ -442,6 +442,72 @@
       const [isPlatformSearching, setIsPlatformSearching] = useState(false);
 
       // Search non-YouTube platforms via cloud function (Gemini-powered)
+      // Google Custom Search — returns real, indexed URLs (no hallucination)
+      const googleCustomSearch = async (query, platform) => {
+        const siteFilter = platform === 'substack' ? 'substack.com' : 'reddit.com';
+        const dateRestrict = 'm1'; // last month
+        const url = `https://www.googleapis.com/customsearch/v1?key=${ytApiKey}&cx=${GOOGLE_CSE_CX}&q=${encodeURIComponent(query)}&siteSearch=${siteFilter}&siteSearchFilter=i&dateRestrict=${dateRestrict}&num=5`;
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`CSE ${resp.status}`);
+        const data = await resp.json();
+        if (!data.items || data.items.length === 0) return [];
+        return data.items.map((item, i) => ({
+          id: `${platform}-cse-${i}-${Date.now()}`,
+          title: item.title || 'Untitled',
+          author: item.pagemap?.metatags?.[0]?.['author'] || item.pagemap?.metatags?.[0]?.['og:site_name'] || (platform === 'reddit' ? (item.link.match(/r\/([^/]+)/) || [])[1] || '' : ''),
+          url: item.link,
+          snippet: item.snippet || '',
+          platform: platform,
+          publishDate: item.pagemap?.metatags?.[0]?.['article:published_time']?.substring(0, 10) || '',
+          subscriberCount: '',
+          postFrequency: '',
+          commentCount: '',
+          upvotes: '',
+          subreddit: platform === 'reddit' ? (item.link.match(/r\/([^/]+)/) || ['', ''])[1] : '',
+          contentType: platform === 'substack' ? 'newsletter' : 'discussion'
+        }));
+      };
+
+      // AI fallback search (used when Google CSE not configured)
+      const aiPlatformSearch = async (query, platform) => {
+        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
+        const platformName = platformLabels[platform] || platform;
+        const systemPrompt = platform === 'substack'
+          ? `You are a content search assistant. Search for Substack newsletters and articles about the given topic. CRITICAL: Only return URLs you are highly confident actually exist — use the format authorname.substack.com/p/slug and only reference well-known Substack authors. Prefer content published within the last 30 days. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string - the person's real name, NOT the newsletter name), url (string - must be a real, verified substack.com URL), snippet (string - 1-2 sentence description of what the article covers), publishDate (string - approximate date like "Feb 2026" or "Jan 2026"), subscriberCount (string - approximate subscriber count like "50K+" or "10K+" if known, or ""), postFrequency (string - like "Weekly" or "Daily" or "2x/month" if known, or ""), contentType (string - one of "newsletter", "article", "essay", "analysis", "guide"). Return ONLY the JSON array, no other text. Prioritize well-known, established Substack authors with real subscriber bases and verified URLs.`
+          : `You are a content search assistant. Search for Reddit threads and discussions about the given topic. CRITICAL: Only return URLs you are highly confident actually exist. Prefer content from the last 30 days. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string - the subreddit like "r/marketing"), url (string - must be a real, verified reddit.com URL), snippet (string - 1-2 sentence description), commentCount (string - approximate like "150+" or "2K+" if known, or ""), upvotes (string - approximate like "500" or "3.2K" if known, or ""), subreddit (string - the subreddit name like "r/marketing"), contentType (string - one of "discussion", "guide", "question", "resource", "case-study"). Return ONLY the JSON array, no other text. Prioritize high-engagement threads with real community discussion and verified URLs.`;
+        const response = await fetch(CLOUD_FUNCTION_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task: 'generateStory', systemPrompt, userQuery: `Find ${platformName} content about: ${query}` })
+        });
+        const result = await response.json();
+        const text = (result.text || '').trim();
+        let parsed = [];
+        try {
+          const jsonStr = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+          parsed = JSON.parse(jsonStr);
+        } catch(e) {
+          const match = text.match(/\[[\s\S]*\]/);
+          if (match) { try { parsed = JSON.parse(match[0]); } catch(e2) {} }
+        }
+        if (!Array.isArray(parsed) || parsed.length === 0) return [];
+        return parsed.map((r, i) => ({
+          id: `${platform}-${i}-${Date.now()}`,
+          title: r.title || 'Untitled',
+          author: r.author || 'Unknown',
+          url: r.url || '',
+          snippet: r.snippet || '',
+          platform: platform,
+          publishDate: r.publishDate || '',
+          subscriberCount: r.subscriberCount || '',
+          postFrequency: r.postFrequency || '',
+          commentCount: r.commentCount || '',
+          upvotes: r.upvotes || '',
+          subreddit: r.subreddit || '',
+          contentType: r.contentType || ''
+        }));
+      };
+
       const searchPlatformContent = async () => {
         const query = youtubeInput.trim();
         if (!query) return;
@@ -460,54 +526,25 @@
 
         const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
         const platformName = platformLabels[platform] || platform;
-        const siteHints = { substack: 'substack.com', reddit: 'reddit.com' };
 
         try {
-          const systemPrompt = platform === 'substack'
-            ? `You are a content search assistant. Search for Substack newsletters and articles about the given topic. CRITICAL: Only return URLs you are highly confident actually exist — use the format authorname.substack.com/p/slug and only reference well-known Substack authors. Prefer content published within the last 30 days. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string - the person's real name, NOT the newsletter name), url (string - must be a real, verified substack.com URL), snippet (string - 1-2 sentence description of what the article covers), publishDate (string - approximate date like "Feb 2026" or "Jan 2026"), subscriberCount (string - approximate subscriber count like "50K+" or "10K+" if known, or ""), postFrequency (string - like "Weekly" or "Daily" or "2x/month" if known, or ""), contentType (string - one of "newsletter", "article", "essay", "analysis", "guide"). Return ONLY the JSON array, no other text. Prioritize well-known, established Substack authors with real subscriber bases and verified URLs.`
-            : `You are a content search assistant. Search for Reddit threads and discussions about the given topic. CRITICAL: Only return URLs you are highly confident actually exist. Prefer content from the last 30 days. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string - the subreddit like "r/marketing"), url (string - must be a real, verified reddit.com URL), snippet (string - 1-2 sentence description), commentCount (string - approximate like "150+" or "2K+" if known, or ""), upvotes (string - approximate like "500" or "3.2K" if known, or ""), subreddit (string - the subreddit name like "r/marketing"), contentType (string - one of "discussion", "guide", "question", "resource", "case-study"). Return ONLY the JSON array, no other text. Prioritize high-engagement threads with real community discussion and verified URLs.`;
+          let results = [];
 
-          const response = await fetch(CLOUD_FUNCTION_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              task: 'generateStory',
-              systemPrompt: systemPrompt,
-              userQuery: `Find ${platformName} content about: ${query}`
-            })
-          });
-          const result = await response.json();
-          const text = (result.text || '').trim();
-
-          // Parse JSON from response (handle markdown code blocks)
-          let parsed = [];
-          try {
-            const jsonStr = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            parsed = JSON.parse(jsonStr);
-          } catch(e) {
-            // Try to extract array from response
-            const match = text.match(/\[[\s\S]*\]/);
-            if (match) {
-              try { parsed = JSON.parse(match[0]); } catch(e2) {}
+          // Use Google Custom Search if configured (real URLs)
+          if (GOOGLE_CSE_CX) {
+            try {
+              results = await googleCustomSearch(query, platform);
+            } catch (cseErr) {
+              console.warn('Google CSE failed, falling back to AI search:', cseErr);
+              results = await aiPlatformSearch(query, platform);
             }
+          } else {
+            // Fallback: AI-generated results (URLs may not be verified)
+            results = await aiPlatformSearch(query, platform);
           }
 
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setPlatformResults(parsed.map((r, i) => ({
-              id: `${platform}-${i}-${Date.now()}`,
-              title: r.title || 'Untitled',
-              author: r.author || 'Unknown',
-              url: r.url || '',
-              snippet: r.snippet || '',
-              platform: platform,
-              publishDate: r.publishDate || '',
-              subscriberCount: r.subscriberCount || '',
-              postFrequency: r.postFrequency || '',
-              commentCount: r.commentCount || '',
-              upvotes: r.upvotes || '',
-              subreddit: r.subreddit || '',
-              contentType: r.contentType || ''
-            })));
+          if (results.length > 0) {
+            setPlatformResults(results);
           } else {
             setSearchError(`No ${platformName} results found. Try a different query or paste a URL directly.`);
           }
@@ -613,6 +650,7 @@
       };
 
       const ytApiKey = "AIzaSyDCUc877CDBxRntQwctrKTFfjQ8rhPruss";
+      const GOOGLE_CSE_CX = ""; // Programmable Search Engine CX ID — set this to enable real URL search
       const CLOUD_FUNCTION_URL = "https://us-central1-gen-lang-client-0769430147.cloudfunctions.net/advisor";
 
       useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [activeTab]);
@@ -1997,6 +2035,8 @@
                             <div className="space-y-2 max-w-2xl mx-auto">
                               <div className="flex items-center justify-between mb-1">
                                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{sourceCount}/{maxSources} sources added</span>
+                                {!GOOGLE_CSE_CX && <span className="text-[8px] text-amber-500/60 ml-2">AI search — URLs may not be verified</span>}
+                                {GOOGLE_CSE_CX && <span className="text-[8px] text-emerald-500/60 ml-2">Google verified search</span>}
                               </div>
                               <div className="flex gap-2">
                                 <input
