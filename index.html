@@ -2645,7 +2645,7 @@
                     </div>
                 </div>
                 <div className="overflow-x-auto bg-[#020617] py-5 relative text-left w-full">
-                  <div className="bg-[#01040d] rounded-[64px] border border-white/5 shadow-2xl relative overflow-hidden w-full min-h-[1300px] mx-auto" style={{aspectRatio:'1200/1300'}}>
+                  <div className="bg-[#01040d] rounded-[64px] border border-white/5 shadow-2xl relative overflow-hidden w-full h-[1300px] mx-auto">
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 1300">
                       {nodes.flows?.map((flow, i) => {
                         const midX = (flow.from.x + flow.to.x) / 2; const midY = (flow.from.y + flow.to.y) / 2; const dx = flow.to.x - flow.from.x; const dy = flow.to.y - flow.from.y; const dist = Math.sqrt(dx*dx + dy*dy); const offset = dist * 0.2; const cpX = midX - (dy / dist) * offset; const cpY = midY + (dx / dist) * offset; const d = `M ${flow.from.x},${flow.from.y} Q ${cpX},${cpY} ${flow.to.x},${flow.to.y}`;
