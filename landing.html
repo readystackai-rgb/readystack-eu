@@ -272,89 +272,61 @@
           <div class="demo-dot" style="background:#ff5f57;"></div>
           <div class="demo-dot" style="background:#ffbd2e;"></div>
           <div class="demo-dot" style="background:#28c840;"></div>
-          <span class="text-[10px] text-slate-600 ml-3 font-medium" id="titlebarText" style="font-family:'Poppins',sans-serif;">ReadyStack — District Composer</span>
+          <span class="text-[10px] text-slate-600 ml-3 font-medium" id="titlebarText" style="font-family:'Poppins',sans-serif;">ReadyStack — Storyteller</span>
         </div>
 
         <div class="demo-body">
 
-          <!-- ══════ STEP 0: SEARCH ══════ -->
+          <!-- ══════ STEP 0: SEARCH — matches Storyteller UI exactly ══════ -->
           <div class="demo-step active" id="step0">
-            <p class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 mb-3" style="font-family:'Poppins',sans-serif;">Step 1 — Discover</p>
-            <p class="text-white font-bold text-[16px] mb-5">Start with a search. Find the content shaping your market.</p>
-
-            <div class="relative mb-6">
-              <input type="text" class="search-input" id="searchInput" placeholder="Search YouTube, podcasts, newsletters..." readonly />
-              <div class="absolute right-4 top-1/2 -translate-y-1/2">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <!-- Search input — Storyteller form factor -->
+            <div class="bg-[#020617]/50 p-6 md:p-8 rounded-[32px] border border-white/5 shadow-inner space-y-6">
+              <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic">YouTube Search or Embed Link</label>
+              <div class="flex gap-3">
+                <input type="text" class="flex-grow bg-[#0f172a] border border-slate-800 rounded-xl p-4 text-xs text-white focus:border-indigo-500 outline-none transition-colors" id="searchInput" placeholder="Search strategy..." readonly />
+                <button class="bg-indigo-600 hover:bg-indigo-500 px-8 rounded-xl text-white font-black uppercase tracking-widest text-[10px] transition-all border border-white/10 flex-shrink-0" id="searchBtn">Search / Resolve</button>
               </div>
-            </div>
 
-            <div id="searchResults" style="display:none;">
-              <p class="text-[10px] text-slate-500 mb-3 font-medium">YouTube results for "seth godin"</p>
-              <div class="space-y-2" id="ytResults"></div>
-            </div>
+              <!-- Search results grid — Storyteller card layout -->
+              <div id="searchResults" class="grid gap-4 max-w-3xl mx-auto" style="display:none;">
+              </div>
 
-            <div class="flex items-center justify-between mt-6">
-              <span class="text-[10px] text-slate-600 italic" id="searchHint">Watch the search...</span>
-              <button class="next-btn" id="nextBtn0" style="display:none;" onclick="goStep(1)">Select Content &rarr;</button>
+              <!-- Next button row -->
+              <div class="flex items-center justify-between" id="searchFooter" style="display:none;">
+                <span class="text-[10px] text-slate-600 italic">Click a video to select it for your district</span>
+                <button class="next-btn" onclick="goStep(1)">Continue &rarr;</button>
+              </div>
             </div>
           </div>
 
-          <!-- ══════ STEP 1: SELECT CONTENT ══════ -->
+          <!-- ══════ STEP 1: VIDEO SELECTED — preview ══════ -->
           <div class="demo-step" id="step1">
-            <p class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 mb-3" style="font-family:'Poppins',sans-serif;">Step 2 — Select</p>
-            <p class="text-white font-bold text-[16px] mb-5">Click to select the content that matters. These become your district's foundation.</p>
+            <div class="bg-[#020617]/50 p-6 md:p-8 rounded-[32px] border border-white/5 shadow-inner space-y-6">
+              <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic">Selected Video</label>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="selectGrid">
-              <div class="yt-card selected" onclick="this.classList.toggle('selected')">
-                <div class="flex items-start gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#ef4444"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
-                  </div>
-                  <div>
-                    <p class="text-[13px] text-white font-semibold leading-tight">This is Marketing</p>
-                    <p class="text-[11px] text-slate-500 mt-1">Seth Godin — 2.1M views</p>
-                  </div>
-                </div>
-              </div>
-              <div class="yt-card selected" onclick="this.classList.toggle('selected')">
-                <div class="flex items-start gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#ef4444"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
-                  </div>
-                  <div>
-                    <p class="text-[13px] text-white font-semibold leading-tight">The Practice: Shipping Creative Work</p>
-                    <p class="text-[11px] text-slate-500 mt-1">Seth Godin — 890K views</p>
+              <!-- Embedded preview card -->
+              <div class="bg-[#0f172a] rounded-3xl border border-indigo-500/30 p-5 relative overflow-hidden" style="box-shadow: 0 0 30px rgba(124,140,255,0.08);">
+                <div class="flex gap-6">
+                  <img src="https://img.youtube.com/vi/BaFpwEOlwMQ/mqdefault.jpg" class="w-40 aspect-video rounded-xl object-cover shadow-2xl flex-shrink-0" alt="Tribes — Seth Godin" />
+                  <div class="flex-grow text-left space-y-2">
+                    <h5 class="text-white font-bold text-[13px] leading-tight italic">Seth Godin — Tribes</h5>
+                    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Seth Godin</p>
+                    <div class="flex items-center gap-4">
+                      <span class="text-[10px] font-black text-emerald-400" style="font-variant-numeric: tabular-nums;">587,432 VIEWS</span>
+                      <span class="bg-emerald-500/20 text-emerald-400 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">Verified Signal</span>
+                    </div>
                   </div>
                 </div>
+                <!-- Selection glow bar -->
+                <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent"></div>
               </div>
-              <div class="yt-card" onclick="this.classList.toggle('selected')">
-                <div class="flex items-start gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M12 1a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5v-3a7 7 0 0 1 14 0v3h-2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z"/></svg>
-                  </div>
-                  <div>
-                    <p class="text-[13px] text-white font-semibold leading-tight">Akimbo: A Podcast from Seth Godin</p>
-                    <p class="text-[11px] text-slate-500 mt-1">Podcast — 340 episodes</p>
-                  </div>
-                </div>
-              </div>
-              <div class="yt-card" onclick="this.classList.toggle('selected')">
-                <div class="flex items-start gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/></svg>
-                  </div>
-                  <div>
-                    <p class="text-[13px] text-white font-semibold leading-tight">Seth's Blog — Daily Newsletter</p>
-                    <p class="text-[11px] text-slate-500 mt-1">Substack — 1M+ subscribers</p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <div class="flex items-center justify-between mt-6">
-              <button class="ghost-btn" onclick="goStep(0)">&larr; Back</button>
-              <button class="next-btn" onclick="goStep(2)">Analyze &rarr;</button>
+              <p class="text-[11px] text-slate-500 text-center">ReadyStack will analyze this video and begin building your district.</p>
+
+              <div class="flex items-center justify-between">
+                <button class="ghost-btn" onclick="goStep(0)">&larr; Search again</button>
+                <button class="next-btn" onclick="goStep(2)">Analyze &rarr;</button>
+              </div>
             </div>
           </div>
 
@@ -755,11 +727,135 @@
       if (n === 2) runAnalysis();
     }
 
-    // ─── STEP 0: Auto-type search ───
+    // ─── STEP 0: Auto-type search + Storyteller-style results ───
+    const videos = [
+      {
+        id: 'BaFpwEOlwMQ',
+        title: 'Seth Godin — Tribes',
+        channel: 'Seth Godin',
+        views: 587432,
+        thumb: 'https://img.youtube.com/vi/BaFpwEOlwMQ/mqdefault.jpg',
+        selected: true,
+        flagged: false
+      },
+      {
+        id: 'sLaqRYfFtTM',
+        title: 'This is Marketing — Seth Godin at Google',
+        channel: 'Talks at Google',
+        views: 2134891,
+        thumb: 'https://img.youtube.com/vi/sLaqRYfFtTM/mqdefault.jpg',
+        selected: false,
+        flagged: false,
+        verified: true
+      },
+      {
+        id: 'QnYFr6HRGDY',
+        title: 'The Practice — Shipping Creative Work',
+        channel: 'Seth Godin',
+        views: 891205,
+        thumb: 'https://img.youtube.com/vi/QnYFr6HRGDY/mqdefault.jpg',
+        selected: false,
+        flagged: false
+      },
+      {
+        id: 'FLAGGED_001',
+        title: 'You Won\'t BELIEVE What Seth Godin Said!! EXPOSED 😱',
+        channel: 'ViralClickz',
+        views: 4210,
+        thumb: '',
+        selected: false,
+        flagged: true,
+        flagReason: 'Content does not meet quality standards.'
+      }
+    ];
+
+    function buildVideoCard(v, idx) {
+      const isFlagged = v.flagged;
+      const isSelected = v.selected;
+
+      const card = document.createElement('div');
+      card.className = `flex gap-4 md:gap-6 p-4 md:p-5 bg-[#0f172a] border rounded-3xl transition-all group relative overflow-hidden ${
+        isFlagged
+          ? 'opacity-40 border-amber-500/20 grayscale-[0.5]'
+          : isSelected
+            ? 'border-indigo-500/50 cursor-pointer shadow-xl ring-1 ring-indigo-500/20'
+            : 'border-white/5 hover:border-indigo-500/50 cursor-pointer shadow-xl'
+      }`;
+      card.style.animation = 'slideUp 0.35s ease-out forwards';
+      card.style.animationDelay = (idx * 0.15) + 's';
+      card.style.opacity = '0';
+
+      if (!isFlagged) {
+        card.onclick = function() {
+          // toggle selection
+          document.querySelectorAll('.video-card').forEach(c => {
+            c.classList.remove('border-indigo-500/50', 'ring-1', 'ring-indigo-500/20');
+            c.classList.add('border-white/5');
+            const check = c.querySelector('.select-check');
+            if (check) check.style.display = 'none';
+          });
+          this.classList.remove('border-white/5');
+          this.classList.add('border-indigo-500/50', 'ring-1', 'ring-indigo-500/20');
+          const check = this.querySelector('.select-check');
+          if (check) check.style.display = 'flex';
+        };
+      }
+      card.classList.add('video-card');
+
+      // Thumbnail
+      const thumbHtml = v.thumb
+        ? `<img src="${v.thumb}" class="w-28 md:w-40 aspect-video rounded-xl object-cover shadow-2xl flex-shrink-0" alt="${v.title}" />`
+        : `<div class="w-28 md:w-40 aspect-video rounded-xl bg-slate-800/50 flex items-center justify-center flex-shrink-0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="8" y1="16" x2="16" y2="8"/></svg></div>`;
+
+      // Stats / flagged badge
+      let statsHtml = '';
+      if (isFlagged) {
+        statsHtml = `
+          <div class="bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 mt-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-amber-500" style="animation: pulse 2s ease-in-out infinite;"></div>
+            <span class="text-[9px] font-black text-amber-500 uppercase tracking-widest italic">${v.flagReason}</span>
+          </div>`;
+      } else {
+        const viewStr = v.views >= 1000000
+          ? (v.views / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'
+          : v.views.toLocaleString();
+        statsHtml = `
+          <div class="flex items-center gap-3 flex-wrap">
+            <span class="text-[10px] font-black text-emerald-400" style="font-variant-numeric:tabular-nums;">${v.views.toLocaleString()} VIEWS</span>
+            ${v.verified ? '<span class="bg-emerald-500/20 text-emerald-400 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">Verified Signal</span>' : ''}
+          </div>`;
+      }
+
+      // Selection checkmark
+      const checkHtml = isSelected
+        ? `<div class="select-check absolute top-3 right-3 w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center" style="display:flex;"><svg viewBox="0 0 12 12" fill="none" class="w-3 h-3"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`
+        : `<div class="select-check absolute top-3 right-3 w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center" style="display:none;"><svg viewBox="0 0 12 12" fill="none" class="w-3 h-3"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+
+      // Selected glow bar
+      const glowHtml = isSelected
+        ? `<div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent"></div>`
+        : '';
+
+      card.innerHTML = `
+        ${glowHtml}
+        ${checkHtml}
+        ${thumbHtml}
+        <div class="flex-grow text-left space-y-2 min-w-0">
+          <h5 class="text-white font-bold text-[13px] leading-tight italic line-clamp-2">${v.title}</h5>
+          <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">${v.channel}</p>
+          ${statsHtml}
+        </div>
+      `;
+
+      return card;
+    }
+
     (function initSearch() {
       const input = document.getElementById('searchInput');
-      const query = 'seth godin';
+      const btn = document.getElementById('searchBtn');
+      const query = 'seth godin tribes';
       let i = 0;
+
       setTimeout(() => {
         const typeInterval = setInterval(() => {
           if (i <= query.length) {
@@ -767,43 +863,33 @@
             i++;
           } else {
             clearInterval(typeInterval);
-            // Show results after typing
+            // Flash search button
             setTimeout(() => {
-              document.getElementById('searchResults').style.display = 'block';
-              document.getElementById('searchResults').style.animation = 'fadeIn 0.4s ease-out forwards';
-              // Build YT result cards
-              const results = [
-                { title: 'This is Marketing — Seth Godin', views: '2.1M views', time: '18:42' },
-                { title: 'The Practice: Shipping Creative Work', views: '890K views', time: '24:16' },
-                { title: 'Stop Stealing Dreams — TEDx', views: '3.4M views', time: '17:51' },
-              ];
-              const container = document.getElementById('ytResults');
-              results.forEach((r, idx) => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center gap-3 bg-[#020617]/40 rounded-lg border border-white/5 p-3';
-                div.style.animation = 'slideUp 0.3s ease-out forwards';
-                div.style.animationDelay = (idx * 0.12) + 's';
-                div.style.opacity = '0';
-                div.innerHTML = `
-                  <div class="w-8 h-8 rounded bg-red-500/15 flex items-center justify-center flex-shrink-0">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#ef4444"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.3-1.9.5-3.9.5-5.8a31.5 31.5 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-[12px] text-white font-medium">${r.title}</p>
-                    <p class="text-[10px] text-slate-500">${r.views} · ${r.time}</p>
-                  </div>
-                `;
-                container.appendChild(div);
-              });
-              // Show next button
+              btn.textContent = 'Searching...';
+              btn.classList.add('opacity-50');
+
               setTimeout(() => {
-                document.getElementById('nextBtn0').style.display = 'inline-block';
-                document.getElementById('nextBtn0').style.animation = 'fadeIn 0.3s ease-out forwards';
-                document.getElementById('searchHint').textContent = '3 results found';
-              }, 600);
-            }, 400);
+                btn.textContent = 'Search / Resolve';
+                btn.classList.remove('opacity-50');
+
+                // Build results
+                const container = document.getElementById('searchResults');
+                container.style.display = 'grid';
+                container.style.animation = 'fadeIn 0.4s ease-out forwards';
+
+                videos.forEach((v, idx) => {
+                  container.appendChild(buildVideoCard(v, idx));
+                });
+
+                // Show footer
+                setTimeout(() => {
+                  document.getElementById('searchFooter').style.display = 'flex';
+                  document.getElementById('searchFooter').style.animation = 'fadeIn 0.3s ease-out forwards';
+                }, 700);
+              }, 900);
+            }, 300);
           }
-        }, 80);
+        }, 70);
       }, 1200);
     })();
 
