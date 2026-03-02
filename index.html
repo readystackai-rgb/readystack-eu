@@ -1638,7 +1638,7 @@
               <div className="mb-8 whitespace-nowrap">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">District Setup</h3>
                 <div className="w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-white/5">
-                  <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-500" style={{ width: `${Math.max(12.5, (['youtube', 'intro', 'observatory', 'mapper', 'connect', 'looker', 'g4', 'automation'].indexOf(activeTab) + 1) * 12.5)}%` }}></div>
+                  <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-500" style={{ width: `${Math.max(12.5, (['youtube', 'intro', 'mapper', 'observatory', 'connect', 'looker', 'g4', 'automation'].indexOf(activeTab) + 1) * 12.5)}%` }}></div>
                 </div>
               </div>
               
@@ -1646,15 +1646,15 @@
                 {[
                   { id: 'youtube', num: 1, label: 'Values and Voices', icon: 'mic' },
                   { id: 'intro', num: 2, label: 'Residents', icon: 'users' },
-                  { id: 'observatory', num: 3, label: 'Tourist Flow', icon: 'git-branch' },
-                  { id: 'mapper', num: 4, label: 'District Map', icon: 'map' },
+                  { id: 'mapper', num: 3, label: 'District Map', icon: 'map' },
+                  { id: 'observatory', num: 4, label: 'Tourist Flow', icon: 'git-branch' },
                   { id: 'connect', num: 5, label: 'Invite Residents', icon: 'send' },
                   { id: 'looker', num: 6, label: 'Looker', icon: 'bar-chart-2' },
                   { id: 'g4', num: 7, label: 'GA4', icon: 'activity' },
                   { id: 'automation', num: 8, label: 'Automation', icon: 'zap' }
                 ].map(step => {
                   const isActive = activeTab === step.id;
-                  const railOrder = ['youtube', 'intro', 'observatory', 'mapper', 'connect', 'looker', 'g4', 'automation'];
+                  const railOrder = ['youtube', 'intro', 'mapper', 'observatory', 'connect', 'looker', 'g4', 'automation'];
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
 
@@ -2324,7 +2324,7 @@
                             </div>
                         </div>
                     </div>
-                    <div className="text-center py-6"><button onClick={() => buildStoryDistrict('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-4">Confirming your residents unlocks the Tourist Flow.</p></div>
+                    <div className="text-center py-6"><button onClick={() => buildStoryDistrict('mapper')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-4">Confirming your residents unlocks the District Map.</p></div>
                 </div>
               </div>
             )}
@@ -2478,7 +2478,7 @@
                 </div>
 
                 <div className="py-6 text-center">
-                    <button onClick={() => setActiveTab('connect')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button>
+                    <button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">VIEW TOURIST FLOW</button>
                 </div>
               </div>
             )}
@@ -2707,7 +2707,7 @@
                    <div className="h-96 flex items-end pt-8"><HoldingPowerChart datasets={[{ color: '#ffffff', label: 'Preview', points: [30, 45, 40, 55, 70, 65, 80, 75, 85, 90, 88, 95] }, { color: '#48c9b0', label: 'Sharing', points: [10, 15, 25, 20, 35, 45, 40, 50, 65, 60, 75, 70] }, { color: '#7c8cff', label: 'Sourcing', points: [5, 8, 12, 10, 18, 25, 22, 30, 45, 42, 55, 60] }]} /></div>
                 </div>
                 <div className="py-6 text-center">
-                    <button onClick={() => setActiveTab('mapper')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">VIEW DISTRICT MAP</button>
+                    <button onClick={() => setActiveTab('connect')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">INVITE RESIDENTS</button>
                 </div>
               </div>
             )}
