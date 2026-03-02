@@ -404,8 +404,8 @@
           alert(`You already have a YouTube source. One per platform.`);
           return;
         }
-        if ((platform === 'substack' || platform === 'reddit') && existingCount >= 6) {
-          alert(`Maximum 6 sources per platform.`);
+        if ((platform === 'substack' || platform === 'reddit') && existingCount >= 3) {
+          alert(`Maximum 3 sources per platform.`);
           return;
         }
         let displayName = url;
@@ -464,8 +464,8 @@
 
         try {
           const systemPrompt = platform === 'substack'
-            ? `You are a content search assistant. Search for Substack newsletters and articles about the given topic. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string), url (string - must be a real substack.com URL, format: authorname.substack.com/p/slug), snippet (string - 1-2 sentence description of what the article covers), publishDate (string - approximate date like "Jan 2026" or "2025" if known, or ""), subscriberCount (string - approximate subscriber count like "50K+" or "10K+" if the newsletter is well-known, or ""), postFrequency (string - like "Weekly" or "Daily" or "2x/month" if known, or ""), contentType (string - one of "newsletter", "article", "essay", "analysis", "guide"). Return ONLY the JSON array, no other text. Prioritize well-known, established Substack authors with real subscriber bases.`
-            : `You are a content search assistant. Search for Reddit threads and discussions about the given topic. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string - the subreddit like "r/marketing"), url (string - must be a real reddit.com URL), snippet (string - 1-2 sentence description), commentCount (string - approximate like "150+" or "2K+" if known, or ""), upvotes (string - approximate like "500" or "3.2K" if known, or ""), subreddit (string - the subreddit name like "r/marketing"), contentType (string - one of "discussion", "guide", "question", "resource", "case-study"). Return ONLY the JSON array, no other text. Prioritize high-engagement threads with real community discussion.`;
+            ? `You are a content search assistant. Search for Substack newsletters and articles about the given topic. CRITICAL: Only return URLs you are highly confident actually exist — use the format authorname.substack.com/p/slug and only reference well-known Substack authors. Prefer content published within the last 30 days. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string - the person's real name, NOT the newsletter name), url (string - must be a real, verified substack.com URL), snippet (string - 1-2 sentence description of what the article covers), publishDate (string - approximate date like "Feb 2026" or "Jan 2026"), subscriberCount (string - approximate subscriber count like "50K+" or "10K+" if known, or ""), postFrequency (string - like "Weekly" or "Daily" or "2x/month" if known, or ""), contentType (string - one of "newsletter", "article", "essay", "analysis", "guide"). Return ONLY the JSON array, no other text. Prioritize well-known, established Substack authors with real subscriber bases and verified URLs.`
+            : `You are a content search assistant. Search for Reddit threads and discussions about the given topic. CRITICAL: Only return URLs you are highly confident actually exist. Prefer content from the last 30 days. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string - the subreddit like "r/marketing"), url (string - must be a real, verified reddit.com URL), snippet (string - 1-2 sentence description), commentCount (string - approximate like "150+" or "2K+" if known, or ""), upvotes (string - approximate like "500" or "3.2K" if known, or ""), subreddit (string - the subreddit name like "r/marketing"), contentType (string - one of "discussion", "guide", "question", "resource", "case-study"). Return ONLY the JSON array, no other text. Prioritize high-engagement threads with real community discussion and verified URLs.`;
 
           const response = await fetch(CLOUD_FUNCTION_URL, {
             method: 'POST',
@@ -590,8 +590,8 @@
           alert(`You already have a YouTube source. One per platform.`);
           return;
         }
-        if ((platform === 'substack' || platform === 'reddit') && existingCount >= 6) {
-          alert(`Maximum 6 sources per platform.`);
+        if ((platform === 'substack' || platform === 'reddit') && existingCount >= 3) {
+          alert(`Maximum 3 sources per platform.`);
           return;
         }
         
@@ -1956,29 +1956,48 @@
                     {(searchPlatform || 'youtube') !== 'youtube' && (() => {
                       const platform = searchPlatform;
                       const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
-                      const existingSource = mapping.sources?.find(s => s.type === platform && s.url);
+                      const existingSources = (mapping.sources || []).filter(s => s.type === platform && s.url);
+                      const sourceCount = existingSources.length;
+                      const maxSources = 3;
+                      const canAddMore = sourceCount < maxSources;
 
                       return (
                         <div className="space-y-6">
-                          {/* Show existing source if selected */}
-                          {existingSource && (
-                            <div className="max-w-2xl mx-auto bg-[#0f172a]/50 border border-white/10 rounded-xl p-4 flex items-center gap-4 animate-fade-in">
-                              <div className="flex-grow text-left">
-                                <p className="text-xs text-white font-medium">{existingSource.lab}</p>
-                                <p className="text-[9px] text-slate-600 truncate">{existingSource.author ? `${existingSource.author} · ` : ''}{existingSource.url}</p>
-                              </div>
-                              <button
-                                onClick={() => { setMapping(prev => ({ ...prev, sources: prev.sources.filter(s => s.type !== platform) })); }}
-                                className="text-slate-600 hover:text-white/40 transition-all text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/5 hover:border-white/10"
-                              >
-                                Replace
-                              </button>
+                          {/* Show existing sources */}
+                          {sourceCount > 0 && (
+                            <div className="max-w-2xl mx-auto space-y-3 animate-fade-in">
+                              {existingSources.map((src, si) => (
+                                <div key={si} className="bg-[#0f172a]/60 border border-white/10 rounded-2xl p-5 text-left">
+                                  <div className="flex items-start justify-between gap-4">
+                                    <div className="flex items-start gap-3 flex-grow min-w-0">
+                                      <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        {platform === 'substack' && <SubstackIcon size={18} className="text-orange-400" />}
+                                        {platform === 'reddit' && <RedditIcon size={18} className="text-orange-500" />}
+                                      </div>
+                                      <div className="min-w-0">
+                                        <p className="text-sm font-bold text-white truncate">{src.lab}</p>
+                                        <p className="text-[10px] text-slate-400 uppercase tracking-wider">{src.author || platformLabels[platform]}</p>
+                                        {src.url && <p className="text-[9px] text-indigo-400/60 truncate mt-1">{src.url}</p>}
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={() => { setMapping(prev => ({ ...prev, sources: prev.sources.filter((s, idx) => !(s.type === platform && s.url === src.url)) })); }}
+                                      className="text-slate-600 hover:text-red-400 transition-all flex-shrink-0"
+                                    >
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           )}
 
-                          {/* Search input */}
-                          {!existingSource && (
+                          {/* Search input with counter */}
+                          {canAddMore && (
                             <div className="space-y-2 max-w-2xl mx-auto">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{sourceCount}/{maxSources} sources added</span>
+                              </div>
                               <div className="flex gap-2">
                                 <input
                                   type="text"
@@ -1997,6 +2016,9 @@
                                 </button>
                               </div>
                             </div>
+                          )}
+                          {!canAddMore && (
+                            <p className="text-center text-[9px] text-slate-500 font-black uppercase tracking-widest">{maxSources}/{maxSources} sources added</p>
                           )}
 
                           {isPlatformSearching && (
@@ -2092,7 +2114,7 @@
                           )}
 
                           {/* Empty state */}
-                          {!existingSource && platformResults.length === 0 && !isPlatformSearching && !searchError && (
+                          {sourceCount === 0 && platformResults.length === 0 && !isPlatformSearching && !searchError && (
                             <div className="text-center py-8">
                               <p className="text-slate-600 text-xs italic">Search for {platformLabels[platform]} content or paste a direct URL.</p>
                             </div>
@@ -2105,11 +2127,19 @@
                     {mapping.sources?.some(s => s.url) && (
                       <div className="border-t border-white/5 pt-5 mt-2">
                         <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-3">Cited Sources</p>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="space-y-3">
                           {mapping.sources.filter(s => s.url).map((s, i) => (
-                            <div key={i} className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-lg px-3 py-2">
-                              <span className="text-[8px] font-black text-slate-600 uppercase">{s.ven}</span>
-                              <span className="text-[10px] text-white/60 truncate max-w-[200px]">{s.lab}</span>
+                            <div key={i} className="bg-[#0f172a]/40 border border-white/5 rounded-2xl p-4 flex items-center gap-4">
+                              <div className="w-9 h-9 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                                {s.type === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-red-400"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
+                                {s.type === 'substack' && <SubstackIcon size={14} className="text-orange-400" />}
+                                {s.type === 'reddit' && <RedditIcon size={14} className="text-orange-500" />}
+                              </div>
+                              <div className="flex-grow min-w-0 text-left">
+                                <p className="text-xs font-bold text-white truncate">{s.lab}</p>
+                                <p className="text-[9px] text-slate-500 truncate">{s.author ? `${s.author} · ` : ''}{s.type === 'youtube' ? 'YouTube' : s.type === 'substack' ? 'Substack' : s.type === 'reddit' ? 'Reddit' : s.ven}</p>
+                              </div>
+                              {s.url && <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-indigo-400/60 hover:text-indigo-400 uppercase tracking-widest flex-shrink-0 transition-colors">View</a>}
                             </div>
                           ))}
                         </div>
@@ -2178,7 +2208,7 @@
                 <div className="space-y-10">
                     <div className="text-center space-y-3">
                         <h3 className="text-4xl font-black text-white uppercase tracking-tighter">WHO'S IN YOUR DISTRICT?</h3>
-                        <p className="text-slate-400 italic text-sm">Name your residents to pre-populate your District Map.</p>
+                        <p className="text-slate-400 italic text-sm">Add Residents who offer services and solutions to execute the core process.</p>
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
 
@@ -2225,21 +2255,21 @@
                     })()}
 
                     <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                        <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
-                            <h5 className="text-xs font-black text-white/70 uppercase tracking-widest text-center">PARTNERS<br/><span className="text-[9px] opacity-50 italic">ADJACENT CREWS</span></h5>
+                        <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left min-w-0 overflow-hidden">
+                            <h5 className="text-xs font-black text-white/70 uppercase tracking-widest text-center">PARTNERS</h5>
                             {storyParticipants.homies.map((p, i) => (
                             <div key={i} className="flex gap-2">
-                              <input placeholder={`Partner ${i+1}`} value={p.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.homies]; next[i] = {...next[i], name: v}; return {...prev, homies: next}; }); }} className="flex-1 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />
-                              <input placeholder="product / service" value={p.product} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.homies]; next[i] = {...next[i], product: v}; return {...prev, homies: next}; }); }} className="flex-1 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:border-white/30 outline-none shadow-inner" />
+                              <input placeholder={`Partner ${i+1}`} value={p.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.homies]; next[i] = {...next[i], name: v}; return {...prev, homies: next}; }); }} className="w-1/2 min-w-0 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />
+                              <input placeholder="product / service" value={p.product} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.homies]; next[i] = {...next[i], product: v}; return {...prev, homies: next}; }); }} className="w-1/2 min-w-0 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:border-white/30 outline-none shadow-inner" />
                             </div>
                           ))}
                         </div>
-                        <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
-                            <h5 className="text-xs font-black text-white/70 uppercase tracking-widest text-center">CUSTOMERS<br/><span className="text-[9px] opacity-50 italic">ACTIVE RESIDENTS</span></h5>
+                        <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left min-w-0 overflow-hidden">
+                            <h5 className="text-xs font-black text-white/70 uppercase tracking-widest text-center">CUSTOMERS</h5>
                             {storyParticipants.besties.map((p, i) => (
                             <div key={i} className="flex gap-2">
-                              <input placeholder={`Customer ${i+1}`} value={p.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.besties]; next[i] = {...next[i], name: v}; return {...prev, besties: next}; }); }} className="flex-1 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />
-                              <input placeholder="product / service" value={p.product} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.besties]; next[i] = {...next[i], product: v}; return {...prev, besties: next}; }); }} className="flex-1 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:border-white/30 outline-none shadow-inner" />
+                              <input placeholder={`Customer ${i+1}`} value={p.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.besties]; next[i] = {...next[i], name: v}; return {...prev, besties: next}; }); }} className="w-1/2 min-w-0 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-white/30 outline-none shadow-inner" />
+                              <input placeholder="product / service" value={p.product} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.besties]; next[i] = {...next[i], product: v}; return {...prev, besties: next}; }); }} className="w-1/2 min-w-0 bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:border-white/30 outline-none shadow-inner" />
                             </div>
                           ))}
                         </div>
