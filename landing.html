@@ -287,6 +287,15 @@
                 <button class="bg-indigo-600 hover:bg-indigo-500 px-8 rounded-xl text-white font-black uppercase tracking-widest text-[10px] transition-all border border-white/10 flex-shrink-0" id="searchBtn">Search / Resolve</button>
               </div>
 
+              <!-- Prompt overlay — guides user to select anchor video -->
+              <div id="selectPrompt" style="display:none;" class="relative">
+                <div class="flex items-center justify-center gap-3 py-3 px-5 rounded-2xl border border-indigo-500/30 bg-indigo-500/5 mb-4" style="animation: pulseGlow 2.5s ease-in-out infinite;">
+                  <div class="w-2 h-2 rounded-full bg-indigo-400" style="animation: pulse 1.5s ease-in-out infinite;"></div>
+                  <span class="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-300" style="font-family:'Poppins',sans-serif;">Select Anchor Video</span>
+                  <div class="w-2 h-2 rounded-full bg-indigo-400" style="animation: pulse 1.5s ease-in-out infinite;"></div>
+                </div>
+              </div>
+
               <!-- Search results grid — Storyteller card layout -->
               <div id="searchResults" class="grid gap-4 max-w-3xl mx-auto" style="display:none;">
               </div>
@@ -307,9 +316,9 @@
               <!-- Embedded preview card -->
               <div class="bg-[#0f172a] rounded-3xl border border-indigo-500/30 p-5 relative overflow-hidden" style="box-shadow: 0 0 30px rgba(124,140,255,0.08);">
                 <div class="flex gap-6">
-                  <img src="https://img.youtube.com/vi/BaFpwEOlwMQ/mqdefault.jpg" class="w-40 aspect-video rounded-xl object-cover shadow-2xl flex-shrink-0" alt="Tribes — Seth Godin" />
+                  <img src="https://img.youtube.com/vi/uQGYr9bnktw/mqdefault.jpg" class="w-40 aspect-video rounded-xl object-cover shadow-2xl flex-shrink-0" alt="The Tribes We Lead — Seth Godin" />
                   <div class="flex-grow text-left space-y-2">
-                    <h5 class="text-white font-bold text-[13px] leading-tight italic">Seth Godin — Tribes</h5>
+                    <h5 class="text-white font-bold text-[13px] leading-tight italic">Seth Godin — The Tribes We Lead</h5>
                     <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">Seth Godin</p>
                     <div class="flex items-center gap-4">
                       <span class="text-[10px] font-black text-emerald-400" style="font-variant-numeric: tabular-nums;">587,432 VIEWS</span>
@@ -730,39 +739,39 @@
     // ─── STEP 0: Auto-type search + Storyteller-style results ───
     const videos = [
       {
-        id: 'BaFpwEOlwMQ',
-        title: 'Seth Godin — Tribes',
+        id: 'uQGYr9bnktw',
+        title: 'Seth Godin — The Tribes We Lead',
         channel: 'Seth Godin',
         views: 587432,
-        thumb: 'https://img.youtube.com/vi/BaFpwEOlwMQ/mqdefault.jpg',
+        thumb: 'https://img.youtube.com/vi/uQGYr9bnktw/mqdefault.jpg',
         selected: true,
         flagged: false
       },
       {
-        id: 'sLaqRYfFtTM',
-        title: 'This is Marketing — Seth Godin at Google',
+        id: 'NsPnPBPR5oQ',
+        title: 'This is Marketing — Seth Godin Interview',
         channel: 'Talks at Google',
         views: 2134891,
-        thumb: 'https://img.youtube.com/vi/sLaqRYfFtTM/mqdefault.jpg',
+        thumb: 'https://img.youtube.com/vi/NsPnPBPR5oQ/mqdefault.jpg',
         selected: false,
         flagged: false,
         verified: true
       },
       {
-        id: 'QnYFr6HRGDY',
+        id: 'BpGT7DJAtQ4',
         title: 'The Practice — Shipping Creative Work',
         channel: 'Seth Godin',
         views: 891205,
-        thumb: 'https://img.youtube.com/vi/QnYFr6HRGDY/mqdefault.jpg',
+        thumb: 'https://img.youtube.com/vi/BpGT7DJAtQ4/mqdefault.jpg',
         selected: false,
         flagged: false
       },
       {
-        id: 'FLAGGED_001',
-        title: 'You Won\'t BELIEVE What Seth Godin Said!! EXPOSED 😱',
+        id: 'pZmldV28AAg',
+        title: 'You Won\'t BELIEVE What Seth Godin Said!! EXPOSED',
         channel: 'ViralClickz',
         views: 4210,
-        thumb: '',
+        thumb: 'https://img.youtube.com/vi/pZmldV28AAg/mqdefault.jpg',
         selected: false,
         flagged: true,
         flagReason: 'Content does not meet quality standards.'
@@ -802,10 +811,10 @@
       }
       card.classList.add('video-card');
 
-      // Thumbnail
+      // Thumbnail — larger for visibility
       const thumbHtml = v.thumb
-        ? `<img src="${v.thumb}" class="w-28 md:w-40 aspect-video rounded-xl object-cover shadow-2xl flex-shrink-0" alt="${v.title}" />`
-        : `<div class="w-28 md:w-40 aspect-video rounded-xl bg-slate-800/50 flex items-center justify-center flex-shrink-0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="8" y1="16" x2="16" y2="8"/></svg></div>`;
+        ? `<img src="${v.thumb}" class="w-32 md:w-44 aspect-video rounded-xl object-cover shadow-2xl flex-shrink-0" alt="${v.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><div class="w-32 md:w-44 aspect-video rounded-xl bg-slate-800/50 items-center justify-center flex-shrink-0" style="display:none;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="8" y1="16" x2="16" y2="8"/></svg></div>`
+        : `<div class="w-32 md:w-44 aspect-video rounded-xl bg-slate-800/50 flex items-center justify-center flex-shrink-0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="4"/><line x1="8" y1="16" x2="16" y2="8"/></svg></div>`;
 
       // Stats / flagged badge
       let statsHtml = '';
@@ -871,6 +880,11 @@
               setTimeout(() => {
                 btn.textContent = 'Search / Resolve';
                 btn.classList.remove('opacity-50');
+
+                // Show "Select Anchor Video" prompt
+                const prompt = document.getElementById('selectPrompt');
+                prompt.style.display = 'block';
+                prompt.style.animation = 'fadeIn 0.4s ease-out forwards';
 
                 // Build results
                 const container = document.getElementById('searchResults');
