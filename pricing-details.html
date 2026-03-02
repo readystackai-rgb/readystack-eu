@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing Details — ReadyStack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;900&display=swap');
+
+    :root {
+      --purple-header: linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%);
+      --accent: #7c8cff;
+    }
+
+    html { width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
+    body {
+      background-color: #020617;
+      margin: 0; padding: 0; width: 100%;
+      color: #cbd5e1;
+      font-family: 'Inter', sans-serif;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #020617; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    a { color: #7c8cff; text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #a5b4fc; }
+
+    .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
+    .animate-delay-1 { animation-delay: 0.1s; }
+    .animate-delay-2 { animation-delay: 0.2s; }
+    .animate-delay-3 { animation-delay: 0.3s; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header style="background: var(--purple-header);" class="border-b border-white/10 w-full sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div class="w-12 h-10 flex-shrink-0 flex items-center justify-center">
+          <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width:24px;height:24px;object-fit:contain;" />
+        </div>
+        <span class="text-xl font-bold text-white tracking-tight leading-none" style="font-family: 'Poppins', sans-serif;">ReadyStack</span>
+      </div>
+      <a href="https://readystackai-rgb.github.io/readystack-eu/pricing.html" class="text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">&larr; Back to Pricing</a>
+    </div>
+  </header>
+
+  <!-- TITLE -->
+  <section class="max-w-3xl mx-auto px-8 pt-20 pb-12 text-center animate-fade-in">
+    <p class="text-[9px] font-black uppercase tracking-[0.4em] text-indigo-400 italic mb-4" style="font-family:'Poppins',sans-serif;">Pricing Details</p>
+    <h1 class="text-white font-black text-[36px] md:text-[48px] uppercase italic tracking-tighter leading-[0.95] mb-4" style="font-family:'Poppins',sans-serif;">
+      Simple Pricing.<br/><span class="text-indigo-400">No Surprises.</span>
+    </h1>
+  </section>
+
+  <!-- MEMBERSHIP TIERS -->
+  <section class="max-w-3xl mx-auto px-8 pb-16 animate-fade-in animate-delay-1">
+    <div class="bg-[#0f172a]/50 rounded-[32px] border border-white/5 p-10 relative overflow-hidden" style="box-shadow: 0 0 60px rgba(0,0,0,0.4);">
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
+      <p class="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-6" style="font-family:'Poppins',sans-serif;">Membership</p>
+
+      <table class="w-full text-left" style="border-collapse: separate; border-spacing: 0;">
+        <thead>
+          <tr>
+            <th class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 pb-3 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Tier</th>
+            <th class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 pb-3 border-b border-white/5 text-right" style="font-family:'Poppins',sans-serif;">Monthly</th>
+          </tr>
+        </thead>
+        <tbody class="text-[14px]">
+          <tr>
+            <td class="py-4 border-b border-white/[0.03]">
+              <strong class="text-white">Explorer</strong>
+              <span class="text-[11px] text-slate-500 block mt-0.5">Up to 5 districts, 10 participants each</span>
+            </td>
+            <td class="py-4 text-right border-b border-white/[0.03]"><span class="text-emerald-400 font-semibold">Free</span></td>
+          </tr>
+          <tr>
+            <td class="py-4 border-b border-white/[0.03]">
+              <strong class="text-white">Resident</strong>
+              <span class="text-[11px] text-slate-500 block mt-0.5">Unlimited districts, earnings eligible, expert IDs</span>
+            </td>
+            <td class="py-4 text-right border-b border-white/[0.03]"><span class="text-white font-semibold">$50</span></td>
+          </tr>
+          <tr>
+            <td class="py-4">
+              <strong class="text-white">Resident Automator</strong>
+              <span class="text-[11px] text-slate-500 block mt-0.5">Everything in Resident + hosted automation, mass email, data hosting</span>
+            </td>
+            <td class="py-4 text-right"><span class="text-white font-semibold">$50</span> <span class="text-[11px] text-purple-400 font-bold">+ PAYG</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- HOSTED AUTOMATION FEES -->
+  <section class="max-w-3xl mx-auto px-8 pb-16 animate-fade-in animate-delay-2">
+    <div class="bg-[#0f172a]/50 rounded-[32px] border border-white/5 p-10 relative overflow-hidden" style="box-shadow: 0 0 60px rgba(0,0,0,0.4);">
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
+      <p class="text-[9px] font-black uppercase tracking-[0.3em] text-purple-400 mb-6" style="font-family:'Poppins',sans-serif;">Pay As You Go</p>
+      <h3 class="text-white font-black text-[22px] uppercase italic tracking-tight leading-tight mb-2" style="font-family:'Poppins',sans-serif;">Hosted Automation Fees (HAF)</h3>
+      <p class="text-[13px] text-slate-500 mb-8">Volume-based pricing scaled to your automation trigger usage per month. First 2,500 triggers are free every month.</p>
+
+      <table class="w-full text-left" style="border-collapse: separate; border-spacing: 0;">
+        <thead>
+          <tr>
+            <th class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 pb-3 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Triggers / month</th>
+            <th class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 pb-3 border-b border-white/5 text-right" style="font-family:'Poppins',sans-serif;">Price</th>
+          </tr>
+        </thead>
+        <tbody class="text-[14px]">
+          <tr><td class="py-3 text-slate-300 border-b border-white/[0.03]">1 — 2,500</td><td class="py-3 text-right border-b border-white/[0.03]"><span class="text-emerald-400 font-semibold">Free</span></td></tr>
+          <tr><td class="py-3 text-slate-300 border-b border-white/[0.03]">2,501 — 5,000</td><td class="py-3 text-slate-300 text-right border-b border-white/[0.03]">$89</td></tr>
+          <tr><td class="py-3 text-slate-300 border-b border-white/[0.03]">5,001 — 10,000</td><td class="py-3 text-slate-300 text-right border-b border-white/[0.03]">$129</td></tr>
+          <tr><td class="py-3 text-slate-300 border-b border-white/[0.03]">10,001 — 20,000</td><td class="py-3 text-slate-300 text-right border-b border-white/[0.03]">$189</td></tr>
+          <tr><td class="py-3 text-slate-300 border-b border-white/[0.03]">20,001 — 50,000</td><td class="py-3 text-slate-300 text-right border-b border-white/[0.03]">$289</td></tr>
+          <tr><td class="py-3 text-slate-300 border-b border-white/[0.03]">50,001 — 100,000</td><td class="py-3 text-slate-300 text-right border-b border-white/[0.03]">$489</td></tr>
+          <tr><td class="py-3 text-slate-300 border-b border-white/[0.03]">100,001 — 200,000</td><td class="py-3 text-slate-300 text-right border-b border-white/[0.03]">$769</td></tr>
+          <tr><td class="py-3 text-slate-300">200,001+</td><td class="py-3 text-slate-300 text-right">$0.004 / trigger</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- REVENUE SHARING -->
+  <section class="max-w-3xl mx-auto px-8 pb-16 animate-fade-in animate-delay-3">
+    <div class="bg-[#0f172a]/50 rounded-[32px] border border-white/5 p-10 relative overflow-hidden" style="box-shadow: 0 0 60px rgba(0,0,0,0.4);">
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent"></div>
+      <p class="text-[9px] font-black uppercase tracking-[0.3em] text-amber-400 mb-6" style="font-family:'Poppins',sans-serif;">The Dividend</p>
+      <h3 class="text-white font-black text-[22px] uppercase italic tracking-tight leading-tight mb-2" style="font-family:'Poppins',sans-serif;">Revenue Sharing on Hosted Automation Fees</h3>
+      <p class="text-[13px] text-slate-500 mb-8">Residents earn a permanent share of the Hosted Automation Fees generated by district usage. Not a referral bonus — a lifetime financial stake.</p>
+
+      <table class="w-full text-left" style="border-collapse: separate; border-spacing: 0;">
+        <thead>
+          <tr>
+            <th class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 pb-3 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Role</th>
+            <th class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 pb-3 border-b border-white/5 text-center" style="font-family:'Poppins',sans-serif;">Share</th>
+            <th class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 pb-3 border-b border-white/5 text-right" style="font-family:'Poppins',sans-serif;">How</th>
+          </tr>
+        </thead>
+        <tbody class="text-[14px]">
+          <tr>
+            <td class="py-4 border-b border-white/[0.03]"><strong class="text-white">Residents</strong></td>
+            <td class="py-4 text-center border-b border-white/[0.03]"><span class="text-amber-400 font-black text-[18px]">40%</span></td>
+            <td class="py-4 text-right text-[12px] text-slate-500 border-b border-white/[0.03]">Share districts — others run hosted automation</td>
+          </tr>
+          <tr>
+            <td class="py-4"><strong class="text-white">District Founders</strong></td>
+            <td class="py-4 text-center"><span class="text-amber-400 font-black text-[18px]">20%</span></td>
+            <td class="py-4 text-right text-[12px] text-slate-500">Create a district used to run hosted automation</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="text-[11px] text-slate-600 mt-6">Revenue sharing applies to Hosted Automation Fees paid by end customers. Makesbridge retains the platform share to operate backend infrastructure, email delivery, data hosting, and automation services.</p>
+    </div>
+  </section>
+
+  <!-- BILLING -->
+  <section class="max-w-3xl mx-auto px-8 pb-20">
+    <div class="bg-[#0f172a]/30 rounded-[32px] border border-white/5 p-10 relative overflow-hidden" style="box-shadow: 0 0 40px rgba(0,0,0,0.3);">
+      <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4" style="font-family:'Poppins',sans-serif;">Billing</p>
+      <div class="space-y-3 text-[13px] text-slate-500 leading-relaxed">
+        <p>Membership fees are billed monthly via Stripe. PAYG hosted automation fees are calculated and billed monthly based on actual usage.</p>
+        <p>Month to month. No contracts. Cancel anytime before your renewal date.</p>
+        <p>Earnings are paid out via Stripe Connected Accounts.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-white/5 mt-8">
+    <div class="max-w-6xl mx-auto px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center space-x-2">
+        <div class="bg-white p-1 rounded-full flex items-center justify-center border border-white/20 overflow-hidden">
+          <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width:16px;height:16px;object-fit:contain;" />
+        </div>
+        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500" style="font-family:'Poppins',sans-serif;">ReadyStack — A Makesbridge Technology Product</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="https://readystackai-rgb.github.io/readystack-eu/pricing.html" class="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Pricing</a>
+        <a href="https://readystack.ai/privacy-policy" class="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Privacy Policy</a>
+        <a href="https://readystack.ai/terms-of-service" class="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Terms of Service</a>
+        <span class="text-[9px] font-black uppercase tracking-widest text-slate-600" style="font-family:'Poppins',sans-serif;">&copy; 2026 Makesbridge Technology, Inc.</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
