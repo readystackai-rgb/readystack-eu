@@ -371,6 +371,16 @@
       });
 
       // Auto-populate a cited creator into the first empty Partner slot
+      // Migrate old string-based storyParticipants to {name, product} objects
+      const migrateParticipants = (data) => {
+        if (!data) return null;
+        const migrate = (arr) => {
+          if (!Array.isArray(arr)) return arr;
+          return arr.map(item => typeof item === 'string' ? { name: item, product: '' } : item);
+        };
+        return { homies: migrate(data.homies || []), besties: migrate(data.besties || []) };
+      };
+
       const autoPopulatePartner = (creatorName) => {
         if (!creatorName || !creatorName.trim()) return;
         const name = creatorName.trim();
@@ -673,7 +683,7 @@
               if (snap.stackLabel) setStackLabel(snap.stackLabel);
               if (snap.activeTab) setActiveTab(snap.activeTab);
               if (snap.isSearchPanelOpen === false) setIsSearchPanelOpen(false);
-              if (snap.storyParticipants) setStoryParticipants(snap.storyParticipants);
+              if (snap.storyParticipants) setStoryParticipants(migrateParticipants(snap.storyParticipants));
               if (snap.angelChoices) setAngelChoices(snap.angelChoices);
               if (snap.angelAmounts) setAngelAmounts(snap.angelAmounts);
               if (snap.mapping) setMapping(snap.mapping);
@@ -870,7 +880,7 @@
             setVideoStory(null);
           }
 
-          if (state.storyParticipants) setStoryParticipants(state.storyParticipants);
+          if (state.storyParticipants) setStoryParticipants(migrateParticipants(state.storyParticipants));
           if (state.angelChoices) setAngelChoices(state.angelChoices);
           if (state.angelAmounts) setAngelAmounts(state.angelAmounts);
 
