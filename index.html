@@ -723,7 +723,13 @@
               if (snap.stackLabel) setStackLabel(snap.stackLabel);
               if (snap.activeTab) setActiveTab(snap.activeTab);
               if (snap.isSearchPanelOpen === false) setIsSearchPanelOpen(false);
-              if (snap.storyParticipants) setStoryParticipants(migrateParticipants(snap.storyParticipants));
+              if (snap.storyParticipants) {
+                setStoryParticipants(migrateParticipants(snap.storyParticipants));
+              } else if (snap.mapping && snap.mapping.residents && snap.mapping.residents.length > 0) {
+                const restored = snap.mapping.residents.map(r => ({ name: r.name || '', company: r.company || '', specialty: r.specialty || '' }));
+                while (restored.length < 10) restored.push({ name: '', company: '', specialty: '' });
+                setStoryParticipants({ residents: restored.slice(0, 10) });
+              }
               if (snap.angelChoices) setAngelChoices(snap.angelChoices);
               if (snap.angelAmounts) setAngelAmounts(snap.angelAmounts);
               if (snap.mapping) setMapping(snap.mapping);
@@ -914,7 +920,14 @@
             setVideoStory(null);
           }
 
-          if (state.storyParticipants) setStoryParticipants(migrateParticipants(state.storyParticipants));
+          // Restore residents: prefer storyParticipants, fallback to mapping.residents
+          if (state.storyParticipants) {
+            setStoryParticipants(migrateParticipants(state.storyParticipants));
+          } else if (state.mapping && state.mapping.residents && state.mapping.residents.length > 0) {
+            const restored = state.mapping.residents.map(r => ({ name: r.name || '', company: r.company || '', specialty: r.specialty || '' }));
+            while (restored.length < 10) restored.push({ name: '', company: '', specialty: '' });
+            setStoryParticipants({ residents: restored.slice(0, 10) });
+          }
           if (state.angelChoices) setAngelChoices(state.angelChoices);
           if (state.angelAmounts) setAngelAmounts(state.angelAmounts);
 
@@ -1217,7 +1230,8 @@
               selecting: [...rsSelecting, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Product Tour', platform: 'tour', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Live Demo', platform: 'demo', ga4Count: 1000 }])), ...manualSelecting],
               executing: [...rsExecuting, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Watch Tutorial', platform: 'webinar', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Partner Checkout', platform: 'partner_checkout', price: 1000, ga4Count: 1000 }])), ...manualExecuting],
               expanding: [...rsExpanding, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Affiliate Sign Up', platform: 'affiliate', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Success Case Study', platform: 'case_study', ga4Count: 1000 }])), ...manualExpanding],
-              angels: prev.angels || []
+              angels: prev.angels || [],
+              residents: storyParticipants.residents.filter(r => (r.name || '').trim())
             };
         });
         setActiveTab(target);
@@ -1555,12 +1569,7 @@
               {/* NEW MY DISTRICTS SECTION */}
               <div className="mb-6 border-b border-white/10 pb-6">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-slate-400">
-                      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                    </svg>
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">My Districts</h3>
-                  </div>
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">My Districts</h3>
                   {rsSession && (
                     <button
                       onClick={() => {
@@ -1605,7 +1614,7 @@
                           ) : (
                             <div className="flex items-center">
                               <button
-                                onClick={() => handleLoadDistrict(d.sheetId)}
+                                onClick={() => { handleLoadDistrict(d.sheetId); setActiveTab('youtube'); }}
                                 className={`flex-1 text-left px-3 py-2.5 rounded-xl transition-all text-[11px] truncate ${
                                   rsSheetId === d.sheetId
                                     ? 'bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-bold'
@@ -2240,43 +2249,6 @@
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
 
-                    {/* Cited Voices — auto-populated from Featured YouTube */}
-                    {(() => {
-                      const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.lab || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
-                      if (citedAuthors.length === 0) return null;
-                      return (
-                        <div className="bg-[#0f172a]/60 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
-                          <div className="flex items-center gap-3 mb-4">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-400"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            <h5 className="text-[11px] font-black text-white uppercase tracking-widest">Cited Voices</h5>
-                            <span className="text-[9px] text-slate-500 italic ml-1">from Featured YouTube</span>
-                          </div>
-                          <div className="flex flex-wrap gap-3">
-                            {citedAuthors.map((a, i) => (
-                              <div key={i} className="relative group">
-                                <div className="flex items-center gap-2.5 bg-[#020617] border border-white/10 rounded-xl px-4 py-2.5 cursor-pointer transition-all hover:border-white/20">
-                                  {a.platform === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-red-400 shrink-0"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
-                                  {a.platform === 'substack' && <SubstackIcon size={12} className="text-orange-400 shrink-0" />}
-                                  {a.platform === 'reddit' && <RedditIcon size={12} className="text-orange-500 shrink-0" />}
-                                  <span className="text-[10px] font-bold text-white">{a.name}</span>
-                                </div>
-                                <div className="absolute top-full left-0 mt-2 z-50 bg-[#0f172a] border border-white/10 rounded-xl p-2 shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity w-48">
-                                  {a.url && <button onClick={() => window.open(a.url, '_blank')} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                    Visit Profile
-                                  </button>}
-                                  <button onClick={() => { autoPopulatePartner(a.name); }} className="w-full text-left px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center gap-2">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                    Add as Resident
-                                  </button>
-                                  
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })()}
 
                     <div>
                         <div className="bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
@@ -2454,7 +2426,7 @@
                 <div className="space-y-10">
                   <div className="text-center space-y-3">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter">INVITE RESIDENTS</h3>
-                    <p className="text-slate-400 italic text-sm">Let your Cited Voices know you're spreading the word.</p>
+                    <p className="text-slate-400 italic text-sm">Let your featured sources know you're spreading the word.</p>
                   </div>
 
                   {(() => {
