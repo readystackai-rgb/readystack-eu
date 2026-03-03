@@ -356,9 +356,7 @@
 
       const [mapping, setMapping] = useState({
         sources: [
-          { ven: 'YouTube', lab: 'Strategy Video', type: 'youtube', ga4Count: 18420 },
-          { ven: 'Substack', lab: 'Newsletter', type: 'substack', ga4Count: 18420 },
-          { ven: 'Reddit', lab: 'Discussion', type: 'reddit', ga4Count: 18420 }
+          { ven: 'YouTube', lab: 'Strategy Video', type: 'youtube', ga4Count: 18420 }
         ],
         learning: [], selecting: [], executing: [], expanding: [], angels: []
       });
@@ -1206,17 +1204,12 @@
         const rsExecuting = [ { ven: 'ReadyStack', lab: 'Copy ReadyStack', platform: 'starting', dedicated: true, internal: true, ga4Count: 3400 }, { ven: 'ReadyStack', lab: 'Upload Data', platform: 'uploads', dedicated: true, internal: true, ga4Count: 1200 }, { id: 'rs-api', ven: 'ReadyStack', lab: 'ReadyStack Activation', platform: 'api_config', dedicated: true, internal: true, ga4Count: 4500 }, { id: 'rs-commerce', ven: 'ReadyStack', lab: 'ReadyStack Checkout', platform: 'commerce', dedicated: true, internal: true, price: 1200, ga4Count: 1200 } ];
         const rsExpanding = [ { ven: 'ReadyStack', lab: 'Shares ReadyStack', platform: 'network_invite', dedicated: true, internal: true, ga4Count: 1200 }, { ven: 'ReadyStack', lab: 'Check ReadyStack Earnings', platform: 'deposits', dedicated: true, internal: true, ga4Count: 2300 }, { ven: 'ReadyStack', lab: 'Schedules ReadyStack Onboarding', platform: 'success', dedicated: true, internal: true, ga4Count: 3400 } ];
         
-        const nextAngels = [];
-        if (angelChoices.observe) nextAngels.push({ lab: 'Observation Angel', platform: 'observer', amount: angelAmounts.observe, startups: [] });
-        if (angelChoices.awareness) nextAngels.push({ lab: 'District Awareness Angel', platform: 'awareness', amount: angelAmounts.awareness, startups: [] });
-        if (angelChoices.invest) nextAngels.push({ lab: 'Investment Angel', platform: 'seed', amount: angelAmounts.invest, startups: allParticipants.slice(0, 3).map(p => p.name) });
-        
+        // Angels are managed directly in District Finance — preserve them as-is
         setMapping(prev => {
             const manualLearning = prev.learning ? prev.learning.filter(p => p.isManual) : [];
             const manualSelecting = prev.selecting ? prev.selecting.filter(p => p.isManual) : [];
             const manualExecuting = prev.executing ? prev.executing.filter(p => p.isManual) : [];
             const manualExpanding = prev.expanding ? prev.expanding.filter(p => p.isManual) : [];
-            const manualAngels = (prev.angels || []).filter(a => a.isManual);
 
             return {
               ...prev,
@@ -1224,14 +1217,14 @@
               selecting: [...rsSelecting, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Product Tour', platform: 'tour', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Live Demo', platform: 'demo', ga4Count: 1000 }])), ...manualSelecting],
               executing: [...rsExecuting, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Watch Tutorial', platform: 'webinar', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Partner Checkout', platform: 'partner_checkout', price: 1000, ga4Count: 1000 }])), ...manualExecuting],
               expanding: [...rsExpanding, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Affiliate Sign Up', platform: 'affiliate', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Success Case Study', platform: 'case_study', ga4Count: 1000 }])), ...manualExpanding],
-              angels: [...nextAngels, ...manualAngels]
+              angels: prev.angels || []
             };
         });
         setActiveTab(target);
       };
 
       const handleSourceUpdate = (idx, key, val) => { setMapping(prev => { const next = [...prev.sources]; next[idx] = {...next[idx], [key]: val}; return { ...prev, sources: next }; }); };
-      const addSource = () => { setMapping(prev => ({ ...prev, sources: [...prev.sources, { ven: '', lab: 'New Source', type: 'substack', ga4Count: 18420, isManual: true }] })); };
+      const addSource = () => { setMapping(prev => ({ ...prev, sources: [...prev.sources, { ven: '', lab: 'New Source', type: 'youtube', ga4Count: 18420, isManual: true }] })); };
       const removeSource = (idx) => { setMapping(prev => ({ ...prev, sources: prev.sources.filter((_, i) => i !== idx) })); };
       const handlePatternUpdate = (stageId, idx, key, val) => { setMapping(prev => { const next = [...(prev[stageId] || [])]; if (next[idx]) next[idx] = {...next[idx], [key]: val}; return { ...prev, [stageId]: next }; }); };
       
@@ -1580,9 +1573,7 @@
                         setIsSearchPanelOpen(true);
                         setMapping({
                           sources: [
-                            { ven: 'YouTube', lab: 'Strategy Video', type: 'youtube', ga4Count: 18420 },
-                            { ven: 'Substack', lab: 'Newsletter', type: 'substack', ga4Count: 18420 },
-                            { ven: 'Reddit', lab: 'Discussion', type: 'reddit', ga4Count: 18420 }
+                            { ven: 'YouTube', lab: 'Strategy Video', type: 'youtube', ga4Count: 18420 }
                           ],
                           learning: [], selecting: [], executing: [], expanding: [], angels: []
                         });
@@ -1651,7 +1642,7 @@
               <div className="mb-8 whitespace-nowrap">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">District Setup</h3>
                 <div className="w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-white/5">
-                  <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-500" style={{ width: `${Math.max(12.5, (['youtube', 'intro', 'mapper', 'observatory', 'connect', 'looker', 'g4', 'automation'].indexOf(activeTab) + 1) * 12.5)}%` }}></div>
+                  <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-500" style={{ width: `${Math.max(11.1, (['youtube', 'intro', 'mapper', 'finance', 'observatory', 'connect', 'looker', 'g4', 'automation'].indexOf(activeTab) + 1) * 11.1)}%` }}></div>
                 </div>
               </div>
               
@@ -1817,30 +1808,15 @@
               <div className="max-w-5xl mx-auto animate-fade-in space-y-6 text-left pt-16 pb-10">
                   <div className="text-center space-y-3 mb-6">
                       <h3 className="text-3xl font-black text-white uppercase tracking-tighter">FEATURED YOUTUBE</h3>
-                      <p className="text-slate-500 italic text-xs">Feature the YouTube voices that shape this space. One voice per platform.</p>
+                      <p className="text-slate-500 italic text-xs">Search for authority or paste an embed code to anchor your District.</p>
                   </div>
 
-                  {/* ── Platform Tabs — always visible ── */}
+                  {/* ── YouTube Search Header ── */}
                   <div className="flex gap-1 justify-center">
-                    {[
-                      { id: 'youtube', label: 'YouTube', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor" stroke="none"/></svg> },
-                      { id: 'substack', label: 'Substack', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M4 4h16"/><path d="M4 8h16"/><path d="M4 12l8 6 8-6"/></svg> },
-                      { id: 'reddit', label: 'Reddit', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><circle cx="12" cy="12" r="10"/><path d="M16.5 14.5c-.7.7-2 1.5-4.5 1.5s-3.8-.8-4.5-1.5"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="15" cy="11" r="1" fill="currentColor"/><path d="M17 8l2-2"/><circle cx="19.5" cy="5.5" r="1"/></svg> }
-                    ].map(p => {
-                      const isActive = (searchPlatform || 'youtube') === p.id;
-                      const hasSource = mapping.sources?.some(s => s.type === p.id && s.url);
-                      return (
-                        <button
-                          key={p.id}
-                          onClick={() => { setSearchPlatform(p.id); setSearchResults([]); setPlatformResults([]); setSearchError(null); setYoutubeInput(''); }}
-                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${isActive ? 'text-white bg-white/10 border-white/20' : hasSource ? 'text-white/60 border-white/10 bg-white/5' : 'text-slate-600 border-transparent hover:text-slate-400 hover:border-white/10'}`}
-                        >
-                          {p.icon}
-                          {p.label}
-                          {hasSource && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 text-white/40"><polyline points="20 6 9 17 4 12"/></svg>}
-                        </button>
-                      );
-                    })}
+                    <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white bg-white/10 border border-white/20">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor" stroke="none"/></svg>
+                      YOUTUBE SEARCH OR EMBED LINK
+                    </div>
                   </div>
 
                   <div className="bg-[#020617]/50 p-8 rounded-[32px] border border-white/5 shadow-inner space-y-6">
@@ -1960,7 +1936,7 @@
                                   disabled={isSearching}
                                   className="bg-white/10 hover:bg-white/15 disabled:opacity-30 px-6 rounded-xl text-white font-black uppercase tracking-widest text-[9px] transition-all border border-white/10"
                                 >
-                                  {isSearching ? '...' : 'Search'}
+                                  {isSearching ? '...' : 'Search / Resolve'}
                                 </button>
                               </div>
                             </div>
@@ -2302,7 +2278,7 @@
                       );
                     })()}
 
-                    <div className="max-w-3xl mx-auto">
+                    <div>
                         <div className="bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
                             <div className="flex items-center justify-between mb-5">
                               <h5 className="text-xs font-black text-white/70 uppercase tracking-widest">RESIDENTS</h5>
@@ -2466,39 +2442,6 @@
                       </div>
                     </div>
                   )})}
-                <div className="p-10 rounded-[40px] bg-amber-500/5 border border-amber-500/20 shadow-2xl mb-12 text-left">
-                   <h4 className="text-amber-400 text-[12px] font-black uppercase tracking-[0.3em] mb-10 italic text-left">ANGEL INVESTORS</h4>
-                   <div className="space-y-6 text-left">
-                      {(mapping.angels || []).map((a, scoutIdx) => (
-                        <div key={scoutIdx} className="bg-[#0f172a] p-8 rounded-3xl border border-slate-800 shadow-xl space-y-6 text-left">
-                           <div className="grid grid-cols-12 gap-4 items-center group text-left">
-                              <div className="col-span-11 grid grid-cols-4 gap-4 text-left">
-                                 <div className="space-y-1 text-left text-left text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Investor Name</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left" placeholder="Investor Name" value={a.lab} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'lab', e.target.value)} /></div>
-                                 <div className="space-y-1 text-left text-left text-left text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Class</label><select className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] outline-none text-left" value={a.platform} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'platform', e.target.value)}><option value="observer">Observation Angel</option><option value="awareness">District Awareness Angel</option><option value="seed">Investment Angel</option></select></div>
-                                 <div className="space-y-1 text-left text-left text-left text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left text-left">{a.platform === 'observer' ? 'Pending Investment' : 'Investment'}</label><input type="number" min="50000" step="10000" className={`w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left text-left`} value={a.amount} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'amount', parseInt(e.target.value))} /></div>
-                                 <div className="space-y-1 text-left text-left text-left text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Portfolio</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left text-left" placeholder="URL" value={a.pat} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'pat', e.target.value)} /></div>
-                              </div>
-                              <div className="flex items-center gap-2 text-left">
-                                <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity text-left">
-                                  <button onClick={() => movePattern('angels', scoutIdx, -1)} className="p-1 hover:text-amber-400 text-slate-700 disabled:opacity-0 text-left text-left" disabled={scoutIdx === 0}><svg xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
-                                  <button onClick={() => movePattern('angels', scoutIdx, 1)} className="p-1 hover:text-amber-400 text-slate-700 disabled:opacity-0 text-left text-left" disabled={scoutIdx === (mapping.angels || []).length - 1}><svg xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
-                                </div>
-                                <button onClick={() => removePattern('angels', scoutIdx)} className="text-slate-600 hover:text-red-500 flex justify-center text-left text-left text-left text-left"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg></button>
-                              </div>
-                           </div>
-                           {a.platform === 'seed' && (<div className="pl-6 border-l-2 border-emerald-500/20 space-y-4 text-left"><h5 className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic text-left">Startup Allocations</h5><div className="flex flex-wrap gap-3 text-left">{a.startups?.map((startupVen, startupIdx) => (
-                               <div key={startupIdx} className="flex items-center gap-2 bg-[#0a0f1e] border border-emerald-500/30 rounded-full pl-4 pr-2 py-1.5 shadow-inner text-left">
-                                   <select className="bg-transparent text-white text-[10px] outline-none font-bold italic uppercase tracking-tight text-left text-left" value={startupVen} onChange={(e) => updateScoutStartup(scoutIdx, startupIdx, e.target.value)}>
-                                       {(mapping.learning || []).map((p, pIdx) => <option key={pIdx} value={p.ven}>{p.ven || `Partner ${pIdx+1}`}</option>)}
-                                   </select>
-                                   <button onClick={() => removeStartupFromScout(scoutIdx, startupIdx)} className="text-slate-500 hover:text-red-400 p-1 text-left text-left text-left"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                               </div>))}<button onClick={() => addStartupToScout(scoutIdx)} className="text-[9px] font-black text-emerald-400 hover:text-white transition-all uppercase tracking-widest text-left text-left">+ Add Startup</button></div></div>)}
-                        </div>
-                      ))}
-                      <button onClick={() => addPattern('angels')} className="flex items-center gap-2 text-[10px] font-black text-amber-400 uppercase tracking-widest mt-6 hover:text-indigo-300 transition-all text-left text-left text-left">+ Add Angel Investor</button>
-                   </div>
-                </div>
-
                 <div className="py-6 text-center">
                     <button onClick={() => setActiveTab('finance')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">CONTINUE TO DISTRICT FINANCE</button>
                 </div>
@@ -2578,16 +2521,37 @@
                     <p className="text-slate-400 italic text-sm">Manage angel participation and view your district revenue snapshot.</p>
                   </div>
 
-                  {/* Angels Section — moved from Residents */}
-                  <div className="bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
-                    <h5 className="text-xs font-black text-white/70 uppercase tracking-widest mb-4">ANGELS <span className="text-[9px] opacity-50 italic ml-2">DISTRICT CAPITAL</span></h5>
-                    <div className="space-y-2">
-                      {[ { id: 'observe', label: 'DISTRICT OBSERVATION' }, { id: 'awareness', label: 'FUNDS DISTRICT AWARENESS', amountKey: 'awareness' }, { id: 'invest', label: 'INVESTS IN RESIDENTS', amountKey: 'invest' } ].map(opt => (
-                        <div key={opt.id} className={`p-3 rounded-xl border transition-all cursor-pointer ${angelChoices[opt.id] ? 'bg-white/5 border-white/20' : 'bg-slate-900 border-white/5'}`} onClick={() => setAngelChoices(prev => ({...prev, [opt.id]: !prev[opt.id]}))}>
-                          <div className="flex items-center gap-2 mb-1.5"><div className={`w-3 h-3 rounded border flex items-center justify-center ${angelChoices[opt.id] ? 'bg-white/30 border-white/40' : 'border-slate-700'}`}>{angelChoices[opt.id] && <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>}</div><span className="text-[10px] font-black text-white uppercase tracking-tight text-left">{opt.label}</span></div>
-                          {opt.amountKey && angelChoices[opt.id] && (<div className="mt-2 text-left"><label className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Pending Investment</label><input type="number" value={angelAmounts[opt.amountKey]} onChange={(e) => { const val = parseInt(e.target.value); setAngelAmounts(prev => ({...prev, [opt.amountKey]: isNaN(val) ? 0 : val})); }} onClick={e => e.stopPropagation()} className="w-full bg-[#020617] border border-slate-800 rounded-lg p-2 text-[10px] text-white font-mono" /></div>)}
+                  {/* Angel Investors — full form */}
+                  <div className="p-10 rounded-[40px] bg-amber-500/5 border border-amber-500/20 shadow-2xl text-left">
+                    <h4 className="text-amber-400 text-[12px] font-black uppercase tracking-[0.3em] mb-10 italic text-left">ANGEL INVESTORS</h4>
+                    <div className="space-y-6 text-left">
+                      {(mapping.angels || []).map((a, scoutIdx) => (
+                        <div key={scoutIdx} className="bg-[#0f172a] p-8 rounded-3xl border border-slate-800 shadow-xl space-y-6 text-left">
+                           <div className="grid grid-cols-12 gap-4 items-center group text-left">
+                              <div className="col-span-11 grid grid-cols-4 gap-4 text-left">
+                                 <div className="space-y-1 text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Investor Name</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left" placeholder="Investor Name" value={a.lab} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'lab', e.target.value)} /></div>
+                                 <div className="space-y-1 text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Class</label><select className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] outline-none text-left" value={a.platform} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'platform', e.target.value)}><option value="observer">Observation Angel</option><option value="awareness">District Awareness Angel</option><option value="seed">Investment Angel</option></select></div>
+                                 <div className="space-y-1 text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">{a.platform === 'observer' ? 'Pending Investment' : 'Investment'}</label><input type="number" min="50000" step="10000" className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left" value={a.amount} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'amount', parseInt(e.target.value))} /></div>
+                                 <div className="space-y-1 text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Portfolio</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left" placeholder="URL" value={a.pat} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'pat', e.target.value)} /></div>
+                              </div>
+                              <div className="flex items-center gap-2 text-left">
+                                <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity text-left">
+                                  <button onClick={() => movePattern('angels', scoutIdx, -1)} className="p-1 hover:text-amber-400 text-slate-700 disabled:opacity-0" disabled={scoutIdx === 0}><svg xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
+                                  <button onClick={() => movePattern('angels', scoutIdx, 1)} className="p-1 hover:text-amber-400 text-slate-700 disabled:opacity-0" disabled={scoutIdx === (mapping.angels || []).length - 1}><svg xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+                                </div>
+                                <button onClick={() => removePattern('angels', scoutIdx)} className="text-slate-600 hover:text-red-500 flex justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg></button>
+                              </div>
+                           </div>
+                           {a.platform === 'seed' && (<div className="pl-6 border-l-2 border-emerald-500/20 space-y-4 text-left"><h5 className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic text-left">Startup Allocations</h5><div className="flex flex-wrap gap-3 text-left">{a.startups?.map((startupVen, startupIdx) => (
+                               <div key={startupIdx} className="flex items-center gap-2 bg-[#0a0f1e] border border-emerald-500/30 rounded-full pl-4 pr-2 py-1.5 shadow-inner text-left">
+                                   <select className="bg-transparent text-white text-[10px] outline-none font-bold italic uppercase tracking-tight text-left" value={startupVen} onChange={(e) => updateScoutStartup(scoutIdx, startupIdx, e.target.value)}>
+                                       {(mapping.learning || []).map((p, pIdx) => <option key={pIdx} value={p.ven}>{p.ven || `Partner ${pIdx+1}`}</option>)}
+                                   </select>
+                                   <button onClick={() => removeStartupFromScout(scoutIdx, startupIdx)} className="text-slate-500 hover:text-red-400 p-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                               </div>))}<button onClick={() => addStartupToScout(scoutIdx)} className="text-[9px] font-black text-emerald-400 hover:text-white transition-all uppercase tracking-widest">+ Add Startup</button></div></div>)}
                         </div>
                       ))}
+                      <button onClick={() => addPattern('angels')} className="flex items-center gap-2 text-[10px] font-black text-amber-400 uppercase tracking-widest mt-6 hover:text-indigo-300 transition-all text-left">+ Add Angel Investor</button>
                     </div>
                   </div>
 
@@ -2600,12 +2564,12 @@
                         <p className="text-2xl font-black text-white">{storyParticipants.residents.filter(r => (r.name || '').trim()).length}</p>
                       </div>
                       <div className="bg-[#020617] rounded-xl p-4 border border-white/5 text-center">
-                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Angel Programs</p>
-                        <p className="text-2xl font-black text-white">{Object.values(angelChoices).filter(Boolean).length}</p>
+                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Angel Investors</p>
+                        <p className="text-2xl font-black text-white">{(mapping.angels || []).length}</p>
                       </div>
                       <div className="bg-[#020617] rounded-xl p-4 border border-white/5 text-center">
                         <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Pending Capital</p>
-                        <p className="text-2xl font-black text-white">${(angelChoices.awareness ? angelAmounts.awareness : 0) + (angelChoices.invest ? angelAmounts.invest : 0)}</p>
+                        <p className="text-2xl font-black text-white">${(mapping.angels || []).reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
