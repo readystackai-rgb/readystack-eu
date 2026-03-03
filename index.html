@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Deployed via ReadyStack AI Ops | 2026-03-01 03:33 UTC -->
 <html lang="en">
 <head>
   <meta charset="UTF-8"
@@ -7,6 +6,7 @@
   <title>ReadyStack Engagement Utility</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+/* MARKER_0 */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;700;900&display=swap');
 
     :root {
@@ -123,6 +123,7 @@
       70%  { box-shadow: 0 0 0 10px rgba(124, 140, 255, 0); }
       100% { box-shadow: 0 0 0 0 rgba(124, 140, 255, 0); }
     }
+/* MARKER_99 */
   </style>
 </head>
 <body>
@@ -134,40 +135,21 @@
   <script type="text/babel">
     const { useState, useRef, useMemo, useEffect } = React;
 
-    const ReadyStackLogo = ({ size = 24, variant = 'light' }) => (
-      <div className="flex items-center justify-center overflow-hidden transition-all duration-300">
+/* MARKER_200 */
+    const ReadyStackLogo = ({ size = 24 }) => (
+      <div className="bg-white p-1.5 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.4)] border-2 border-white overflow-hidden transition-all duration-300">
         <img 
-          src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png"
-          alt="ReadyStack"
-          style={{ 
-            width: size, 
-            height: size, 
-            objectFit: 'contain',
-            borderRadius: '4px'
+          src="https://lh3.googleusercontent.com/d/1-cfFYPbbR6LgEbtV7J9__PNewwAnIZim" 
+          alt="ReadyStack" 
+          style={{ width: size, height: size, objectFit: 'contain' }} 
+          onError={(e) => {
+            e.target.onerror = null; 
+            e.target.src = 'https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png';
+            e.target.style.filter = 'brightness(0)';
           }}
         />
       </div>
     );
-
-    const DistrictSquareIcon = ({ size = 12 }) => {
-      const gap = Math.max(1, size * 0.15);
-      const cell = (size - gap) / 2;
-      return (
-        <div style={{ display: 'grid', gridTemplateColumns: `${cell}px ${cell}px`, gap: `${gap}px`, width: size, height: size }}>
-          <div style={{ backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '1.5px' }} />
-          <div style={{ backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '1.5px' }} />
-          <div style={{ backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '1.5px' }} />
-          <div style={{ backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '1.5px' }} />
-        </div>
-      );
-    };
-
-    const RedditIcon = ({ size = 14, className = "" }) => (
-      <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" className={className}>
-        <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
-      </svg>
-    );
-
 
     const AngelIcon = ({ size = 14, className = "" }) => (
       <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -211,16 +193,14 @@
       };
       const iconName = iconMap[type] || 'circle';
       useEffect(() => {
-        if (containerRef.current && typeof lucide !== 'undefined' && !['substack', 'youtube', 'reddit'].includes(type)) {
+        if (containerRef.current && typeof lucide !== 'undefined' && type !== 'substack') {
           containerRef.current.innerHTML = `<i data-lucide="${iconName}" style="width: ${size}px; height: ${size}px"></i>`;
           lucide.createIcons({ nameAttr: 'data-lucide' });
         }
       }, [type, iconName, size]);
-      if (type === 'gateway') return <ReadyStackLogo size={size} variant="light" />;
+      if (type === 'gateway') return <ReadyStackLogo size={size} />;
       if (['observer', 'awareness', 'seed'].includes(type)) return <AngelIcon size={size} className={className} />;
-      if (type === 'youtube') return <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} className={className}><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.546 12 3.546 12 3.546s-7.505 0-9.377.504A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.504 9.376.504 9.376.504s7.505 0 9.377-.504a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>;
       if (type === 'substack') return <SubstackIcon size={size} className={className} />;
-      if (type === 'reddit') return <RedditIcon size={size} className={className} />;
       return <span ref={containerRef} className={`inline-flex items-center justify-center pointer-events-none ${className}`} style={{ width: size, height: size }} />;
     };
 
@@ -285,6 +265,7 @@
         </div>
       );
     };
+/* MARKER_209 */
 
     const stages = [
       { id: 'learning', label: 'LEARNING', color: '#ff2a1a' },
@@ -296,6 +277,7 @@
     const App = () => {
 
 
+/* MARKER_210 */
       const CONTENT_BLACKLIST = [
         { terms: ["exposed","unbelievable","wait for it","you won't believe","crazy","insane"], reason: "Content does not meet quality standards." },
         { terms: ["prank","challenge","reaction","vlog","daily life","storytime","grwm"], reason: "Content does not meet standards of trust." },
@@ -321,7 +303,7 @@
       const [isLiveData, setIsLiveData] = useState(false);
       const [isRailOpen, setIsRailOpen] = useState(true);
       
-      const [searchPlatform, setSearchPlatform] = useState('youtube');
+/* MARKER_211 */
       const [youtubeInput, setYoutubeInput] = useState('');
       const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState('');
       const [selectedVideoData, setSelectedVideoData] = useState(null);
@@ -335,15 +317,17 @@
       const [storyOutline, setStoryOutline] = useState(null);
       const [isGeneratingStory, setIsGeneratingStory] = useState(false);
 
+/* MARKER_212 */
       const [videoStory, setVideoStory] = useState(null);
       const [playbackProgress, setPlaybackProgress] = useState(0);
       const [isNarrativePlaying, setIsNarrativePlaying] = useState(false);
       const narrativeInterval = useRef(null);
 
-      const [storyParticipants, setStoryParticipants] = useState({ homies: [{name:'',product:''},{name:'',product:''},{name:'',product:''},{name:'',product:''},{name:'',product:''},{name:'',product:''}], besties: [{name:'',product:''},{name:'',product:''},{name:'',product:''}] });
+      const [storyParticipants, setStoryParticipants] = useState({ homies: ['', '', ''], besties: ['', '', ''], pursuits: ['', '', ''] });
       const [storyError, setStoryError] = useState(null);
       const [angelChoices, setAngelChoices] = useState({ observe: false, awareness: false, invest: false });
       const [angelAmounts, setAngelAmounts] = useState({ observe: 10000, awareness: 25000, invest: 100000 });
+/* MARKER_213 */
       const [rsSession, setRsSession] = useState(null);       // { sessionId, email }
       const [rsSheetId, setRsSheetId] = useState(null);       // active district Sheet ID
       const [isSaving, setIsSaving] = useState(false);
@@ -352,309 +336,20 @@
       const [showUserMenu, setShowUserMenu] = useState(false);
       const [draggedItem, setDraggedItem] = useState(null);
       const [deletingDistrictId, setDeletingDistrictId] = useState(null);
-      const [residentAssignments, setResidentAssignments] = useState({});
-      const [additionalWNTH, setAdditionalWNTH] = useState([]);
-      const [financeAccepted, setFinanceAccepted] = useState(false);
-      const [financeSplit, setFinanceSplit] = useState('default');
 
       const [mapping, setMapping] = useState({
         sources: [
-          { ven: 'YouTube', lab: 'Strategy Video', type: 'youtube', ga4Count: 18420 }
+          { ven: 'LinkedIn', lab: 'Organic Post', type: 'linkedin', ga4Count: 18420 },
+          { ven: 'YouTube', lab: 'Strategy Video', type: 'youtube', ga4Count: 18420 },
+          { ven: 'Substack', lab: 'Newsletter Feed', type: 'substack', ga4Count: 18420 }
         ],
         learning: [], selecting: [], executing: [], expanding: [], angels: []
       });
 
-      // Auto-populate a cited creator into the first empty Partner slot
-      // Migrate old string-based storyParticipants to {name, product} objects
-      const migrateParticipants = (data) => {
-        if (!data) return null;
-        const migrate = (arr) => {
-          if (!Array.isArray(arr)) return arr;
-          return arr.map(item => typeof item === 'string' ? { name: item, product: '' } : item);
-        };
-        return { homies: migrate(data.homies || []), besties: migrate(data.besties || []) };
-      };
-
-      const autoPopulatePartner = (creatorName) => {
-        if (!creatorName || !creatorName.trim()) return;
-        const name = creatorName.trim();
-        setStoryParticipants(prev => {
-          // Don't add if already present in any category
-          const allNames = [...prev.homies, ...prev.besties].map(n => (n.name || '').toLowerCase().trim());
-          if (allNames.includes(name.toLowerCase())) return prev;
-          // Find first empty Partner slot
-          const emptyIdx = prev.homies.findIndex(h => !(h.name || '').trim());
-          if (emptyIdx === -1) {
-            // All slots full — expand the array
-            return { ...prev, homies: [...prev.homies, {name: name, product: ''}] };
-          }
-          const next = [...prev.homies];
-          next[emptyIdx] = {name: name, product: ''};
-          return { ...prev, homies: next };
-        });
-      };
-
-      // Handle non-YouTube platform URL submissions
-      const handlePlatformUrl = () => {
-        const url = youtubeInput.trim();
-        if (!url) return;
-        const platform = searchPlatform || 'youtube';
-        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
-        // Check platform limits
-        const existingCount = (mapping.sources || []).filter(s => s.type === platform).length;
-        if (platform === 'youtube' && existingCount > 0) {
-          alert(`You already have a YouTube source. One per platform.`);
-          return;
-        }
-        if ((platform === 'substack' || platform === 'reddit') && existingCount >= 3) {
-          alert(`Maximum 3 sources per platform.`);
-          return;
-        }
-        let displayName = url;
-        let authorName = '';
-        try {
-          const parsed = new URL(url.startsWith('http') ? url : 'https://' + url);
-          const pathParts = parsed.pathname.split('/').filter(Boolean);
-          displayName = decodeURIComponent(pathParts.pop() || parsed.hostname);
-          // Extract author from URL patterns
-          if (platform === 'substack') {
-            authorName = parsed.hostname.split('.')[0].replace(/-/g, ' ');
-          } else if (platform === 'reddit' && pathParts.length >= 2 && pathParts[0] === 'u') {
-            authorName = pathParts[1];
-          } else if (pathParts.length > 0) {
-            // Fallback: use first meaningful path segment as author hint
-            authorName = decodeURIComponent(pathParts[0]).replace(/-/g, ' ');
-          }
-        } catch(e) {}
-        const newSource = {
-          ven: platformLabels[platform] || platform,
-          lab: displayName.replace(/-/g, ' ').substring(0, 40),
-          type: platform,
-          url: url.startsWith('http') ? url : 'https://' + url,
-          author: authorName,
-          ga4Count: 0
-        };
-        setMapping(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
-        setYoutubeInput('');
-        setSearchPlatform('youtube');
-      };
-
-      // Platform search results (non-YouTube)
-      const [platformResults, setPlatformResults] = useState([]);
-      const [isPlatformSearching, setIsPlatformSearching] = useState(false);
-
-      // Search non-YouTube platforms via cloud function (Gemini-powered)
-      // Google Custom Search — returns real, indexed URLs (no hallucination)
-      const googleCustomSearch = async (query, platform) => {
-        const siteFilter = platform === 'substack' ? 'substack.com' : 'reddit.com';
-        const dateRestrict = 'm1'; // last month
-        const url = `https://www.googleapis.com/customsearch/v1?key=${ytApiKey}&cx=${GOOGLE_CSE_CX}&q=${encodeURIComponent(query)}&siteSearch=${siteFilter}&siteSearchFilter=i&dateRestrict=${dateRestrict}&num=5`;
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error(`CSE ${resp.status}`);
-        const data = await resp.json();
-        if (!data.items || data.items.length === 0) return [];
-        return data.items.map((item, i) => ({
-          id: `${platform}-cse-${i}-${Date.now()}`,
-          title: item.title || 'Untitled',
-          author: item.pagemap?.metatags?.[0]?.['author'] || item.pagemap?.metatags?.[0]?.['og:site_name'] || (platform === 'reddit' ? (item.link.match(/r\/([^/]+)/) || [])[1] || '' : ''),
-          url: item.link,
-          snippet: item.snippet || '',
-          platform: platform,
-          publishDate: item.pagemap?.metatags?.[0]?.['article:published_time']?.substring(0, 10) || '',
-          subscriberCount: '',
-          postFrequency: '',
-          commentCount: '',
-          upvotes: '',
-          subreddit: platform === 'reddit' ? (item.link.match(/r\/([^/]+)/) || ['', ''])[1] : '',
-          contentType: platform === 'substack' ? 'newsletter' : 'discussion'
-        }));
-      };
-
-      // AI fallback search (used when Google CSE not configured)
-      const aiPlatformSearch = async (query, platform) => {
-        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
-        const platformName = platformLabels[platform] || platform;
-        const systemPrompt = platform === 'substack'
-          ? `You are a content search assistant. Search for Substack newsletters and articles about the given topic. CRITICAL: Only return URLs you are highly confident actually exist — use the format authorname.substack.com/p/slug and only reference well-known Substack authors. Prefer content published within the last 30 days. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string - the person's real name, NOT the newsletter name), url (string - must be a real, verified substack.com URL), snippet (string - 1-2 sentence description of what the article covers), publishDate (string - approximate date like "Feb 2026" or "Jan 2026"), subscriberCount (string - approximate subscriber count like "50K+" or "10K+" if known, or ""), postFrequency (string - like "Weekly" or "Daily" or "2x/month" if known, or ""), contentType (string - one of "newsletter", "article", "essay", "analysis", "guide"). Return ONLY the JSON array, no other text. Prioritize well-known, established Substack authors with real subscriber bases and verified URLs.`
-          : `You are a content search assistant. Search for Reddit threads and discussions about the given topic. CRITICAL: Only return URLs you are highly confident actually exist. Prefer content from the last 30 days. Return EXACTLY 5 results as a JSON array. Each result must have: title (string), author (string - the subreddit like "r/marketing"), url (string - must be a real, verified reddit.com URL), snippet (string - 1-2 sentence description), commentCount (string - approximate like "150+" or "2K+" if known, or ""), upvotes (string - approximate like "500" or "3.2K" if known, or ""), subreddit (string - the subreddit name like "r/marketing"), contentType (string - one of "discussion", "guide", "question", "resource", "case-study"). Return ONLY the JSON array, no other text. Prioritize high-engagement threads with real community discussion and verified URLs.`;
-        const response = await fetch(CLOUD_FUNCTION_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ task: 'generateStory', systemPrompt, userQuery: `Find ${platformName} content about: ${query}` })
-        });
-        const result = await response.json();
-        const text = (result.text || '').trim();
-        let parsed = [];
-        try {
-          const jsonStr = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-          parsed = JSON.parse(jsonStr);
-        } catch(e) {
-          const match = text.match(/\[[\s\S]*\]/);
-          if (match) { try { parsed = JSON.parse(match[0]); } catch(e2) {} }
-        }
-        if (!Array.isArray(parsed) || parsed.length === 0) return [];
-        return parsed.map((r, i) => ({
-          id: `${platform}-${i}-${Date.now()}`,
-          title: r.title || 'Untitled',
-          author: r.author || 'Unknown',
-          url: r.url || '',
-          snippet: r.snippet || '',
-          platform: platform,
-          publishDate: r.publishDate || '',
-          subscriberCount: r.subscriberCount || '',
-          postFrequency: r.postFrequency || '',
-          commentCount: r.commentCount || '',
-          upvotes: r.upvotes || '',
-          subreddit: r.subreddit || '',
-          contentType: r.contentType || ''
-        }));
-      };
-
-      const searchPlatformContent = async () => {
-        const query = youtubeInput.trim();
-        if (!query) return;
-        const platform = searchPlatform || 'youtube';
-        if (platform === 'youtube') { searchYouTube(); return; }
-
-        // If it looks like a URL, resolve it directly instead of searching
-        if (query.startsWith('http') || query.includes('.com/') || query.includes('.co/')) {
-          resolvePlatformUrl(query);
-          return;
-        }
-
-        setIsPlatformSearching(true);
-        setSearchError(null);
-        setPlatformResults([]);
-
-        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
-        const platformName = platformLabels[platform] || platform;
-
-        try {
-          let results = [];
-
-          // Use Google Custom Search if configured (real URLs)
-          if (GOOGLE_CSE_CX) {
-            try {
-              results = await googleCustomSearch(query, platform);
-            } catch (cseErr) {
-              console.warn('Google CSE failed, falling back to AI search:', cseErr);
-              results = await aiPlatformSearch(query, platform);
-            }
-          } else {
-            // Fallback: AI-generated results (URLs may not be verified)
-            results = await aiPlatformSearch(query, platform);
-          }
-
-          if (results.length > 0) {
-            setPlatformResults(results);
-          } else {
-            setSearchError(`No ${platformName} results found. Try a different query or paste a URL directly.`);
-          }
-        } catch (err) {
-          setSearchError(`Search failed. Try pasting a ${platformName} URL directly.`);
-        } finally {
-          setIsPlatformSearching(false);
-        }
-      };
-
-      // Resolve a pasted platform URL into rich metadata
-      const resolvePlatformUrl = async (inputUrl) => {
-        const platform = searchPlatform || 'youtube';
-        const url = inputUrl || youtubeInput.trim();
-        if (!url) return;
-
-        setIsPlatformSearching(true);
-        setSearchError(null);
-        setPlatformResults([]);
-
-        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
-
-        try {
-          const systemPrompt = `You are a URL metadata resolver. Given a URL, extract the article/post metadata. Return a JSON object with: title (string), author (string), snippet (string - brief description of the content). Return ONLY the JSON object, no other text. If you don't know the exact content, infer from the URL structure.`;
-
-          const response = await fetch(CLOUD_FUNCTION_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              task: 'generateStory',
-              systemPrompt: systemPrompt,
-              userQuery: `Extract metadata from this URL: ${url}`
-            })
-          });
-          const result = await response.json();
-          const text = (result.text || '').trim();
-
-          let parsed = {};
-          try {
-            const jsonStr = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            parsed = JSON.parse(jsonStr);
-          } catch(e) {
-            const match = text.match(/\{[\s\S]*\}/);
-            if (match) {
-              try { parsed = JSON.parse(match[0]); } catch(e2) {}
-            }
-          }
-
-          setPlatformResults([{
-            id: `${platform}-resolved-${Date.now()}`,
-            title: parsed.title || url,
-            author: parsed.author || '',
-            url: url.startsWith('http') ? url : 'https://' + url,
-            snippet: parsed.snippet || '',
-            platform: platform
-          }]);
-        } catch (err) {
-          // Fallback: still show the URL as a selectable result
-          setPlatformResults([{
-            id: `${platform}-fallback-${Date.now()}`,
-            title: url,
-            author: '',
-            url: url.startsWith('http') ? url : 'https://' + url,
-            snippet: 'Paste URL resolved',
-            platform: platform
-          }]);
-        } finally {
-          setIsPlatformSearching(false);
-        }
-      };
-
-      // Choose a platform search result (non-YouTube)
-      const choosePlatformResult = (result) => {
-        const platform = result.platform || searchPlatform || 'substack';
-        const platformLabels = { substack: 'Substack', reddit: 'Reddit' };
-
-        // Check platform limits
-        const existingCount = (mapping.sources || []).filter(s => s.type === platform).length;
-        if (platform === 'youtube' && existingCount > 0) {
-          alert(`You already have a YouTube source. One per platform.`);
-          return;
-        }
-        if ((platform === 'substack' || platform === 'reddit') && existingCount >= 3) {
-          alert(`Maximum 3 sources per platform.`);
-          return;
-        }
-        
-        const newSource = {
-          ven: platformLabels[platform] || platform,
-          lab: (result.title || 'Source').substring(0, 40),
-          type: platform,
-          url: result.url,
-          author: result.author || '',
-          ga4Count: 0
-        };
-        setMapping(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
-
-        // Close search, reset
-        setPlatformResults([]);
-        setYoutubeInput('');
-        setSearchPlatform('youtube');
-        setIsSearchPanelOpen(false);
-      };
-
       const ytApiKey = "AIzaSyDCUc877CDBxRntQwctrKTFfjQ8rhPruss";
-      const GOOGLE_CSE_CX = "56ffa52e2f9eb4318"; // Programmable Search Engine CX ID
       const CLOUD_FUNCTION_URL = "https://us-central1-gen-lang-client-0769430147.cloudfunctions.net/advisor";
 
+/* MARKER_214 */
       useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [activeTab]);
 
       useEffect(() => {
@@ -690,6 +385,7 @@
         }
       }, [rsSession]);
 
+/* MARKER_215 */
       useEffect(() => {
         const params    = new URLSearchParams(window.location.search);
         const sessionId = params.get('rs_session');
@@ -713,9 +409,7 @@
               if (snap.stackLabel) setStackLabel(snap.stackLabel);
               if (snap.activeTab) setActiveTab(snap.activeTab);
               if (snap.isSearchPanelOpen === false) setIsSearchPanelOpen(false);
-              if (snap.storyParticipants) setStoryParticipants(migrateParticipants(snap.storyParticipants));
-              if (snap.angelChoices) setAngelChoices(snap.angelChoices);
-              if (snap.angelAmounts) setAngelAmounts(snap.angelAmounts);
+              if (snap.storyParticipants) setStoryParticipants(snap.storyParticipants);
               if (snap.mapping) setMapping(snap.mapping);
               restoredFromOAuthRef.current = true;
             } catch (e) {
@@ -738,6 +432,7 @@
       const closeTimeoutRef = useRef(null);
       const restoredFromOAuthRef = useRef(false);
 
+/* MARKER_216 */
       const fetchWithRetry = async (url, options = {}, retries = 5, backoff = 1000) => {
         try {
           const response = await fetch(url, options);
@@ -753,6 +448,7 @@
       };
 
       // Generic POST to the advisor Cloud Function
+/* MARKER_217 */
       const callAdvisor = async (task, data = {}, overrideSessionId = null) => {
         const sid  = overrideSessionId || rsSession?.sessionId;
         const body = { task, ...data, ...(sid ? { sessionId: sid } : {}) };
@@ -766,6 +462,7 @@
         return json;
       };
 
+/* MARKER_218 */
       const persistAppState = () => {
         const snapshot = {};
         if (selectedVideoData) snapshot.selectedVideoData = selectedVideoData;
@@ -775,8 +472,6 @@
         if (activeTab !== 'youtube') snapshot.activeTab = activeTab;
         if (!isSearchPanelOpen) snapshot.isSearchPanelOpen = false;
         if (storyParticipants) snapshot.storyParticipants = storyParticipants;
-        if (angelChoices) snapshot.angelChoices = angelChoices;
-        if (angelAmounts) snapshot.angelAmounts = angelAmounts;
         if (mapping) snapshot.mapping = mapping;
         if (Object.keys(snapshot).length > 0) {
           localStorage.setItem('rs_app_state', JSON.stringify(snapshot));
@@ -784,6 +479,7 @@
       };
 
       // Start Google OAuth flow
+/* MARKER_219 */
       const initiateGoogleAuth = async () => {
         persistAppState();
         const returnUrl   = window.location.href;
@@ -797,6 +493,7 @@
       };
 
       // Perform save
+/* MARKER_220 */
       const triggerSave = async (overrideSessionId) => {
         setIsSaving(true);
         try {
@@ -825,10 +522,7 @@
               sheetId      : rsSheetId || undefined,
               videoData    : selectedVideoData || null,
               youtubeEmbedUrl: youtubeEmbedUrl || '',
-              videoStory   : videoStory || null,
-              storyParticipants,
-              angelChoices,
-              angelAmounts
+              videoStory   : videoStory || null
             }
           }, overrideSessionId);
           if (result.sheetId) {
@@ -859,6 +553,7 @@
       };
 
       // Fetch district list
+/* MARKER_221 */
       const triggerOpen = async (overrideSessionId) => {
         setIsOpening(true);
         try {
@@ -904,10 +599,6 @@
             setVideoStory(null);
           }
 
-          if (state.storyParticipants) setStoryParticipants(migrateParticipants(state.storyParticipants));
-          if (state.angelChoices) setAngelChoices(state.angelChoices);
-          if (state.angelAmounts) setAngelAmounts(state.angelAmounts);
-
           setRsSheetId(sheetId);
           localStorage.setItem('rs_sheet_id', sheetId);
         } catch (e) {
@@ -915,16 +606,16 @@
         }
       };
 
-      // Sign out clears session but preserves app state (video, names, mapping)
+      // Sign out clears everything
+/* MARKER_222 */
       const handleSignOut = () => {
-        persistAppState();                       // save in-flight work before clearing session
         setRsSession(null);
         setRsSheetId(null);
         setShowUserMenu(false);
         localStorage.removeItem('rs_session');
         localStorage.removeItem('rs_email');
         localStorage.removeItem('rs_sheet_id');
-        // NOTE: rs_app_state intentionally NOT removed — preserves user work across logout/login
+        localStorage.removeItem('rs_app_state');
       };
 
       const handleDeleteDistrict = async (sheetId) => {
@@ -982,6 +673,7 @@
         } catch (e) { setVisionResults(prev => ({ ...prev, [videoId]: "PASS" })); }
       };
 
+/* MARKER_223 */
       const searchYouTube = async (pageToken = null) => {
         if (!youtubeInput.trim()) return;
         const directId = extractVideoId(youtubeInput);
@@ -1035,24 +727,6 @@
         setSelectedVideoData(video);
         setIsSearchPanelOpen(false);
         setIsGeneratingStory(true);
-        // Update YouTube source in mapping with actual video data
-        setMapping(prev => {
-          const ytIdx = prev.sources.findIndex(s => s.type === 'youtube');
-          const ytSource = {
-            ven: 'YouTube',
-            lab: (video.snippet?.title || 'Strategy Video').substring(0, 40),
-            type: 'youtube',
-            url: `https://www.youtube.com/watch?v=${video.id}`,
-            author: video.snippet?.channelTitle || '',
-            ga4Count: parseInt(video.statistics?.viewCount) || 18420
-          };
-          if (ytIdx >= 0) {
-            const next = [...prev.sources];
-            next[ytIdx] = ytSource;
-            return { ...prev, sources: next };
-          }
-          return { ...prev, sources: [ytSource, ...prev.sources] };
-        });
         try {
             let contentText = `Title: ${video.snippet.title}\nDescription: ${video.snippet.description}`;
             const transcript = await getTranscript(video.id);
@@ -1084,6 +758,7 @@
         } catch (err) { console.error("Metadata failure", err); }
       };
 
+/* MARKER_224 */
       const generateStoryFromVideo = async () => {
         if (!selectedVideoData) return;
         setIsGeneratingStory(true);
@@ -1106,7 +781,7 @@
            - Bad examples: "The Ultimate Growth Machine", "Revolutionary Marketing Platform", "Unstoppable Revenue Engine"
         3. Problem: One paragraph on the core problem being solved and who feels it.
         4. Resident: The ideal resident profile (who should own/deploy this).
-        5. Network: 3 Partners, 3 Customers, 3 Guests.
+        5. Network: 3 Partners, 3 Customers, 3 Shared Targets.
         6. Checklist: 5-6 specific, actionable steps to take after watching.
         7. Automations: 3-5 automations with Trigger, Action, and Outcome.
         8. Narrative: 2-3 paragraphs telling the story of how this ReadyStack turns ideas into a compounding commercial asset.
@@ -1171,82 +846,46 @@
       const handleNodeLeave = () => { closeTimeoutRef.current = setTimeout(() => { setHoveredNode(null); }, 1200); };
       const handleTooltipEnter = () => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); };
 
+/* MARKER_225 */
       const buildStoryDistrict = (targetTab) => {
         const target = typeof targetTab === 'string' ? targetTab : 'mapper';
         setStoryError(null);
-
-        // Try new flat resident assignments first
-        const wnthItems = videoStory?.automations || [];
-        const assignedResidents = [];
-        wnthItems.forEach((a, i) => {
-          const name = (residentAssignments[`wnth-${i}`] || '').trim();
-          if (name) assignedResidents.push({ name, groupId: 'resident', task: a.action });
-        });
-        additionalWNTH.forEach((item, i) => {
-          const name = (residentAssignments[`add-wnth-${i}`] || '').trim();
-          if (name && item.action.trim()) assignedResidents.push({ name, groupId: 'resident', task: item.action });
-        });
-
-        let allParticipants;
-        if (assignedResidents.length > 0) {
-          allParticipants = assignedResidents;
-        } else {
-          // Legacy fallback to old storyParticipants
-          const categories = [
-            { items: storyParticipants.homies, prefix: 'Partner', groupId: 'homie' },
-            { items: storyParticipants.besties, prefix: 'Customer', groupId: 'bestie' }
-          ];
-          allParticipants = categories.flatMap(cat => cat.items.map((n, i) => ({ name: (n.name || '').trim() || `${cat.prefix} ${i + 1}`, groupId: cat.groupId })));
-        }
-
-        if (new Set(allParticipants.map(n => n.name.toLowerCase())).size !== allParticipants.length) {
-          setStoryError("Duplicate names detected. Unique residents only.");
-          return;
-        }
-
-        // Build referral resources from cited Strategy sources
-        const citedSourceResources = (mapping.sources || [])
-          .filter(s => s.url || s.type === 'youtube')
-          .map(s => ({
-            ven: s.author || s.ven || s.lab,
-            lab: s.lab || 'Cited Source',
-            platform: s.type || 'youtube',
-            ga4Count: s.ga4Count || 1000,
-            pat: s.url || '',
-            isCitedSource: true
-          }));
-
-        const rsLearning = [{ ven: 'ReadyStack', lab: 'Process Walkthrough', platform: 'youtube', dedicated: true, internal: true, ga4Count: 1200, pat: youtubeEmbedUrl }, ...citedSourceResources];
+        const categories = [ { items: storyParticipants.homies, prefix: 'Partner', groupId: 'homie' }, { items: storyParticipants.besties, prefix: 'Customer', groupId: 'bestie' }, { items: storyParticipants.pursuits, prefix: 'Shared Target', groupId: 'pursuit' } ];
+        const allParticipants = categories.flatMap(cat => cat.items.map((n, i) => ({ name: n.trim() || `${cat.prefix} ${i + 1}`, groupId: cat.groupId })));
+        if (new Set(allParticipants.map(n => n.name.toLowerCase())).size !== allParticipants.length) { setStoryError("Duplicate names detected. Unique residents only."); return; }
+        
+        const rsLearning = [{ ven: 'ReadyStack', lab: 'Process Walkthrough', platform: 'youtube', dedicated: true, internal: true, ga4Count: 1200, pat: youtubeEmbedUrl }];
         const rsSelecting = [{ ven: 'ReadyStack', lab: 'Interactive Tour', platform: 'tour', dedicated: true, internal: true, ga4Count: 2300 }];
         const rsExecuting = [ { ven: 'ReadyStack', lab: 'Copy ReadyStack', platform: 'starting', dedicated: true, internal: true, ga4Count: 3400 }, { ven: 'ReadyStack', lab: 'Upload Data', platform: 'uploads', dedicated: true, internal: true, ga4Count: 1200 }, { id: 'rs-api', ven: 'ReadyStack', lab: 'ReadyStack Activation', platform: 'api_config', dedicated: true, internal: true, ga4Count: 4500 }, { id: 'rs-commerce', ven: 'ReadyStack', lab: 'ReadyStack Checkout', platform: 'commerce', dedicated: true, internal: true, price: 1200, ga4Count: 1200 } ];
         const rsExpanding = [ { ven: 'ReadyStack', lab: 'Shares ReadyStack', platform: 'network_invite', dedicated: true, internal: true, ga4Count: 1200 }, { ven: 'ReadyStack', lab: 'Check ReadyStack Earnings', platform: 'deposits', dedicated: true, internal: true, ga4Count: 2300 }, { ven: 'ReadyStack', lab: 'Schedules ReadyStack Onboarding', platform: 'success', dedicated: true, internal: true, ga4Count: 3400 } ];
-
+        
         const nextAngels = [];
         if (angelChoices.observe) nextAngels.push({ lab: 'Observation Angel', platform: 'observer', amount: angelAmounts.observe, startups: [] });
         if (angelChoices.awareness) nextAngels.push({ lab: 'District Awareness Angel', platform: 'awareness', amount: angelAmounts.awareness, startups: [] });
         if (angelChoices.invest) nextAngels.push({ lab: 'Investment Angel', platform: 'seed', amount: angelAmounts.invest, startups: allParticipants.slice(0, 3).map(p => p.name) });
-
+        
         setMapping(prev => {
-          const manualLearning = prev.learning ? prev.learning.filter(p => p.isManual) : [];
-          const manualSelecting = prev.selecting ? prev.selecting.filter(p => p.isManual) : [];
-          const manualExecuting = prev.executing ? prev.executing.filter(p => p.isManual) : [];
-          const manualExpanding = prev.expanding ? prev.expanding.filter(p => p.isManual) : [];
-          const manualAngels = (prev.angels || []).filter(a => a.isManual);
+            const manualLearning = prev.learning ? prev.learning.filter(p => p.isManual) : [];
+            const manualSelecting = prev.selecting ? prev.selecting.filter(p => p.isManual) : [];
+            const manualExecuting = prev.executing ? prev.executing.filter(p => p.isManual) : [];
+            const manualExpanding = prev.expanding ? prev.expanding.filter(p => p.isManual) : [];
+            const manualAngels = (prev.angels || []).filter(a => a.isManual);
 
-          return {
-            ...prev,
-            learning: [...rsLearning, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Tutorial Video', platform: 'youtube', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Logic Map', platform: 'miro', ga4Count: 1000 }])), ...manualLearning],
-            selecting: [...rsSelecting, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Product Tour', platform: 'tour', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Live Demo', platform: 'demo', ga4Count: 1000 }])), ...manualSelecting],
-            executing: [...rsExecuting, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Watch Tutorial', platform: 'webinar', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Partner Checkout', platform: 'partner_checkout', price: 1000, ga4Count: 1000 }])), ...manualExecuting],
-            expanding: [...rsExpanding, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Affiliate Sign Up', platform: 'affiliate', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Success Case Study', platform: 'case_study', ga4Count: 1000 }])), ...manualExpanding],
-            angels: [...nextAngels, ...manualAngels]
-          };
+            return {
+              ...prev,
+              learning: [...rsLearning, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Tutorial Video', platform: 'youtube', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Logic Map', platform: 'miro', ga4Count: 1000 }])), ...manualLearning],
+              selecting: [...rsSelecting, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Product Tour', platform: 'tour', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Live Demo', platform: 'demo', ga4Count: 1000 }])), ...manualSelecting],
+              executing: [...rsExecuting, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Watch Tutorial', platform: 'webinar', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Partner Checkout', platform: 'partner_checkout', price: 1000, ga4Count: 1000 }])), ...manualExecuting],
+              expanding: [...rsExpanding, ...allParticipants.flatMap(p => ([{ ...p, ven: p.name, lab: 'Affiliate Sign Up', platform: 'affiliate', ga4Count: 1000 }, { ...p, ven: p.name, lab: 'Success Case Study', platform: 'case_study', ga4Count: 1000 }])), ...manualExpanding],
+              angels: [...nextAngels, ...manualAngels]
+            };
         });
         setActiveTab(target);
       };
 
+/* MARKER_226 */
       const handleSourceUpdate = (idx, key, val) => { setMapping(prev => { const next = [...prev.sources]; next[idx] = {...next[idx], [key]: val}; return { ...prev, sources: next }; }); };
-      const addSource = () => { setMapping(prev => ({ ...prev, sources: [...prev.sources, { ven: '', lab: 'New Source', type: 'youtube', ga4Count: 18420, isManual: true }] })); };
+      const addSource = () => { setMapping(prev => ({ ...prev, sources: [...prev.sources, { ven: '', lab: 'New Source', type: 'linkedin', ga4Count: 18420, isManual: true }] })); };
       const removeSource = (idx) => { setMapping(prev => ({ ...prev, sources: prev.sources.filter((_, i) => i !== idx) })); };
       const handlePatternUpdate = (stageId, idx, key, val) => { setMapping(prev => { const next = [...(prev[stageId] || [])]; if (next[idx]) next[idx] = {...next[idx], [key]: val}; return { ...prev, [stageId]: next }; }); };
       
@@ -1265,6 +904,7 @@
       const addStartupToScout = (idx) => { setMapping(prev => { const next = [...(prev.angels || [])]; const defaultStartup = (prev.learning && prev.learning.length > 0) ? prev.learning[0].ven : 'Partner A'; next[idx] = {...next[idx], startups: [...(next[idx].startups || []), defaultStartup]}; return { ...prev, angels: next }; }); };
       const removeStartupFromScout = (idx, sIdx) => { setMapping(prev => { const next = [...(prev.angels || [])]; next[idx] = {...next[idx], startups: next[idx].startups.filter((_, i) => i !== sIdx)}; return { ...prev, angels: next }; }); };
 
+/* MARKER_227 */
       const handleDragStart = (e, stageId, index) => { setDraggedItem({ stageId, index }); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', index); };
       const handleDragEnd = () => { setDraggedItem(null); };
       const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
@@ -1272,108 +912,7 @@
 
       const copyUrl = (text, id) => { const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); setUrlCopied(id); setTimeout(() => setUrlCopied(null), 2000); };
 
-      // ══════════════════════════════════════════════════════════════
-      // SEND TO STUDIO — Phase 1: JSON Payload Assembly
-      // Maps Storyteller state → Studio data model (see STUDIO_DATA_MODEL.md)
-      // ══════════════════════════════════════════════════════════════
-      const [showStudioExport, setShowStudioExport] = useState(false);
-      const [studioPayload, setStudioPayload] = useState(null);
-      const [studioExportCopied, setStudioExportCopied] = useState(false);
-
-      const buildStudioPayload = () => {
-        if (!videoStory || !selectedVideoData) return null;
-        const channelTitle = selectedVideoData.snippet?.channelTitle || 'Creator';
-
-        // Build resident list — try new flat model first, fallback to legacy
-        let partners = [];
-        let customers = [];
-        const wnthItems = videoStory?.automations || [];
-        const hasAssignments = wnthItems.some((_, i) => (residentAssignments[`wnth-${i}`] || '').trim());
-        if (hasAssignments) {
-          wnthItems.forEach((a, i) => {
-            const name = (residentAssignments[`wnth-${i}`] || '').trim();
-            if (name) partners.push(name);
-          });
-          additionalWNTH.forEach((item, i) => {
-            const name = (residentAssignments[`add-wnth-${i}`] || '').trim();
-            if (name) partners.push(name);
-          });
-        } else {
-          partners = storyParticipants.homies.filter(p => (p.name || p).toString().trim()).map(p => typeof p === 'string' ? p.trim() : p.name.trim());
-          customers = storyParticipants.besties.filter(p => (p.name || p).toString().trim()).map(p => typeof p === 'string' ? p.trim() : p.name.trim());
-        }
-
-        const payload = {
-          title: videoStory.title || stackLabel || 'Untitled District',
-          districtName: videoStory.districtName || stackLabel || 'Untitled District',
-          youtubeEmbedUrl: youtubeEmbedUrl || '',
-          ctaButtonText: `Follow ${channelTitle}`,
-          ctaButtonUrl: `https://www.youtube.com/@${channelTitle.replace(/\\s+/g, '')}`,
-          collaborationLink: '',
-
-          inThisReadyStack: [
-            ...(videoStory.checklist || []).map(item => ({ callToAction: item, link: '' })),
-            ...(videoStory.automations || []).map(a => ({ callToAction: a.action || a.trigger || '', link: '' }))
-          ],
-
-          tasksAndAgents: (videoStory.automations || []).map((automation, idx) => ({
-            name: automation.action || 'Task ' + (idx + 1),
-            subTasks: [
-              { name: 'Setup Google Sheet', rows: [{ todo: 'Create tracking spreadsheet', triggerApp: 'Google Sheets', triggerWebsite: 'https://sheets.google.com', actionApp: '', actionWebsite: '', setupLink: '', tutorialUrl: '' }] },
-              { name: automation.trigger || 'Execute Task', rows: [
-                { todo: 'Manual (free)', triggerApp: automation.trigger || '', triggerWebsite: '', actionApp: automation.outcome || '', actionWebsite: '', setupLink: '', tutorialUrl: '' },
-                { todo: 'Use App (free)', triggerApp: automation.trigger || '', triggerWebsite: '', actionApp: automation.outcome || '', actionWebsite: '', setupLink: '', tutorialUrl: '' }
-              ]}
-            ]
-          })),
-
-          hostedAutomationFlow: {
-            steps: (videoStory.automations || []).map((automation, idx) => ({
-              stepNumber: idx + 1,
-              name: 'H2H - ' + (automation.action || 'Touch ' + (idx + 1)),
-              paths: [{ conditions: [], actions: { sendEmail: false, sendAlert: true, updateScore: true, addTag: [], addToFlow: false, zapierTrigger: false } }]
-            }))
-          },
-
-          residents: {
-            partners: partners,
-            customers: customers,
-            network: videoStory.network || { partners: [], customers: [], targets: [] }
-          },
-
-          meta: {
-            sourceVideoId: selectedVideoData.id || '',
-            sourceVideoTitle: selectedVideoData.snippet?.title || '',
-            channelTitle: channelTitle,
-            generatedAt: new Date().toISOString(),
-            storytellerVersion: '2.0',
-            phase: 1
-          }
-        };
-        return payload;
-      };
-
-      const handleStudioExport = () => {
-        const payload = buildStudioPayload();
-        if (!payload) return;
-        setStudioPayload(payload);
-        setShowStudioExport(true);
-        setStudioExportCopied(false);
-      };
-
-      const copyStudioPayload = () => {
-        if (!studioPayload) return;
-        const json = JSON.stringify(studioPayload, null, 2);
-        const el = document.createElement('textarea');
-        el.value = json;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        setStudioExportCopied(true);
-        setTimeout(() => setStudioExportCopied(false), 3000);
-      };
-
+/* MARKER_228 */
       const nodes = useMemo(() => {
         const items = []; const centerX = 600;
         const narrativeScale = obsMode === 'narrative' ? (1 + (playbackProgress * 0.05)) : 1;
@@ -1432,10 +971,12 @@
         
         return { items, flows: allFlows, scaledTraffic, hangtimeVal: 4.5, searchingVal: 1.2, finance: { districtDividendsAmount: Math.round(rsGrossRevenue * 0.6), snapshotRevenueItems, totalSnapshotARR: snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0), investmentInItems: (mapping.angels || []).filter(a => a.platform !== 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), pendingInvestmentItems: (mapping.angels || []).filter(a => a.platform === 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), totalFinanceCapital: Math.round(rsGrossRevenue * 0.6) + snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0) }, counts: { buying: Math.round(scaledTraffic * 0.005), sharing: Math.round(scaledTraffic * 0.003), retention: Math.round(scaledTraffic * 0.004) }, probs: { buying: 82, sharing: 64, retention: 71 } };
       }, [mapping, lookerPeriod, obsMode, playbackProgress]);
+/* MARKER_229 */
 
       return (
       
         <div className="min-h-screen w-full bg-[#020617] text-slate-300 font-sans text-[13px] animate-fade-in text-left">
+       {/* MARKER_100 */}
           {hoveredNode && (
             <div 
               className="fixed z-[1000] bg-[#0b1224]/98 backdrop-blur-3xl border border-white/20 p-6 rounded-[32px] shadow-[0_40px_100px_rgba(0,0,0,0.9)] animate-fade-in flex flex-col gap-6 w-[340px] pointer-events-auto" 
@@ -1588,89 +1129,11 @@
               )}
             </div>
           )}
-          {/* ══ Studio Export Modal ══ */}
-          {showStudioExport && studioPayload && (
-            <div className="fixed inset-0 z-[2000] flex items-center justify-center" onClick={() => setShowStudioExport(false)}>
-              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
-              <div className="relative bg-[#0b1224] border border-white/10 rounded-[24px] shadow-[0_40px_100px_rgba(0,0,0,0.9)] w-[90%] max-w-[700px] max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                  <div>
-                    <p className="text-[9px] font-black text-amber-400 uppercase tracking-[0.2em]">Send to Studio</p>
-                    <h3 className="text-lg font-black text-white uppercase italic tracking-tighter mt-1">{studioPayload.districtName}</h3>
-                  </div>
-                  <button onClick={() => setShowStudioExport(false)} className="text-slate-500 hover:text-white transition-all p-2">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  </button>
-                </div>
-                <div className="p-6 space-y-4 overflow-y-auto flex-1">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-[#020617] border border-white/5 rounded-xl p-4">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">YouTube</p>
-                      <p className="text-[11px] text-white font-bold truncate">{studioPayload.meta.sourceVideoTitle}</p>
-                    </div>
-                    <div className="bg-[#020617] border border-white/5 rounded-xl p-4">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Channel</p>
-                      <p className="text-[11px] text-white font-bold truncate">{studioPayload.meta.channelTitle}</p>
-                    </div>
-                  </div>
-                  <div className="bg-[#020617] border border-white/5 rounded-xl p-4">
-                    <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-2">Key Points ({studioPayload.inThisReadyStack.length} items)</p>
-                    <div className="space-y-1">
-                      {studioPayload.inThisReadyStack.slice(0, 8).map((item, i) => (
-                        <p key={i} className="text-[10px] text-slate-300 flex items-center gap-2">
-                          <span className="w-1 h-1 bg-indigo-400 rounded-full flex-shrink-0"></span>
-                          {item.callToAction}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-[#020617] border border-white/5 rounded-xl p-4">
-                    <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-2">Tasks & Agents ({studioPayload.tasksAndAgents.length} actions)</p>
-                    <div className="space-y-1">
-                      {studioPayload.tasksAndAgents.map((task, i) => (
-                        <p key={i} className="text-[10px] text-slate-300 flex items-center gap-2">
-                          <span className="w-1 h-1 bg-emerald-400 rounded-full flex-shrink-0"></span>
-                          {task.name}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-[#020617] border border-white/5 rounded-xl p-4">
-                    <p className="text-[8px] font-black text-amber-400 uppercase tracking-widest mb-2">Automation Flow ({studioPayload.hostedAutomationFlow.steps.length} steps)</p>
-                    <div className="space-y-1">
-                      {studioPayload.hostedAutomationFlow.steps.map((step, i) => (
-                        <p key={i} className="text-[10px] text-slate-300 flex items-center gap-2">
-                          <span className="text-[8px] font-black text-amber-400/60 w-4">{step.stepNumber}.</span>
-                          {step.name}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                  <details className="bg-[#020617] border border-white/5 rounded-xl">
-                    <summary className="p-4 text-[8px] font-black text-slate-500 uppercase tracking-widest cursor-pointer hover:text-slate-300 transition-all">View JSON Payload</summary>
-                    <pre className="p-4 pt-0 text-[9px] text-slate-400 font-mono overflow-x-auto max-h-[200px] overflow-y-auto whitespace-pre-wrap break-all">{JSON.stringify(studioPayload, null, 2)}</pre>
-                  </details>
-                </div>
-                <div className="p-6 border-t border-white/10 flex items-center gap-3">
-                  <button onClick={copyStudioPayload} className="flex-1 py-3 px-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-[10px] font-black text-amber-400 uppercase tracking-widest hover:bg-amber-500/20 transition-all flex items-center justify-center gap-2">
-                    {studioExportCopied ? (
-                      <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="20 6 9 17 4 12"/></svg> Copied</>
-                    ) : (
-                      <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy JSON</>
-                    )}
-                  </button>
-                  <a href="https://mks.bridgemailsystem.com/pms/loginS.jsp" target="_top" className="flex-1 py-3 px-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:bg-indigo-500/20 transition-all text-center">
-                    Open Studio
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
-
+{/* MARKER_109 */}
           <header className="rs-header sticky top-0 z-[100] shadow-2xl" style={{ width: '100%', left: 0, right: 0, boxSizing: 'border-box' }}>
             <div className="w-full px-6 py-4 flex justify-between items-center">
               <div className="flex items-center space-x-2">
-                <div className="w-12 h-10 flex-shrink-0 flex items-center justify-center"><img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack Logo" className="h-9 w-auto object-contain" style={{ borderRadius: "6px" }} /></div> 
+                <div className="w-12 h-10 flex-shrink-0 flex items-center justify-center"><img src="https://lh3.googleusercontent.com/d/1-cfFYPbbR6LgEbtV7J9__PNewwAnIZim" alt="ReadyStack Logo" className="h-9 w-auto object-contain" /></div> 
                 <div className="flex flex-col text-left"><span className="text-xl font-bold text-white tracking-tight leading-none" style={{ fontFamily: 'Poppins, sans-serif' }}>ReadyStack</span></div>
               </div>
               <div className="flex items-center space-x-3">
@@ -1732,25 +1195,14 @@
           </header>
           <div className="bg-[#0f172a] border-b border-white/5 relative z-50 w-full">
             <div className="w-full px-6 py-5 flex items-center gap-4 text-left">
-              <button
-                onClick={() => setIsRailOpen(!isRailOpen)}
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center shrink-0"
-                title={isRailOpen ? "Hide Rail" : "Show Rail"}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-                  <path d="M9 3v18"/>
-                  {isRailOpen ? <path d="m16 15-3-3 3-3"/> : <path d="m13 9 3 3-3 3"/>}
-                </svg>
-              </button>
-              <div className="bg-white/10 p-2 rounded-lg flex items-center justify-center border border-white/20"><DistrictSquareIcon size={20} /></div>
+              <GoogleAnalyticsIcon />
               <div className="text-left">
                 <h2 className="text-2xl font-black text-white italic uppercase leading-none tracking-tighter">Dark Market District</h2>
               </div>
             </div>
           </div>
           
-          <main className="w-full py-8 px-4 flex items-start">
+          <main className="max-w-[1400px] mx-auto py-8 px-6 flex items-start">
             
             {/* LEFT ONBOARDING RAIL */}
             <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
@@ -1758,12 +1210,7 @@
               {/* NEW MY DISTRICTS SECTION */}
               <div className="mb-6 border-b border-white/10 pb-6">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-slate-400">
-                      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                    </svg>
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">My Districts</h3>
-                  </div>
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">My Districts</h3>
                   {rsSession && (
                     <button
                       onClick={() => {
@@ -1776,9 +1223,9 @@
                         setIsSearchPanelOpen(true);
                         setMapping({
                           sources: [
+                            { ven: 'LinkedIn', lab: 'Organic Post', type: 'linkedin', ga4Count: 18420 },
                             { ven: 'YouTube', lab: 'Strategy Video', type: 'youtube', ga4Count: 18420 },
-                            { ven: 'Substack', lab: 'Newsletter', type: 'substack', ga4Count: 18420 },
-                            { ven: 'Reddit', lab: 'Discussion', type: 'reddit', ga4Count: 18420 }
+                            { ven: 'Substack', lab: 'Newsletter Feed', type: 'substack', ga4Count: 18420 }
                           ],
                           learning: [], selecting: [], executing: [], expanding: [], angels: []
                         });
@@ -1847,69 +1294,63 @@
               <div className="mb-8 whitespace-nowrap">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">District Setup</h3>
                 <div className="w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-white/5">
-                  <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-500" style={{ width: `${Math.max(11.1, (['youtube', 'intro', 'mapper', 'finance', 'observatory', 'connect', 'looker', 'g4', 'automation'].indexOf(activeTab) + 1) * 11.1)}%` }}></div>
+                  <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-500" style={{ width: `${Math.max(14.28, (['youtube', 'intro', 'mapper', 'observatory', 'looker', 'g4', 'automation'].indexOf(activeTab) + 1) * 14.28)}%` }}></div>
                 </div>
+                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-2 text-right">Step {(['youtube', 'intro', 'mapper', 'observatory', 'looker', 'g4', 'automation'].indexOf(activeTab) + 1) || 1} of 7</p>
               </div>
-
+              
               <div className="space-y-3 flex-grow whitespace-nowrap overflow-hidden">
-                {[
-                  { id: 'youtube', num: 1, label: 'Values and Voices', icon: 'mic' },
-                  { id: 'intro', num: 2, label: 'Residents', icon: 'users' },
-                  { id: 'mapper', num: 3, label: 'District Map', icon: 'map' },
-                  { id: 'finance', num: 4, label: 'District Finance', icon: 'banknote' },
-                  { id: 'observatory', num: 5, label: 'Tourist Flow', icon: 'git-branch' },
-                  { id: 'connect', num: 6, label: 'Invite Residents', icon: 'send' },
-                  { id: 'looker', num: 7, label: 'Looker', icon: 'bar-chart-2' },
-                  { id: 'g4', num: 8, label: 'GA4', icon: 'activity' },
-                  { id: 'automation', num: 9, label: 'Automation', icon: 'zap' }
+                {[ 
+                  { id: 'youtube', num: 1, label: 'Featured YouTube' }, 
+                  { id: 'intro', num: 2, label: 'Occupants and Residents' },
+                  { id: 'mapper', num: 3, label: 'District Map' }, 
+                  { id: 'observatory', num: 4, label: 'View District Flow' }, 
+                  { id: 'looker', num: 5, label: 'View Looker' }, 
+                  { id: 'g4', num: 6, label: 'View GA4' }, 
+                  { id: 'automation', num: 7, label: 'Get Automation' } 
                 ].map(step => {
                   const isActive = activeTab === step.id;
-                  const railOrder = ['youtube', 'intro', 'mapper', 'finance', 'observatory', 'connect', 'looker', 'g4', 'automation'];
-                  const currentIndex = railOrder.indexOf(activeTab);
-                  const stepIndex = railOrder.indexOf(step.id);
-
-                  // Sequential unlock: lock everything after Residents until Residents is complete
-                  const isLocked = stepIndex >= 2 && mapping.learning.length === 0;
+                  const currentIndex = ['youtube', 'intro', 'mapper', 'observatory', 'looker', 'g4', 'automation'].indexOf(activeTab);
+                  const stepIndex = step.num - 1;
+                  
+                  // Sequential unlock check
+                  const isLocked = step.num > 3 && mapping.learning.length === 0; 
                   const isCompleted = stepIndex < currentIndex;
                   
-                  const RailIcon = ({ name, cls }) => {
-                    const ref = useRef(null);
-                    useEffect(() => { if (ref.current && typeof lucide !== 'undefined') { ref.current.innerHTML = `<i data-lucide="${name}" style="width:14px;height:14px"></i>`; lucide.createIcons({ nameAttr: 'data-lucide' }); } }, [name]);
-                    return <span ref={ref} className={`inline-flex items-center justify-center shrink-0 ${cls || ''}`} style={{ width: 14, height: 14 }} />;
-                  };
-
                   if (isActive) {
                     return (
-                      <div key={step.id} className="p-4 rounded-xl border border-indigo-500 bg-indigo-500/10 text-white flex flex-col gap-2 relative overflow-hidden shadow-[0_0_20px_rgba(99,102,241,0.15)] cursor-default">
+                      <div key={step.num} className="p-4 rounded-xl border border-indigo-500 bg-indigo-500/10 text-white flex flex-col gap-2 relative overflow-hidden shadow-[0_0_20px_rgba(99,102,241,0.15)] cursor-default">
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
                         <div className="flex items-center gap-3">
-                          <RailIcon name={step.icon} cls="text-indigo-400" />
-                          <span className="text-[10px] font-black uppercase tracking-widest">{step.label}</span>
+                          <div className="w-4 h-4 rounded-full border-2 border-indigo-500 flex items-center justify-center shrink-0"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></div></div>
+                          <span className="text-[10px] font-black uppercase tracking-widest">{step.num}. {step.label}</span>
                         </div>
                       </div>
                     );
                   } else if (isLocked) {
                     return (
-                      <div key={step.id} className="p-4 rounded-xl border border-white/5 bg-[#020617]/50 text-slate-600 flex items-center gap-3 transition-all cursor-not-allowed">
-                        <RailIcon name={step.icon} cls="text-slate-700" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">{step.label}</span>
+                      <div key={step.num} className="p-4 rounded-xl border border-white/5 bg-[#020617]/50 text-slate-600 flex items-center gap-3 transition-all cursor-not-allowed">
+                        <div className="w-4 h-4 rounded-full border-2 border-slate-700 shrink-0"></div>
+                        <span className="text-[10px] font-black uppercase tracking-widest">{step.num}. {step.label}</span>
                       </div>
                     );
                   } else {
                     return (
-                      <div key={step.id} onClick={() => {
+                      <div key={step.num} onClick={() => {
                         if (activeTab === 'intro') {
                             buildStoryDistrict(step.id);
+                        } else if (step.id === 'mapper' && mapping.learning.length === 0) {
+                            buildStoryDistrict('mapper');
                         } else {
                             setActiveTab(step.id);
                         }
                       }} className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 flex items-center gap-3 transition-all cursor-pointer hover:bg-emerald-500/20">
                         {isCompleted ? (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path></svg>
                         ) : (
-                            <RailIcon name={step.icon} cls="text-emerald-400" />
+                            <div className="w-4 h-4 rounded-full border-2 border-emerald-500 shrink-0"></div>
                         )}
-                        <span className="text-[10px] font-black uppercase tracking-widest">{step.label}</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">{step.num}. {step.label}</span>
                       </div>
                     );
                   }
@@ -1919,9 +1360,22 @@
 
             {/* MAIN CONTENT AREA */}
             <div className="flex-grow min-w-0 bg-[#0f172a]/30 border border-white/5 rounded-[40px] p-10 overflow-hidden shadow-inner relative min-h-[800px] transition-all duration-300">
+              <button 
+                onClick={() => setIsRailOpen(!isRailOpen)}
+                className="absolute top-6 left-6 z-[100] bg-[#020617] border border-white/10 p-2 rounded-xl text-slate-400 hover:text-white transition-all hover:border-white/30 shadow-2xl flex items-center gap-2 group"
+                title={isRailOpen ? "Hide Rail" : "Show Rail"}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0">
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                  <path d="M9 3v18"/>
+                  {isRailOpen ? <path d="m16 15-3-3 3-3"/> : <path d="m13 9 3 3-3 3"/>}
+                </svg>
+                {!isRailOpen && <span className="text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity w-0 group-hover:w-auto overflow-hidden block whitespace-nowrap pl-1">Show Rail</span>}
+              </button>
 
               {/* ── District Name (Google Sheets style) ── */}
               <div className="absolute top-6 left-20 z-[80] flex items-center gap-3">
+                <img src="https://lh3.googleusercontent.com/d/1-cfFYPbbR6LgEbtV7J9__PNewwAnIZim" alt="ReadyStack" className="h-7 w-auto object-contain opacity-60" />
                 {isEditingName ? (
                   <input
                     autoFocus
@@ -1938,29 +1392,17 @@
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   />
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <DistrictSquareIcon size={14} />
-                    <span
-                      onClick={() => setIsEditingName(true)}
-                      className={`text-base font-medium cursor-pointer hover:bg-white/5 px-1 py-0.5 rounded transition-all truncate max-w-[240px] block ${
-                        nameFlash ? 'text-indigo-300 animate-pulse' :
-                        stackLabel === 'ReadyStack Campaign' ? 'text-white/30' : 'text-white/60'
-                      }`}
-                      style={{ fontFamily: 'Inter, sans-serif' }}
-                      title="Click to rename"
-                    >
-                      {stackLabel === 'ReadyStack Campaign' ? 'Untitled District' : stackLabel}
-                    </span>
-                    <button
-                      onClick={() => setIsEditingName(true)}
-                      className="text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
-                      title="Edit district name"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                        <path d="M3 17.25V21h3.75L17.81 9.94a3.5 3.5 0 0 0-4.97-4.97L2.25 16.25z"/><path d="m15 6 3.75-3.75"/>
-                      </svg>
-                    </button>
-                  </div>
+                  <span
+                    onClick={() => setIsEditingName(true)}
+                    className={`text-base font-medium cursor-pointer hover:bg-white/5 px-1 py-0.5 rounded transition-all truncate max-w-[280px] block ${
+                      nameFlash ? 'text-indigo-300 animate-pulse' :
+                      stackLabel === 'ReadyStack Campaign' ? 'text-white/30' : 'text-white/60'
+                    }`}
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    title="Click to rename"
+                  >
+                    {stackLabel === 'ReadyStack Campaign' ? 'Untitled District' : stackLabel}
+                  </span>
                 )}
               </div>
 
@@ -1982,369 +1424,252 @@
                     <polyline points="7 3 7 8 15 8"/>
                   </svg>
                 </button>
-                {/* Studio — Send to Studio export */}
-                <button
-                  onClick={handleStudioExport}
-                  disabled={!videoStory || !selectedVideoData}
-                  className={`bg-[#020617] border border-white/10 p-2 rounded-xl transition-all shadow-2xl inline-flex ${videoStory && selectedVideoData ? 'text-slate-400 hover:text-amber-400 hover:border-amber-500/30 cursor-pointer' : 'text-slate-600 cursor-not-allowed opacity-50'}`}
-                  title={videoStory && selectedVideoData ? "Send to Studio" : "Generate a story first to export"}
+                {/* Studio */}
+                <a
+                  href="https://mks.bridgemailsystem.com/pms/loginS.jsp"
+                  target="_top"
+                  className="bg-[#020617] border border-white/10 p-2 rounded-xl text-slate-400 hover:text-amber-400 transition-all hover:border-amber-500/30 shadow-2xl inline-flex"
+                  title="Studio"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                     <line x1="8" y1="21" x2="16" y2="21"/>
                     <line x1="12" y1="17" x2="12" y2="21"/>
                   </svg>
-                </button>
-                {/* Share */}
-                <button
-                  onClick={() => alert('Share feature coming soon')}
-                  className="bg-[#020617] border border-white/10 p-2 rounded-xl text-slate-400 hover:text-blue-400 transition-all hover:border-blue-500/30 shadow-2xl"
-                  title="Share District"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-                    <polyline points="16 6 12 2 8 6"/>
-                    <line x1="12" y1="2" x2="12" y2="15"/>
-                  </svg>
-                </button>
+                </a>
               </div>
 
+{/* MARKER_110 */}
             {activeTab === 'youtube' && (
-              <div className="max-w-5xl mx-auto animate-fade-in space-y-6 text-left pt-16 pb-10">
-                  <div className="text-center space-y-3 mb-6">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter">VALUES AND VOICES</h3>
-                      <p className="text-slate-500 italic text-xs">Align the values and voices that shape this space. One voice per platform.</p>
+              <div className="max-w-5xl mx-auto animate-fade-in space-y-8 text-left pt-16 pb-10">
+                  <div className="text-center space-y-4 mb-10">
+                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter">FEATURED YOUTUBE</h3>
+                      <p className="text-slate-400 italic text-sm">Search for authority or paste an embed code to anchor your District.</p>
                   </div>
-
-
-                  <div className="bg-[#020617]/50 p-8 rounded-[32px] border border-white/5 shadow-inner space-y-6">
-
-                    {/* ── YouTube Tab Content ── */}
-                    {(searchPlatform || 'youtube') === 'youtube' && (
-                      <div className="space-y-6">
-                        {/* YouTube: selected video view */}
-                        {youtubeEmbedUrl && !isSearchPanelOpen ? (
-                          <div className="space-y-8 animate-fade-in">
-                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5">
-                              <div className="lg:col-span-3 space-y-4">
-                                <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black">
-                                  <iframe src={youtubeEmbedUrl} title="YouTube Preview" frameBorder="0" allowFullScreen className="w-full h-full"></iframe>
-                                </div>
-                                <div className="flex gap-2">
-                                  <button onClick={() => setIsSearchPanelOpen(true)} className="flex-grow py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-500 font-black text-[9px] uppercase tracking-widest transition-all border border-white/5">Change</button>
-                                  <button onClick={generateStoryFromVideo} disabled={isGeneratingStory || !selectedVideoData} className="flex-grow py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 font-black text-[9px] uppercase tracking-widest transition-all border border-white/5 disabled:opacity-30">{isGeneratingStory ? 'Thinking...' : 'Analyze'}</button>
-                                </div>
+                  
+                  <div className="bg-[#020617]/50 p-8 rounded-[32px] border border-white/5 shadow-inner space-y-8">
+                      {isSearchPanelOpen ? (
+                        <div className="space-y-8">
+                          <div className="space-y-3 max-w-2xl mx-auto">
+                              <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic">YouTube Search or Embed Link</label>
+                              <div className="flex gap-3">
+                                  <input 
+                                    type="text" 
+                                    value={youtubeInput} 
+                                    onChange={(e) => setYoutubeInput(e.target.value)} 
+                                    onKeyDown={(e) => e.key === 'Enter' && searchYouTube()}
+                                    className="flex-grow bg-[#0f172a] border border-slate-800 rounded-xl p-4 text-xs text-white focus:border-indigo-500 outline-none transition-colors" 
+                                    placeholder="Search strategy..." 
+                                  />
+                                  <button 
+                                    onClick={() => searchYouTube()} 
+                                    disabled={isSearching}
+                                    className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-8 rounded-xl text-white font-black uppercase tracking-widest text-[10px] transition-all border border-white/10"
+                                  >
+                                    {isSearching ? 'Searching...' : 'Search / Resolve'}
+                                  </button>
                               </div>
-                              <div className="lg:col-span-2 space-y-4 pt-1 text-left">
-                                <h4 className="text-xl font-bold text-white mb-6 italic tracking-tight">Key Points</h4>
-                                {videoStory && videoStory.checklist ? (
-                                  <ul className="space-y-3 text-slate-400 text-xs italic animate-fade-in">
-                                    {videoStory.checklist.map((item, idx) => (
-                                      <li key={idx} className="flex items-start gap-2">
-                                        <div className="w-1 h-1 rounded-full bg-white/30 mt-1.5 flex-shrink-0"></div>
-                                        <span>{item}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <p className="text-xs text-white/20 italic">Run analysis to populate...</p>
-                                )}
-                              </div>
+                          </div>
+
+                          {searchError && (
+                            <div className="max-w-2xl mx-auto bg-red-500/10 border border-red-500/30 p-4 rounded-xl text-red-400 text-[10px] font-black uppercase tracking-widest text-center">
+                              {searchError}
                             </div>
+                          )}
 
-                            {videoStory && (
-                              <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl animate-fade-in space-y-6 text-left">
-                                <div className="space-y-3 border-b border-white/5 pb-4">
-                                  <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">ReadyStack Brief</p>
-                                  <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter">{videoStory.title}</h4>
-                                  <p className="text-xs text-slate-400 italic leading-relaxed">{videoStory.narrative}</p>
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                  <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-2">Core Problem</p>
-                                    <p className="text-[11px] text-slate-400 leading-relaxed">{videoStory.problem}</p>
-                                  </div>
-                                  <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-2">Ideal Resident</p>
-                                    <p className="text-[11px] text-slate-400 leading-relaxed">{videoStory.resident}</p>
-                                  </div>
-                                </div>
-                                <div className="space-y-3">
-                                  <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Network Map Seed</p>
-                                  <div className="grid md:grid-cols-3 gap-3">
-                                    <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                      <p className="text-[9px] font-black text-white/40 uppercase mb-2">Partners</p>
-                                      <ul className="space-y-1.5">{videoStory.network?.partners?.map((p, i) => <li key={i} className="text-[10px] text-slate-400 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{p}</span></li>)}</ul>
+                          {searchResults.length > 0 && (
+                            <div className="grid gap-4 max-w-3xl mx-auto animate-fade-in">
+                              {searchResults.map(video => {
+                                const blacklistReason = getBlacklistReason(video);
+                                const visionResult = visionResults[video.id];
+                                const isFlagged = blacklistReason || (visionResult && visionResult.startsWith("FAIL"));
+                                const reason = blacklistReason || (visionResult && visionResult.split("FAIL")[1]?.trim());
+
+                                return (
+                                  <div 
+                                    key={video.id} 
+                                    className={`flex gap-6 p-5 bg-[#0f172a] border border-white/5 rounded-3xl transition-all group relative overflow-hidden ${isFlagged ? 'opacity-40 border-amber-500/20 grayscale-[0.5]' : 'hover:border-indigo-500/50 cursor-pointer shadow-xl'}`}
+                                    onClick={() => !isFlagged && chooseVideo(video)}
+                                  >
+                                    <img src={video.snippet.thumbnails.medium.url} className="w-40 aspect-video rounded-xl object-cover shadow-2xl" />
+                                    <div className="flex-grow text-left space-y-2">
+                                      <h5 className="text-white font-bold text-[13px] line-clamp-2 italic leading-tight">{video.snippet.title}</h5>
+                                      <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{video.snippet.channelTitle}</p>
+                                      
+                                      {isFlagged ? (
+                                        <div className="bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg inline-flex items-center gap-2">
+                                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+                                          <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest italic">Flagged: {reason || "Quality Standards"}</span>
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center gap-4">
+                                          <span className="text-[10px] font-black text-emerald-400 tabular-nums">{(parseInt(video.statistics?.viewCount || "0")).toLocaleString()} VIEWS</span>
+                                          {visionResult === "PASS" && <span className="bg-emerald-500/20 text-emerald-400 text-[8px] font-black px-1.5 py-0.5 rounded uppercase">Verified Signal</span>}
+                                        </div>
+                                      )}
                                     </div>
-                                    <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                      <p className="text-[9px] font-black text-white/40 uppercase mb-2">Customers</p>
-                                      <ul className="space-y-1.5">{videoStory.network?.customers?.map((c, i) => <li key={i} className="text-[10px] text-slate-400 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{c}</span></li>)}</ul>
-                                    </div>
-                                    <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                      <p className="text-[9px] font-black text-white/40 uppercase mb-2">Guests</p>
-                                      <ul className="space-y-1.5">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-[10px] text-slate-400 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{t}</span></li>)}</ul>
-                                    </div>
                                   </div>
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                  <div className="space-y-3">
-                                    <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Actions</p>
-                                    <ul className="space-y-2">
-                                      {videoStory.checklist?.map((c, i) => (
-                                        <li key={i} className="text-[11px] text-slate-400 flex items-start gap-2 bg-[#0f172a]/30 p-2.5 rounded-lg border border-white/5">
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 text-white/30 shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                          <span>{c}</span>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-10 animate-fade-in">
+                          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 bg-[#0f172a]/50 p-8 rounded-3xl border border-white/5 shadow-2xl">
+                              <div className="lg:col-span-3 space-y-5">
+                                  <div className="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+                                      <iframe src={youtubeEmbedUrl} title="YouTube Preview" frameBorder="0" allowFullScreen className="w-full h-full"></iframe>
+                                  </div>
+                                  <div className="flex gap-3">
+                                    <button onClick={() => setIsSearchPanelOpen(true)} className="flex-grow py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 font-black text-[10px] uppercase tracking-widest transition-all">Change Video</button>
+                                    <button onClick={generateStoryFromVideo} disabled={isGeneratingStory || !selectedVideoData} className="flex-grow py-3 rounded-xl bg-indigo-600/20 border border-indigo-500/50 text-indigo-300 font-black text-[10px] uppercase tracking-widest transition-all hover:bg-indigo-600/40 disabled:opacity-50">{isGeneratingStory ? 'Strategist is Thinking...' : 'Analyze Story & Theme'}</button>
+                                  </div>
+                              </div>
+                              <div className="lg:col-span-2 space-y-5 pt-2 text-left">
+                                  <h4 className="text-xl font-bold text-white mb-6 italic tracking-tight">In this ReadyStack</h4>
+                                  {videoStory && videoStory.checklist ? (
+                                    <ul className="space-y-4 text-indigo-300 text-sm italic animate-fade-in">
+                                      {videoStory.checklist.map((item, idx) => (
+                                        <li key={idx} className="flex items-start gap-3">
+                                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0"></div>
+                                          <span>{item}</span>
                                         </li>
                                       ))}
                                     </ul>
-                                  </div>
-                                  <div className="space-y-3">
-                                    <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest italic">What Needs to Happen</p>
-                                    <p className="text-[8px] text-slate-500 italic mb-2">The knowing-doing gap — jobs the strategy leaves on the table. Assign a resident to each in the next step.</p>
-                                    <div className="space-y-3">
-                                      {videoStory.automations?.map((a, i) => (
-                                        <div key={i} className="bg-[#0f172a]/50 p-4 rounded-xl border border-indigo-500/10 text-[11px] space-y-2 hover:border-indigo-500/30 transition-all">
-                                          <div className="flex items-start gap-3">
-                                            <div className="w-5 h-5 rounded-full border-2 border-indigo-500/40 flex items-center justify-center flex-shrink-0 mt-0.5"><span className="text-[8px] font-black text-indigo-400">{i + 1}</span></div>
-                                            <div>
-                                              <p className="text-white font-bold text-[12px]">{a.action}</p>
-                                              <p className="text-slate-400 text-[10px] italic mt-1">When: {a.trigger}</p>
-                                              <p className="text-indigo-300/60 text-[9px] italic mt-0.5">Outcome: {a.outcome}</p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
+                                  ) : (
+                                    <ul className="space-y-4 text-white/20 text-sm italic">
+                                      <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 rounded-full bg-white/20"></div> Run analysis to populate...</li>
+                                    </ul>
+                                  )}
+                                  <a
+                                    href="https://mks.bridgemailsystem.com/pms/loginS.jsp"
+                                    target="_top"
+                                    className="inline-block mt-6 text-[9px] font-black text-white/30 uppercase tracking-widest hover:text-white/50 transition-all"
+                                  >
+                                    Edit in Studio →
+                                  </a>
+                              </div>
+                          </div>
+
+                          {videoStory && (
+                            <div className="bg-indigo-500/5 border border-indigo-500/20 p-8 rounded-[32px] animate-fade-in space-y-8 text-left">
+                              <div className="space-y-4 border-b border-white/10 pb-6">
+                                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-1">ReadyStack Brief</p>
+                                <h4 className="text-3xl font-black text-white uppercase italic tracking-tighter">{videoStory.title}</h4>
+                                <p className="text-sm text-slate-300 italic leading-relaxed">{videoStory.narrative}</p>
+                              </div>
+
+                              <div className="grid md:grid-cols-2 gap-6">
+                                <div className="bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5 shadow-inner">
+                                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic mb-3">Core Problem</p>
+                                  <p className="text-xs text-slate-300 leading-relaxed">{videoStory.problem}</p>
                                 </div>
-                                <div className="flex flex-wrap gap-2 pt-3 border-t border-white/5">
-                                  {videoStory.ctas?.map((cta, i) => <span key={i} className="px-4 py-2 bg-white/5 border border-white/5 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-500">{cta}</span>)}
+                                <div className="bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5 shadow-inner">
+                                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic mb-3">Ideal Resident Profile</p>
+                                  <p className="text-xs text-slate-300 leading-relaxed">{videoStory.resident}</p>
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        ) : (
-                          /* YouTube: search view */
-                          <div className="space-y-6">
-                            <div className="space-y-2 max-w-2xl mx-auto">
-                              <div className="flex gap-2">
-                                <input
-                                  type="text"
-                                  value={youtubeInput}
-                                  onChange={(e) => setYoutubeInput(e.target.value)}
-                                  onKeyDown={(e) => e.key === 'Enter' && searchYouTube()}
-                                  className="flex-grow bg-[#0f172a] border border-white/10 rounded-xl p-3.5 text-xs text-white focus:border-white/30 outline-none transition-colors placeholder-slate-600"
-                                  placeholder="Search YouTube or paste a video link..."
-                                />
-                                <button
-                                  onClick={() => searchYouTube()}
-                                  disabled={isSearching}
-                                  className="bg-white/10 hover:bg-white/15 disabled:opacity-30 px-6 rounded-xl text-white font-black uppercase tracking-widest text-[9px] transition-all border border-white/10"
-                                >
-                                  {isSearching ? '...' : 'Search'}
-                                </button>
+
+                              <div className="space-y-4">
+                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic">Network Map Seed</p>
+                                <div className="grid md:grid-cols-3 gap-4">
+                                  <div className="bg-[#0f172a]/50 p-5 rounded-2xl border border-[#5b4eff]/20">
+                                    <p className="text-[10px] font-black text-[#5b4eff] uppercase mb-3">Partners</p>
+                                    <ul className="space-y-2">{videoStory.network?.partners?.map((p, i) => <li key={i} className="text-[11px] text-slate-300 flex items-start gap-2"><span className="text-[#5b4eff] mt-0.5">▹</span><span className="leading-tight">{p}</span></li>)}</ul>
+                                  </div>
+                                  <div className="bg-[#0f172a]/50 p-5 rounded-2xl border border-[#ff2a1a]/20">
+                                    <p className="text-[10px] font-black text-[#ff2a1a] uppercase mb-3">Customers</p>
+                                    <ul className="space-y-2">{videoStory.network?.customers?.map((c, i) => <li key={i} className="text-[11px] text-slate-300 flex items-start gap-2"><span className="text-[#ff2a1a] mt-0.5">▹</span><span className="leading-tight">{c}</span></li>)}</ul>
+                                  </div>
+                                  <div className="bg-[#0f172a]/50 p-5 rounded-2xl border border-[#ffd666]/20">
+                                    <p className="text-[10px] font-black text-[#ffd666] uppercase mb-3">Shared Targets</p>
+                                    <ul className="space-y-2">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-[11px] text-slate-300 flex items-start gap-2"><span className="text-[#ffd666] mt-0.5">▹</span><span className="leading-tight">{t}</span></li>)}</ul>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="grid md:grid-cols-2 gap-6">
+                                 <div className="space-y-4">
+                                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic">Action Checklist</p>
+                                   <ul className="space-y-3">
+                                     {videoStory.checklist?.map((c, i) => (
+                                       <li key={i} className="text-xs text-slate-300 flex items-start gap-3 bg-[#0f172a]/30 p-3 rounded-xl border border-white/5">
+                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                         <span className="leading-relaxed">{c}</span>
+                                       </li>
+                                     ))}
+                                   </ul>
+                                 </div>
+                                 <div className="space-y-4">
+                                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic">Recommended Automations</p>
+                                   <div className="space-y-3">
+                                     {videoStory.automations?.map((a, i) => (
+                                       <div key={i} className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5 text-[11px] space-y-1">
+                                         <div className="flex gap-2"><span className="font-black text-indigo-400 w-14">TRIGGER:</span> <span className="text-slate-300">{a.trigger}</span></div>
+                                         <div className="flex gap-2"><span className="font-black text-emerald-400 w-14">ACTION:</span> <span className="text-slate-300">{a.action}</span></div>
+                                         <div className="flex gap-2 pt-1 border-t border-white/5 mt-1"><span className="font-black text-fuchsia-400 w-14">OUTCOME:</span> <span className="text-slate-300 italic">{a.outcome}</span></div>
+                                       </div>
+                                     ))}
+                                   </div>
+                                 </div>
+                              </div>
+
+                              <div className="space-y-3 pt-4 border-t border-white/10">
+                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic">Suggested CTAs</p>
+                                <div className="flex flex-wrap gap-3">
+                                  {videoStory.ctas?.map((cta, i) => <span key={i} className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-300 hover:bg-white/10 transition-colors cursor-default shadow-lg">{cta}</span>)}
+                                </div>
                               </div>
                             </div>
-
-                            {searchError && (
-                              <p className="text-center text-red-400/60 text-[10px] italic">{searchError}</p>
-                            )}
-
-                            {searchResults.length > 0 && (
-                              <div className="grid gap-3 max-w-3xl mx-auto animate-fade-in">
-                                {searchResults.map(video => {
-                                  const blacklistReason = getBlacklistReason(video);
-                                  const visionResult = visionResults[video.id];
-                                  const isFlagged = blacklistReason || (visionResult && visionResult.startsWith("FAIL"));
-                                  const reason = blacklistReason || (visionResult && visionResult.split("FAIL")[1]?.trim());
-                                  return (
-                                    <div
-                                      key={video.id}
-                                      className={`flex gap-4 p-4 bg-[#0f172a] border border-white/5 rounded-xl transition-all ${isFlagged ? 'opacity-30' : 'hover:border-white/20 cursor-pointer'}`}
-                                      onClick={() => !isFlagged && chooseVideo(video)}
-                                    >
-                                      <img src={video.snippet.thumbnails.medium.url} className="w-32 aspect-video rounded-lg object-cover" />
-                                      <div className="flex-grow text-left space-y-1.5">
-                                        <h5 className="text-white text-xs font-medium line-clamp-2 leading-tight">{video.snippet.title}</h5>
-                                        <p className="text-[9px] text-slate-600 uppercase font-black tracking-widest">{video.snippet.channelTitle}</p>
-                                        {isFlagged ? (
-                                          <p className="text-[8px] text-amber-500/60 italic">Flagged: {reason || "Quality Standards"}</p>
-                                        ) : (
-                                          <p className="text-[9px] text-slate-600 tabular-nums">{(parseInt(video.statistics?.viewCount || "0")).toLocaleString()} views</p>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* ── Selected Sources Summary ── */}
-                    {mapping.sources?.some(s => s.url) && (
-                      <div className="border-t border-white/5 pt-5 mt-2">
-                        <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-3">Cited Sources</p>
-                        <div className="space-y-3">
-                          {mapping.sources.filter(s => s.url).map((s, i) => (
-                            <div key={i} className="bg-[#0f172a]/40 border border-white/5 rounded-2xl p-4 flex items-center gap-4">
-                              <div className="w-9 h-9 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                                {s.type === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-red-400"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
-                                {s.type === 'substack' && <SubstackIcon size={14} className="text-orange-400" />}
-                                {s.type === 'reddit' && <RedditIcon size={14} className="text-orange-500" />}
-                              </div>
-                              <div className="flex-grow min-w-0 text-left">
-                                <p className="text-xs font-bold text-white truncate">{s.lab}</p>
-                                <p className="text-[9px] text-slate-500 truncate">{s.author ? `${s.author} · ` : ''}{s.type === 'youtube' ? 'YouTube' : s.type === 'substack' ? 'Substack' : s.type === 'reddit' ? 'Reddit' : s.ven}</p>
-                              </div>
-                              {s.url && <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-indigo-400/60 hover:text-indigo-400 uppercase tracking-widest flex-shrink-0 transition-colors">View</a>}
-                            </div>
-                          ))}
+                          )}
                         </div>
+                      )}
+                      <div className="py-6 text-center mt-4 border-t border-white/5 pt-8">
+                        <button onClick={() => setActiveTab('intro')} disabled={!youtubeEmbedUrl} className={`brand-glow-btn px-12 py-4 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[11px] shadow-2xl transition-all ${!youtubeEmbedUrl ? 'opacity-50 cursor-not-allowed bg-slate-900 border-slate-800' : 'bg-[#020617]'}`}>CONFIRM & CONTINUE</button>
                       </div>
-                    )}
-
-                    {/* ── Blended Brief: amalgamation of cited sources ── */}
-                    {(() => {
-                      const cited = (mapping.sources || []).filter(s => (s.author || s.ven) && s.citedResult);
-                      const hasCited = cited.length > 0 || youtubeEmbedUrl;
-                      if (!hasCited) return null;
-                      return (
-                        <div className="bg-[#0f172a]/60 p-8 rounded-[32px] border border-white/5 shadow-inner space-y-5">
-                          <div className="flex items-center gap-3">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                            <h4 className="text-[11px] font-black text-white uppercase tracking-widest">The Brief</h4>
-                            <span className="text-[9px] text-slate-500 italic ml-1">composite view of your values and voices</span>
-                          </div>
-                          <div className="space-y-3">
-                            {youtubeEmbedUrl && videoStory && (
-                              <div className="bg-[#020617] border border-white/5 rounded-xl p-4 text-left">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-red-400"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                  <span className="text-[9px] font-black text-red-400 uppercase tracking-wider">YouTube</span>
-                                  <span className="text-[9px] text-slate-500">{videoStory?.title || 'Featured Video'}</span>
-                                </div>
-                                <p className="text-[11px] text-slate-300 leading-relaxed">{videoStory?.districtName || videoStory?.title || 'Video analysis pending'}</p>
-                              </div>
-                            )}
-                            {cited.filter(s => s.type === 'substack').map((s, i) => (
-                              <div key={`sub-${i}`} className="bg-[#020617] border border-white/5 rounded-xl p-4 text-left">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <SubstackIcon size={10} className="text-orange-400" />
-                                  <span className="text-[9px] font-black text-orange-400 uppercase tracking-wider">Substack</span>
-                                  <span className="text-[9px] text-slate-500">{s.author || s.ven}</span>
-                                </div>
-                                <p className="text-[11px] text-slate-300 leading-relaxed">{s.citedResult?.title || s.lab}</p>
-                                {s.citedResult?.description && <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">{s.citedResult.description.substring(0, 200)}{s.citedResult.description.length > 200 ? '...' : ''}</p>}
-                              </div>
-                            ))}
-                            {cited.filter(s => s.type === 'reddit').map((s, i) => (
-                              <div key={`red-${i}`} className="bg-[#020617] border border-white/5 rounded-xl p-4 text-left">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <RedditIcon size={10} className="text-orange-500" />
-                                  <span className="text-[9px] font-black text-orange-500 uppercase tracking-wider">Reddit</span>
-                                  <span className="text-[9px] text-slate-500">{s.author || s.ven}</span>
-                                </div>
-                                <p className="text-[11px] text-slate-300 leading-relaxed">{s.citedResult?.title || s.lab}</p>
-                                {s.citedResult?.description && <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">{s.citedResult.description.substring(0, 200)}{s.citedResult.description.length > 200 ? '...' : ''}</p>}
-                              </div>
-                            ))}
-                          </div>
-                          <p className="text-[9px] text-slate-600 italic text-center">This brief synthesizes the voices shaping your district. It travels with your Residents and District Map.</p>
-                        </div>
-                      );
-                    })()}
-
-                    <div className="pt-4 text-center border-t border-white/5">
-                      <button onClick={() => setActiveTab('intro')} disabled={!youtubeEmbedUrl} className={`px-10 py-3.5 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[10px] transition-all border ${!youtubeEmbedUrl ? 'opacity-30 cursor-not-allowed bg-[#020617] border-white/5' : 'bg-white/10 border-white/10 hover:bg-white/15'}`}>Continue to Residents</button>
-                    </div>
                   </div>
               </div>
             )}
+{/* MARKER_119 */}
             {activeTab === 'intro' && (
-              <div className="max-w-5xl mx-auto animate-fade-in pt-16 pb-16">
-                <div className="space-y-8">
-                    <div className="text-center space-y-2">
-                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter">RESIDENTS</h3>
-                        <p className="text-slate-400 italic text-sm">Assign a resident to each item. Who makes this happen?</p>
+              <div className="max-w-7xl mx-auto animate-fade-in pt-16">
+                <div className="space-y-10">
+                    <div className="text-center space-y-3">
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter">WHO'S IN YOUR STORY?</h3>
+                        <p className="text-slate-400 italic text-sm">Name your residents and define your strategy to pre-populate your District Map.</p>
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
-
-                    <div className="space-y-4">
-                      {videoStory?.automations?.map((item, i) => (
-                        <div key={i} className="bg-[#0f172a]/50 p-5 rounded-xl border border-white/5 space-y-3">
-                          <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full border-2 border-indigo-500/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <span className="text-[8px] font-black text-indigo-400">{i + 1}</span>
-                            </div>
-                            <div className="flex-grow">
-                              <p className="text-white font-bold text-[13px]">{item.action}</p>
-                              <p className="text-slate-400 text-[10px] italic mt-1">When: {item.trigger}</p>
-                            </div>
-                          </div>
-                          <div className="ml-9 space-y-1">
-                            <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Assigned To</label>
-                            <input
-                              type="text"
-                              value={residentAssignments[`wnth-${i}`] || ''}
-                              onChange={(e) => setResidentAssignments(prev => ({...prev, [`wnth-${i}`]: e.target.value}))}
-                              placeholder="Resident name"
-                              className="w-full bg-[#020617] border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none transition-colors"
-                            />
-                          </div>
+                    <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-6">
+                        <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
+                            <h5 className="text-xs font-black text-[#5b4eff] uppercase tracking-widest text-center">1. PARTNERS<br/><span className="text-[9px] opacity-60 italic">ADJACENT CREWS</span></h5>
+                            {storyParticipants.homies.map((val, i) => (<input key={i} placeholder={`Partner ${i+1}`} value={val} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.homies]; next[i] = v; return {...prev, homies: next}; }); }} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-[#5b4eff] outline-none shadow-inner" />))}
                         </div>
-                      ))}
-
-                      {additionalWNTH.map((item, i) => (
-                        <div key={`add-${i}`} className="bg-[#0f172a]/50 p-5 rounded-xl border border-indigo-500/10 space-y-3">
-                          <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full border-2 border-indigo-500/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <span className="text-[8px] font-black text-indigo-400">{(videoStory?.automations?.length || 0) + i + 1}</span>
-                            </div>
-                            <div className="flex-grow">
-                              <input
-                                type="text"
-                                value={item.action}
-                                onChange={(e) => {
-                                  const next = [...additionalWNTH];
-                                  next[i].action = e.target.value;
-                                  setAdditionalWNTH(next);
-                                }}
-                                placeholder="What needs to happen?"
-                                className="w-full bg-transparent border-0 p-0 text-white font-bold text-[13px] focus:outline-none"
-                              />
-                              {item.trigger && <p className="text-slate-400 text-[10px] italic mt-1">When: {item.trigger}</p>}
-                            </div>
-                          </div>
-                          <div className="ml-9 space-y-1">
-                            <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Assigned To</label>
-                            <input
-                              type="text"
-                              value={residentAssignments[`add-wnth-${i}`] || ''}
-                              onChange={(e) => setResidentAssignments(prev => ({...prev, [`add-wnth-${i}`]: e.target.value}))}
-                              placeholder="Resident name"
-                              className="w-full bg-[#020617] border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none transition-colors"
-                            />
-                          </div>
+                        <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
+                            <h5 className="text-xs font-black text-[#ff2a1a] uppercase tracking-widest text-center">2. CUSTOMERS<br/><span className="text-[9px] opacity-60 italic">ACTIVE RESIDENTS</span></h5>
+                            {storyParticipants.besties.map((val, i) => (<input key={i} placeholder={`Customer ${i+1}`} value={val} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.besties]; next[i] = v; return {...prev, besties: next}; }); }} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-[#ff2a1a] outline-none shadow-inner" />))}
                         </div>
-                      ))}
+                        <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
+                            <h5 className="text-xs font-black text-[#ffd666] uppercase tracking-widest text-center">3. SHARED TARGETS<br/><span className="text-[9px] opacity-60 italic text-center">WHO YOU BOTH WANT TO REACH</span></h5>
+                            {storyParticipants.pursuits.map((val, i) => (<input key={i} placeholder={`Shared Target ${i+1}`} value={val} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.pursuits]; next[i] = v; return {...prev, pursuits: next}; }); }} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-3 text-xs text-white focus:border-[#ffd666] outline-none shadow-inner" />))}
+                        </div>
+                        <div className="space-y-4 bg-slate-900/40 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
+                            <h5 className="text-xs font-black text-[#10b981] uppercase tracking-widest text-center">4. ANGEL PARTICIPATION<br/><span className="text-[9px] opacity-60 italic">DISTRICT CAPITAL</span></h5>
+                            <div className="space-y-2">
+                                {[ { id: 'observe', label: 'DISTRICT OBSERVATION' }, { id: 'awareness', label: 'FUNDS DISTRICT AWARENESS', amountKey: 'awareness' }, { id: 'invest', label: 'INVESTS IN RESIDENTS', amountKey: 'invest' } ].map(opt => (
+                                    <div key={opt.id} className={`p-3 rounded-xl border transition-all cursor-pointer ${angelChoices[opt.id] ? 'bg-[#5b4eff]/10 border-[#5b4eff]' : 'bg-slate-900 border-white/5'}`} onClick={() => setAngelChoices(prev => ({...prev, [opt.id]: !prev[opt.id]}))}>
+                                        <div className="flex items-center gap-2 mb-1.5"><div className={`w-3 h-3 rounded border flex items-center justify-center ${angelChoices[opt.id] ? 'bg-[#5b4eff] border-[#5b4eff]' : 'border-slate-700'}`}>{angelChoices[opt.id] && <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>}</div><span className="text-[10px] font-black text-white uppercase tracking-tight text-left">{opt.label}</span></div>
+                                        {opt.amountKey && angelChoices[opt.id] && (<div className="mt-2 text-left"><label className="text-[8px] font-black uppercase text-indigo-400 tracking-widest">Pending Investment</label><input type="number" value={angelAmounts[opt.amountKey]} onChange={(e) => { const val = parseInt(e.target.value); setAngelAmounts(prev => ({...prev, [opt.amountKey]: isNaN(val) ? 0 : val})); }} onClick={e => e.stopPropagation()} className="w-full bg-[#020617] border border-slate-800 rounded-lg p-2 text-[10px] text-white font-mono" /></div>)}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
-
-                    <button
-                      onClick={() => setAdditionalWNTH([...additionalWNTH, {action: '', trigger: ''}])}
-                      className="w-full py-3 rounded-lg border border-dashed border-indigo-500/30 text-indigo-400 text-[10px] font-black uppercase tracking-widest hover:border-indigo-500/60 hover:bg-indigo-500/5 transition-all"
-                    >
-                      + Add Item
-                    </button>
-
-                    <div className="text-center py-8 border-t border-white/5">
-                      <button onClick={() => buildStoryDistrict('mapper')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button>
-                    </div>
+                    <div className="text-center py-6"><button onClick={() => buildStoryDistrict('mapper')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-4">Confirming your residents unlocks the District Map.</p></div>
                 </div>
               </div>
             )}
+{/* MARKER_129 */}
 
             {activeTab === 'mapper' && (
               <div className="space-y-10 animate-fade-in text-left pt-16">
@@ -2400,9 +1725,9 @@
                                     <div className="col-span-2 space-y-2 relative">
                                         <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest">TYPE</label>
                                         <select value={src.type} onChange={(e) => handleSourceUpdate(i, 'type', e.target.value)} className="w-full bg-[#0f172a] border border-slate-800 rounded-lg p-3 text-xs text-white focus:border-indigo-500 outline-none transition-colors appearance-none">
+                                            <option value="linkedin">LinkedIn</option>
                                             <option value="youtube">YouTube</option>
                                             <option value="substack">Substack</option>
-                                            <option value="reddit">Reddit</option>
                                             <option value="article">Article</option>
                                         </select>
                                         <div className="absolute right-3 top-[34px] pointer-events-none text-slate-500">
@@ -2427,7 +1752,7 @@
                     return (
                     <div key={stage.id} className="p-10 rounded-[40px] bg-slate-900/30 border border-slate-800 relative shadow-2xl mb-8 text-left">
                       <div className={`absolute top-0 left-0 bottom-0 w-1.5 rounded-l-full`} style={{backgroundColor: stage.color}} />
-                      <h4 className="text-[12px] font-black uppercase tracking-[0.3em] mb-10 italic text-left" style={{color: stage.color}}>{stage.label}</h4>
+                      <h4 className="text-[12px] font-black uppercase tracking-[0.3em] mb-10 italic text-left" style={{color: stage.color}}>{stage.label} POD</h4>
                       {isInternalStage && dedicatedItems.length > 0 && (
                         <div className="mb-10 space-y-4 bg-indigo-500/5 p-8 rounded-3xl border border-indigo-500/20 shadow-inner text-left">
                           <h5 className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-4 italic text-left">Dedicated Setup</h5>
@@ -2448,7 +1773,7 @@
                           return (
                             <div key={idx} className="bg-[#0f172a] p-6 rounded-2xl border border-slate-800 grid grid-cols-12 gap-4 items-center shadow-xl text-left group">
                               <div className={`col-span-10 grid ${(p.platform === 'commerce' || p.platform === 'partner_checkout') ? 'grid-cols-4' : 'grid-cols-3'} gap-4 text-left`}>
-                                <div className="space-y-1 text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Partner</label><input list={`residents-list-${stage.id}-${idx}`} className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left" value={p.ven} placeholder="partner name" onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'ven', e.target.value)} /><datalist id={`residents-list-${stage.id}-${idx}`}>{[...storyParticipants.homies, ...storyParticipants.besties].filter(n => (n.name || '').trim()).map((p, ni) => (<option key={ni} value={p.name} />))}</datalist></div>
+                                <div className="space-y-1 text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Partner</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left" value={p.ven} placeholder="partner name" onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'ven', e.target.value)} /></div>
                                 <div className="space-y-1 text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Location / Action</label><select className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] outline-none text-left" value={p.platform} onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'platform', e.target.value)}>{stage.id === 'learning' && ( <><option value="youtube">YouTube</option><option value="substack">Substack</option><option value="miro">Miro</option><option value="webinar">Webinar</option></> )}{stage.id === 'selecting' && ( <><option value="marketplace">Marketplace</option><option value="tour">Interactive Tour</option><option value="demo">Live Demo</option><option value="trial">Trial Page</option><option value="reviews_pricing">Reviews Pricing</option><option value="youtube">YouTube</option><option value="substack">Substack</option><option value="miro">Miro</option><option value="webinar">Webinar</option></> )}{stage.id === 'executing' && ( <><option value="webinar">Watch Tutorial</option><option value="partner_checkout">Partner Checkout</option><option value="api_config">API Configuration</option><option value="field_map">Field Mapping</option><option value="asset_deploy">Asset Deployment</option><option value="workspace_init">Workspace Initialization</option><option value="user_prov">User Provisioning</option><option value="onboarding">Onboarding</option></> )}{stage.id === 'expanding' && (<><optgroup label="Network Growth"><option value="affiliate">Affiliate sign up</option><option value="partner_invite">Partner Invite</option><option value="team_upgrade">Team Seat Upgrade</option><option value="community_spotlight">Community Spotlight</option></optgroup><optgroup label="Financial Value"><option value="revenue_share">Revenue Share Dashboard</option><option value="royalty_report">Royalty Report</option><option value="dividend_payout">Dividend Payout</option><option value="deposits">Check ReadyStack Earnings</option></optgroup><optgroup label="Strategic Scale"><option value="growth_audit">Growth Audit</option><option value="market_expansion">Market Expansion Plan</option><option value="beta_access">Feature Beta Access</option><option value="case_study">Case Study Spotlight</option></optgroup></>)}</select></div>
                                 {(p.platform === 'commerce' || p.platform === 'partner_checkout') && (<div className="space-y-1 text-left animate-fade-in"><label className="text-[8px] font-black uppercase text-emerald-400 text-left tracking-widest">Pending Dollar Value</label><input type="number" step="10" className="w-full bg-[#0a0f1e] border border-emerald-500/30 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left shadow-inner focus:border-emerald-50 outline-none" value={p.price || 0} onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'price', parseInt(e.target.value))} /></div>)}
                                 <div className="space-y-1 text-left text-left text-left"><label className="text-[8px] font-black uppercase text-slate-500 text-left">Asset URL</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-[11px] font-mono text-left shadow-inner" value={p.pat} placeholder="https://..." onChange={(e) => handlePatternUpdate(stage.id, originalIdx, 'pat', e.target.value)} /></div>
@@ -2457,7 +1782,7 @@
                             </div>
                           );
                         })}
-                        
+                        <button onClick={() => addPattern(stage.id)} className="flex items-center gap-2 text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-6 hover:text-indigo-300 transition-all text-left text-left">+ Point of Interest</button>
                       </div>
                     </div>
                   )})}
@@ -2495,137 +1820,11 @@
                 </div>
 
                 <div className="py-6 text-center">
-                    <button onClick={() => setActiveTab('finance')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT: FINANCE</button>
+                    <button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">VIEW DISTRICT FLOW</button>
                 </div>
               </div>
             )}
-
-            {/* ── DISTRICT FINANCE TAB ── */}
-            {activeTab === 'finance' && (
-              <div className="max-w-5xl mx-auto animate-fade-in pt-16 pb-16">
-                <div className="space-y-8">
-                    <div className="text-center space-y-2">
-                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT FINANCE</h3>
-                        <p className="text-slate-400 italic text-sm">Model the revenue split and investor participation for this district.</p>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-8">
-                      {/* Left side: Revenue projection */}
-                      <div className="bg-[#0f172a]/50 p-8 rounded-[32px] border border-white/5 space-y-4 text-left">
-                        <h4 className="text-[11px] font-black text-indigo-400 uppercase tracking-widest italic">Revenue Projection</h4>
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Estimated Monthly Revenue</label>
-                            <p className="text-lg font-black text-white mt-2">${Math.round((mapping.learning.length || 50) * 1200 / 12 * 0.4).toLocaleString()}</p>
-                            <p className="text-[9px] text-slate-400 italic mt-1">Based on {mapping.learning.length || 50} participants</p>
-                          </div>
-                          <div className="pt-2 border-t border-white/5">
-                            <label className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">12-Month Lifetime Value</label>
-                            <p className="text-2xl font-black text-indigo-400 mt-2">${(Math.round((mapping.learning.length || 50) * 1200 / 12 * 0.4) * 144).toLocaleString()}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right side: Revenue split & angels */}
-                      <div className="bg-[#0f172a]/50 p-8 rounded-[32px] border border-white/5 space-y-6 text-left">
-                        <div className="space-y-3">
-                          <h4 className="text-[11px] font-black text-emerald-400 uppercase tracking-widest italic">Revenue Split</h4>
-                          <div className="space-y-2">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input type="radio" checked={financeSplit === 'default'} onChange={() => setFinanceSplit('default')} className="w-4 h-4" />
-                              <span className="text-[10px] text-white font-bold">Default: 40% ReadyStack / 60% District</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input type="radio" checked={financeSplit === 'custom'} onChange={() => setFinanceSplit('custom')} className="w-4 h-4" />
-                              <span className="text-[10px] text-white font-bold">Custom Split</span>
-                            </label>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3 pt-4 border-t border-white/5">
-                          <h4 className="text-[11px] font-black text-amber-400 uppercase tracking-widest italic">Angel Participation</h4>
-                          <div className="space-y-2">
-                            {[ { id: 'observe', label: 'DISTRICT OBSERVATION' }, { id: 'awareness', label: 'FUNDS DISTRICT AWARENESS', amountKey: 'awareness' }, { id: 'invest', label: 'INVESTS IN RESIDENTS', amountKey: 'invest' } ].map(opt => (
-                              <div key={opt.id} className={`p-2.5 rounded-lg border transition-all cursor-pointer ${angelChoices[opt.id] ? 'bg-white/5 border-white/20' : 'bg-slate-900 border-white/5'}`} onClick={() => setAngelChoices(prev => ({...prev, [opt.id]: !prev[opt.id]}))}>
-                                <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded border flex items-center justify-center ${angelChoices[opt.id] ? 'bg-white/30 border-white/40' : 'border-slate-700'}`}>{angelChoices[opt.id] && <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>}</div><span className="text-[9px] font-black text-white uppercase tracking-tight">{opt.label}</span></div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-center py-8 border-t border-white/5">
-                      <button onClick={() => { setFinanceAccepted(true); setActiveTab('observatory'); }} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">ACCEPT & VIEW DISTRICT</button>
-                    </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── INVITE RESIDENTS TAB ── */}
-            {activeTab === 'connect' && (
-              <div className="max-w-4xl mx-auto animate-fade-in pt-16">
-                <div className="space-y-10">
-                  <div className="text-center space-y-3">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">INVITE RESIDENTS</h3>
-                    <p className="text-slate-400 italic text-sm">Let your Cited Values and Voices know you're spreading the word.</p>
-                  </div>
-
-                  {(() => {
-                    const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.lab || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
-                    if (citedAuthors.length === 0) {
-                      return (
-                        <div className="text-center py-16">
-                          <div className="bg-[#0f172a]/60 p-10 rounded-[32px] border border-white/5 shadow-inner inline-block">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-slate-600 mx-auto mb-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                            <p className="text-slate-500 text-sm">Feature voices first, then connect with them here.</p>
-                            <button onClick={() => setActiveTab('youtube')} className="mt-4 text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Values and Voices</button>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return (
-                      <div className="space-y-4">
-                        {citedAuthors.map((a, i) => (
-                          <div key={i} className="bg-[#0f172a]/60 p-6 rounded-[32px] border border-white/5 shadow-inner flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white">
-                                {a.platform === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-red-400"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
-                                {a.platform === 'substack' && <SubstackIcon size={18} className="text-orange-400" />}
-                                {a.platform === 'reddit' && <RedditIcon size={18} className="text-orange-500" />}
-                                {!['youtube','substack','reddit'].includes(a.platform) && <span className="font-black text-sm">{a.name.charAt(0).toUpperCase()}</span>}
-                              </div>
-                              <div className="text-left">
-                                <p className="text-sm font-bold text-white">{a.name}</p>
-                                <p className="text-[10px] text-slate-500 uppercase tracking-wider">{a.platform}{a.url ? ` \u2022 ` : ''}{a.url && <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors">View source</a>}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              {a.url && (
-                                <a href={a.url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-[10px] font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all">
-                                  Visit
-                                </a>
-                              )}
-                              <button className="px-4 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:bg-indigo-500/20 transition-all">
-                                Notify
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                        <div className="text-center pt-6">
-                          <p className="text-[9px] text-slate-500 italic">Notify sends an invitation to participate in your district. Mechanism coming soon.</p>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  <div className="text-center py-6">
-                    <button onClick={() => setActiveTab('looker')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Looker</button>
-                  </div>
-                </div>
-              </div>
-            )}
-
+{/* MARKER_130 */}
 
             {activeTab === 'observatory' && (
               <div className="space-y-5 animate-fade-in font-sans text-left relative pt-16">
@@ -2721,7 +1920,7 @@
                       <button onClick={toggleNarrative} className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase flex items-center gap-3 transition-all border text-left ${isNarrativePlaying ? 'bg-fuchsia-600 border-fuchsia-400 text-white shadow-[0_0_25px_rgba(192,38,211,0.5)]' : 'bg-slate-900 border-white/10 text-slate-400 hover:border-white/30'}`}>{isNarrativePlaying ? <i data-lucide="pause" className="w-3 h-3 text-left"></i> : <i data-lucide="play" className="w-3 h-3 text-left"></i>}{isNarrativePlaying ? `Month ${playbackProgress + 1}` : 'Narrative'}</button>
                     </div>
                 </div>
-                <div className="overflow-x-auto bg-[#020617] py-5 relative text-left w-full">
+                <div className="overflow-x-auto bg-[#020617] py-5 relative text-left">
                   <div className="bg-[#01040d] rounded-[64px] border border-white/5 shadow-2xl relative overflow-hidden w-[1200px] h-[1300px] mx-auto">
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 1300">
                       {nodes.flows?.map((flow, i) => {
@@ -2745,19 +1944,17 @@
                         );
                       })}
                     </svg>
-                    {nodes.items.map(n => {
-                      const iconColor = n.type === 'youtube' ? '#f87171' : n.type === 'substack' ? '#fb923c' : n.type === 'reddit' ? '#f97316' : '#ffffff';
-                      return (
-                      <div key={n.id} className="absolute node-container" style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20 }} onMouseEnter={() => handleNodeHover(n)} onMouseLeave={handleNodeLeave}><div className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' : n.isSystem ? 'rounded-xl border-[2.5px] rotate-45' : 'rounded-full border-[2px]'}`} style={{ borderColor: n.color, width: `${n.radius * 2}px`, height: `${n.radius * 2}px`, color: iconColor }}><div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}><MediumIcon type={n.type} size={n.radius * 0.9} /></div></div></div>
-                      );
-                    })}
+                    {nodes.items.map(n => (
+                      <div key={n.id} className="absolute node-container" style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20 }} onMouseEnter={() => handleNodeHover(n)} onMouseLeave={handleNodeLeave}><div className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' : n.isSystem ? 'rounded-xl border-[2.5px] rotate-45' : 'rounded-full border-[2px]'}`} style={{ borderColor: n.color, width: `${n.radius * 2}px`, height: `${n.radius * 2}px`, color: '#ffffff' }}><div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}><MediumIcon type={n.type} size={n.radius * 0.9} /></div></div></div>
                     ))}
                   </div>
                 </div>
               </div>
             )}
+{/* MARKER_139 */}
 
 
+{/* MARKER_140 */}
             {activeTab === 'looker' && (
               <div className="space-y-12 animate-fade-in text-left font-sans pt-16">
                 <div className="flex justify-between items-center border-b border-white/5 pb-10">
@@ -2785,17 +1982,16 @@
                    <div className="flex justify-between items-start mb-12"><div className="text-left text-left"><h4 className="text-white font-black text-[22px] uppercase italic tracking-tighter text-left">COMMERCE MOMENTUM</h4><p className="text-[10px] text-slate-500 uppercase font-black mt-2 italic tracking-widest text-left">Correlate Preview visits to Sharing activity and Sourcing probability</p></div><div className="flex flex-col gap-4 text-[9px] font-black uppercase tracking-widest italic text-right"><div className="flex items-center justify-end gap-3 text-white"><div className="w-2 h-2 rounded-full bg-white"></div> PREVIEW ENTRY</div><div className="flex items-center justify-end gap-3 text-[#48c9b0]"><div className="w-2 h-2 rounded-full bg-[#48c9b0]"></div> SHARING ACTIVITY</div><div className="flex items-center justify-end gap-3 text-[#7c8cff]"><div className="w-2 h-2 rounded-full bg-[#7c8cff]"></div> SOURCING DELTA</div></div></div>
                    <div className="h-96 flex items-end pt-8"><HoldingPowerChart datasets={[{ color: '#ffffff', label: 'Preview', points: [30, 45, 40, 55, 70, 65, 80, 75, 85, 90, 88, 95] }, { color: '#48c9b0', label: 'Sharing', points: [10, 15, 25, 20, 35, 45, 40, 50, 65, 60, 75, 70] }, { color: '#7c8cff', label: 'Sourcing', points: [5, 8, 12, 10, 18, 25, 22, 30, 45, 42, 55, 60] }]} /></div>
                 </div>
-                <div className="py-6 text-center">
-                    <button onClick={() => setActiveTab('connect')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">INVITE RESIDENTS</button>
-                </div>
               </div>
             )}
+{/* MARKER_149 */}
 
+{/* MARKER_150 */}
             {activeTab === 'g4' && (
               <div className="bg-white rounded-[40px] shadow-2xl overflow-hidden animate-fade-in text-left font-sans pt-16">
                 <div className="bg-[#f8f9fa] border-b border-slate-200 px-10 py-6 flex justify-between items-center">
                   <div className="flex items-center gap-4"><i data-lucide="table" className="w-6 h-6 text-indigo-600"></i><h4 className="text-[#3c4043] font-bold text-lg tracking-tight leading-none uppercase italic">GA4 Registry Log</h4></div>
-                  <div className="bg-white/10 p-2 rounded-lg flex items-center justify-center border border-white/20"><DistrictSquareIcon size={20} /></div>
+                  <GoogleAnalyticsIcon />
                 </div>
                 <div className="p-10">
                     <table className="w-full text-slate-800">
@@ -2809,6 +2005,7 @@
             )}
 
             </div>
+{/* MARKER_199 */}
 
 
           </main>
