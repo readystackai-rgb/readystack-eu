@@ -9,7 +9,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;900&&display=swap');
 
     :root {
-      --purple-header: linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%);
+      --nav-header: linear-gradient(135deg, #0f172a 0%, #020617 100%);
       --accent: #7c8cff;
     }
 
@@ -133,7 +133,7 @@
 </head>
 <body>
   <!-- HEADER -->
-  <header style="background: var(--purple-header);" class="border-b border-white/10 w-full">
+  <header style="background: var(--nav-header);" class="border-b border-white/10 w-full">
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
       <div class="flex items-center space-x-2">
         <div class="w-12 h-10 flex-shrink-0 flex items-center justify-center">
@@ -198,52 +198,31 @@
       </ul>
 
       <h2>5. Membership Plans & Pricing</h2>
-      <p>ReadyStack offers two membership tiers. Both require a base monthly membership fee.</p>
+      <p>ReadyStack offers two membership tiers:</p>
 
-      <h3>5.1 Resident Membership — $50 / month</h3>
-      <p>Core platform access including Storyteller Mode, Architect Mode, Builder Mode, ReadyStack Studio, and Observatory. Includes the ability to copy, create, and share ReadyStacks. Does not include hosted automation services.</p>
+      <h3>5.1 Explorer — Free</h3>
+      <p>Explorer accounts provide access to the District Composer (up to 5 districts with 10 residents each), District Flows, District Finance and Angels, and the Exhibition and Case Builder. Explorer accounts do not include revenue sharing, persistent district storage, or hosted automation services. Explorers may upgrade to Resident status at any time.</p>
 
-      <h3>5.2 Resident Automator Membership — $50 / month + Pay-As-You-Go</h3>
-      <p>Everything in Resident, plus hosted automation services billed monthly on a pay-as-you-go basis. Pay-as-you-go services include mass email delivery, data hosting, and automation triggers. These services are provided by the Makesbridge platform and billed through Makesbridge Technology, Inc.</p>
+      <h3>5.2 Resident Membership — $50 / month</h3>
+      <p>Resident membership includes everything in Explorer, plus: unlimited districts and residents, persistent district storage, revenue sharing eligibility (see Section 6), and access to hosted automation services. Hosted automation services — including email delivery, campaign workflows, and engagement sequences — are billed separately on a usage basis as described in Section 5.3.</p>
 
-      <h3>5.3 Hosted Automation Fee (HAF) Schedule</h3>
-      <p>Hosted Automation Fees are volume-based, scaling with your automation trigger usage per month:</p>
-
-      <div class="bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5 my-4">
-        <table class="pricing-table">
-          <thead>
-            <tr>
-              <th>Triggers / Month</th>
-              <th>Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>1 to 2,500</td><td>$0.00</td></tr>
-            <tr><td>2,501 to 5,000</td><td>$89.00</td></tr>
-            <tr><td>5,001 to 10,000</td><td>$129.00</td></tr>
-            <tr><td>10,001 to 20,000</td><td>$189.00</td></tr>
-            <tr><td>20,001 to 50,000</td><td>$289.00</td></tr>
-            <tr><td>50,001 to 100,000</td><td>$489.00</td></tr>
-            <tr><td>100,001 to 200,000</td><td>$769.00</td></tr>
-            <tr><td>200,001+</td><td>$0.004 / trigger</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p>HAF pricing is subject to change with reasonable notice. Current pricing is always reflected in the Architect Mode HAF Schedule view.</p>
+      <h3>5.3 Hosted Automation Fees (HAF)</h3>
+      <p>Hosted Automation Fees are the infrastructure costs that power district operations. These fees are volume-based, scaling with automation trigger usage per month. The first 2,500 triggers per month are included at no additional cost. Usage beyond that threshold is billed monthly according to the current HAF Schedule, which is available within the platform. HAF pricing is subject to change with reasonable notice.</p>
+      <p>Hosted Automation Fees constitute the revenue pool from which partner dividends are distributed (see Section 6).</p>
 
       <h3>5.4 Billing & Automatic Renewal</h3>
-      <p>Membership fees are billed monthly on a recurring basis via Stripe. Pay-as-you-go hosted automation fees are calculated and billed monthly based on actual usage. Your membership will automatically renew each billing period unless you cancel prior to the renewal date. You agree to automatic renewal and acknowledge that pricing may be updated to reflect the current schedule at the time of renewal.</p>
+      <p>Membership fees are billed monthly on a recurring basis via Stripe. Hosted Automation Fees are calculated and billed monthly based on actual usage. Your membership will automatically renew each billing period unless you cancel prior to the renewal date. You agree to automatic renewal and acknowledge that pricing may be updated to reflect the current schedule at the time of renewal.</p>
 
       <h2>6. Revenue Sharing & Partner Payments</h2>
 
       <h3>6.1 The Revenue Share Model</h3>
-      <p>ReadyStack operates a revenue sharing model on Hosted Automation Fees generated by your ReadyStack's customers:</p>
+      <p>Revenue sharing is available exclusively to active Resident members in good standing. ReadyStack operates a revenue sharing model on Hosted Automation Fees generated by district operations:</p>
       <ul>
-        <li><strong class="text-white">Organizers (District creators)</strong> — receive 60% of Hosted Automation Fees on customers you directly acquired, and 20% on customers acquired by your network partners.</li>
-        <li><strong class="text-white">Network Partners (those who share your ReadyStack)</strong> — receive 40% of Hosted Automation Fees for life on customers they referred.</li>
+        <li><strong class="text-white">District Founders (20%)</strong> — Residents who design and create a district earn 20% of all Hosted Automation Fees that district generates, permanently, for as long as the district remains active.</li>
+        <li><strong class="text-white">Referring Residents (40%)</strong> — Residents who spread the word and bring people into a district earn 40% of the Hosted Automation Fees generated by those they referred, permanently.</li>
+        <li><strong class="text-white">ReadyStack (40%)</strong> — Makesbridge retains 40% to operate the infrastructure, including the automation platform, email delivery, data hosting, and support services.</li>
       </ul>
-      <p>Revenue sharing percentages apply to the Hosted Automation Fees paid by end customers. Makesbridge retains the remaining platform share to operate backend infrastructure, email delivery, data hosting, and automation services.</p>
+      <p>Revenue sharing percentages apply to the Hosted Automation Fees paid by end users of district automation. These are permanent stakes, not one-time referral bonuses, and remain in effect for as long as the Resident maintains an active membership in good standing.</p>
 
       <h3>6.2 Payouts via Stripe Connected Accounts</h3>
       <p>To receive revenue share payments, you must establish a Stripe Connected Account linked to your ReadyStack account. You may request a Connected Account by submitting the in-product request form. Makesbridge will verify and link your Stripe Connected Account to your ReadyStack User ID. Payouts are processed upon customer payment. Makesbridge is not responsible for delays caused by Stripe's processing timelines or your failure to maintain a valid Connected Account.</p>
@@ -325,14 +304,14 @@
   <footer class="border-t border-white/5 mt-20">
     <div class="max-w-6xl mx-auto px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="flex items-center space-x-2">
-        <div class="bg-white p-1 rounded-full flex items-center justify-center border border-white/20 overflow-hidden">
+        <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center">
           <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width:16px;height:16px;object-fit:contain;" />
         </div>
-        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500" style="font-family:'Poppins',sans-serif;">ReadyStack — A Makesbridge Technology Product</span>
+        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500" style="font-family:'Poppins',sans-serif;">ReadyStack — Makesbridge Technology, Inc.</span>
       </div>
       <div class="flex items-center gap-6">
-        <a href="https://readystack.ai/privacy-policy" class="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Privacy Policy</a>
-        <a href="https://readystack.ai/terms-of-service" class="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Terms of Service</a>
+        <a href="privacy-policy.html" class="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Privacy Policy</a>
+        <a href="terms-of-service.html" class="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Terms of Service</a>
         <span class="text-[9px] font-black uppercase tracking-widest text-slate-600" style="font-family:'Poppins',sans-serif;">© 2026 Makesbridge Technology, Inc.</span>
       </div>
     </div>
