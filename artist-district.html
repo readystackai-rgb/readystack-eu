@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist District — ReadyStack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #020617;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .hero-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            background-color: rgba(2, 6, 23, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link {
+            color: #e2e8f0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            color: #7c8cff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(124, 140, 255, 0.3);
+        }
+
+        .btn-outline {
+            border: 2px solid #7c8cff;
+            color: #7c8cff;
+            padding: 12px 28px;
+            border-radius: 8px;
+            background: transparent;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(124, 140, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background-color: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(124, 140, 255, 0.5);
+            background-color: rgba(15, 23, 42, 0.7);
+            box-shadow: 0 8px 32px rgba(124, 140, 255, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: rgba(124, 140, 255, 0.2);
+            border: 1px solid rgba(124, 140, 255, 0.5);
+            color: #7c8cff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: clamp(1.875rem, 5vw, 2.5rem);
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: #cbd5e1;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .green-text {
+            color: #10b981;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #020617 0%, #7c8cff 50%, #020617 100%);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 12px rgba(124, 140, 255, 0.4);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 24px rgba(124, 140, 255, 0.6);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 12px rgba(124, 140, 255, 0.4);
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 24px rgba(124, 140, 255, 0.6);
+        }
+
+        .flow-step {
+            position: relative;
+            text-align: center;
+        }
+
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7c8cff;
+            font-size: 24px;
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table td {
+            padding: 16px;
+            text-align: left;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+            color: white;
+            width: 35%;
+        }
+
+        .comparison-table td:nth-child(2),
+        .comparison-table td:nth-child(3) {
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .comparison-table .featured {
+            background-color: rgba(124, 140, 255, 0.1);
+            border-left: 3px solid #7c8cff;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: clamp(2rem, 6vw, 3rem);
+            }
+
+            .section-title {
+                font-size: clamp(1.5rem, 4vw, 2rem);
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-step::after {
+                right: 0;
+                transform: rotate(90deg) translateX(50%);
+                bottom: -20px;
+            }
+
+            .comparison-table td {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- STICKY HEADER NAV -->
+    <header class="sticky-header">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-white" style="font-family: 'Poppins', sans-serif;">Artist District</h1>
+            <nav class="flex gap-8 items-center">
+                <a class="nav-link" onclick="document.getElementById('hero').scrollIntoView({behavior:'smooth'}); return false;" href="javascript:void(0)">Home</a>
+                <a class="nav-link" onclick="document.getElementById('calculator').scrollIntoView({behavior:'smooth'}); return false;" href="javascript:void(0)">Calculator</a>
+                <a class="nav-link" onclick="document.getElementById('preview').scrollIntoView({behavior:'smooth'}); return false;" href="javascript:void(0)">Preview</a>
+                <a class="nav-link" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'}); return false;" href="javascript:void(0)">Pricing</a>
+                <a class="btn-primary" href="https://www.readystack.ai/contact" target="_top">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 1. HERO SECTION -->
+    <section id="hero" class="min-h-screen flex items-center justify-center px-4 py-20">
+        <div class="max-w-4xl mx-auto text-center space-y-8 fade-in-up visible">
+            <div class="space-y-6">
+                <span class="badge">POWERED BY READYSTACK</span>
+                <h1 class="hero-title">Fans Get Paid to Share Your Music. And So Do You.</h1>
+                <p class="section-subtitle text-lg max-w-2xl mx-auto">
+                    Fans earn 40% of every automation fee — forever. You earn 20%. Sponsors fund the district. No labels. No ad spend. Just an economy that grows with you.
+                </p>
+            </div>
+            <div class="flex gap-4 justify-center flex-wrap">
+                <button class="btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Start Your Economy</button>
+                <button class="btn-outline" onclick="document.getElementById('calculator').scrollIntoView({behavior:'smooth'})">See the Math</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. THE PAY FLIP -->
+    <section class="py-20 px-4 bg-gradient-to-b from-transparent via-slate-900/5 to-transparent">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="section-title text-center">The Pay Flip</h2>
+            <p class="section-subtitle text-center">How the 20/40/40 economy works</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 fade-in-up">
+                <div class="card">
+                    <div class="text-3xl font-bold text-indigo-400 mb-3">20%</div>
+                    <h3 class="text-xl font-bold text-white mb-3" style="font-family: 'Poppins', sans-serif;">You (Artist)</h3>
+                    <p class="text-slate-300">Your music drives the economy. You earn on every automation.</p>
+                </div>
+                <div class="card">
+                    <div class="text-3xl font-bold green-text mb-3">40%</div>
+                    <h3 class="text-xl font-bold text-white mb-3" style="font-family: 'Poppins', sans-serif;">Your Fans</h3>
+                    <p class="text-slate-300">Fans share your district. Every share triggers automations. They earn 40%.</p>
+                </div>
+                <div class="card">
+                    <div class="text-3xl font-bold text-purple-400 mb-3">40%</div>
+                    <h3 class="text-xl font-bold text-white mb-3" style="font-family: 'Poppins', sans-serif;">ReadyStack</h3>
+                    <p class="text-slate-300">We build the rails, host the tools, and handle payments.</p>
+                </div>
+            </div>
+
+            <div class="text-center text-slate-300 max-w-2xl mx-auto">
+                <p>Spotify pays $0.003 per stream. We pay you and your fans thousands. For years.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. GIFT → TRANSACTION FLOW -->
+    <section class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="section-title text-center">How the Economy Grows</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 fade-in-up mt-12">
+                <div class="flow-step">
+                    <div class="card mb-4">
+                        <div class="text-2xl font-bold text-indigo-400 mb-2" style="font-family: 'Poppins', sans-serif;">GIFT</div>
+                        <p class="text-slate-300">Your music draws fans in</p>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="card mb-4">
+                        <div class="text-2xl font-bold text-indigo-400 mb-2" style="font-family: 'Poppins', sans-serif;">ACQUAINTANCE</div>
+                        <p class="text-slate-300">They discover tools in your district</p>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="card mb-4">
+                        <div class="text-2xl font-bold text-indigo-400 mb-2" style="font-family: 'Poppins', sans-serif;">COLLEAGUE</div>
+                        <p class="text-slate-300">They share and earn 40%</p>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="card mb-4">
+                        <div class="text-2xl font-bold text-indigo-400 mb-2" style="font-family: 'Poppins', sans-serif;">TRANSACTION</div>
+                        <p class="text-slate-300">Everyone earns. The economy compounds.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. HOW IT WORKS -->
+    <section class="py-20 px-4 bg-gradient-to-b from-transparent via-slate-900/5 to-transparent">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="section-title text-center">How It Works</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 fade-in-up">
+                <div class="card">
+                    <div class="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-3">Step 1</div>
+                    <h3 class="text-xl font-bold text-white mb-3" style="font-family: 'Poppins', sans-serif;">Drop Your Video</h3>
+                    <p class="text-slate-300">Paste a YouTube URL. Our AI builds your district narrative.</p>
+                </div>
+                <div class="card">
+                    <div class="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-3">Step 2</div>
+                    <h3 class="text-xl font-bold text-white mb-3" style="font-family: 'Poppins', sans-serif;">Select Your Workflow</h3>
+                    <p class="text-slate-300">Choose from pre-built automation workflows. No coding.</p>
+                </div>
+                <div class="card">
+                    <div class="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-3">Step 3</div>
+                    <h3 class="text-xl font-bold text-white mb-3" style="font-family: 'Poppins', sans-serif;">Launch Your District</h3>
+                    <p class="text-slate-300">Your Storyteller Preview goes live. Fans discover, share, and earn.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. INCOME CALCULATOR -->
+    <section id="calculator" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="section-title text-center">See Your Earnings</h2>
+            <p class="section-subtitle text-center">Adjust your district's size and watch the economy grow in real time.</p>
+
+            <!-- Preset Buttons -->
+            <div class="flex justify-center gap-4 mb-12 flex-wrap fade-in-up">
+                <button class="btn-outline" onclick="setPreset(5000)">Starting Out (5K)</button>
+                <button class="btn-outline" onclick="setPreset(50000)">Mid-Tier (50K)</button>
+                <button class="btn-outline" onclick="setPreset(300000)">Jason (300K)</button>
+            </div>
+
+            <!-- Calculator Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 fade-in-up">
+                <!-- LEFT: Input Sliders -->
+                <div class="space-y-8">
+                    <div>
+                        <label class="block text-sm font-bold text-indigo-400 uppercase mb-2">Total Fans: <span id="fans-value">50K</span></label>
+                        <input type="range" id="fans" min="1" max="500" value="50" step="1" oninput="updateCalculator()">
+                        <div class="text-xs text-slate-400 mt-1">1K to 500K</div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-indigo-400 uppercase mb-2">Fan Activation Rate: <span id="activation-value">2%</span></label>
+                        <input type="range" id="activation" min="0.25" max="5" value="2" step="0.25" oninput="updateCalculator()">
+                        <div class="text-xs text-slate-400 mt-1">0.25% to 5%</div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-indigo-400 uppercase mb-2">Automations per Month: <span id="automations-value">20</span></label>
+                        <input type="range" id="automations" min="5" max="100" value="20" step="5" oninput="updateCalculator()">
+                        <div class="text-xs text-slate-400 mt-1">5 to 100</div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-indigo-400 uppercase mb-2">Sharing Rate: <span id="sharing-value">15%</span></label>
+                        <input type="range" id="sharing" min="5" max="50" value="15" step="5" oninput="updateCalculator()">
+                        <div class="text-xs text-slate-400 mt-1">5% to 50%</div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Results -->
+                <div class="space-y-6">
+                    <div class="card">
+                        <div class="text-sm text-slate-400 uppercase mb-1">Monthly Earnings (You)</div>
+                        <div class="text-4xl font-bold gradient-text" id="result-monthly">$1,080</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="text-sm text-slate-400 uppercase mb-1">Monthly Earnings (All Fans)</div>
+                        <div class="text-4xl font-bold green-text" id="result-fans">$2,160</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="text-sm text-slate-400 uppercase mb-1">Annual Earnings (You)</div>
+                        <div class="text-4xl font-bold gradient-text" id="result-annual">$12,960</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="text-sm text-slate-400 uppercase mb-1">vs. Spotify Multiplier</div>
+                        <div class="text-4xl font-bold gradient-text" id="result-multiplier">8,640x</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Math Breakdown -->
+            <div class="mt-12 p-6 bg-slate-900/30 rounded-lg border border-slate-700/50 fade-in-up">
+                <h4 class="text-sm font-bold text-indigo-400 uppercase mb-4">Math Breakdown</h4>
+                <p class="text-sm text-slate-300 mb-2">
+                    <span id="breakdown-fans">50,000</span> fans × <span id="breakdown-activation">2%</span> activation ×
+                    <span id="breakdown-sharing">15%</span> sharing = <span id="breakdown-triggers">1,500</span> monthly automations
+                </p>
+                <p class="text-sm text-slate-300">
+                    <span id="breakdown-cost">$180</span> monthly automation cost → You: <span class="gradient-text">$36</span> | Fans: <span class="green-text">$72</span> | ReadyStack: <span class="text-purple-400">$72</span>
+                </p>
+            </div>
+
+            <!-- Trigger Pricing Tiers -->
+            <div class="mt-12">
+                <h4 class="text-sm font-bold text-indigo-400 uppercase mb-6 text-center">Trigger Pricing Tiers</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 fade-in-up">
+                    <div class="card text-center">
+                        <div class="text-2xl font-bold text-indigo-400 mb-1">Free</div>
+                        <p class="text-xs text-slate-400">0 – 2,500</p>
+                        <p class="text-sm text-slate-300 mt-2">Up to 2,500 triggers per month</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="text-2xl font-bold text-indigo-400 mb-1">$0.012</div>
+                        <p class="text-xs text-slate-400">2,501 – 10K</p>
+                        <p class="text-sm text-slate-300 mt-2">Per trigger over 2,500</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="text-2xl font-bold text-indigo-400 mb-1">$0.008</div>
+                        <p class="text-xs text-slate-400">10K – 50K</p>
+                        <p class="text-sm text-slate-300 mt-2">Per trigger over 10,000</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="text-2xl font-bold text-indigo-400 mb-1">$0.004</div>
+                        <p class="text-xs text-slate-400">50K+</p>
+                        <p class="text-sm text-slate-300 mt-2">Per trigger over 50,000</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. METALFORLIFE PREVIEW -->
+    <section id="preview" class="py-20 px-4 bg-gradient-to-b from-transparent via-slate-900/5 to-transparent">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="section-title text-center">See a District in Action</h2>
+            <p class="section-subtitle text-center">This is MetalForLife — Jason Hardouin's district. 300K fans. One economy.</p>
+
+            <!-- Hero Video -->
+            <div class="mb-12 rounded-lg overflow-hidden fade-in-up">
+                <iframe width="100%" height="400" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+
+            <!-- Playlist Section -->
+            <h3 class="text-xl font-bold text-white mb-6 mt-12" style="font-family: 'Poppins', sans-serif;">Music & Collaborations</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 fade-in-up">
+                <!-- Spotify Embed -->
+                <div class="rounded-lg overflow-hidden">
+                    <iframe src="https://open.spotify.com/embed/track/4cOdK2wGLETKBW3PvgPWqT?utm_source=generator" width="100%" height="352" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                </div>
+
+                <!-- YouTube Embed -->
+                <div class="rounded-lg overflow-hidden">
+                    <iframe src="https://www.youtube.com/embed/JGwWNGJdvx8" width="100%" height="352" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+
+                <!-- Suno Placeholder -->
+                <div class="card flex items-center justify-center min-h-[352px] text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-indigo-400 mb-2" style="font-family: 'Poppins', sans-serif;">AI Collab Track</div>
+                        <p class="text-slate-300 mb-4">Listen on Suno</p>
+                        <button class="btn-outline">Open Suno</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Residents & Sponsors -->
+            <h3 class="text-xl font-bold text-white mb-6 mt-12" style="font-family: 'Poppins', sans-serif;">Partners & Sponsors</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 fade-in-up">
+                <div class="card">
+                    <span class="badge mb-3">GEAR</span>
+                    <h4 class="font-bold text-white mb-2">Heavy Tone Guitar Shop</h4>
+                    <p class="text-sm text-slate-300 mb-4">Premium metal and rock gear for serious musicians.</p>
+                    <a href="javascript:void(0)" class="text-indigo-400 hover:text-white transition-colors text-sm font-bold">Visit Shop →</a>
+                </div>
+                <div class="card">
+                    <span class="badge mb-3">FITNESS</span>
+                    <h4 class="font-bold text-white mb-2">Pit Stop Fitness</h4>
+                    <p class="text-sm text-slate-300 mb-4">Hardcore training for metal heads and rockers.</p>
+                    <a href="javascript:void(0)" class="text-indigo-400 hover:text-white transition-colors text-sm font-bold">Visit Studio →</a>
+                </div>
+                <div class="card">
+                    <span class="badge mb-3">INK</span>
+                    <h4 class="font-bold text-white mb-2">Ironside Ink</h4>
+                    <p class="text-sm text-slate-300 mb-4">Custom metal-inspired tattoo artistry and design.</p>
+                    <a href="javascript:void(0)" class="text-indigo-400 hover:text-white transition-colors text-sm font-bold">View Portfolio →</a>
+                </div>
+                <div class="card">
+                    <span class="badge mb-3">STUDIO</span>
+                    <h4 class="font-bold text-white mb-2">Thunderbolt Recording</h4>
+                    <p class="text-sm text-slate-300 mb-4">Full-service recording studio for metal and rock.</p>
+                    <a href="javascript:void(0)" class="text-indigo-400 hover:text-white transition-colors text-sm font-bold">Book Session →</a>
+                </div>
+            </div>
+
+            <!-- Earn 40% Banner -->
+            <div class="mt-12 p-8 rounded-lg bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 text-center fade-in-up">
+                <h4 class="text-xl font-bold text-white mb-2" style="font-family: 'Poppins', sans-serif;">Your Fans Are Already Sharing</h4>
+                <p class="text-slate-300 mb-6">Your fans are already sharing your music for free. Now they get paid for it.</p>
+                <button class="btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Build Your Economy</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. WHAT ARTISTS & FANS GET -->
+    <section class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 fade-in-up">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-6" style="font-family: 'Poppins', sans-serif;">What Artists Get</h3>
+                    <ul class="space-y-4">
+                        <li class="flex gap-3">
+                            <span class="text-indigo-400 font-bold">▪</span>
+                            <span class="text-slate-300"><strong>District Homepage</strong> — Your branded hub</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-indigo-400 font-bold">▪</span>
+                            <span class="text-slate-300"><strong>AI Narrative</strong> — Automatically generated storytelling</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-indigo-400 font-bold">▪</span>
+                            <span class="text-slate-300"><strong>Revenue Share</strong> — 20% of every automation fee</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-indigo-400 font-bold">▪</span>
+                            <span class="text-slate-300"><strong>Workflow Marketplace</strong> — Pre-built integrations</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-indigo-400 font-bold">▪</span>
+                            <span class="text-slate-300"><strong>Fan Analytics</strong> — Real-time engagement data</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-6" style="font-family: 'Poppins', sans-serif;">What Fans Get</h3>
+                    <ul class="space-y-4">
+                        <li class="flex gap-3">
+                            <span class="green-text font-bold">▪</span>
+                            <span class="text-slate-300"><strong>40% Revenue Share</strong> — Earn on every share</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="green-text font-bold">▪</span>
+                            <span class="text-slate-300"><strong>Tool Discovery</strong> — Access exclusive district tools</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="green-text font-bold">▪</span>
+                            <span class="text-slate-300"><strong>Business District Access</strong> — Partner benefits & discounts</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="green-text font-bold">▪</span>
+                            <span class="text-slate-300"><strong>Sharing Economy</strong> — Build personal income streams</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="green-text font-bold">▪</span>
+                            <span class="text-slate-300"><strong>Community Status</strong> — Recognized contributor badges</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. THE REAL COMPETITION -->
+    <section class="py-20 px-4 bg-gradient-to-b from-transparent via-slate-900/5 to-transparent">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="section-title text-center">You're Not Competing With Us</h2>
+            <p class="section-subtitle text-center">You're competing with the stack of 7 tools you're already paying for.</p>
+
+            <div class="mt-12 overflow-x-auto fade-in-up">
+                <table class="comparison-table">
+                    <thead>
+                        <tr class="border-b-2 border-indigo-500/30">
+                            <th class="text-left p-4 text-white font-bold">Feature</th>
+                            <th class="text-center p-4 text-slate-300">The DIY Stack (7 tools)</th>
+                            <th class="text-center p-4 text-indigo-400 font-bold">ReadyStack Artist District</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="p-4">Monthly Cost</td>
+                            <td class="text-center p-4 text-slate-300">$400+ / month</td>
+                            <td class="text-center p-4 text-indigo-400 font-bold">$0 – $50 / month</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4">Setup Time</td>
+                            <td class="text-center p-4 text-slate-300">3+ months</td>
+                            <td class="text-center p-4 text-indigo-400 font-bold">5 minutes</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4">Revenue Sharing</td>
+                            <td class="text-center p-4 text-slate-300">None</td>
+                            <td class="text-center p-4 text-indigo-400 font-bold">20/40/40</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4">Fan Economy</td>
+                            <td class="text-center p-4 text-slate-300">None</td>
+                            <td class="text-center p-4 text-indigo-400 font-bold">Built-in</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4">Automation</td>
+                            <td class="text-center p-4 text-slate-300">Manual</td>
+                            <td class="text-center p-4 text-indigo-400 font-bold">AI-Powered</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4">Maintenance</td>
+                            <td class="text-center p-4 text-slate-300">You</td>
+                            <td class="text-center p-4 text-indigo-400 font-bold">Us</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. PRICING -->
+    <section id="pricing" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="section-title text-center">Simple, Fair Pricing</h2>
+            <p class="section-subtitle text-center">Scale with your fans. Pay only for what you use.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 fade-in-up">
+                <!-- Explorer Plan -->
+                <div class="card">
+                    <h3 class="text-2xl font-bold text-white mb-1" style="font-family: 'Poppins', sans-serif;">Explorer</h3>
+                    <div class="text-3xl font-bold text-indigo-400 mb-6">$0 <span class="text-base text-slate-400">/month</span></div>
+                    <ul class="space-y-3 mb-8 text-slate-300 text-sm">
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Free up to 2,500 triggers</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Storyteller Preview</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>1 district</span>
+                        </li>
+                    </ul>
+                    <button class="btn-outline w-full">Get Started</button>
+                </div>
+
+                <!-- Resident Plan (Featured) -->
+                <div class="card border-2 border-indigo-500/50 relative transform lg:scale-105">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <span class="badge bg-indigo-500/30 border-indigo-500">FEATURED</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-1 mt-4" style="font-family: 'Poppins', sans-serif;">Resident</h3>
+                    <div class="text-3xl font-bold gradient-text mb-6">$50 <span class="text-base text-slate-400">/month</span></div>
+                    <ul class="space-y-3 mb-8 text-slate-300 text-sm">
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Everything in Explorer</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Resident listing in district</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Sponsor placement</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Fan analytics dashboard</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Up to 10K triggers/month</span>
+                        </li>
+                    </ul>
+                    <button class="btn-primary w-full">Choose Resident</button>
+                </div>
+
+                <!-- Resident Automator Plan -->
+                <div class="card">
+                    <h3 class="text-2xl font-bold text-white mb-1" style="font-family: 'Poppins', sans-serif;">Resident Automator</h3>
+                    <div class="text-3xl font-bold text-indigo-400 mb-1">$50 <span class="text-base text-slate-400">/month</span></div>
+                    <div class="text-sm text-slate-400 mb-6">+ pay-as-you-go triggers</div>
+                    <ul class="space-y-3 mb-8 text-slate-300 text-sm">
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Everything in Resident</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Unlimited triggers</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Tiered pricing per trigger</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Advanced workflow builder</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-400">✓</span>
+                            <span>Priority API access</span>
+                        </li>
+                    </ul>
+                    <button class="btn-outline w-full">Get Started</button>
+                </div>
+            </div>
+
+            <!-- Trigger Pricing -->
+            <div class="mt-16">
+                <h4 class="text-center text-lg font-bold text-white mb-8" style="font-family: 'Poppins', sans-serif;">Trigger Pricing (Pay-As-You-Go)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 fade-in-up">
+                    <div class="card text-center">
+                        <div class="text-2xl font-bold text-green-400 mb-1">Free</div>
+                        <p class="text-xs text-slate-400 mb-2">0 – 2,500</p>
+                        <p class="text-sm text-slate-300">No charge for first 2,500 triggers</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="text-2xl font-bold text-indigo-400 mb-1">$0.012</div>
+                        <p class="text-xs text-slate-400 mb-2">2,501 – 10K</p>
+                        <p class="text-sm text-slate-300">Per trigger above 2,500</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="text-2xl font-bold text-indigo-400 mb-1">$0.008</div>
+                        <p class="text-xs text-slate-400 mb-2">10K – 50K</p>
+                        <p class="text-sm text-slate-300">Per trigger above 10,000</p>
+                    </div>
+                    <div class="card text-center">
+                        <div class="text-2xl font-bold text-indigo-400 mb-1">$0.004</div>
+                        <p class="text-xs text-slate-400 mb-2">50K+</p>
+                        <p class="text-sm text-slate-300">Per trigger above 50,000</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 10. FINAL CTA -->
+    <section class="py-20 px-4 bg-gradient-to-b from-transparent via-slate-900/5 to-transparent">
+        <div class="max-w-2xl mx-auto text-center space-y-8 fade-in-up">
+            <h2 class="hero-title">Ready to Build Your Economy?</h2>
+            <p class="text-lg text-slate-300 max-w-xl mx-auto">
+                Gift → Acquaintance → Colleague → Transaction. That's the ReadyStack flywheel.
+            </p>
+            <button class="btn-primary text-lg px-12 py-4" onclick="window.open('https://www.readystack.ai', '_top')">Start Your Economy</button>
+        </div>
+    </section>
+
+    <!-- 11. FOOTER -->
+    <footer class="border-t border-white/5 mt-8">
+        <div class="max-w-6xl mx-auto py-8 px-4 text-center space-y-3">
+            <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 block" style="font-family:'Poppins',sans-serif;">ReadyStack — A Makesbridge Technology Product</span>
+            <div class="flex justify-center gap-6 flex-wrap">
+                <a href="https://www.readystack.ai/privacy-policy" target="_top" class="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Privacy Policy</a>
+                <a href="https://www.readystack.ai/terms-of-service" target="_top" class="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Terms of Service</a>
+                <a href="https://www.readystack.ai/contact" target="_top" class="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Contact</a>
+            </div>
+            <span class="text-[9px] font-black uppercase tracking-widest text-slate-600 block" style="font-family:'Poppins',sans-serif;">&copy; 2026 Makesbridge Technology, Inc.</span>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize IntersectionObserver for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all fade-in elements
+        document.querySelectorAll('.fade-in-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Calculator Logic
+        function updateCalculator() {
+            const fans = parseInt(document.getElementById('fans').value) * 1000;
+            const activation = parseFloat(document.getElementById('activation').value);
+            const automations = parseInt(document.getElementById('automations').value);
+            const sharing = parseFloat(document.getElementById('sharing').value);
+
+            // Update display values
+            document.getElementById('fans-value').textContent = (fans / 1000) + 'K';
+            document.getElementById('activation-value').textContent = activation + '%';
+            document.getElementById('automations-value').textContent = automations;
+            document.getElementById('sharing-value').textContent = sharing + '%';
+
+            // Calculate monthly automations triggered
+            const monthlyAutomations = Math.floor((fans * (activation / 100) * (sharing / 100)) + automations);
+
+            // Calculate cost based on tiered pricing
+            let totalCost = 0;
+            if (monthlyAutomations <= 2500) {
+                totalCost = 0;
+            } else if (monthlyAutomations <= 10000) {
+                totalCost = (monthlyAutomations - 2500) * 0.012;
+            } else if (monthlyAutomations <= 50000) {
+                totalCost = (7500 * 0.012) + ((monthlyAutomations - 10000) * 0.008);
+            } else {
+                totalCost = (7500 * 0.012) + (40000 * 0.008) + ((monthlyAutomations - 50000) * 0.004);
+            }
+
+            // Split 20/40/40
+            const artistMonthly = totalCost * 0.2;
+            const fanMonthly = totalCost * 0.4;
+            const artistAnnual = artistMonthly * 12;
+
+            // Spotify comparison
+            const spotifyEarnings = fans * 12 * 0.003;
+            const multiplier = spotifyEarnings > 0 ? (artistAnnual / spotifyEarnings) : 0;
+
+            // Update results
+            document.getElementById('result-monthly').textContent = '$' + artistMonthly.toFixed(2);
+            document.getElementById('result-fans').textContent = '$' + fanMonthly.toFixed(2);
+            document.getElementById('result-annual').textContent = '$' + artistAnnual.toFixed(2);
+            document.getElementById('result-multiplier').textContent = multiplier.toFixed(0) + 'x';
+
+            // Update breakdown
+            document.getElementById('breakdown-fans').textContent = fans.toLocaleString();
+            document.getElementById('breakdown-activation').textContent = activation + '%';
+            document.getElementById('breakdown-sharing').textContent = sharing + '%';
+            document.getElementById('breakdown-triggers').textContent = monthlyAutomations.toLocaleString();
+            document.getElementById('breakdown-cost').textContent = '$' + totalCost.toFixed(2);
+        }
+
+        // Preset functions
+        function setPreset(fanCount) {
+            let activation = 2;
+            let automations = 20;
+            let sharing = 15;
+
+            if (fanCount === 5000) {
+                activation = 1.5;
+                automations = 10;
+                sharing = 10;
+            } else if (fanCount === 50000) {
+                activation = 2;
+                automations = 20;
+                sharing = 15;
+            } else if (fanCount === 300000) {
+                activation = 3.5;
+                automations = 50;
+                sharing = 25;
+            }
+
+            document.getElementById('fans').value = fanCount / 1000;
+            document.getElementById('activation').value = activation;
+            document.getElementById('automations').value = automations;
+            document.getElementById('sharing').value = sharing;
+
+            updateCalculator();
+        }
+
+        // Initialize calculator on page load
+        window.addEventListener('DOMContentLoaded', updateCalculator);
+    </script>
+</body>
+</html>
