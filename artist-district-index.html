@@ -1536,50 +1536,84 @@
                           {/* Artist name + single Add Platform control */}
                           <div className="flex items-center gap-3 mb-4">
                             <p className="text-sm font-bold text-white">{r.name}</p>
-                            <div className="flex items-center gap-2">
-                              <select
-                                className="bg-[#020617] border border-slate-700 rounded-lg px-3 py-1.5 text-[10px] text-slate-300 outline-none cursor-pointer"
-                                value=""
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  if (!val) return;
-                                  // Check if it's a traffic source
-                                  const isTraf = TRAFFIC_SOURCE_OPTIONS.find(o => o.value === val);
-                                  if (isTraf) {
-                                    addTrafficSource(origIdx);
-                                    // Set the type on the newly added source
-                                    const updated = [...storyParticipants.residents];
-                                    const sources = updated[origIdx].trafficSources || [];
-                                    sources[sources.length - 1] = { ...sources[sources.length - 1], type: val };
-                                    updated[origIdx] = { ...updated[origIdx], trafficSources: sources };
-                                    setStoryParticipants({ residents: updated });
-                                  } else {
-                                    // It's a quadrant link
-                                    const updated = [...storyParticipants.residents];
-                                    const current = updated[origIdx].extraLinks || [];
-                                    updated[origIdx] = { ...updated[origIdx], extraLinks: [...current, { type: val, url: '' }] };
-                                    setStoryParticipants({ residents: updated });
-                                  }
-                                  e.target.value = '';
-                                }}
+                            <div className="relative">
+                              <button
+                                onClick={() => setMapEditingItem(mapEditingItem === 'dropdown-'+origIdx ? null : 'dropdown-'+origIdx)}
+                                className="bg-[#020617] border border-indigo-500/40 rounded-lg px-3 py-1.5 text-[10px] text-indigo-300 outline-none cursor-pointer hover:border-indigo-400 hover:text-indigo-200 transition-colors flex items-center gap-1"
                               >
-                                <option value="">+ District Engagement Item</option>
-                                <optgroup label="Traffic Sources → Preview">
-                                  {TRAFFIC_SOURCE_OPTIONS.map(o => <option key={'t-'+o.value} value={o.value}>{o.label}</option>)}
-                                </optgroup>
-                                <optgroup label="Discover (Watch / Stream)">
-                                  {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'discover').map(o => <option key={'d-'+o.value} value={o.value}>{o.label}</option>)}
-                                </optgroup>
-                                <optgroup label="Engage (Listen / Follow)">
-                                  {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'engage').map(o => <option key={'e-'+o.value} value={o.value}>{o.label}</option>)}
-                                </optgroup>
-                                <optgroup label="Connect (Visit / Join)">
-                                  {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'connect').map(o => <option key={'c-'+o.value} value={o.value}>{o.label}</option>)}
-                                </optgroup>
-                                <optgroup label="Support (Shop / Back)">
-                                  {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'support').map(o => <option key={'s-'+o.value} value={o.value}>{o.label}</option>)}
-                                </optgroup>
-                              </select>
+                                <span className="text-indigo-400 font-bold">+</span> District Engagement Item
+                              </button>
+                              {mapEditingItem === 'dropdown-'+origIdx && (
+                                <div className="absolute top-full left-0 mt-1 z-50 bg-[#0f172a] border border-slate-600 rounded-xl shadow-2xl w-64 max-h-80 overflow-y-auto">
+                                  {/* TRAFFIC */}
+                                  <div className="px-3 pt-3 pb-1">
+                                    <p className="text-[9px] font-bold text-white uppercase tracking-widest border-b border-slate-600 pb-1.5">Traffic</p>
+                                  </div>
+                                  {TRAFFIC_SOURCE_OPTIONS.map(o => (
+                                    <button key={'t-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                      addTrafficSource(origIdx);
+                                      const updated = [...storyParticipants.residents];
+                                      const sources = updated[origIdx].trafficSources || [];
+                                      sources[sources.length - 1] = { ...sources[sources.length - 1], type: o.value };
+                                      updated[origIdx] = { ...updated[origIdx], trafficSources: sources };
+                                      setStoryParticipants({ residents: updated });
+                                      setMapEditingItem(null);
+                                    }}>{o.label}</button>
+                                  ))}
+                                  {/* DISCOVER */}
+                                  <div className="px-3 pt-3 pb-1">
+                                    <p className="text-[9px] font-bold text-red-400 uppercase tracking-widest border-b border-slate-600 pb-1.5">Discover</p>
+                                  </div>
+                                  {[{value:'youtube-extra',label:'YouTube',color:'#ff0000'},{value:'spotify-extra',label:'Spotify',color:'#1db954'}].map(o => (
+                                    <button key={'d-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                      const updated = [...storyParticipants.residents];
+                                      const current = updated[origIdx].extraLinks || [];
+                                      updated[origIdx] = { ...updated[origIdx], extraLinks: [...current, { type: o.value, url: '' }] };
+                                      setStoryParticipants({ residents: updated });
+                                      setMapEditingItem(null);
+                                    }}>{o.label}</button>
+                                  ))}
+                                  {/* ENGAGE */}
+                                  <div className="px-3 pt-3 pb-1">
+                                    <p className="text-[9px] font-bold text-yellow-400 uppercase tracking-widest border-b border-slate-600 pb-1.5">Engage</p>
+                                  </div>
+                                  {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'engage').map(o => (
+                                    <button key={'e-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                      const updated = [...storyParticipants.residents];
+                                      const current = updated[origIdx].extraLinks || [];
+                                      updated[origIdx] = { ...updated[origIdx], extraLinks: [...current, { type: o.value, url: '' }] };
+                                      setStoryParticipants({ residents: updated });
+                                      setMapEditingItem(null);
+                                    }}>{o.label}</button>
+                                  ))}
+                                  {/* CONNECT */}
+                                  <div className="px-3 pt-3 pb-1">
+                                    <p className="text-[9px] font-bold text-green-400 uppercase tracking-widest border-b border-slate-600 pb-1.5">Connect</p>
+                                  </div>
+                                  {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'connect').map(o => (
+                                    <button key={'c-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                      const updated = [...storyParticipants.residents];
+                                      const current = updated[origIdx].extraLinks || [];
+                                      updated[origIdx] = { ...updated[origIdx], extraLinks: [...current, { type: o.value, url: '' }] };
+                                      setStoryParticipants({ residents: updated });
+                                      setMapEditingItem(null);
+                                    }}>{o.label}</button>
+                                  ))}
+                                  {/* SUPPORT */}
+                                  <div className="px-3 pt-3 pb-1">
+                                    <p className="text-[9px] font-bold text-purple-400 uppercase tracking-widest border-b border-slate-600 pb-1.5">Support</p>
+                                  </div>
+                                  {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'support').map(o => (
+                                    <button key={'s-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                      const updated = [...storyParticipants.residents];
+                                      const current = updated[origIdx].extraLinks || [];
+                                      updated[origIdx] = { ...updated[origIdx], extraLinks: [...current, { type: o.value, url: '' }] };
+                                      setStoryParticipants({ residents: updated });
+                                      setMapEditingItem(null);
+                                    }}>{o.label}</button>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
 
