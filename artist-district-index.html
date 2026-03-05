@@ -691,10 +691,10 @@
 
       // Quadrant platform types — WHERE fans GO after the Preview page
       const LINK_TYPE_OPTIONS = [
-        { value: 'soundcloud', label: 'SoundCloud', quadrant: 'discover', color: '#ff5500' },
-        { value: 'bandcamp', label: 'Bandcamp', quadrant: 'discover', color: '#1da0c3' },
-        { value: 'applemusic', label: 'Apple Music', quadrant: 'discover', color: '#fa243c' },
-        { value: 'tiktok', label: 'TikTok', quadrant: 'discover', color: '#fe2c55' },
+        { value: 'soundcloud', label: 'SoundCloud', quadrant: 'engage', color: '#ff5500' },
+        { value: 'bandcamp', label: 'Bandcamp', quadrant: 'engage', color: '#1da0c3' },
+        { value: 'applemusic', label: 'Apple Music', quadrant: 'engage', color: '#fa243c' },
+        { value: 'tiktok', label: 'TikTok', quadrant: 'engage', color: '#fe2c55' },
         { value: 'instagram', label: 'Instagram', quadrant: 'engage', color: '#e1306c' },
         { value: 'twitter', label: 'Twitter / X', quadrant: 'engage', color: '#1da1f2' },
         { value: 'discord', label: 'Discord', quadrant: 'connect', color: '#5865f2' },
@@ -704,7 +704,7 @@
         { value: 'patreon', label: 'Patreon', quadrant: 'support', color: '#ff424d' },
         { value: 'kofi', label: 'Ko-fi', quadrant: 'support', color: '#ff5e5b' },
         { value: 'tickets', label: 'Tickets / Live Shows', quadrant: 'support', color: '#ffd666' },
-        { value: 'other', label: 'Other', quadrant: 'discover', color: '#94a3b8' },
+        { value: 'other', label: 'Other', quadrant: 'engage', color: '#94a3b8' },
       ];
 
       // Backer type definitions for artist backing
@@ -1563,7 +1563,7 @@
                                   e.target.value = '';
                                 }}
                               >
-                                <option value="">+ Add Platform</option>
+                                <option value="">+ District Engagement Item</option>
                                 <optgroup label="Traffic Sources → Preview">
                                   {TRAFFIC_SOURCE_OPTIONS.map(o => <option key={'t-'+o.value} value={o.value}>{o.label}</option>)}
                                 </optgroup>
