@@ -107,6 +107,32 @@
       transition: width 0.3s ease;
     }
 
+    /* Range slider thumb styling */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: 2px solid #7c8cff;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(124, 140, 255, 0.3);
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 12px rgba(124, 140, 255, 0.5);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: 2px solid #7c8cff;
+      cursor: pointer;
+    }
+
     .input-field {
       background-color: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -227,11 +253,18 @@
       const containerRef = useRef(null);
       const iconMap = {
         youtube: 'video', video: 'video', demo: 'video',
-        spotify: 'headphones', music: 'headphones',
+        spotify: 'headphones', music: 'headphones', applemusic: 'headphones',
+        soundcloud: 'cloud', bandcamp: 'disc-3',
         web: 'globe', website: 'globe', docs: 'file-text',
         merch: 'shopping-bag', checkout: 'shopping-cart', commerce: 'shopping-cart',
         signup: 'user-plus', social: 'share-2', case: 'book-open',
-        meet: 'users-round'
+        meet: 'users-round',
+        tiktok: 'clapperboard', instagram: 'camera', twitter: 'at-sign',
+        discord: 'message-circle', email: 'mail',
+        disco: 'radio', laylo: 'bell-ring',
+        patreon: 'heart', kofi: 'coffee', tickets: 'ticket',
+        observer: 'eye', awareness: 'megaphone', seed: 'sprout',
+        node: 'circle', other: 'circle', gateway: 'circle'
       };
       const iconName = iconMap[type] || 'circle';
       useEffect(() => {
@@ -345,12 +378,12 @@
         ]
       });
 
-      // Partners
+      // Partners — now with traffic sources + extra links like artists
       const [partners, setPartners] = useState([
-        {name:'BeatCloud',company:'BeatCloud Inc.',email:'promo@beatcloud.io',phone:'555-0201',imageUrl:'',link:'',landingUrl:'https://beatcloud.io/artists',offerUrl:'https://beatcloud.io/pro',promoUrl:'https://beatcloud.io/share'},
-        {name:'Vinyl District',company:'VD Records',email:'info@vinyldistrict.com',phone:'555-0202',imageUrl:'',link:'',landingUrl:'https://vinyldistrict.com',offerUrl:'https://vinyldistrict.com/deals',promoUrl:''},
-        {name:'',company:'',email:'',phone:'',imageUrl:'',link:'',landingUrl:'',offerUrl:'',promoUrl:''},
-        {name:'',company:'',email:'',phone:'',imageUrl:'',link:'',landingUrl:'',offerUrl:'',promoUrl:''}
+        {name:'BeatCloud',company:'BeatCloud Inc.',email:'promo@beatcloud.io',phone:'555-0201',imageUrl:'',link:'',landingUrl:'https://beatcloud.io/artists',offerUrl:'https://beatcloud.io/pro',promoUrl:'https://beatcloud.io/share',trafficSources:[{type:'instagram',url:'https://instagram.com/beatcloud'}],extraLinks:[{type:'discord',url:'https://discord.gg/beatcloud'}]},
+        {name:'Vinyl District',company:'VD Records',email:'info@vinyldistrict.com',phone:'555-0202',imageUrl:'',link:'',landingUrl:'https://vinyldistrict.com',offerUrl:'https://vinyldistrict.com/deals',promoUrl:'',trafficSources:[{type:'email',url:'newsletter@vinyldistrict.com'}],extraLinks:[]},
+        {name:'',company:'',email:'',phone:'',imageUrl:'',link:'',landingUrl:'',offerUrl:'',promoUrl:'',trafficSources:[],extraLinks:[]},
+        {name:'',company:'',email:'',phone:'',imageUrl:'',link:'',landingUrl:'',offerUrl:'',promoUrl:'',trafficSources:[],extraLinks:[]}
       ]);
 
       // Playlist
@@ -393,12 +426,21 @@
       const [playbackProgress, setPlaybackProgress] = useState(0);
       const [isNarrativePlaying, setIsNarrativePlaying] = useState(false);
       const narrativeInterval = useRef(null);
+      // Artist Focus — null means "All Artists" (no focus), string = focused artist name
+      const [selectedArtist, setSelectedArtist] = useState(null);
+      // Layout mode — 'ecosystem' = chaotic scatter, 'relational' = organized columns by artist
+      const [flowLayout, setFlowLayout] = useState('ecosystem');
+      const [analyticsView, setAnalyticsView] = useState('traffic');
+      const [trafficRange, setTrafficRange] = useState(30);
 
       // Share Settings
       const [shareSettings, setShareSettings] = useState({
         enableRewards: true, showDashboard: true, enableLeaderboard: true
       });
       const [fanCount, setFanCount] = useState(1000);
+      const [calcActivation, setCalcActivation] = useState(2);     // % of fans who use automation
+      const [calcSharing, setCalcSharing] = useState(15);           // % of activated fans who share
+      const [calcTriggers, setCalcTriggers] = useState(20);         // base automations/month
       const [vibeStatus, setVibeStatus] = useState('idle');
 
       // Persistence
@@ -604,16 +646,29 @@
         });
 
         allPartners.forEach((partner, idx) => {
-          next.learning.push({ ven: partner.name, lab: `${partner.name} Info`, platform: 'web', ga4Count: 700 + idx * 60, isManual: false });
-          next.selecting.push({ ven: partner.name, lab: `${partner.name} Page`, platform: 'web', ga4Count: 500 + idx * 50, isManual: false });
-          next.executing.push({ ven: partner.name, lab: 'Purchase/Offer', platform: 'checkout', ga4Count: 400 + idx * 40, isManual: false });
-          next.expanding.push({ ven: partner.name, lab: 'Promo/Share', platform: 'social', ga4Count: 300 + idx * 30, isManual: false });
+          // Core partner links → quadrant nodes
+          if (partner.landingUrl) next.learning.push({ ven: partner.name, lab: `${partner.name} Landing`, platform: 'web', ga4Count: 700 + idx * 60, isManual: false });
+          if (partner.link) next.selecting.push({ ven: partner.name, lab: `${partner.name} Site`, platform: 'web', ga4Count: 500 + idx * 50, isManual: false });
+          if (partner.offerUrl) next.executing.push({ ven: partner.name, lab: `${partner.name} Offer`, platform: 'checkout', ga4Count: 400 + idx * 40, isManual: false });
+          if (partner.promoUrl) next.expanding.push({ ven: partner.name, lab: `${partner.name} Promo`, platform: 'social', ga4Count: 300 + idx * 30, isManual: false });
+          // Partner traffic sources → sources array
+          (partner.trafficSources || []).forEach(src => {
+            if (!src.url) return;
+            next.sources.push({ ven: partner.name, lab: `${partner.name} ${src.type}`, platform: src.type, ga4Count: 500 + idx * 30, isManual: false });
+          });
+          // Partner extra links → mapped to quadrants
+          const partnerQuadrantMap = { website:'learning', landing:'learning', social:'selecting', newsletter:'executing', offer:'executing', promo:'expanding', product:'expanding' };
+          (partner.extraLinks || []).forEach(link => {
+            if (!link.url) return;
+            const stageKey = partnerQuadrantMap[link.type] || 'learning';
+            next[stageKey].push({ ven: partner.name, lab: `${partner.name} ${link.type}`, platform: link.type, ga4Count: 350 + idx * 25, isManual: false });
+          });
         });
 
         setMapping(prev => ({ ...next, angels: prev.angels || [] }));
       }, [
-        storyParticipants.residents.map(r => `${r.name}|${r.youtubeUrl}|${r.spotifyUrl}|${r.districtUrl}|${r.merchUrl}|${(r.extraLinks||[]).map(l=>l.type+':'+l.url).join(';')}`).join(','),
-        partners.map(p => `${p.name}|${p.landingUrl}|${p.offerUrl}|${p.promoUrl}`).join(',')
+        storyParticipants.residents.map(r => `${r.name}|${r.youtubeUrl}|${r.spotifyUrl}|${r.districtUrl}|${r.merchUrl}|${(r.extraLinks||[]).map(l=>l.type+':'+l.url).join(';')}|${(r.trafficSources||[]).map(s=>s.type+':'+s.url).join(';')}`).join(','),
+        partners.map(p => `${p.name}|${p.landingUrl}|${p.offerUrl}|${p.promoUrl}|${(p.trafficSources||[]).map(s=>s.type+':'+s.url).join(';')}|${(p.extraLinks||[]).map(l=>l.type+':'+l.url).join(';')}`).join(',')
       ]);
 
       // Save to Google Sheets
@@ -707,19 +762,14 @@
         { value: 'other', label: 'Other', quadrant: 'engage', color: '#94a3b8' },
       ];
 
-      // Backer type definitions for artist backing
+      // Backer type definitions — simplified to 6 core types
       const BACKER_TYPES = [
-        { value: 'label', label: 'Label Partner', icon: 'disc-3', color: '#a855f7', description: 'Indie record label, distribution deal' },
-        { value: 'publisher', label: 'Publisher', icon: 'file-music', color: '#22c55e', description: 'Songwriting royalties, sync licensing' },
-        { value: 'sponsor', label: 'Sponsor', icon: 'megaphone', color: '#f97316', description: 'Brand partnership, product placement' },
-        { value: 'patron', label: 'Patron', icon: 'heart', color: '#ec4899', description: 'Patreon, Ko-fi, crowdfunding supporters' },
-        { value: 'grant', label: 'Grant / Arts Council', icon: 'award', color: '#eab308', description: 'NEA, state arts councils, music nonprofits' },
-        { value: 'curator', label: 'Playlist Curator', icon: 'list-music', color: '#06b6d4', description: 'Playlist placement, media coverage' },
-        { value: 'manager', label: 'Manager', icon: 'briefcase', color: '#64748b', description: 'Artist management, career strategy' },
-        { value: 'promoter', label: 'Agent / Promoter', icon: 'ticket', color: '#f43f5e', description: 'Booking agent, live show promoter' },
-        { value: 'distributor', label: 'Distributor', icon: 'upload-cloud', color: '#8b5cf6', description: 'DistroKid, TuneCore, CD Baby' },
-        { value: 'tech', label: 'Tech Partner', icon: 'cpu', color: '#3b82f6', description: 'Splice, BeatStars, production tools' },
-        { value: 'collaborator', label: 'Artist Collaborator', icon: 'users', color: '#7c8cff', description: 'Feature artist, cross-promotion' },
+        { value: 'sponsor', label: 'Sponsor', icon: 'megaphone', color: '#f97316', description: 'Brand deal, product partner' },
+        { value: 'patron', label: 'Patron', icon: 'heart', color: '#ec4899', description: 'Fan funding, crowdfunding, tips' },
+        { value: 'label', label: 'Label / Distributor', icon: 'disc-3', color: '#a855f7', description: 'Record label, distribution, licensing' },
+        { value: 'growth', label: 'Growth Partner', icon: 'trending-up', color: '#06b6d4', description: 'Curator, manager, promoter' },
+        { value: 'investor', label: 'Investor', icon: 'bar-chart-2', color: '#22c55e', description: 'Seed capital, revenue share' },
+        { value: 'grant', label: 'Grant / Fund', icon: 'award', color: '#eab308', description: 'Arts council, nonprofit, fellowship' },
       ];
 
       const addExtraLink = (residentIdx) => {
@@ -821,6 +871,53 @@
         setPartners(updated);
       };
 
+      // Partner traffic source helpers
+      const addPartnerTrafficSource = (partnerIdx) => {
+        const updated = [...partners];
+        const current = updated[partnerIdx].trafficSources || [];
+        updated[partnerIdx] = { ...updated[partnerIdx], trafficSources: [...current, { type: 'website', url: '' }] };
+        setPartners(updated);
+      };
+
+      const updatePartnerTrafficSource = (partnerIdx, srcIdx, field, value) => {
+        const updated = [...partners];
+        const sources = [...(updated[partnerIdx].trafficSources || [])];
+        sources[srcIdx] = { ...sources[srcIdx], [field]: value };
+        updated[partnerIdx] = { ...updated[partnerIdx], trafficSources: sources };
+        setPartners(updated);
+      };
+
+      const removePartnerTrafficSource = (partnerIdx, srcIdx) => {
+        const updated = [...partners];
+        const sources = [...(updated[partnerIdx].trafficSources || [])];
+        sources.splice(srcIdx, 1);
+        updated[partnerIdx] = { ...updated[partnerIdx], trafficSources: sources };
+        setPartners(updated);
+      };
+
+      const addPartnerExtraLink = (partnerIdx) => {
+        const updated = [...partners];
+        const current = updated[partnerIdx].extraLinks || [];
+        updated[partnerIdx] = { ...updated[partnerIdx], extraLinks: [...current, { type: 'other', url: '' }] };
+        setPartners(updated);
+      };
+
+      const updatePartnerExtraLink = (partnerIdx, linkIdx, field, value) => {
+        const updated = [...partners];
+        const links = [...(updated[partnerIdx].extraLinks || [])];
+        links[linkIdx] = { ...links[linkIdx], [field]: value };
+        updated[partnerIdx] = { ...updated[partnerIdx], extraLinks: links };
+        setPartners(updated);
+      };
+
+      const removePartnerExtraLink = (partnerIdx, linkIdx) => {
+        const updated = [...partners];
+        const links = [...(updated[partnerIdx].extraLinks || [])];
+        links.splice(linkIdx, 1);
+        updated[partnerIdx] = { ...updated[partnerIdx], extraLinks: links };
+        setPartners(updated);
+      };
+
       // Toggle vertical
       const toggleVertical = (v) => {
         setSelectedVerticals(prev =>
@@ -850,8 +947,59 @@
       // Resident specialties
       const residentSpecialties = ['Vocalist / Singer', 'Producer / Beatmaker', 'Songwriter / Lyricist', 'DJ / Turntablist', 'Instrumentalist', 'Engineer / Mixer', 'Visual Artist / VJ', 'Manager / A&R'];
 
+      {/* ========== SECTION: DISTRICT FLOW HOVER SYSTEM ========== */}
+      // Close timeout ref for smooth tooltip UX
+      const closeTimeoutRef = useRef(null);
+
+      // Hover handlers — matching Storyteller architecture
+      const handleNodeHover = (node) => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); setHoveredNode(node); };
+      const handleNodeLeave = () => { closeTimeoutRef.current = setTimeout(() => { setHoveredNode(null); }, 1200); };
+      const handleTooltipEnter = () => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); };
+
+      // Narrative playback — simulates 12-month traffic growth cycle
+      const toggleNarrative = () => {
+        if (isNarrativePlaying) { clearInterval(narrativeInterval.current); setIsNarrativePlaying(false); }
+        else { setObsMode('narrative'); setIsNarrativePlaying(true); setPlaybackProgress(0); narrativeInterval.current = setInterval(() => { setPlaybackProgress(p => (p >= 11 ? 0 : p + 1)); }, 1200); }
+      };
+
+      // Music-specific node description map — contextual one-liners per platform type
+      const nMap = {
+        youtube: 'Discovery: Video content driving fan awareness',
+        spotify: 'Engagement: Streaming platform building listener habits',
+        applemusic: 'Engagement: Premium streaming discovery channel',
+        soundcloud: 'Discovery: Underground and emerging artist platform',
+        bandcamp: 'Discovery: Direct-to-fan music marketplace',
+        tiktok: 'Discovery: Short-form viral content engine',
+        instagram: 'Engagement: Visual storytelling and fan interaction',
+        twitter: 'Engagement: Real-time conversation and announcements',
+        discord: 'Connection: Community hub for superfans',
+        email: 'Connection: Direct artist-to-fan communication',
+        web: 'Connection: Artist-owned digital home base',
+        website: 'Connection: Artist-owned digital home base',
+        merch: 'Support: Physical goods and branded merchandise',
+        checkout: 'Support: Purchase conversion touchpoint',
+        commerce: 'Support: E-commerce revenue channel',
+        patreon: 'Support: Recurring fan subscription revenue',
+        kofi: 'Support: One-time fan tips and donations',
+        tickets: 'Support: Live event ticket sales',
+        disco: 'Connection: Music industry networking tool',
+        laylo: 'Connection: Drop alerts and pre-save campaigns',
+        signup: 'Engagement: Fan registration and onboarding',
+        social: 'Engagement: Social sharing and amplification',
+        docs: 'System: ReadyStack documentation resource',
+        music: 'Engagement: Curated playlist experience',
+        demo: 'Discovery: Product walkthrough content',
+        meet: 'Connection: Live session or virtual meetup',
+        gateway: 'Hub: ReadyStack district entry point',
+        observer: 'Backer: Passive visibility investment',
+        awareness: 'Backer: Active awareness campaign funding',
+        seed: 'Backer: Direct artist development investment',
+        node: 'District: Ecosystem touchpoint',
+        other: 'District: Custom engagement channel'
+      };
+
       {/* ========== SECTION: NODES / VISUALIZATION ========== */}
-      // Nodes visualization for District Flow — matches Storyteller architecture
+      // Nodes visualization for District Flow — supports two layout modes
       const nodes = useMemo(() => {
         const items = [];
         const centerX = 600;
@@ -861,14 +1009,124 @@
           { id: 'executing', label: 'Connect', color: '#48c9b0' },
           { id: 'expanding', label: 'Support', color: '#7c8cff' }
         ];
-        const narrativeScale = obsMode === 'narrative' ? (1 + (playbackProgress * 0.05)) : 1;
-        const driftFactor = obsMode === 'narrative' ? (playbackProgress * 2.5) : 0;
+        const stageColorMap = { learning: '#ff2a1a', selecting: '#ffd666', executing: '#48c9b0', expanding: '#7c8cff' };
+        const narrativeScale = obsMode === 'narrative' ? (1 + (playbackProgress * 0.08)) : 1;
+        const driftFactor = obsMode === 'narrative' ? (playbackProgress * 4) : 0;
+        const flowIntensity = obsMode === 'narrative' ? (1 + (playbackProgress * 0.12)) : 1;
         const getStableJitter = (id, amount = 35) => {
-          const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-          return ((hash % 100) / 100 - 0.5) * amount;
+          let h1 = 0, h2 = 0;
+          for (let i = 0; i < id.length; i++) { h1 = (h1 * 31 + id.charCodeAt(i)) & 0xffff; h2 = (h2 * 37 + id.charCodeAt(i)) & 0xffff; }
+          const combined = ((h1 * 0.618) % 1 + (h2 * 0.317) % 1) / 2;
+          return (combined - 0.5) * amount;
         };
         const timeMultiplier = 1;
 
+        // ====== RELATIONAL VIEW LAYOUT ======
+        // Clean grid: artist columns × stage rows. Straight paths. Readable.
+        if (flowLayout === 'relational') {
+          // Gather unique artist names (excluding ReadyStack internal)
+          const allArtistNames = [];
+          const seen = new Set();
+          ['learning','selecting','executing','expanding'].forEach(stageId => {
+            (mapping[stageId] || []).forEach(p => {
+              const v = p.ven || 'Partner';
+              if (v !== 'ReadyStack' && !seen.has(v)) { seen.add(v); allArtistNames.push(v); }
+            });
+          });
+          // ReadyStack goes last as system column
+          allArtistNames.push('ReadyStack');
+          const numCols = allArtistNames.length;
+          const colWidth = 1080 / Math.max(numCols, 1);
+          const leftPad = 60;
+
+          // Stage row Y positions — evenly spaced
+          const stageY = { learning: 200, selecting: 450, executing: 700, expanding: 950 };
+
+          // Place nodes in grid cells
+          const stageArtistCount = {}; // track sub-index per cell
+          stages.forEach(stage => {
+            const stageItems = mapping[stage.id] || [];
+            stageItems.forEach((p, idx) => {
+              const vendor = p.ven || 'Partner';
+              const colIdx = allArtistNames.indexOf(vendor === 'ReadyStack' || !allArtistNames.includes(vendor) ? 'ReadyStack' : vendor);
+              const cellKey = `${stage.id}-${colIdx}`;
+              const subIdx = stageArtistCount[cellKey] || 0;
+              stageArtistCount[cellKey] = subIdx + 1;
+
+              // X = column center, offset vertically for multiple nodes in same cell
+              const baseX = leftPad + (colIdx * colWidth) + (colWidth / 2);
+              const baseY = stageY[stage.id];
+              // Stack multiple nodes in same cell vertically with small offset
+              const stackOffset = subIdx * 58;
+              const nodeId = `${stage.id}-${idx}`;
+              const baseRadius = (p.dedicated || p.internal) ? 20 : 24;
+              const scaledRadius = baseRadius * (1 + (narrativeScale - 1) * 0.5);
+
+              items.push({
+                id: nodeId, label: p.lab || p.platform, vendor: vendor,
+                stageId: stage.id, type: p.platform || 'node', color: stageColorMap[stage.id],
+                internal: !!p.internal, url: p.pat || '',
+                x: baseX, y: baseY + stackOffset,
+                radius: scaledRadius,
+                isSystem: true, ga4Count: (p.ga4Count || 1000) * timeMultiplier
+              });
+            });
+          });
+
+          // Build relational flows — same artist across stages (vertical)
+          const allFlows = [];
+          const stageOrder = ['learning', 'selecting', 'executing', 'expanding'];
+          allArtistNames.forEach(artistName => {
+            for (let s = 0; s < stageOrder.length - 1; s++) {
+              const fromNodes = items.filter(n => n.vendor === artistName && n.stageId === stageOrder[s]);
+              const toNodes = items.filter(n => n.vendor === artistName && n.stageId === stageOrder[s + 1]);
+              if (fromNodes.length && toNodes.length) {
+                // Connect last node in source stage to first in destination stage
+                allFlows.push({
+                  from: fromNodes[fromNodes.length - 1], to: toNodes[0],
+                  speed: 5 + s, color: stageColorMap[stageOrder[s + 1]], strokeWidth: 1.8
+                });
+              }
+            }
+          });
+
+          // Cross-artist flows at same stage — the key relational insight
+          // Show where artist A's Discover content links to artist B's Engage, etc.
+          stageOrder.forEach((stageId, si) => {
+            const nextStage = stageOrder[si + 1];
+            if (!nextStage) return;
+            // For each artist, connect their stage node to the next artist's next-stage node
+            for (let a = 0; a < allArtistNames.length - 1; a++) {
+              const fromArtist = allArtistNames[a];
+              const toArtist = allArtistNames[(a + 1) % (allArtistNames.length - 1)]; // skip ReadyStack
+              if (fromArtist === 'ReadyStack' || toArtist === 'ReadyStack') continue;
+              const fromNode = items.find(n => n.vendor === fromArtist && n.stageId === stageId && !n.internal);
+              const toNode = items.find(n => n.vendor === toArtist && n.stageId === nextStage && !n.internal);
+              if (fromNode && toNode) {
+                allFlows.push({
+                  from: fromNode, to: toNode,
+                  speed: 8, color: '#c084fc', strokeWidth: 1.2, isCrossArtist: true
+                });
+              }
+            }
+          });
+
+          // Column headers (stored as metadata, rendered in JSX)
+          const columnHeaders = allArtistNames.map((name, i) => ({
+            name, x: leftPad + (i * colWidth) + (colWidth / 2), y: 60
+          }));
+
+          // Row labels
+          const rowLabels = stages.map(s => ({
+            label: s.label, color: s.color, y: stageY[s.id]
+          }));
+
+          const scaledTraffic = mapping.sources?.reduce((acc, s) => acc + (s.ga4Count || 18420), 0) || 0;
+
+          return { items, flows: allFlows, gravityLines: [], scaledTraffic, flowIntensity, columnHeaders, rowLabels, isRelational: true };
+        }
+
+        // ====== ECOSYSTEM VIEW LAYOUT (original) ======
         // Hub / Gateway node — the ReadyStack fox
         const entryNode = {
           id: 'ready-hub', label: 'ReadyStack Hub', vendor: 'ReadyStack',
@@ -877,89 +1135,133 @@
         };
         items.push(entryNode);
 
-        // Traffic Sources — across the top
-        mapping.sources?.forEach((s, idx) => {
-          const x = (centerX - 180) + (360 / (mapping.sources.length - 1 || 1)) * idx + getStableJitter(`src-${idx}`, 20);
-          items.push({
-            id: `source-${idx}`, label: s.lab, vendor: s.ven,
-            isTrafficSource: true, type: s.type || 'web',
-            color: '#ffffff', x, y: 160, radius: 26,
-            ga4Count: (s.ga4Count || 18420) * timeMultiplier
+        // Traffic Sources — grouped by artist/partner across the top
+        const sourcesByVendor = {};
+        (mapping.sources || []).forEach((s, idx) => {
+          const ven = s.ven || 'Unknown';
+          if (!sourcesByVendor[ven]) sourcesByVendor[ven] = [];
+          sourcesByVendor[ven].push({ ...s, origIdx: idx });
+        });
+        const vendorGroups = Object.keys(sourcesByVendor);
+        const totalSourceWidth = 900;
+        const sourceStartX = centerX - totalSourceWidth / 2;
+        const groupGap = 40;
+        const totalNodes = (mapping.sources || []).length;
+        const nodeSpacing = totalNodes > 0 ? Math.min(65, (totalSourceWidth - groupGap * (vendorGroups.length - 1)) / totalNodes) : 65;
+        let srcCursor = sourceStartX;
+        vendorGroups.forEach((ven, gi) => {
+          const group = sourcesByVendor[ven];
+          group.forEach((s, si) => {
+            items.push({
+              id: `source-${s.origIdx}`, label: s.lab, vendor: s.ven,
+              isTrafficSource: true, type: s.type || 'web',
+              color: '#ffffff', x: srcCursor, y: 160, radius: 26,
+              ga4Count: (s.ga4Count || 18420) * timeMultiplier,
+              vendorGroup: ven
+            });
+            srcCursor += nodeSpacing;
           });
+          if (gi < vendorGroups.length - 1) srcCursor += groupGap;
         });
 
-        // Angels / Backers — very top
-        (mapping.angels || []).forEach((a, idx) => {
-          let x, y;
-          if (a.platform === 'awareness') { x = (centerX - 80) + (idx * 40); y = 80; }
-          else if (a.platform === 'seed') { x = 200 + (idx * 40); y = 100; }
-          else { x = 1000 - (idx * 40); y = 100; }
-          items.push({
-            id: `angel-${idx}`, label: a.platform, vendor: a.lab || 'Angel',
-            type: a.platform,
-            color: a.platform === 'observer' ? '#ffd700' : '#10b981',
-            x: x + getStableJitter(`ang-${idx}`), y: y + getStableJitter(`angy-${idx}`),
-            radius: 26, isSystem: true, isAngel: true,
-            investorClass: a.platform, startups: a.startups || [],
-            amount: a.amount || 0
+        // Backers — rendered as small badge row across top (not random floating nodes)
+        const activeBckrsForFlow = (mapping.angels || []).filter(b => b.lab && b.visible !== false);
+        if (activeBckrsForFlow.length > 0) {
+          const backerStartX = centerX - (activeBckrsForFlow.length * 55) / 2;
+          activeBckrsForFlow.forEach((a, idx) => {
+            const typeInfo = BACKER_TYPES.find(t => t.value === a.type) || BACKER_TYPES[0];
+            items.push({
+              id: `angel-${idx}`, label: a.lab || typeInfo.label, vendor: a.lab || 'Backer',
+              type: a.type || 'sponsor',
+              color: typeInfo.color,
+              x: backerStartX + (idx * 55), y: 55,
+              radius: 18, isSystem: true, isAngel: true, isBacker: true,
+              investorClass: a.type, startups: a.startups || [],
+              amount: a.amount || 0
+            });
           });
-        });
+        }
 
-        // Quadrant bounds — same as Storyteller
+        // Quadrant bounds
         const quadBounds = {
-          learning:  { xMin: 80,  xMax: 520,  yMin: 480, yMax: 720,  color: '#ff2a1a' },
-          selecting: { xMin: 680, xMax: 1120, yMin: 480, yMax: 720,  color: '#ffd666' },
-          executing: { xMin: 80,  xMax: 520,  yMin: 800, yMax: 1250, color: '#48c9b0' },
-          expanding: { xMin: 680, xMax: 1120, yMin: 800, yMax: 1250, color: '#7c8cff' }
+          learning:  { xMin: 60,  xMax: 540,  yMin: 440, yMax: 760,  color: '#ff2a1a' },
+          selecting: { xMin: 660, xMax: 1140, yMin: 440, yMax: 760,  color: '#ffd666' },
+          executing: { xMin: 60,  xMax: 540,  yMin: 820, yMax: 1240, color: '#48c9b0' },
+          expanding: { xMin: 660, xMax: 1140, yMin: 820, yMax: 1240, color: '#7c8cff' }
         };
 
-        // Populate quadrant nodes from mapping
+        // Grouped grid layout — nodes organized by artist/partner within each quadrant
         stages.forEach((stage) => {
           const stageItems = mapping[stage.id] || [];
           const bounds = quadBounds[stage.id];
-          const densityMult = Math.max(0.65, 1.1 - (stageItems.length / 30));
+          const pad = 30;
+          const usableW = bounds.xMax - bounds.xMin - pad * 2;
+          const usableH = bounds.yMax - bounds.yMin - pad * 2;
+
+          // Group items by vendor (artist name)
+          const byVendor = {};
           stageItems.forEach((p, idx) => {
-            const nodeId = `${stage.id}-${idx}`;
-            const isRS = p.dedicated || p.internal;
-            const row = Math.floor(idx / 3);
-            const col = idx % 3;
-            const driftY = (stage.id === 'executing' || stage.id === 'expanding') ? -driftFactor : driftFactor;
-            const baseX = ((bounds.xMin + bounds.xMax) / 2) + (col * 50) - 50;
-            const baseY = bounds.yMin + (row * 100 * densityMult) + driftY;
-            items.push({
-              id: nodeId, label: p.lab || p.platform, vendor: p.ven || 'Partner',
-              stageId: stage.id, type: p.platform || 'node', color: bounds.color,
-              internal: !!p.internal,
-              x: baseX + getStableJitter(nodeId, 45),
-              y: baseY + getStableJitter(nodeId + '-y', 35),
-              radius: (isRS ? 24 : (22 * densityMult)) * (1 + (narrativeScale - 1) * 0.4),
-              isSystem: true, ga4Count: (p.ga4Count || 1000) * timeMultiplier
+            const ven = p.ven || 'Partner';
+            if (!byVendor[ven]) byVendor[ven] = [];
+            byVendor[ven].push({ ...p, origIdx: idx });
+          });
+          // Sort: named artists first (alphabetical), ReadyStack/system last
+          const vendorKeys = Object.keys(byVendor).sort((a, b) => {
+            if (a === 'ReadyStack') return 1;
+            if (b === 'ReadyStack') return -1;
+            return a.localeCompare(b);
+          });
+
+          const numVendors = vendorKeys.length || 1;
+          // Each vendor gets a horizontal band within the quadrant
+          const bandHeight = usableH / numVendors;
+
+          vendorKeys.forEach((ven, vi) => {
+            const group = byVendor[ven];
+            const bandY = bounds.yMin + pad + vi * bandHeight;
+            const bandCenterY = bandY + bandHeight / 2;
+            const nodeGap = Math.min(70, usableW / (group.length + 1));
+
+            group.forEach((p, ni) => {
+              const nodeId = `${stage.id}-${p.origIdx}`;
+              const isRS = p.dedicated || p.internal;
+              const baseRadius = isRS ? 20 : 24;
+              const scaledRadius = baseRadius * (1 + (narrativeScale - 1) * 0.5);
+              const driftY = (stage.id === 'executing' || stage.id === 'expanding') ? -driftFactor : driftFactor;
+
+              // Spread nodes evenly across the band width
+              const x = bounds.xMin + pad + nodeGap * (ni + 1);
+              const y = bandCenterY + driftY;
+
+              items.push({
+                id: nodeId, label: p.lab || p.platform, vendor: ven,
+                stageId: stage.id, type: p.platform || 'node', color: bounds.color,
+                internal: !!p.internal, url: p.pat || '',
+                x: Math.max(bounds.xMin + pad, Math.min(bounds.xMax - pad, x)),
+                y: Math.max(bounds.yMin + pad, Math.min(bounds.yMax - pad, y)),
+                radius: scaledRadius,
+                isSystem: true, ga4Count: (p.ga4Count || 1000) * timeMultiplier,
+                vendorGroup: ven
+              });
             });
           });
         });
 
-        // Build flows
+        // Build ecosystem flows
         const allFlows = [];
-
-        // Traffic Sources → Hub (white)
         const entryFlows = items.filter(n => n.isTrafficSource).map(source => ({
           from: source, to: entryNode, speed: 7, color: '#ffffff', strokeWidth: 1.5
         }));
         allFlows.push(...entryFlows);
-
-        // Hub → quadrant stages
         const lNodes = items.filter(n => n.stageId === 'learning');
         const sNodes = items.filter(n => n.stageId === 'selecting');
         const eNodes = items.filter(n => n.stageId === 'executing');
         const xNodes = items.filter(n => n.stageId === 'expanding');
-
         lNodes.forEach((n, i) => allFlows.push({ from: entryNode, to: n, speed: 4 + (i % 3), color: '#ff2a1a', strokeWidth: 1.2 }));
         sNodes.forEach((n, i) => allFlows.push({ from: entryNode, to: n, speed: 4.5 + (i % 3), color: '#ffd666', strokeWidth: 1.2 }));
         lNodes.forEach((n, i) => { if (eNodes.length) allFlows.push({ from: n, to: eNodes[i % eNodes.length], speed: 5, color: '#48c9b0', strokeWidth: 1.2 }); });
         sNodes.forEach((n, i) => { if (eNodes.length) allFlows.push({ from: n, to: eNodes[(i + 1) % eNodes.length], speed: 5, color: '#48c9b0', strokeWidth: 1.2 }); });
         eNodes.forEach((n, i) => { if (xNodes.length) allFlows.push({ from: n, to: xNodes[i % xNodes.length], speed: 6, color: '#7c8cff', strokeWidth: 1.5 }); });
-
-        // Angel flows
         items.filter(n => n.isAngel).forEach(n => {
           if (n.investorClass === 'awareness') {
             items.filter(t => t.isTrafficSource).forEach(t => {
@@ -977,8 +1279,34 @@
 
         const scaledTraffic = mapping.sources?.reduce((acc, s) => acc + (s.ga4Count || 18420), 0) || 0;
 
-        return { items, flows: allFlows, scaledTraffic };
-      }, [mapping, obsMode, playbackProgress]);
+        // Gravity lines (ecosystem view only)
+        const gravityLines = [];
+        if (selectedArtist) {
+          const artistNodes = items.filter(n => n.vendor === selectedArtist && n.stageId && !n.isAngel);
+          const otherArtistNodes = items.filter(n => n.vendor !== selectedArtist && n.vendor !== 'ReadyStack' && n.stageId && !n.isAngel);
+          const stageOrder = ['learning', 'selecting', 'executing', 'expanding'];
+          const candidates = [];
+          artistNodes.forEach(aNode => {
+            const aIdx = stageOrder.indexOf(aNode.stageId);
+            otherArtistNodes.forEach(oNode => {
+              const oIdx = stageOrder.indexOf(oNode.stageId);
+              if (oIdx >= aIdx && oIdx <= aIdx + 1) {
+                let str = 0;
+                const combined = aNode.id + oNode.id;
+                for (let i = 0; i < combined.length; i++) str = (str * 31 + combined.charCodeAt(i)) & 0xfff;
+                const strength = (str % 100) / 100;
+                if (strength > 0.4) {
+                  candidates.push({ from: aNode, to: oNode, speed: 12 + (str % 4), color: '#c084fc', strokeWidth: 1.2 + strength * 1.2, isGravity: true, strength });
+                }
+              }
+            });
+          });
+          candidates.sort((a, b) => b.strength - a.strength);
+          gravityLines.push(...candidates.slice(0, 4));
+        }
+
+        return { items, flows: allFlows, gravityLines, scaledTraffic, flowIntensity, isRelational: false };
+      }, [mapping, obsMode, playbackProgress, selectedArtist, flowLayout]);
 
       // Progress percentage
       const progressPercent = Math.round(((activeStep + 1) / 7) * 100);
@@ -1098,9 +1426,10 @@
                     {[
                       'Featured Music',
                       'Collective',
-                      'District Map',
+                      'Links',
                       'Backers',
                       'District Flow',
+                      'Analytics',
                       'Preview'
                     ].map((label, idx) => (
                       <button
@@ -1274,7 +1603,7 @@
                     </div>
 
                     {/* RIGHT COLUMN (col-span-2, sticky) */}
-                    <div className="col-span-2 sticky top-32 h-fit space-y-6">
+                    <div className="col-span-2 sticky top-8 h-fit space-y-6">
                       {/* THE VIBE PANEL */}
                       <div className="space-y-4">
                         <h2 className="poppins font-semibold text-white">The Vibe</h2>
@@ -1287,7 +1616,7 @@
                           <div className="card-bg p-6 border border-indigo-500/20 bg-indigo-500/5 space-y-4">
                             <div className="flex items-center gap-3">
                               <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
-                              <p className="text-sm text-slate-300">Processing Vibe and Suggested Viral Sponsors...</p>
+                              <p className="text-sm text-slate-300">Processing Vibe and Suggested Growth Sponsors...</p>
                             </div>
                           </div>
                         ) : (
@@ -1312,7 +1641,7 @@
                       {/* VIRAL SPONSORS SECTION */}
                       {vibeStatus === 'complete' && (
                         <div className="space-y-4">
-                          <h2 className="poppins font-semibold text-white">Viral Sponsors</h2>
+                          <h2 className="poppins font-semibold text-white">Growth Sponsors</h2>
                           <p className="text-xs text-slate-400">Partners who fund your growth and share your music through their networks</p>
 
                           <div className="grid grid-cols-2 gap-4">
@@ -1336,9 +1665,9 @@
                 <div className="max-w-7xl mx-auto animate-fade-in space-y-10">
 
                   {/* ── HEADER ── */}
-                  <div className="text-center space-y-3">
-                    <h3 className="poppins text-4xl font-black text-white uppercase tracking-tighter">Who's In Your District?</h3>
-                    <p className="text-slate-500 text-sm">Assemble your collective — artists and partners who power your district.</p>
+                  <div className="space-y-2">
+                    <h1 className="poppins font-bold text-3xl text-white">The Collective</h1>
+                    <p className="text-slate-400">Assemble your collective — artists and partners who power your district.</p>
                   </div>
 
                   {/* ── INVITE BAR ── */}
@@ -1450,7 +1779,7 @@
                                 className="w-[20%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-3 py-2.5 text-xs text-slate-400 focus:border-slate-600 outline-none" />
                               <div className="w-[5%] flex items-center justify-center">
                                 {hasName && (
-                                  <button onClick={() => { const next = [...partners]; next[idx] = {name:'',company:'',email:'',phone:'',imageUrl:'',link:'',landingUrl:'',offerUrl:'',promoUrl:''}; setPartners(next); }}
+                                  <button onClick={() => { const next = [...partners]; next[idx] = {name:'',company:'',email:'',phone:'',imageUrl:'',link:'',landingUrl:'',offerUrl:'',promoUrl:'',trafficSources:[],extraLinks:[]}; setPartners(next); }}
                                     className="text-slate-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                                   </button>
@@ -1472,9 +1801,9 @@
                 <div className="max-w-7xl mx-auto animate-fade-in space-y-8">
 
                   {/* ── HEADER ── */}
-                  <div className="text-center space-y-3">
-                    <h3 className="poppins text-4xl font-black text-white uppercase tracking-tighter">District Map</h3>
-                    <p className="text-slate-500 text-sm">Add platforms and they auto-sort into the right column. Traffic drives fans to your Preview page — quadrants are where they go next.</p>
+                  <div className="space-y-2">
+                    <h1 className="poppins font-bold text-3xl text-white">Links</h1>
+                    <p className="text-slate-400">Add platforms and they auto-sort into the right column. Traffic drives fans to your Preview page — quadrants are where they go next.</p>
                   </div>
 
                   {/* 5-Column Headers — sticky visual reference */}
@@ -1691,146 +2020,226 @@
                   })()}
 
                   {/* ══════════════════════════════════════ */}
-                  {/* PARTNERS — Compact 5-col aligned        */}
+                  {/* PARTNERS — Full 5-col treatment like artists */}
                   {/* ══════════════════════════════════════ */}
                   {(() => {
                     const namedPartners = partners.filter(p => (p.name || '').trim());
                     if (namedPartners.length === 0) return null;
-                    return (
-                      <div className="bg-slate-900/30 p-5 rounded-2xl border border-white/[0.04]">
-                        <h5 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Partners</h5>
-                        <div className="space-y-3">
-                          {namedPartners.map((p, pi) => {
-                            const origIdx = partners.indexOf(p);
-                            return (
-                              <div key={origIdx} className="bg-[#020617]/60 p-4 rounded-xl border border-white/5">
-                                <p className="text-xs font-bold text-white mb-2">{p.name} {p.company && <span className="text-slate-500 font-normal ml-1">{p.company}</span>}</p>
-                                <div className="grid grid-cols-5 gap-2">
-                                  <div></div>
-                                  {[
-                                    { label: 'Website', field: 'link', color: '#ff2a1a' },
-                                    { label: 'Landing', field: 'landingUrl', color: '#ffd666' },
-                                    { label: 'Offer', field: 'offerUrl', color: '#48c9b0' },
-                                    { label: 'Promo', field: 'promoUrl', color: '#7c8cff' },
-                                  ].map(f => (
-                                    <div key={f.field}>
-                                      <input placeholder={f.label} value={p[f.field] || ''}
-                                        onChange={(e) => handlePartnerChange(origIdx, f.field, e.target.value)}
-                                        className="w-full bg-[#020617]/80 border rounded px-2 py-1.5 text-[10px] text-slate-400 focus:border-slate-500 outline-none"
-                                        style={{ borderColor: (p[f.field] ? f.color + '30' : '#1e293b') }} />
+
+                    // Partner link type options — business-focused subset
+                    const PARTNER_LINK_OPTIONS = [
+                      { value: 'website', label: 'Website', quadrant: 'discover', color: '#94a3b8' },
+                      { value: 'landing', label: 'Landing Page', quadrant: 'engage', color: '#ffd666' },
+                      { value: 'offer', label: 'Offer Page', quadrant: 'connect', color: '#48c9b0' },
+                      { value: 'promo', label: 'Promo / Share', quadrant: 'support', color: '#7c8cff' },
+                      { value: 'social', label: 'Social Media', quadrant: 'engage', color: '#e1306c' },
+                      { value: 'newsletter', label: 'Newsletter', quadrant: 'connect', color: '#48c9b0' },
+                      { value: 'product', label: 'Product Page', quadrant: 'support', color: '#a855f7' },
+                    ];
+
+                    return namedPartners.map((p, pi) => {
+                      const origIdx = partners.indexOf(p);
+                      // Build column data from partner sources
+                      const cols = {
+                        traffic: (p.trafficSources || []).map((s, si) => {
+                          const info = TRAFFIC_SOURCE_OPTIONS.find(o => o.value === s.type) || TRAFFIC_SOURCE_OPTIONS[0];
+                          return { label: info.label, url: s.url, color: info.color, srcIdx: si, isTraffic: true };
+                        }),
+                        discover: [],
+                        engage: [],
+                        connect: [],
+                        support: [],
+                      };
+                      // Core partner links mapped to quadrants
+                      if (p.landingUrl) cols.discover.push({ label: 'Landing Page', url: p.landingUrl, color: '#ff2a1a', core: true, field: 'landingUrl' });
+                      if (p.link) cols.engage.push({ label: 'Website', url: p.link, color: '#ffd666', core: true, field: 'link' });
+                      if (p.offerUrl) cols.connect.push({ label: 'Offer Page', url: p.offerUrl, color: '#48c9b0', core: true, field: 'offerUrl' });
+                      if (p.promoUrl) cols.support.push({ label: 'Promo / Share', url: p.promoUrl, color: '#7c8cff', core: true, field: 'promoUrl' });
+                      // Extra links auto-sorted
+                      (p.extraLinks || []).forEach((link, li) => {
+                        const ti = PARTNER_LINK_OPTIONS.find(o => o.value === link.type);
+                        if (ti) cols[ti.quadrant].push({ label: ti.label, url: link.url, color: ti.color, linkIdx: li });
+                      });
+
+                      return (
+                        <div key={origIdx} className="bg-slate-900/30 p-5 rounded-2xl border border-orange-500/10">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-7 h-7 rounded-lg bg-orange-500/15 flex items-center justify-center shrink-0">
+                              <span className="text-orange-400 text-[10px] font-bold">P</span>
+                            </div>
+                            <p className="text-sm font-bold text-white">{p.name} {p.company && <span className="text-slate-500 font-normal ml-1">— {p.company}</span>}</p>
+                            <div className="relative">
+                              <button
+                                onClick={() => setMapEditingItem(mapEditingItem === 'pdrop-'+origIdx ? null : 'pdrop-'+origIdx)}
+                                className="bg-[#020617] border border-orange-500/30 rounded-lg px-3 py-1.5 text-[10px] text-orange-300 outline-none cursor-pointer hover:border-orange-400 hover:text-orange-200 transition-colors flex items-center gap-1"
+                              >
+                                <span className="text-orange-400 font-bold">+</span> Add Item
+                              </button>
+                              {mapEditingItem === 'pdrop-'+origIdx && (
+                                <div className="absolute top-full left-0 mt-1 z-50 bg-[#0f172a] border border-slate-600 rounded-xl shadow-2xl w-56 max-h-72 overflow-y-auto">
+                                  <div className="px-3 pt-3 pb-1"><p className="text-[9px] font-bold text-white uppercase tracking-widest border-b border-slate-600 pb-1.5">Traffic Sources</p></div>
+                                  {TRAFFIC_SOURCE_OPTIONS.map(o => (
+                                    <button key={'pt-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-orange-500/20 hover:text-white transition-colors" onClick={() => {
+                                      addPartnerTrafficSource(origIdx);
+                                      const upd = [...partners];
+                                      const srcs = upd[origIdx].trafficSources || [];
+                                      srcs[srcs.length - 1] = { ...srcs[srcs.length - 1], type: o.value };
+                                      upd[origIdx] = { ...upd[origIdx], trafficSources: srcs };
+                                      setPartners(upd);
+                                      setMapEditingItem(null);
+                                    }}>{o.label}</button>
+                                  ))}
+                                  <div className="px-3 pt-3 pb-1"><p className="text-[9px] font-bold text-orange-400 uppercase tracking-widest border-b border-slate-600 pb-1.5">Engagement</p></div>
+                                  {PARTNER_LINK_OPTIONS.map(o => (
+                                    <button key={'pe-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-orange-500/20 hover:text-white transition-colors" onClick={() => {
+                                      const upd = [...partners];
+                                      const links = upd[origIdx].extraLinks || [];
+                                      upd[origIdx] = { ...upd[origIdx], extraLinks: [...links, { type: o.value, url: '' }] };
+                                      setPartners(upd);
+                                      setMapEditingItem(null);
+                                    }}>{o.label}</button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* 5-Column Display */}
+                          <div className="grid grid-cols-5 gap-2 items-start">
+                            <div className="space-y-1.5">
+                              {cols.traffic.length === 0 && <p className="text-[8px] text-slate-700 text-center py-3 italic">No sources</p>}
+                              {cols.traffic.map((item, ti) => (
+                                <div key={ti} className="group relative">
+                                  <div className="flex items-center gap-1.5 bg-[#020617]/60 rounded-lg px-2.5 py-2 border border-white/5 hover:border-white/15 transition-all cursor-pointer"
+                                    onClick={() => setMapEditingItem(mapEditingItem === 'p'+origIdx+'-t-'+ti ? null : 'p'+origIdx+'-t-'+ti)}>
+                                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-white"></span>
+                                    <span className="text-[10px] text-white font-medium flex-1 truncate">{item.label}</span>
+                                    <button onClick={(e) => { e.stopPropagation(); removePartnerTrafficSource(origIdx, item.srcIdx); }}
+                                      className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                  </div>
+                                  {mapEditingItem === 'p'+origIdx+'-t-'+ti && (
+                                    <input autoFocus placeholder="https://..." value={item.url || ''}
+                                      onChange={(e) => updatePartnerTrafficSource(origIdx, item.srcIdx, 'url', e.target.value)}
+                                      onBlur={() => setMapEditingItem(null)}
+                                      className="mt-1 w-full bg-[#020617] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none focus:border-orange-500" />
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                            {['discover','engage','connect','support'].map(qKey => {
+                              const qColor = { discover:'#ff2a1a', engage:'#ffd666', connect:'#48c9b0', support:'#7c8cff' }[qKey];
+                              const items = cols[qKey];
+                              return (
+                                <div key={qKey} className="space-y-1.5">
+                                  {items.length === 0 && <p className="text-[8px] text-slate-700 text-center py-3 italic">Empty</p>}
+                                  {items.map((item, ii) => (
+                                    <div key={ii} className="group relative">
+                                      <div className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 border transition-all cursor-pointer hover:border-opacity-40"
+                                        style={{ backgroundColor: qColor + '08', borderColor: item.url ? qColor + '25' : '#1e293b' }}
+                                        onClick={() => setMapEditingItem(mapEditingItem === 'p'+origIdx+'-'+qKey+'-'+ii ? null : 'p'+origIdx+'-'+qKey+'-'+ii)}>
+                                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{backgroundColor: item.url ? qColor : '#334155'}}></span>
+                                        <span className="text-[10px] font-medium flex-1 truncate" style={{color: item.url ? '#e2e8f0' : '#475569'}}>{item.label}</span>
+                                        {!item.core && (
+                                          <button onClick={(e) => { e.stopPropagation(); removePartnerExtraLink(origIdx, item.linkIdx); }}
+                                            className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                        )}
+                                      </div>
+                                      {mapEditingItem === 'p'+origIdx+'-'+qKey+'-'+ii && (
+                                        <input autoFocus placeholder="https://..." value={item.url || ''}
+                                          onChange={(e) => {
+                                            if (item.core) { handlePartnerChange(origIdx, item.field, e.target.value); }
+                                            else { updatePartnerExtraLink(origIdx, item.linkIdx, 'url', e.target.value); }
+                                          }}
+                                          onBlur={() => setMapEditingItem(null)}
+                                          className="mt-1 w-full bg-[#020617] border rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none"
+                                          style={{ borderColor: qColor + '40' }} />
+                                      )}
                                     </div>
                                   ))}
                                 </div>
-                              </div>
-                            );
-                          })}
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    );
+                      );
+                    });
                   })()}
                 </div>
               )}
 
               {/* ========== SECTION: RENDER - TAB 3: BACKERS ========== */}
-              {/* TAB 3: Backers */}
+              {/* TAB 3: Backers — Simplified card layout */}
               {activeStep === 3 && (
-                <div className="space-y-6">
+                <div className="space-y-8">
                   <div>
                     <h1 className="poppins font-bold text-3xl text-white">Backers</h1>
-                    <p className="text-slate-400 mt-1">Who supports this district? Add labels, patrons, sponsors, and more.</p>
+                    <p className="text-slate-400 mt-1">Who supports your collective? Backers show up as credibility badges on your district page.</p>
                   </div>
 
-                  {/* Quick Add Backer Type Buttons */}
-                  <div className="card-bg p-5">
-                    <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-widest mb-3">Add a Backer</p>
-                    <div className="flex flex-wrap gap-2">
-                      {BACKER_TYPES.map(bt => (
-                        <button key={bt.value} onClick={() => addBacker(bt.value)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all hover:scale-[1.02]"
-                          style={{ background: bt.color + '15', border: `1px solid ${bt.color}30`, color: bt.color }}>
-                          <span>+</span> {bt.label}
-                        </button>
-                      ))}
-                    </div>
+                  {/* Quick Add — clean pills */}
+                  <div className="flex flex-wrap gap-2">
+                    {BACKER_TYPES.map(bt => (
+                      <button key={bt.value} onClick={() => addBacker(bt.value)}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all hover:scale-[1.02]"
+                        style={{ background: bt.color + '12', border: `1px solid ${bt.color}25`, color: bt.color }}>
+                        <span className="text-sm">+</span> {bt.label}
+                      </button>
+                    ))}
                   </div>
 
-                  {/* Current Backers List */}
+                  {/* Backer Cards — grid layout */}
                   {(mapping.angels || []).length === 0 ? (
-                    <div className="card-bg p-8 text-center">
-                      <p className="text-slate-500 text-sm">No backers yet. Add your first backer above.</p>
-                      <p className="text-slate-600 text-xs mt-2">Backers appear on your artist profile and in District Flow.</p>
+                    <div className="card-bg p-10 text-center">
+                      <p className="text-slate-500 text-sm">No backers yet. Tap a type above to add your first.</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {(mapping.angels || []).map((backer, idx) => {
                         const typeInfo = BACKER_TYPES.find(t => t.value === backer.type) || BACKER_TYPES[0];
                         return (
-                          <div key={idx} className="card-bg p-4 rounded-xl" style={{ borderColor: typeInfo.color + '25' }}>
-                            <div className="flex items-start gap-3">
-                              {/* Type Badge */}
-                              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: typeInfo.color + '20' }}>
-                                <span className="text-xs font-bold" style={{ color: typeInfo.color }}>{typeInfo.label.charAt(0)}</span>
-                              </div>
-
-                              {/* Backer Fields */}
-                              <div className="flex-1 space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="text"
-                                    placeholder={`${typeInfo.label} name...`}
-                                    value={backer.lab || ''}
-                                    onChange={(e) => updateBacker(idx, 'lab', e.target.value)}
-                                    className="flex-1 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-3 py-2 text-sm text-white font-semibold focus:border-slate-600 outline-none"
-                                    style={{ borderColor: typeInfo.color + '30' }}
-                                  />
-                                  <span className="text-[9px] font-semibold uppercase tracking-wider px-2 py-1 rounded-md shrink-0" style={{ background: typeInfo.color + '15', color: typeInfo.color }}>{typeInfo.label}</span>
-                                </div>
-
-                                <div className="grid grid-cols-3 gap-2">
-                                  {/* Deal / Description */}
-                                  <input
-                                    type="text"
-                                    placeholder={backer.type === 'patron' ? 'e.g. 400 patrons, $15/mo avg' : backer.type === 'label' ? 'e.g. 50/50 profit split' : backer.type === 'grant' ? 'e.g. $10K recording grant' : backer.type === 'sponsor' ? 'e.g. $5K/mo + product' : 'Deal details...'}
-                                    value={backer.deal || ''}
-                                    onChange={(e) => updateBacker(idx, 'deal', e.target.value)}
-                                    className="bg-[#020617]/80 border border-slate-800/60 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:border-slate-600 outline-none"
-                                  />
-                                  {/* Amount */}
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-slate-500 text-xs">$</span>
-                                    <input
-                                      type="number"
-                                      placeholder="Amount"
-                                      value={backer.amount || ''}
-                                      onChange={(e) => updateBacker(idx, 'amount', parseInt(e.target.value) || 0)}
-                                      className="flex-1 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:border-slate-600 outline-none"
-                                    />
-                                  </div>
-                                  {/* Status */}
-                                  <select
-                                    value={backer.status || 'active'}
-                                    onChange={(e) => updateBacker(idx, 'status', e.target.value)}
-                                    className="bg-[#020617]/80 border border-slate-800/60 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:border-slate-600 outline-none">
-                                    <option value="active">Active</option>
-                                    <option value="negotiating">Negotiating</option>
-                                    <option value="completed">Completed</option>
-                                    <option value="past">Past</option>
-                                  </select>
-                                </div>
-
-                                {/* Visibility toggle */}
-                                <div className="flex items-center gap-4">
-                                  <label className="flex items-center gap-1.5 cursor-pointer">
-                                    <input type="checkbox" checked={backer.visible !== false} onChange={(e) => updateBacker(idx, 'visible', e.target.checked)}
-                                      className="rounded border-slate-700 bg-slate-800 text-indigo-500 w-3 h-3" />
-                                    <span className="text-[9px] text-slate-400">Show on profile</span>
-                                  </label>
-                                </div>
-                              </div>
-
-                              {/* Delete */}
+                          <div key={idx} className="card-bg p-5 rounded-2xl hover:border-white/10 transition-all" style={{ borderColor: typeInfo.color + '15' }}>
+                            {/* Top row: type badge + delete */}
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg" style={{ background: typeInfo.color + '15', color: typeInfo.color }}>{typeInfo.label}</span>
                               <button onClick={() => removePattern('angels', idx)}
-                                className="text-slate-600 hover:text-red-400 transition-colors text-sm mt-1 shrink-0">✕</button>
+                                className="text-slate-700 hover:text-red-400 transition-colors text-xs">remove</button>
+                            </div>
+                            {/* Name */}
+                            <input
+                              type="text"
+                              placeholder={`Who is this ${typeInfo.label.toLowerCase()}?`}
+                              value={backer.lab || ''}
+                              onChange={(e) => updateBacker(idx, 'lab', e.target.value)}
+                              className="w-full bg-transparent border-b border-slate-800 px-0 py-2 text-base text-white font-semibold focus:border-slate-500 outline-none mb-3 placeholder-slate-700"
+                            />
+                            {/* Note */}
+                            <input
+                              type="text"
+                              placeholder={typeInfo.value === 'sponsor' ? 'e.g. $5K/mo brand deal' : typeInfo.value === 'patron' ? 'e.g. 400 patrons on Patreon' : typeInfo.value === 'label' ? 'e.g. 50/50 profit split' : typeInfo.value === 'investor' ? 'e.g. $25K seed round' : typeInfo.value === 'grant' ? 'e.g. $10K recording grant' : 'Quick note...'}
+                              value={backer.deal || ''}
+                              onChange={(e) => updateBacker(idx, 'deal', e.target.value)}
+                              className="w-full bg-transparent border-none px-0 py-1 text-xs text-slate-400 outline-none mb-3 placeholder-slate-700"
+                            />
+                            {/* Bottom row: status + visibility */}
+                            <div className="flex items-center gap-3">
+                              {['active', 'in_talks', 'completed'].map(s => {
+                                const sLabel = { active: 'Active', in_talks: 'In Talks', completed: 'Done' }[s];
+                                const sColor = { active: '#22c55e', in_talks: '#f97316', completed: '#64748b' }[s];
+                                const isActive = (backer.status || 'active') === s;
+                                return (
+                                  <button key={s} onClick={() => updateBacker(idx, 'status', s)}
+                                    className="text-[10px] font-medium px-2.5 py-1 rounded-lg transition-all"
+                                    style={{ background: isActive ? sColor + '20' : 'transparent', color: isActive ? sColor : '#475569', border: `1px solid ${isActive ? sColor + '40' : 'transparent'}` }}>
+                                    {sLabel}
+                                  </button>
+                                );
+                              })}
+                              <div className="flex-1"></div>
+                              <label className="flex items-center gap-1.5 cursor-pointer">
+                                <input type="checkbox" checked={backer.visible !== false} onChange={(e) => updateBacker(idx, 'visible', e.target.checked)}
+                                  className="rounded border-slate-700 bg-slate-800 text-indigo-500 w-3 h-3" />
+                                <span className="text-[9px] text-slate-500">Show badge</span>
+                              </label>
                             </div>
                           </div>
                         );
@@ -1838,57 +2247,6 @@
                     </div>
                   )}
 
-                  {/* Backer Summary Stats */}
-                  <div className="grid grid-cols-4 gap-3">
-                    <div className="text-center p-3 bg-slate-900/50 rounded-lg border border-white/[0.04]">
-                      <div className="text-xl font-bold text-amber-400">{(mapping.angels || []).length}</div>
-                      <p className="text-[9px] text-slate-500 mt-1 uppercase tracking-wider">Backers</p>
-                    </div>
-                    <div className="text-center p-3 bg-slate-900/50 rounded-lg border border-white/[0.04]">
-                      <div className="text-xl font-bold text-amber-400">{new Set((mapping.angels || []).map(a => a.type)).size}</div>
-                      <p className="text-[9px] text-slate-500 mt-1 uppercase tracking-wider">Types</p>
-                    </div>
-                    <div className="text-center p-3 bg-slate-900/50 rounded-lg border border-white/[0.04]">
-                      <div className="text-xl font-bold text-amber-400">${((mapping.angels || []).reduce((sum, a) => sum + (a.amount || 0), 0)).toLocaleString()}</div>
-                      <p className="text-[9px] text-slate-500 mt-1 uppercase tracking-wider">Total Capital</p>
-                    </div>
-                    <div className="text-center p-3 bg-slate-900/50 rounded-lg border border-white/[0.04]">
-                      <div className="text-xl font-bold text-green-400">{(mapping.angels || []).filter(a => a.status === 'active').length}</div>
-                      <p className="text-[9px] text-slate-500 mt-1 uppercase tracking-wider">Active</p>
-                    </div>
-                  </div>
-
-                  {/* Human-Made Badge Section */}
-                  <div className="card-bg p-5 border-emerald-500/20 bg-emerald-500/5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                        <span className="text-emerald-400 text-lg font-bold">H</span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-emerald-400">Human Artists Only</p>
-                        <p className="text-xs text-slate-400 mt-0.5">This district is certified AI-free. No Suno. No synthetic content. Real artists, real music.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Revenue Share Model */}
-                  <div className="card-bg p-6">
-                    <h2 className="poppins font-semibold text-white mb-4">Revenue Share Model</h2>
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-indigo-500">20%</div>
-                        <p className="text-sm text-slate-400 mt-2">Artist</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-indigo-500">40%</div>
-                        <p className="text-sm text-slate-400 mt-2">Distributor</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-4xl font-bold text-indigo-500">40%</div>
-                        <p className="text-sm text-slate-400 mt-2">ReadyStack</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -1898,6 +2256,31 @@
                 <div className="space-y-6">
                   <h1 className="poppins font-bold text-3xl text-white">District Flow</h1>
                   <p className="text-slate-400">Visualize your district ecosystem in motion</p>
+
+                  {/* Layout Mode Toggle — Ecosystem vs Relational */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 bg-slate-900 rounded-xl p-1 border border-slate-800">
+                      <button
+                        onClick={() => setFlowLayout('ecosystem')}
+                        className={`px-5 py-2 rounded-lg text-[11px] font-bold uppercase transition-all ${
+                          flowLayout === 'ecosystem' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        Ecosystem
+                      </button>
+                      <button
+                        onClick={() => setFlowLayout('relational')}
+                        className={`px-5 py-2 rounded-lg text-[11px] font-bold uppercase transition-all ${
+                          flowLayout === 'relational' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        Relational
+                      </button>
+                    </div>
+                    <span className="text-[10px] text-slate-600">
+                      {flowLayout === 'ecosystem' ? 'Live traffic ecosystem — organic flow' : 'Organized cause & effect — artist columns × journey stages'}
+                    </span>
+                  </div>
 
                   {/* Stage Legend */}
                   <div className="flex gap-4 items-center">
@@ -1909,8 +2292,49 @@
                     ))}
                   </div>
 
-                  {/* Live/Snapshot Toggle */}
-                  <div className="flex items-center gap-4">
+                  {/* Artist Focus Pills — only show in ecosystem mode */}
+                  {flowLayout === 'ecosystem' && <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-bold uppercase text-slate-600 mr-2 tracking-wider">Focus</span>
+                    <button
+                      onClick={() => setSelectedArtist(null)}
+                      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all border ${
+                        !selectedArtist
+                          ? 'bg-white/10 border-white/30 text-white shadow-lg'
+                          : 'bg-transparent border-white/5 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                      }`}
+                    >
+                      All Artists
+                    </button>
+                    {storyParticipants.residents.filter(r => (r.name || '').trim()).map(r => (
+                      <button
+                        key={r.name}
+                        onClick={() => setSelectedArtist(selectedArtist === r.name ? null : r.name)}
+                        className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all border ${
+                          selectedArtist === r.name
+                            ? 'bg-fuchsia-600/20 border-fuchsia-400/50 text-fuchsia-300 shadow-[0_0_12px_rgba(192,38,211,0.3)]'
+                            : 'bg-transparent border-white/5 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                        }`}
+                      >
+                        {r.name}
+                      </button>
+                    ))}
+                  </div>}
+
+                  {/* Artist Focus summary — shows gravity stats when an artist is selected (ecosystem only) */}
+                  {flowLayout === 'ecosystem' && selectedArtist && (nodes.gravityLines || []).length > 0 && (
+                    <div className="flex items-center gap-3 px-4 py-2 bg-fuchsia-950/30 border border-fuchsia-500/20 rounded-xl">
+                      <div className="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse"></div>
+                      <span className="text-[11px] text-fuchsia-300 font-semibold">
+                        {selectedArtist}: {(nodes.gravityLines || []).length} cross-pollination paths detected
+                      </span>
+                      <span className="text-[10px] text-slate-500">
+                        Gravity lines show where {selectedArtist}'s content pulls traffic into other artists' ecosystems
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Live/Snapshot Toggle — ecosystem mode only */}
+                  {flowLayout === 'ecosystem' && <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 bg-slate-900 rounded-xl p-1.5 border border-slate-800">
                       <button
                         onClick={() => { setObsMode('live'); setIsNarrativePlaying(false); }}
@@ -1940,29 +2364,141 @@
                         <option value="3months">Last 3 Months</option>
                       </select>
                     )}
-                  </div>
+
+                    {/* Narrative Playback — 12-month traffic simulation */}
+                    <button
+                      onClick={toggleNarrative}
+                      className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase flex items-center gap-3 transition-all border ${
+                        isNarrativePlaying
+                          ? 'bg-fuchsia-600 border-fuchsia-400 text-white shadow-[0_0_25px_rgba(192,38,211,0.5)]'
+                          : 'bg-slate-900 border-white/10 text-slate-400 hover:border-white/30'
+                      }`}
+                    >
+                      {isNarrativePlaying ? (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                      ) : (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                      )}
+                      {isNarrativePlaying ? `Month ${playbackProgress + 1}` : 'Narrative'}
+                    </button>
+                  </div>}
 
                   {/* SVG Visualization */}
-                  <div className="bg-[#01040d] rounded-[64px] border border-white/5 shadow-2xl relative overflow-hidden w-[1200px] h-[1300px] mx-auto">
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 1300">
+                  <div className="bg-[#01040d] rounded-[64px] border border-white/5 shadow-2xl relative overflow-hidden w-[1200px] mx-auto"
+                    style={{height: nodes.isRelational ? '1100px' : '1300px'}}>
+
+                    {/* Relational View: Column Headers + Row Labels */}
+                    {nodes.isRelational && nodes.columnHeaders && (
+                      <>
+                        {/* Artist column headers */}
+                        {nodes.columnHeaders.map((col, i) => (
+                          <div key={`col-${i}`} className="absolute" style={{
+                            left: col.x, top: col.y, transform: 'translateX(-50%)',
+                            zIndex: 30
+                          }}>
+                            <div style={{
+                              fontSize: '13px', fontWeight: 700, color: col.name === 'ReadyStack' ? '#7c8cff' : '#ffffff',
+                              fontFamily: 'Poppins, sans-serif', textAlign: 'center',
+                              padding: '6px 16px', borderRadius: '10px',
+                              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)'
+                            }}>
+                              {col.name}
+                            </div>
+                          </div>
+                        ))}
+                        {/* Stage row labels */}
+                        {(nodes.rowLabels || []).map((row, i) => (
+                          <div key={`row-${i}`} className="absolute" style={{
+                            left: 18, top: row.y, transform: 'translateY(-50%) rotate(-90deg)',
+                            transformOrigin: 'center center', zIndex: 30
+                          }}>
+                            <span style={{
+                              fontSize: '10px', fontWeight: 800, color: row.color,
+                              textTransform: 'uppercase', letterSpacing: '2px', opacity: 0.6
+                            }}>
+                              {row.label}
+                            </span>
+                          </div>
+                        ))}
+                        {/* Horizontal stage divider lines */}
+                        {(nodes.rowLabels || []).map((row, i) => (
+                          <div key={`divider-${i}`} className="absolute" style={{
+                            left: 50, right: 50, top: row.y - 40,
+                            height: '1px', background: `${row.color}15`, zIndex: 5
+                          }} />
+                        ))}
+                      </>
+                    )}
+
+                    {/* Ecosystem View: Quadrant Labels + Vendor Group Headers */}
+                    {!nodes.isRelational && (
+                      <>
+                        {/* Quadrant labels */}
+                        {[
+                          { label: 'DISCOVER', color: '#ff2a1a', x: 300, y: 445 },
+                          { label: 'ENGAGE', color: '#ffd666', x: 900, y: 445 },
+                          { label: 'CONNECT', color: '#48c9b0', x: 300, y: 825 },
+                          { label: 'SUPPORT', color: '#7c8cff', x: 900, y: 825 }
+                        ].map(q => (
+                          <div key={q.label} className="absolute quadrant-label" style={{
+                            left: q.x, top: q.y, transform: 'translate(-50%, -50%)',
+                            color: q.color, zIndex: 5, fontSize: '11px'
+                          }}>{q.label}</div>
+                        ))}
+                        {/* Subtle quadrant divider lines */}
+                        <div className="absolute" style={{ left: 600, top: 440, width: '1px', height: '800px', background: 'rgba(255,255,255,0.04)', zIndex: 2 }} />
+                        <div className="absolute" style={{ left: 60, top: 820, width: '1080px', height: '1px', background: 'rgba(255,255,255,0.04)', zIndex: 2 }} />
+                        {/* Traffic Sources section label */}
+                        <div className="absolute" style={{
+                          left: 60, top: 130, zIndex: 10,
+                          fontSize: '10px', fontWeight: 800, color: '#64748b',
+                          textTransform: 'uppercase', letterSpacing: '2px'
+                        }}>TRAFFIC SOURCES</div>
+                      </>
+                    )}
+
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox={nodes.isRelational ? '0 0 1200 1100' : '0 0 1200 1300'}>
+                      {/* Flows — relational uses clean lines, ecosystem uses bezier curves */}
                       {nodes.flows?.map((flow, i) => {
-                        const midX = (flow.from.x + flow.to.x) / 2;
-                        const midY = (flow.from.y + flow.to.y) / 2;
                         const dx = flow.to.x - flow.from.x;
                         const dy = flow.to.y - flow.from.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        const offset = dist * 0.2;
-                        const cpX = midX - (dy / dist) * offset;
-                        const cpY = midY + (dx / dist) * offset;
-                        const d = `M ${flow.from.x},${flow.from.y} Q ${cpX},${cpY} ${flow.to.x},${flow.to.y}`;
+                        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                        let d;
+                        if (nodes.isRelational) {
+                          // Relational: gentle S-curve for readability (not wild beziers)
+                          const midY = (flow.from.y + flow.to.y) / 2;
+                          d = `M ${flow.from.x},${flow.from.y} C ${flow.from.x},${midY} ${flow.to.x},${midY} ${flow.to.x},${flow.to.y}`;
+                        } else {
+                          // Ecosystem: original bezier
+                          const midX = (flow.from.x + flow.to.x) / 2;
+                          const midY = (flow.from.y + flow.to.y) / 2;
+                          const offset = dist * 0.2;
+                          const cpX = midX - (dy / dist) * offset;
+                          const cpY = midY + (dx / dist) * offset;
+                          d = `M ${flow.from.x},${flow.from.y} Q ${cpX},${cpY} ${flow.to.x},${flow.to.y}`;
+                        }
                         const isFunding = flow.isFunding;
+                        const isCrossArtist = flow.isCrossArtist;
                         const pathColor = flow.color || '#ffffff';
-                        const strokeW = isFunding ? (flow.strokeWidth || 3.5) : (flow.strokeWidth || 1.2);
-                        const opac = isFunding ? 0.9 : 0.15;
+                        const fi = nodes.flowIntensity || 1;
+                        const strokeW = (isFunding ? (flow.strokeWidth || 3.5) : (flow.strokeWidth || 1.2)) * fi;
+                        // Artist Focus dimming (ecosystem mode only)
+                        const fromIsArtist = flow.from.vendor === selectedArtist;
+                        const toIsArtist = flow.to.vendor === selectedArtist;
+                        const flowTouchesArtist = !selectedArtist || fromIsArtist || toIsArtist;
+                        const focusDim = selectedArtist && !flowTouchesArtist ? 0.04 : 1;
+                        const opac = nodes.isRelational
+                          ? (isCrossArtist ? 0.35 : 0.25)
+                          : (isFunding ? 0.9 : Math.min(0.5, 0.15 * fi)) * focusDim;
                         return (
-                          <g key={`road-${i}`}>
-                            <path d={d} className="path-connector" style={{ stroke: pathColor, strokeWidth: strokeW, opacity: opac }} />
-                            <circle
+                          <g key={`road-${i}`} style={{transition:'opacity 0.4s ease'}}>
+                            <path d={d} className={nodes.isRelational ? '' : 'path-connector'} style={{
+                              stroke: pathColor, strokeWidth: strokeW, opacity: opac,
+                              fill: 'none',
+                              strokeDasharray: isCrossArtist ? '8 5' : 'none'
+                            }} />
+                            {/* Beads only in ecosystem mode */}
+                            {!nodes.isRelational && focusDim > 0.5 && <circle
                               r={strokeW + 1}
                               fill={pathColor}
                               className="bead"
@@ -1972,15 +2508,65 @@
                                 animation: `data-flow ${flow.speed}s linear infinite`,
                                 animationDelay: `${(i % 8) * 0.8}s`
                               }}
-                            />
+                            />}
+                          </g>
+                        );
+                      })}
+
+                      {/* Gravity Lines — cross-artist interplay paths (purple dashed) */}
+                      {(nodes.gravityLines || []).map((grav, i) => {
+                        const midX = (grav.from.x + grav.to.x) / 2;
+                        const midY = (grav.from.y + grav.to.y) / 2;
+                        const dx = grav.to.x - grav.from.x;
+                        const dy = grav.to.y - grav.from.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const offset = dist * 0.25;
+                        const cpX = midX - (dy / dist) * offset;
+                        const cpY = midY + (dx / dist) * offset;
+                        const d = `M ${grav.from.x},${grav.from.y} Q ${cpX},${cpY} ${grav.to.x},${grav.to.y}`;
+                        return (
+                          <g key={`gravity-${i}`}>
+                            {/* Glow layer — soft purple halo behind the line */}
+                            <path d={d} style={{
+                              stroke: grav.color, strokeWidth: grav.strokeWidth + 4,
+                              opacity: 0.08 + grav.strength * 0.08,
+                              strokeDasharray: 'none',
+                              fill: 'none', filter: 'blur(4px)'
+                            }} />
+                            {/* Main dashed line */}
+                            <path d={d} style={{
+                              stroke: grav.color, strokeWidth: grav.strokeWidth,
+                              opacity: 0.35 + grav.strength * 0.4,
+                              strokeDasharray: '8 6',
+                              fill: 'none'
+                            }} />
                           </g>
                         );
                       })}
                     </svg>
                     {nodes.items?.map(n => {
-                      const iconColor = n.type === 'youtube' ? '#f87171' : n.type === 'spotify' ? '#1db954' : n.isTrafficSource ? '#ffffff' : n.color;
+                      // Quadrant nodes use their stage color for visual consistency.
+                      // Brand colors only for traffic sources + hub at the top.
+                      const brandColorMap = { youtube:'#f87171', spotify:'#1db954', instagram:'#e1306c', tiktok:'#69c9d0', soundcloud:'#ff5500', bandcamp:'#629aa9', discord:'#5865f2', patreon:'#ff424d', applemusic:'#fc3c44' };
+                      const iconColor = n.stageId ? n.color : n.isTrafficSource ? (brandColorMap[n.type] || '#ffffff') : n.type === 'gateway' ? '#ffffff' : (brandColorMap[n.type] || n.color);
+                      // Artist Focus: highlight selected artist's nodes, dim everything else hard
+                      const isFocusedArtist = n.vendor === selectedArtist;
+                      const isHub = n.type === 'gateway';
+                      const isGravityTarget = !nodes.isRelational && selectedArtist && !isFocusedArtist && (nodes.gravityLines || []).some(g => g.to.id === n.id);
+                      // Relational: all nodes full brightness. Ecosystem: focus dimming applies.
+                      const nodeDim = nodes.isRelational ? 1 : (!selectedArtist ? 1 : isFocusedArtist ? 1 : isHub ? 0.6 : isGravityTarget ? 0.75 : 0.08);
                       return (
-                        <div key={n.id} className="absolute node-container" style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20 }}>
+                        <div
+                          key={n.id}
+                          className="absolute node-container"
+                          style={{
+                            left: n.x, top: n.y, transform: 'translate(-50%, -50%)',
+                            zIndex: hoveredNode && hoveredNode.id === n.id ? 50 : 20,
+                            opacity: nodeDim, transition: 'opacity 0.4s ease'
+                          }}
+                          onMouseEnter={() => handleNodeHover(n)}
+                          onMouseLeave={handleNodeLeave}
+                        >
                           <div
                             className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${
                               n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' :
@@ -1988,19 +2574,182 @@
                               'rounded-full border-[2px]'
                             }`}
                             style={{
-                              borderColor: n.color,
+                              borderColor: hoveredNode && hoveredNode.id === n.id ? '#ffffff' : (isGravityTarget ? '#c084fc' : n.color),
                               width: `${(n.radius || 26) * 2}px`,
                               height: `${(n.radius || 26) * 2}px`,
-                              color: iconColor
+                              color: iconColor,
+                              boxShadow: hoveredNode && hoveredNode.id === n.id ? `0 0 24px ${n.color}60` : (isGravityTarget ? '0 0 16px rgba(192,132,252,0.3)' : 'none')
                             }}
                           >
                             <div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}>
                               <MediumIcon type={n.type || 'circle'} size={Math.round((n.radius || 26) * 0.8)} />
                             </div>
                           </div>
+                          {/* Node label — always shown for readability */}
+                          {n.stageId && (
+                            <div style={{
+                              position:'absolute', bottom:'-20px', left:'50%', transform:'translateX(-50%)',
+                              fontSize: '9px',
+                              fontWeight: 600,
+                              color: nodes.isRelational ? '#94a3b8' : (selectedArtist && isFocusedArtist ? '#c084fc' : '#64748b'),
+                              whiteSpace:'nowrap', maxWidth: '100px', overflow:'hidden', textOverflow:'ellipsis', textAlign:'center',
+                              textShadow: selectedArtist && isFocusedArtist ? '0 0 8px rgba(192,132,252,0.5)' : 'none'
+                            }}>
+                              {n.type || n.label}
+                            </div>
+                          )}
+                          {/* Vendor name label for traffic sources — shows grouping */}
+                          {n.isTrafficSource && (
+                            <div style={{
+                              position:'absolute', bottom:'-18px', left:'50%', transform:'translateX(-50%)',
+                              fontSize: '8px', fontWeight: 700, letterSpacing: '0.05em',
+                              color: '#94a3b8',
+                              whiteSpace:'nowrap', maxWidth: '90px', overflow:'hidden', textOverflow:'ellipsis', textAlign:'center'
+                            }}>
+                              {n.vendor}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
+
+                    {/* Hover Tooltip Card */}
+                    {hoveredNode && (
+                      <div
+                        className="absolute"
+                        style={{
+                          left: Math.min(hoveredNode.x + 50, 860),
+                          top: Math.max(hoveredNode.y - 40, 20),
+                          zIndex: 100,
+                          pointerEvents: 'auto'
+                        }}
+                        onMouseEnter={handleTooltipEnter}
+                        onMouseLeave={handleNodeLeave}
+                      >
+                        <div style={{
+                          background: 'rgba(2, 6, 23, 0.95)',
+                          backdropFilter: 'blur(16px)',
+                          border: '1px solid rgba(124, 140, 255, 0.2)',
+                          borderRadius: '16px',
+                          padding: '16px 20px',
+                          width: '340px',
+                          boxShadow: '0 20px 60px rgba(0,0,0,0.6)'
+                        }}>
+                          {/* Header: Icon + Vendor + Label */}
+                          <div style={{display:'flex', alignItems:'center', gap:'12px', marginBottom:'12px'}}>
+                            <div style={{
+                              width:'36px', height:'36px', borderRadius:'10px',
+                              background: `${hoveredNode.color}15`,
+                              border: `1.5px solid ${hoveredNode.color}40`,
+                              display:'flex', alignItems:'center', justifyContent:'center',
+                              color: hoveredNode.color
+                            }}>
+                              <MediumIcon type={hoveredNode.type || 'circle'} size={18} />
+                            </div>
+                            <div>
+                              <div style={{color:'#ffffff', fontWeight:700, fontSize:'14px', fontFamily:'Poppins,sans-serif'}}>
+                                {hoveredNode.vendor || hoveredNode.label}
+                              </div>
+                              <div style={{color:'#7c8cff', fontSize:'11px', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.5px'}}>
+                                {hoveredNode.label}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Description from nMap */}
+                          <div style={{color:'#94a3b8', fontSize:'12px', lineHeight:'1.5', marginBottom:'12px', borderBottom:'1px solid rgba(255,255,255,0.06)', paddingBottom:'12px'}}>
+                            {nMap[hoveredNode.type] || 'District ecosystem touchpoint'}
+                          </div>
+
+                          {/* Volume / Investment stats */}
+                          {hoveredNode.isAngel ? (
+                            <div style={{marginBottom:'12px', borderBottom:'1px solid rgba(255,255,255,0.06)', paddingBottom:'12px'}}>
+                              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                                <span style={{color:'#64748b', fontSize:'11px', fontWeight:600, textTransform:'uppercase'}}>Investment</span>
+                                <span style={{color:'#ffd700', fontWeight:700, fontSize:'16px', fontFamily:'Poppins,sans-serif'}}>
+                                  ${(hoveredNode.amount || 0).toLocaleString()}
+                                </span>
+                              </div>
+                              <div style={{color:'#64748b', fontSize:'11px', marginTop:'4px'}}>
+                                Class: {hoveredNode.investorClass === 'observer' ? 'Observer — Passive visibility' : hoveredNode.investorClass === 'awareness' ? 'Awareness — Active campaigns' : 'Seed — Artist development'}
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{marginBottom:'12px', borderBottom:'1px solid rgba(255,255,255,0.06)', paddingBottom:'12px'}}>
+                              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                                <span style={{color:'#64748b', fontSize:'11px', fontWeight:600, textTransform:'uppercase'}}>Volume</span>
+                                <span style={{color: hoveredNode.color, fontWeight:700, fontSize:'16px', fontFamily:'Poppins,sans-serif'}}>
+                                  {(hoveredNode.ga4Count || 0).toLocaleString()}
+                                </span>
+                              </div>
+                              <div style={{color:'#64748b', fontSize:'11px', marginTop:'4px'}}>
+                                Interactions tracked via GA4
+                              </div>
+                            </div>
+                          )}
+
+                          {/* UTM Tracking URL */}
+                          {!hoveredNode.isAngel && (() => {
+                            const vendorSlug = (hoveredNode.vendor || 'partner').replace(/\s+/g, '_').toLowerCase();
+                            const labelSlug = (hoveredNode.label || 'link').replace(/\s+/g, '_').toLowerCase();
+                            const districtSlug = stackLabel.replace(/\s+/g, '-').toLowerCase();
+                            const trackingUrl = `https://readystack.ai/d/${districtSlug}?utm_source=${vendorSlug}&utm_medium=${labelSlug}&utm_campaign=${districtSlug}&utm_id=G-MUSIC`;
+                            return (
+                              <div>
+                                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'6px'}}>
+                                  <span style={{color:'#64748b', fontSize:'11px', fontWeight:600, textTransform:'uppercase'}}>Tracking URL</span>
+                                  <span style={{
+                                    background: 'rgba(16, 185, 129, 0.15)',
+                                    color: '#10b981',
+                                    fontSize: '9px',
+                                    fontWeight: 700,
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
+                                  }}>GA4 Active</span>
+                                </div>
+                                <div style={{
+                                  background: 'rgba(0,0,0,0.3)',
+                                  borderRadius: '8px',
+                                  padding: '8px 10px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px'
+                                }}>
+                                  <code style={{
+                                    color: '#7c8cff',
+                                    fontSize: '10px',
+                                    wordBreak: 'break-all',
+                                    flex: 1,
+                                    fontFamily: 'monospace',
+                                    lineHeight: '1.4'
+                                  }}>{trackingUrl}</code>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(trackingUrl);
+                                    }}
+                                    style={{
+                                      background: 'rgba(124,140,255,0.15)',
+                                      border: '1px solid rgba(124,140,255,0.3)',
+                                      borderRadius: '6px',
+                                      padding: '4px 8px',
+                                      cursor: 'pointer',
+                                      color: '#7c8cff',
+                                      fontSize: '10px',
+                                      fontWeight: 600,
+                                      whiteSpace: 'nowrap',
+                                      flexShrink: 0
+                                    }}
+                                  >Copy</button>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Stage breakdown stats */}
@@ -2020,10 +2769,780 @@
                 </div>
               )}
 
-              {/* ========== SECTION: RENDER - TAB 5: PREVIEW ========== */}
-              {/* TAB 5: Preview — The public-facing artist page. Gateway for all traffic. */}
+              {/* ========== SECTION: RENDER - TAB 5: DISTRICT ANALYTICS ========== */}
+              {activeStep === 5 && (
+                <div className="space-y-6">
+                  <h1 className="poppins font-bold text-3xl text-white">District Analytics</h1>
+                  <p className="text-slate-400">Traffic, income, and growth — all in one place.</p>
+
+                  {/* 3-way Toggle */}
+                  <div className="flex items-center gap-1 bg-slate-900 rounded-xl p-1 border border-slate-800">
+                    {[
+                      { key: 'traffic', label: 'Traffic' },
+                      { key: 'income', label: 'Income Calculator' },
+                      { key: 'gouveia', label: 'Gouveia Chart' },
+                    ].map(tab => (
+                      <button key={tab.key}
+                        onClick={() => setAnalyticsView(tab.key)}
+                        className={`flex-1 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${analyticsView === tab.key ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                      >{tab.label}</button>
+                    ))}
+                  </div>
+
+                  {/* ════════ VIEW: TRAFFIC ANALYTICS ════════ */}
+                  {analyticsView === 'traffic' && (() => {
+                    const allArtists = storyParticipants.residents.filter(r => (r.name || '').trim());
+                    const allPartners = partners.filter(p => (p.name || '').trim());
+                    const districtFans = fanCount || 5000;
+                    const activeArtists = allArtists.length || 1;
+
+                    // ── Build contributor traffic data (artists + partners ARE the traffic) ──
+                    const contributors = [];
+                    const artistColors = ['#7c8cff', '#a78bfa', '#818cf8', '#6366f1', '#8b5cf6'];
+                    const partnerColors = ['#f97316', '#fb923c', '#fdba74', '#ea580c'];
+                    allArtists.forEach((a, i) => {
+                      const srcCount = (a.trafficSources || []).filter(s => s.url).length;
+                      const linkCount = (a.extraLinks || []).filter(l => l.url).length;
+                      const touchpoints = srcCount + linkCount + (a.youtubeUrl ? 1 : 0) + (a.spotifyUrl ? 1 : 0);
+                      // Mock: more touchpoints = more clicks. Seed with deterministic pseudo-random
+                      const baseFans = Math.round(districtFans / activeArtists);
+                      const clickRate = 0.03 + (touchpoints * 0.008); // 3% base + 0.8% per touchpoint
+                      const monthlyClicks = Math.round(baseFans * clickRate);
+                      const purchaseClickRate = 0.12 + (linkCount * 0.02); // 12% of clicks hit purchase pages
+                      const purchaseClicks = Math.round(monthlyClicks * purchaseClickRate);
+                      const estRevenue = purchaseClicks * 2.50; // avg $2.50 per purchase-page visit (merch, streams, tips)
+                      contributors.push({
+                        name: a.name, kind: 'artist', color: artistColors[i % artistColors.length],
+                        fans: baseFans, touchpoints, monthlyClicks, purchaseClicks, estRevenue,
+                        sources: (a.trafficSources || []).filter(s => s.url).map(s => {
+                          const info = TRAFFIC_SOURCE_OPTIONS.find(o => o.value === s.type) || {};
+                          return { type: s.type, label: info.label || s.type, color: info.color || '#94a3b8' };
+                        })
+                      });
+                    });
+                    allPartners.forEach((p, i) => {
+                      const srcCount = (p.trafficSources || []).filter(s => s.url).length;
+                      const linkCount = [p.link, p.landingUrl, p.offerUrl, p.promoUrl].filter(Boolean).length + ((p.extraLinks || []).filter(l => l.url).length);
+                      const touchpoints = srcCount + linkCount;
+                      const partnerReach = Math.round(districtFans * 0.3); // partners reach ~30% of district
+                      const clickRate = 0.04 + (touchpoints * 0.01);
+                      const monthlyClicks = Math.round(partnerReach * clickRate);
+                      const purchaseClickRate = 0.18 + (linkCount * 0.03); // partners convert higher (offers, promos)
+                      const purchaseClicks = Math.round(monthlyClicks * purchaseClickRate);
+                      const estRevenue = purchaseClicks * 3.20; // partner offers convert higher
+                      contributors.push({
+                        name: p.name, kind: 'partner', color: partnerColors[i % partnerColors.length],
+                        fans: partnerReach, touchpoints, monthlyClicks, purchaseClicks, estRevenue,
+                        sources: (p.trafficSources || []).filter(s => s.url).map(s => {
+                          const info = TRAFFIC_SOURCE_OPTIONS.find(o => o.value === s.type) || {};
+                          return { type: s.type, label: info.label || s.type, color: info.color || '#94a3b8' };
+                        })
+                      });
+                    });
+                    contributors.sort((a, b) => b.monthlyClicks - a.monthlyClicks);
+                    const totalClicks = contributors.reduce((s, c) => s + c.monthlyClicks, 0);
+                    const totalPurchaseClicks = contributors.reduce((s, c) => s + c.purchaseClicks, 0);
+                    const totalEstRevenue = contributors.reduce((s, c) => s + c.estRevenue, 0);
+                    const revPerFan = districtFans > 0 ? (totalEstRevenue / districtFans) : 0;
+
+                    // ── 30-day simulated chart data per contributor ──
+                    const seed = (n) => ((n * 9301 + 49297) % 233280) / 233280; // deterministic pseudo-random
+                    const dailyData = [];
+                    for (let d = 0; d < 30; d++) {
+                      const day = { day: d + 1, total: 0 };
+                      const weekendDip = (d % 7 === 5 || d % 7 === 6) ? 0.65 : 1;
+                      const growthTrend = 1 + (d / 30) * 0.2;
+                      contributors.forEach((c, ci) => {
+                        const dailyBase = c.monthlyClicks / 30;
+                        const variance = 0.5 + seed(d * 100 + ci) * 1.0;
+                        day[c.name] = Math.round(dailyBase * variance * weekendDip * growthTrend);
+                        day.total += day[c.name];
+                      });
+                      dailyData.push(day);
+                    }
+                    const maxDailyClicks = Math.max(...dailyData.map(d => d.total), 1);
+
+                    // ── District Health Score (composite) ──
+                    const growthRate30d = dailyData.length > 1 ? (dailyData[29].total / Math.max(dailyData[0].total, 1)) - 1 : 0;
+                    const activationRate = totalClicks / Math.max(districtFans, 1);
+                    const healthScore = Math.min(100, Math.round((revPerFan * 30 + growthRate30d * 50 + activationRate * 200)));
+                    const healthColor = healthScore >= 70 ? '#10b981' : healthScore >= 40 ? '#f59e0b' : '#ef4444';
+                    const healthLabel = healthScore >= 70 ? 'Healthy' : healthScore >= 40 ? 'Building' : 'Early Stage';
+
+                    // ── Filter data by selected range ──
+                    const rangeDays = trafficRange || 30;
+                    const filteredData = dailyData.slice(Math.max(0, 30 - rangeDays));
+                    const rangeClicks = filteredData.reduce((s, d) => s + d.total, 0);
+                    const rangePurchaseClicks = Math.round(totalPurchaseClicks * (rangeDays / 30));
+                    const rangeRevenue = totalEstRevenue * (rangeDays / 30);
+                    const maxFiltered = Math.max(...filteredData.map(d => d.total), 1);
+
+                    // Chart dimensions — taller, more readable
+                    const tChartW = 600, tChartH = 280, tPadL = 55, tPadR = 20, tPadT = 20, tPadB = 40;
+                    const tPlotW = tChartW - tPadL - tPadR, tPlotH = tChartH - tPadT - tPadB;
+                    const tXScale = (idx) => tPadL + (idx / Math.max(filteredData.length - 1, 1)) * tPlotW;
+                    const tYScale = (v) => tPadT + tPlotH - (v / maxFiltered) * tPlotH;
+                    const totalPath = 'M' + filteredData.map((d, i) => `${tXScale(i).toFixed(1)},${tYScale(d.total).toFixed(1)}`).join(' L');
+                    const totalArea = totalPath + ` L${tXScale(filteredData.length - 1).toFixed(1)},${(tPadT + tPlotH).toFixed(1)} L${tXScale(0).toFixed(1)},${(tPadT + tPlotH).toFixed(1)} Z`;
+
+                    // Y-axis ticks — nice round numbers
+                    const yTicks = [];
+                    const yStep = maxFiltered <= 5 ? 1 : maxFiltered <= 20 ? 5 : maxFiltered <= 50 ? 10 : 25;
+                    for (let t = 0; t <= maxFiltered + yStep; t += yStep) yTicks.push(t);
+                    if (yTicks.length > 6) { const half = yTicks.filter((_, i) => i % 2 === 0); yTicks.length = 0; yTicks.push(...half); }
+
+                    // X-axis labels — show every Nth day
+                    const xLabelStep = rangeDays <= 7 ? 1 : rangeDays <= 14 ? 2 : 5;
+
+                    return (
+                      <div className="space-y-6">
+
+                        {/* ── Date Range Toggle + Title Row ── */}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h2 className="text-base font-semibold text-white poppins">Traffic Analytics</h2>
+                            <p className="text-xs text-slate-400 mt-0.5">Clicks driven by artists and partners in your district</p>
+                          </div>
+                          <div className="flex items-center gap-1 bg-slate-900 rounded-lg p-1 border border-slate-700 shrink-0">
+                            {[7, 14, 30, 90].map(days => (
+                              <button key={days} onClick={() => setTrafficRange(days)}
+                                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${trafficRange === days ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
+                              >{days}d</button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* ── Summary Stats — 3 primary metrics (expert recommendation) ── */}
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="card-bg p-5 rounded-xl border-2" style={{ borderColor: healthColor + '30' }}>
+                            <p className="text-sm text-slate-300 font-medium mb-2">District Health</p>
+                            <div className="flex items-baseline gap-1.5">
+                              <p className="text-4xl font-bold poppins" style={{ color: healthColor }}>{healthScore}</p>
+                              <span className="text-sm text-slate-500">/100</span>
+                            </div>
+                            <p className="text-xs font-medium mt-1" style={{ color: healthColor }}>{healthLabel}</p>
+                          </div>
+                          <div className="card-bg p-5 rounded-xl">
+                            <p className="text-sm text-slate-300 font-medium mb-2">Total Clicks</p>
+                            <p className="text-4xl font-bold text-indigo-400 poppins">{rangeClicks.toLocaleString()}</p>
+                            <p className="text-xs text-slate-400 mt-1">{Math.round(rangeClicks / rangeDays)}/day avg · {rangeDays}d window</p>
+                          </div>
+                          <div className="card-bg p-5 rounded-xl">
+                            <p className="text-sm text-slate-300 font-medium mb-2">Est. Revenue</p>
+                            <p className="text-4xl font-bold text-emerald-400 poppins">${rangeRevenue.toFixed(0)}</p>
+                            <p className="text-xs text-slate-400 mt-1">${revPerFan.toFixed(2)}/fan · {rangePurchaseClicks} purchase clicks ({totalClicks > 0 ? Math.round(totalPurchaseClicks / totalClicks * 100) : 0}%)</p>
+                          </div>
+                        </div>
+
+                        {/* ── Traffic Chart — redesigned for readability ── */}
+                        <div className="card-bg p-6 rounded-2xl">
+                          <div className="flex items-center justify-between mb-5">
+                            <div>
+                              <p className="text-base font-semibold text-white poppins">District Traffic — {rangeDays} Days</p>
+                              <p className="text-sm text-slate-300">Daily clicks from all contributors</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xl font-bold text-indigo-400 poppins">{Math.round(rangeClicks / rangeDays)}<span className="text-sm text-slate-400 font-normal">/day</span></p>
+                            </div>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <svg viewBox={`0 0 ${tChartW} ${tChartH}`} className="w-full" style={{ maxWidth: tChartW, minWidth: 360 }}>
+                              <defs>
+                                <linearGradient id="trafficGrad" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="0%" stopColor="#7c8cff" stopOpacity="0.25" />
+                                  <stop offset="100%" stopColor="#7c8cff" stopOpacity="0.02" />
+                                </linearGradient>
+                              </defs>
+                              {/* Horizontal grid lines */}
+                              {yTicks.map((val, i) => {
+                                const y = tYScale(val);
+                                return (
+                                  <g key={i}>
+                                    <line x1={tPadL} y1={y} x2={tPadL + tPlotW} y2={y} stroke="#334155" strokeWidth="0.5" opacity="0.3" />
+                                    <text x={tPadL - 8} y={y + 4} textAnchor="end" fill="#94a3b8" fontSize="11" fontFamily="Inter">{val}</text>
+                                  </g>
+                                );
+                              })}
+                              {/* X-axis baseline */}
+                              <line x1={tPadL} y1={tPadT + tPlotH} x2={tPadL + tPlotW} y2={tPadT + tPlotH} stroke="#475569" strokeWidth="1" />
+                              {/* Day labels */}
+                              {filteredData.map((d, i) => {
+                                if (i % xLabelStep !== 0 && i !== filteredData.length - 1) return null;
+                                return <text key={i} x={tXScale(i)} y={tPadT + tPlotH + 20} textAnchor="middle" fill="#94a3b8" fontSize="11" fontFamily="Inter">Day {d.day}</text>;
+                              })}
+                              {/* Area fill */}
+                              <path d={totalArea} fill="url(#trafficGrad)" />
+                              {/* Primary total line — bold, prominent, on top */}
+                              <path d={totalPath} fill="none" stroke="#7c8cff" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+                              {/* Data points on total line */}
+                              {filteredData.filter((d, i) => i % xLabelStep === 0 || i === filteredData.length - 1).map((d, idx) => {
+                                const i = filteredData.indexOf(d);
+                                return <circle key={idx} cx={tXScale(i)} cy={tYScale(d.total)} r="5" fill="#020617" stroke="#7c8cff" strokeWidth="2.5" />;
+                              })}
+                            </svg>
+                          </div>
+                          {/* Contributor pills */}
+                          <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-slate-700/30">
+                            <span className="text-xs text-slate-500 mr-1">Contributors:</span>
+                            {contributors.map((c, i) => {
+                              const share = totalClicks > 0 ? Math.round(c.monthlyClicks / totalClicks * 100) : 0;
+                              return (
+                                <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: c.color + '15', color: c.color, border: `1px solid ${c.color}25` }}>
+                                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }}></span>
+                                  {c.name} <span className="opacity-60">{share}%</span>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* ── Contributor Breakdown — readable cards ── */}
+                        <div className="card-bg p-6 rounded-2xl">
+                          <p className="text-sm font-semibold text-white poppins mb-4">Who's Driving Traffic</p>
+                          {contributors.length === 0 ? (
+                            <p className="text-sm text-slate-400">Add artists and partners on the Collective + Links tabs to see contributions.</p>
+                          ) : (
+                            <div className="space-y-3">
+                              {contributors.map((c, ci) => {
+                                const clickShare = totalClicks > 0 ? (c.monthlyClicks / totalClicks * 100) : 0;
+                                return (
+                                  <div key={ci} className="p-4 rounded-xl border border-slate-700/30 bg-slate-900/30">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: c.color + '20', border: `1.5px solid ${c.color}40` }}>
+                                          <span className="text-sm font-bold" style={{ color: c.color }}>{c.name.charAt(0)}</span>
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-semibold text-white">{c.name}</p>
+                                          <p className="text-[11px] text-slate-400">{c.kind} · {c.touchpoints} touchpoint{c.touchpoints !== 1 ? 's' : ''}</p>
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="text-base font-bold poppins" style={{ color: c.color }}>{clickShare.toFixed(0)}%</p>
+                                        <p className="text-[11px] text-slate-400">of traffic</p>
+                                      </div>
+                                    </div>
+                                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden mb-3">
+                                      <div className="h-full rounded-full transition-all" style={{ width: `${clickShare}%`, backgroundColor: c.color, opacity: 0.7 }}></div>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-3 text-center">
+                                      <div>
+                                        <p className="text-sm font-bold text-white">{c.monthlyClicks.toLocaleString()}</p>
+                                        <p className="text-[11px] text-slate-400">clicks/mo</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm font-bold text-emerald-400">{c.purchaseClicks.toLocaleString()}</p>
+                                        <p className="text-[11px] text-slate-400">purchase clicks</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm font-bold text-amber-400">${c.estRevenue.toFixed(0)}</p>
+                                        <p className="text-[11px] text-slate-400">est. revenue</p>
+                                      </div>
+                                    </div>
+                                    {c.sources.length > 0 && (
+                                      <div className="flex flex-wrap gap-1.5 mt-3">
+                                        {c.sources.map((s, si) => (
+                                          <span key={si} className="text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5" style={{ backgroundColor: s.color + '15', color: s.color }}>
+                                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.color }}></span>{s.label}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* ── Cross-Artist Earnings: Network Effect ── */}
+                        {(() => {
+                          /* Build cross-pollination data from contributors */
+                          const artistColors = ['#7c8cff', '#ffd666', '#48c9b0', '#f472b6', '#fb923c', '#a78bfa'];
+                          const artistNames = contributors.filter(c => c.type === 'artist').map(c => c.name);
+                          const partnerNames = contributors.filter(c => c.type !== 'artist').map(c => c.name);
+                          const allNames = [...artistNames, ...partnerNames];
+                          if (allNames.length < 2) return null;
+
+                          /* Deterministic mock cross-pollination flows */
+                          const flows = [];
+                          let totalCrossRevenue = 0;
+                          for (let i = 0; i < Math.min(allNames.length, 4); i++) {
+                            for (let j = 0; j < Math.min(allNames.length, 4); j++) {
+                              if (i === j) continue;
+                              const seed = ((i * 9301 + j * 49297) % 233280) / 233280;
+                              if (seed > 0.45) continue; /* only some pairs cross-pollinate */
+                              const fans = Math.round(12 + seed * 85);
+                              const rev = Math.round(fans * (1.80 + seed * 2.40) * 100) / 100;
+                              totalCrossRevenue += rev;
+                              flows.push({
+                                from: allNames[i],
+                                to: allNames[j],
+                                fans,
+                                revenue: rev,
+                                fromColor: artistColors[i % artistColors.length],
+                                toColor: artistColors[j % artistColors.length]
+                              });
+                            }
+                          }
+                          /* Sort by revenue desc, take top 3 for display */
+                          flows.sort((a, b) => b.revenue - a.revenue);
+                          const topFlows = flows.slice(0, 3);
+
+                          return (
+                            <div className="relative rounded-2xl p-5 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(124,140,255,0.08) 0%, rgba(99,102,241,0.04) 50%, rgba(245,158,11,0.06) 100%)', border: '1px solid rgba(124,140,255,0.15)' }}>
+                              {/* Header row */}
+                              <div className="flex items-start justify-between mb-4">
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c8cff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <p className="text-sm font-semibold text-white poppins">Your Network Effect</p>
+                                  </div>
+                                  <p className="text-xs text-slate-400 leading-relaxed max-w-sm">Fans discovered through one artist who purchased from another. This is the collective advantage.</p>
+                                </div>
+                                <div className="text-right pl-4">
+                                  <p className="text-3xl font-bold text-amber-400 poppins">${totalCrossRevenue.toFixed(0)}</p>
+                                  <p className="text-[11px] text-slate-400 mt-0.5">cross-artist revenue</p>
+                                </div>
+                              </div>
+
+                              {/* Flow examples */}
+                              <div className="space-y-2">
+                                {topFlows.map((f, fi) => (
+                                  <div key={fi} className="flex items-center gap-3 px-3 py-2.5 rounded-lg" style={{ backgroundColor: 'rgba(15,23,42,0.5)' }}>
+                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: f.fromColor + '20', color: f.fromColor }}>{f.from}</span>
+                                    <div className="flex items-center gap-1 text-slate-500">
+                                      <svg width="16" height="10" viewBox="0 0 16 10"><path d="M0 5h12M10 1l4 4-4 4" fill="none" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                      <span className="text-[10px]">{f.fans} fans</span>
+                                      <svg width="16" height="10" viewBox="0 0 16 10"><path d="M0 5h12M10 1l4 4-4 4" fill="none" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                    </div>
+                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: f.toColor + '20', color: f.toColor }}>{f.to}</span>
+                                    <span className="ml-auto text-sm font-bold text-emerald-400 poppins">${f.revenue.toFixed(0)}</span>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Takeaway line */}
+                              <p className="text-[11px] text-slate-500 mt-3 text-center italic">
+                                {flows.length} cross-pollination paths active · {allNames.length} contributors in the network
+                              </p>
+                            </div>
+                          );
+                        })()}
+
+                        {/* ── Revenue Assumptions (collapsible — expert recommendation) ── */}
+                        <details className="group">
+                          <summary className="flex items-center gap-2 cursor-pointer text-xs text-slate-500 hover:text-slate-300 transition-colors py-2 px-1">
+                            <svg className="w-3 h-3 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
+                            Revenue Assumptions
+                          </summary>
+                          <div className="bg-slate-900/40 rounded-xl p-4 mt-1 border-l-2 border-amber-500/20">
+                            <div className="space-y-1.5 text-[11px] text-slate-400 leading-relaxed">
+                              <p>Artists: ~3% base click rate + 0.8% per touchpoint · 12% purchase page visits · avg $2.50/visit</p>
+                              <p>Partners: ~4% base click rate + 1% per touchpoint · 18% purchase rate · avg $3.20/visit</p>
+                              <p>District Health = f(revenue per fan, growth rate, activation rate) · max 100</p>
+                            </div>
+                          </div>
+                        </details>
+                      </div>
+                    );
+                  })()}
+
+                  {/* ════════ VIEW: INCOME CALCULATOR ════════ */}
+                  {analyticsView === 'income' && (() => {
+                    const districtFans = fanCount || 5000;
+                    const activeArtists = storyParticipants.residents.filter(r => (r.name || '').trim()).length || 1;
+                    const activationRate = (calcActivation || 2) / 100;
+                    const sharingRate = (calcSharing || 15) / 100;
+                    const automationsPerMonth = calcTriggers || 20;
+                    const activatedFans = Math.round(districtFans * activationRate);
+                    const sharingFans = Math.round(activatedFans * sharingRate);
+                    const monthlyTriggers = sharingFans + automationsPerMonth;
+
+                    let triggerCost = 0;
+                    if (monthlyTriggers <= 2500) { triggerCost = 0; }
+                    else if (monthlyTriggers <= 10000) { triggerCost = (monthlyTriggers - 2500) * 0.012; }
+                    else if (monthlyTriggers <= 50000) { triggerCost = (7500 * 0.012) + ((monthlyTriggers - 10000) * 0.008); }
+                    else { triggerCost = (7500 * 0.012) + (40000 * 0.008) + ((monthlyTriggers - 50000) * 0.004); }
+
+                    const creatorMonthly = triggerCost * 0.20;
+                    const fansMonthly = triggerCost * 0.40;
+                    const creatorAsSharerMonthly = creatorMonthly + (fansMonthly * 0.5);
+                    const creatorMaxMonthly = creatorMonthly + fansMonthly;
+                    const perFanMonthly = sharingFans > 0 ? (fansMonthly / sharingFans) : 0;
+                    const newFansPerMonth = Math.round(sharingFans * 2.5);
+                    const collectiveBoost = Math.min(1 + (activeArtists * 0.3), 3.0);
+                    const projectedNewFans6mo = Math.round(newFansPerMonth * 6 * collectiveBoost);
+
+                    return (
+                      <div className="space-y-6">
+                        {/* ── Calculator Sliders ── */}
+                        <div className="card-bg p-6 rounded-2xl border border-indigo-500/10">
+                          <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-5">Adjust Your Numbers</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                            <div>
+                              <div className="flex justify-between items-baseline mb-2">
+                                <span className="text-xs text-slate-400">District Fans</span>
+                                <span className="text-sm font-bold text-white poppins">{districtFans.toLocaleString()}</span>
+                              </div>
+                              <input type="range" min="1000" max="500000" step="1000" value={fanCount || 5000}
+                                onChange={(e) => setFanCount(parseInt(e.target.value))}
+                                className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                                style={{ background: `linear-gradient(to right, #7c8cff ${((fanCount || 5000) - 1000) / (500000 - 1000) * 100}%, #1e293b ${((fanCount || 5000) - 1000) / (500000 - 1000) * 100}%)` }}
+                              />
+                              <div className="flex justify-between mt-1"><span className="text-[8px] text-slate-600">1K</span><span className="text-[8px] text-slate-600">500K</span></div>
+                            </div>
+                            <div>
+                              <div className="flex justify-between items-baseline mb-2">
+                                <span className="text-xs text-slate-400">Activation Rate</span>
+                                <span className="text-sm font-bold text-white poppins">{calcActivation}%</span>
+                              </div>
+                              <input type="range" min="0.5" max="10" step="0.5" value={calcActivation}
+                                onChange={(e) => setCalcActivation(parseFloat(e.target.value))}
+                                className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                                style={{ background: `linear-gradient(to right, #10b981 ${(calcActivation - 0.5) / 9.5 * 100}%, #1e293b ${(calcActivation - 0.5) / 9.5 * 100}%)` }}
+                              />
+                              <div className="flex justify-between mt-1"><span className="text-[8px] text-slate-600">0.5%</span><span className="text-[8px] text-slate-600">10%</span></div>
+                            </div>
+                            <div>
+                              <div className="flex justify-between items-baseline mb-2">
+                                <span className="text-xs text-slate-400">Automations / Month</span>
+                                <span className="text-sm font-bold text-white poppins">{calcTriggers}</span>
+                              </div>
+                              <input type="range" min="5" max="100" step="5" value={calcTriggers}
+                                onChange={(e) => setCalcTriggers(parseInt(e.target.value))}
+                                className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                                style={{ background: `linear-gradient(to right, #a78bfa ${(calcTriggers - 5) / 95 * 100}%, #1e293b ${(calcTriggers - 5) / 95 * 100}%)` }}
+                              />
+                              <div className="flex justify-between mt-1"><span className="text-[8px] text-slate-600">5</span><span className="text-[8px] text-slate-600">100</span></div>
+                            </div>
+                            <div>
+                              <div className="flex justify-between items-baseline mb-2">
+                                <span className="text-xs text-slate-400">Sharing Rate</span>
+                                <span className="text-sm font-bold text-white poppins">{calcSharing}%</span>
+                              </div>
+                              <input type="range" min="5" max="50" step="5" value={calcSharing}
+                                onChange={(e) => setCalcSharing(parseInt(e.target.value))}
+                                className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                                style={{ background: `linear-gradient(to right, #f59e0b ${(calcSharing - 5) / 45 * 100}%, #1e293b ${(calcSharing - 5) / 45 * 100}%)` }}
+                              />
+                              <div className="flex justify-between mt-1"><span className="text-[8px] text-slate-600">5%</span><span className="text-[8px] text-slate-600">50%</span></div>
+                            </div>
+                          </div>
+                          <p className="text-[9px] text-slate-600 mt-4">Drag the sliders to model different scenarios. All earnings update in real time.</p>
+                        </div>
+
+                        {/* ── The Split — 20 / 40 / 40 ── */}
+                        <div className="card-bg p-6 rounded-2xl">
+                          <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-4">Revenue Split</p>
+                          <div className="flex items-center gap-1 h-10 rounded-xl overflow-hidden mb-3">
+                            <div className="h-full flex items-center justify-center text-[11px] font-bold text-white" style={{ width: '20%', background: '#7c8cff' }}>You 20%</div>
+                            <div className="h-full flex items-center justify-center text-[11px] font-bold text-white" style={{ width: '40%', background: '#10b981' }}>Fans 40%</div>
+                            <div className="h-full flex items-center justify-center text-[11px] font-bold text-white" style={{ width: '40%', background: '#a78bfa' }}>ReadyStack 40%</div>
+                          </div>
+                          <p className="text-[10px] text-slate-600">Every automation trigger generates a fee. You earn 20% as the creator. Fans who share earn from the 40% fan pool. If you also share, you earn from both — up to 60%.</p>
+                        </div>
+
+                        {/* ── Earnings Breakdown ── */}
+                        <div className="card-bg p-6 rounded-2xl border border-indigo-500/10">
+                          <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-5">Monthly Earnings Estimate</p>
+                          <p className="text-[10px] text-slate-600 mb-4">Based on {districtFans.toLocaleString()} fans · {(activationRate * 100).toFixed(1)}% activation · {(sharingRate * 100)}% sharing · {automationsPerMonth} triggers/mo</p>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="p-5 rounded-xl border border-indigo-500/20 bg-indigo-500/[0.04]">
+                              <p className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold mb-2">You Earn (Creator 20%)</p>
+                              <p className="text-3xl font-bold text-indigo-400 poppins">${Math.round(creatorMonthly).toLocaleString()}</p>
+                              <p className="text-[10px] text-slate-500 mt-1">/month</p>
+                              <p className="text-[10px] text-indigo-300 mt-2 font-semibold">${Math.round(creatorMonthly * 12).toLocaleString()}/yr</p>
+                            </div>
+                            <div className="p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04]">
+                              <p className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold mb-2">You + Sharing (up to 60%)</p>
+                              <p className="text-3xl font-bold text-emerald-400 poppins">${Math.round(creatorAsSharerMonthly).toLocaleString()}</p>
+                              <p className="text-[10px] text-slate-500 mt-1">/month as top sharer</p>
+                              <p className="text-[10px] text-emerald-300 mt-2 font-semibold">${Math.round(creatorMaxMonthly).toLocaleString()}/mo max (60%)</p>
+                            </div>
+                            <div className="p-5 rounded-xl border border-green-500/20 bg-green-500/[0.04]">
+                              <p className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold mb-2">ReadyStack Pays Fans</p>
+                              <p className="text-3xl font-bold text-green-400 poppins">${Math.round(fansMonthly).toLocaleString()}</p>
+                              <p className="text-[10px] text-slate-500 mt-1">/month total fan pool</p>
+                              <p className="text-[10px] text-green-300 mt-2 font-semibold">${perFanMonthly.toFixed(2)}/fan who shares</p>
+                            </div>
+                          </div>
+                          <div className="bg-slate-900/60 rounded-xl p-4 border-l-2 border-indigo-500/40">
+                            <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-3">How it works</p>
+                            <div className="space-y-2 text-[11px]">
+                              <div className="flex justify-between"><span className="text-slate-400">{districtFans.toLocaleString()} fans x {(activationRate*100).toFixed(1)}% activation</span><span className="text-white font-medium">{activatedFans.toLocaleString()} active</span></div>
+                              <div className="flex justify-between"><span className="text-slate-400">{activatedFans.toLocaleString()} active x {(sharingRate*100)}% sharing</span><span className="text-white font-medium">{sharingFans.toLocaleString()} sharing</span></div>
+                              <div className="flex justify-between"><span className="text-slate-400">+ {automationsPerMonth} base automations</span><span className="text-white font-medium">{monthlyTriggers.toLocaleString()} triggers/mo</span></div>
+                              <div className="flex justify-between border-t border-slate-700 pt-2 mt-2"><span className="text-slate-300 font-semibold">Total trigger fees</span><span className="text-indigo-400 font-bold">${triggerCost.toFixed(0)}/mo</span></div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* ── Projected Growth ── */}
+                        <div className="card-bg p-6 rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.02]">
+                          <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-4">Projected Growth</p>
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="text-center p-4 bg-slate-900/50 rounded-xl border border-white/[0.04]">
+                              <p className="text-2xl font-bold text-white poppins">+{newFansPerMonth.toLocaleString()}</p>
+                              <p className="text-[9px] text-slate-500 mt-1 uppercase tracking-wider">New fans/month</p>
+                              <p className="text-[8px] text-slate-600 mt-0.5">from {sharingFans} sharers</p>
+                            </div>
+                            <div className="text-center p-4 bg-slate-900/50 rounded-xl border border-white/[0.04]">
+                              <p className="text-2xl font-bold text-emerald-400 poppins">+{projectedNewFans6mo.toLocaleString()}</p>
+                              <p className="text-[9px] text-slate-500 mt-1 uppercase tracking-wider">New fans in 6 months</p>
+                              <p className="text-[8px] text-emerald-600 mt-0.5">{collectiveBoost.toFixed(1)}x collective boost</p>
+                            </div>
+                            <div className="text-center p-4 bg-slate-900/50 rounded-xl border border-white/[0.04]">
+                              <p className="text-2xl font-bold text-indigo-400 poppins">{(districtFans + projectedNewFans6mo).toLocaleString()}</p>
+                              <p className="text-[9px] text-slate-500 mt-1 uppercase tracking-wider">Total fans at 6mo</p>
+                              <p className="text-[8px] text-slate-600 mt-0.5">{activeArtists} artist{activeArtists > 1 ? 's' : ''} in district</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* ════════ VIEW: THE GOUVEIA CHART ════════ */}
+                  {analyticsView === 'gouveia' && (() => {
+                    const districtFans = fanCount || 5000;
+                    const activeArtists = storyParticipants.residents.filter(r => (r.name || '').trim()).length || 1;
+                    const activationRate = (calcActivation || 2) / 100;
+                    const sharingRate = (calcSharing || 15) / 100;
+                    const activatedFans = Math.round(districtFans * activationRate);
+                    const sharingFans = Math.round(activatedFans * sharingRate);
+                    const newFansPerMonth = Math.round(sharingFans * 2.5);
+                    const collectiveBoost = Math.min(1 + (activeArtists * 0.3), 3.0);
+                    const gouveiaTarget = 10000;
+                    const months = 12;
+                    const monthlyGrowthRate = sharingFans > 0 ? (newFansPerMonth * collectiveBoost) / Math.max(districtFans, 1) : 0.05;
+
+                    /* ── Per-artist mock fan data ── */
+                    const artistNames = storyParticipants.residents.filter(r => (r.name || '').trim()).map(r => r.name.trim());
+                    const artistSeeds = [37, 73, 19, 53, 89, 11, 67, 43]; // deterministic variety
+                    const artistTracks = (artistNames.length > 0 ? artistNames : ['Artist 1']).map((name, idx) => {
+                      const seed = artistSeeds[idx % artistSeeds.length];
+                      const soloFans = Math.round(districtFans / Math.max(activeArtists, 1) * (0.6 + (seed % 40) / 50));
+                      const soloGrowth = monthlyGrowthRate / collectiveBoost * (0.7 + (seed % 30) / 100);
+                      const track = [];
+                      for (let m = 0; m <= months; m++) {
+                        track.push({ month: m, fans: Math.round(soloFans * Math.pow(1 + soloGrowth, m)) });
+                      }
+                      return { name, track, soloFans, color: ['#818cf8','#f472b6','#34d399','#fb923c','#38bdf8','#a78bfa','#fbbf24','#f87171'][idx % 8] };
+                    });
+
+                    /* ── Collective growth (pooled) ── */
+                    const collectiveTrack = [];
+                    for (let m = 0; m <= months; m++) {
+                      const fans = Math.round(districtFans * Math.pow(1 + monthlyGrowthRate, m));
+                      collectiveTrack.push({ month: m, fans });
+                    }
+
+                    const allMaxFans = Math.max(gouveiaTarget * 1.2, ...collectiveTrack.map(d => d.fans), ...artistTracks.flatMap(a => a.track.map(d => d.fans)));
+                    const chartW = 560, chartH = 260, padL = 50, padR = 20, padT = 30, padB = 35;
+                    const plotW = chartW - padL - padR, plotH = chartH - padT - padB;
+                    const xScale = (m) => padL + (m / months) * plotW;
+                    const yScale = (f) => padT + plotH - (f / allMaxFans) * plotH;
+                    const gouveiaY = yScale(gouveiaTarget);
+                    const collectivePath = 'M' + collectiveTrack.map(d => `${xScale(d.month).toFixed(1)},${yScale(d.fans).toFixed(1)}`).join(' L');
+                    const collectiveArea = collectivePath + ` L${xScale(months).toFixed(1)},${(padT + plotH).toFixed(1)} L${xScale(0).toFixed(1)},${(padT + plotH).toFixed(1)} Z`;
+                    const crossMonth = collectiveTrack.find(d => d.fans >= gouveiaTarget);
+                    const monthsTo10K = crossMonth ? crossMonth.month : null;
+                    const pastGouveia = districtFans >= gouveiaTarget;
+
+                    /* ── Solo vs Collective comparison ── */
+                    const avgSoloFinalFans = artistTracks.length > 0 ? Math.round(artistTracks.reduce((sum, a) => sum + a.track[months].fans, 0) / artistTracks.length) : 0;
+                    const collectiveFinalFans = collectiveTrack[months].fans;
+                    const soloMonthsTo10K = (() => {
+                      if (artistTracks.length === 0) return null;
+                      const avg = artistTracks[0].track;
+                      const hit = avg.find(d => d.fans >= gouveiaTarget);
+                      return hit ? hit.month : null;
+                    })();
+                    const fansPerArtist = Math.round(districtFans / Math.max(activeArtists, 1));
+                    const effectiveFansPerArtist = Math.round(collectiveFinalFans / Math.max(activeArtists, 1));
+
+                    return (
+                      <div className="space-y-6">
+                        <div className="card-bg p-6 rounded-2xl border border-amber-500/10 bg-amber-500/[0.02]">
+                          {/* Header */}
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">The Gouveia Chart</p>
+                              <p className="text-[9px] text-slate-600">Individual vs. collective growth — the case for banding together</p>
+                            </div>
+                            <div className="text-right flex items-center gap-2">
+                              <a href="https://joelgouveia.substack.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 transition-all border border-orange-500/15" title="Subscribe to Joel Gouveia on Substack">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z" fill="#f59e0b"/></svg>
+                                <span className="text-[9px] text-amber-400 font-semibold">Joel Gouveia</span>
+                              </a>
+                            </div>
+                          </div>
+
+                          {/* Insight — TOP of chart */}
+                          <div className="mb-4 flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: pastGouveia ? 'rgba(16,185,129,0.06)' : 'rgba(245,158,11,0.06)' }}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${pastGouveia ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
+                              <span className={`text-sm font-bold ${pastGouveia ? 'text-emerald-400' : 'text-amber-400'}`}>{pastGouveia ? '✓' : '→'}</span>
+                            </div>
+                            <div>
+                              {pastGouveia ? (
+                                <p className="text-xs text-emerald-400 font-semibold">You're past the Gouveia Line — your district is in real-money territory</p>
+                              ) : monthsTo10K !== null ? (
+                                <p className="text-xs text-amber-400 font-semibold">As a collective: Month {monthsTo10K} to 10K — {soloMonthsTo10K === null ? 'solo artists may never reach it alone' : `vs. Month ${soloMonthsTo10K}+ solo`}</p>
+                              ) : (
+                                <p className="text-xs text-slate-400 font-semibold">Keep growing — more sharing fans accelerate the path to 10K</p>
+                              )}
+                              <p className="text-[9px] text-slate-600 mt-0.5">{activeArtists} artist{activeArtists > 1 ? 's' : ''} pooling fans with {collectiveBoost.toFixed(1)}x collective boost</p>
+                            </div>
+                          </div>
+
+                          {/* Chart — Individual tracks + Collective total */}
+                          <div className="overflow-x-auto">
+                            <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ maxWidth: chartW, minWidth: 340 }}>
+                              <defs>
+                                <linearGradient id="gouveiaGrad" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.2" />
+                                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.01" />
+                                </linearGradient>
+                              </defs>
+                              {/* Grid lines */}
+                              {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
+                                const y = padT + plotH * (1 - pct);
+                                const val = Math.round(allMaxFans * pct);
+                                return (
+                                  <g key={i}>
+                                    <line x1={padL} y1={y} x2={padL + plotW} y2={y} stroke="#1e293b" strokeWidth="0.5" />
+                                    <text x={padL - 6} y={y + 3} textAnchor="end" fill="#475569" fontSize="8" fontFamily="Inter">{val >= 1000 ? (val/1000).toFixed(val >= 10000 ? 0 : 1) + 'K' : val}</text>
+                                  </g>
+                                );
+                              })}
+                              {/* Month labels */}
+                              {collectiveTrack.filter((d, i) => i % 2 === 0 || i === months).map(d => (
+                                <text key={d.month} x={xScale(d.month)} y={padT + plotH + 16} textAnchor="middle" fill="#475569" fontSize="8" fontFamily="Inter">Mo {d.month}</text>
+                              ))}
+                              {/* The Gouveia Line — 10K benchmark */}
+                              <line x1={padL} y1={gouveiaY} x2={padL + plotW} y2={gouveiaY} stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="6 4" opacity="0.7" />
+                              <text x={padL + plotW + 3} y={gouveiaY + 3} fill="#f59e0b" fontSize="9" fontFamily="Poppins" fontWeight="600">10K Gouveia Line</text>
+                              {/* Individual artist tracks — thin dashed lines */}
+                              {artistTracks.map((artist, ai) => {
+                                const aPath = 'M' + artist.track.map(d => `${xScale(d.month).toFixed(1)},${yScale(d.fans).toFixed(1)}`).join(' L');
+                                return (
+                                  <g key={ai}>
+                                    <path d={aPath} fill="none" stroke={artist.color} strokeWidth="1" strokeDasharray="3 3" opacity="0.5" />
+                                    <text x={xScale(months) + 4} y={yScale(artist.track[months].fans) + 3} fill={artist.color} fontSize="7" fontFamily="Inter" opacity="0.7">{artist.name.split(' ')[0]}</text>
+                                  </g>
+                                );
+                              })}
+                              {/* Collective total — bold amber line */}
+                              <path d={collectiveArea} fill="url(#gouveiaGrad)" />
+                              <path d={collectivePath} fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                              {collectiveTrack.filter((d, i) => i % 3 === 0 || i === months).map(d => (
+                                <circle key={d.month} cx={xScale(d.month)} cy={yScale(d.fans)} r="3.5" fill="#020617" stroke="#f59e0b" strokeWidth="1.5" />
+                              ))}
+                              {/* Start + End labels for collective */}
+                              <text x={xScale(0)} y={yScale(collectiveTrack[0].fans) - 10} textAnchor="middle" fill="#f59e0b" fontSize="8" fontWeight="600" fontFamily="Inter">{districtFans >= 1000 ? (districtFans/1000).toFixed(1) + 'K' : districtFans}</text>
+                              <text x={xScale(months)} y={yScale(collectiveTrack[months].fans) - 10} textAnchor="middle" fill="#f59e0b" fontSize="8" fontWeight="600" fontFamily="Inter">{collectiveTrack[months].fans >= 1000 ? (collectiveTrack[months].fans/1000).toFixed(1) + 'K' : collectiveTrack[months].fans}</text>
+                              {/* "Collective" label on the bold line */}
+                              <text x={xScale(6)} y={yScale(collectiveTrack[6].fans) - 12} textAnchor="middle" fill="#f59e0b" fontSize="9" fontWeight="700" fontFamily="Poppins">Collective</text>
+                            </svg>
+                          </div>
+
+                          {/* Legend */}
+                          <div className="mt-3 flex flex-wrap items-center gap-3">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-5 h-0.5 bg-amber-500 rounded-full"></div>
+                              <span className="text-[9px] text-amber-400 font-semibold">Collective (pooled)</span>
+                            </div>
+                            {artistTracks.slice(0, 5).map((a, i) => (
+                              <div key={i} className="flex items-center gap-1.5">
+                                <div className="w-4 h-0 border-t border-dashed" style={{ borderColor: a.color, opacity: 0.6 }}></div>
+                                <span className="text-[8px] text-slate-500">{a.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* ── THE COLLECTIVE ARGUMENT ── */}
+                        <div className="card-bg p-6 rounded-2xl border border-indigo-500/10 bg-indigo-500/[0.02]">
+                          <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold mb-3">The Collective Economics Argument</p>
+                          <p className="text-sm text-slate-300 leading-relaxed mb-4">
+                            You don't each need 10,000 fans. As a collective of <span className="text-indigo-400 font-bold">{activeArtists}</span>, you pool
+                            <span className="text-amber-400 font-bold"> {districtFans >= 1000 ? (districtFans/1000).toFixed(1) + 'K' : districtFans}</span> fans —
+                            that's <span className="text-white font-bold">{fansPerArtist >= 1000 ? (fansPerArtist/1000).toFixed(1) + 'K' : fansPerArtist}</span> per artist on paper,
+                            but <span className="text-emerald-400 font-bold">{effectiveFansPerArtist >= 1000 ? (effectiveFansPerArtist/1000).toFixed(1) + 'K' : effectiveFansPerArtist}</span> effective fans per artist when the collective effect kicks in.
+                          </p>
+
+                          {/* Solo vs Collective comparison cards */}
+                          <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/30">
+                              <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-1">Going Solo</p>
+                              <p className="text-lg text-slate-400 font-bold">{avgSoloFinalFans >= 1000 ? (avgSoloFinalFans/1000).toFixed(1) + 'K' : avgSoloFinalFans}</p>
+                              <p className="text-[9px] text-slate-600">avg fans at 12 months</p>
+                              <p className="text-[9px] text-rose-400/70 mt-1">{soloMonthsTo10K !== null ? `Month ${soloMonthsTo10K} to 10K` : 'May not reach 10K in 12mo'}</p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-amber-500/[0.04] border border-amber-500/15">
+                              <p className="text-[9px] text-amber-500 uppercase tracking-wider font-bold mb-1">As a Collective</p>
+                              <p className="text-lg text-amber-400 font-bold">{collectiveFinalFans >= 1000 ? (collectiveFinalFans/1000).toFixed(1) + 'K' : collectiveFinalFans}</p>
+                              <p className="text-[9px] text-slate-600">pooled fans at 12 months</p>
+                              <p className="text-[9px] text-emerald-400/70 mt-1">{monthsTo10K !== null ? `Month ${monthsTo10K} to 10K` : 'On the path'} — {collectiveBoost.toFixed(1)}x boost</p>
+                            </div>
+                          </div>
+
+                          {/* Why it works */}
+                          <div className="space-y-2 p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
+                            <p className="text-[10px] text-slate-400 font-semibold">Why the collective wins:</p>
+                            <div className="grid grid-cols-1 gap-1.5">
+                              <div className="flex items-start gap-2">
+                                <span className="text-indigo-400 text-[10px] mt-0.5 shrink-0">1.</span>
+                                <p className="text-[10px] text-slate-500"><span className="text-slate-300 font-medium">Shared audience.</span> Every fan who discovers one artist gets exposure to the whole district. Cross-pollination replaces cold outreach.</p>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <span className="text-indigo-400 text-[10px] mt-0.5 shrink-0">2.</span>
+                                <p className="text-[10px] text-slate-500"><span className="text-slate-300 font-medium">Compounding triggers.</span> More fans means more automations fire. ReadyStack's trigger pricing rewards volume — your cost per trigger drops as the collective grows.</p>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <span className="text-indigo-400 text-[10px] mt-0.5 shrink-0">3.</span>
+                                <p className="text-[10px] text-slate-500"><span className="text-slate-300 font-medium">Revenue earlier.</span> {activeArtists > 1 ? `Instead of ${activeArtists} artists each struggling toward 10K alone, the collective reaches the Gouveia Line together — and everyone earns.` : 'Adding more artists multiplies the effect.'}</p>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <span className="text-indigo-400 text-[10px] mt-0.5 shrink-0">4.</span>
+                                <p className="text-[10px] text-slate-500"><span className="text-slate-300 font-medium">Post-capitalist collectivism.</span> This isn't about splitting a fixed pie. The collective <em>grows</em> the pie — each artist's participation makes everyone's share bigger.</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Revenue at milestones */}
+                          <div className="mt-4">
+                            <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-2">Revenue at fan milestones (collective, est.)</p>
+                            <div className="flex gap-2">
+                              {[5000, 10000, 25000, 50000].map(milestone => {
+                                const actFans = Math.round(milestone * activationRate);
+                                const triggers = actFans * (calcTriggers || 20);
+                                const rate = triggers <= 2500 ? 0 : triggers <= 10000 ? 0.012 : triggers <= 50000 ? 0.008 : 0.004;
+                                const grossRev = triggers * rate;
+                                const creatorRev = grossRev * 0.2;
+                                return (
+                                  <div key={milestone} className="flex-1 p-2 rounded-lg bg-slate-800/30 border border-slate-700/20 text-center">
+                                    <p className="text-[10px] text-amber-400 font-bold">{(milestone/1000)}K fans</p>
+                                    <p className="text-xs text-emerald-400 font-bold">${creatorRev.toFixed(0)}<span className="text-[8px] text-slate-600">/mo</span></p>
+                                    <p className="text-[8px] text-slate-600">creator share</p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <p className="text-[8px] text-slate-700 mt-1.5 text-right">Based on {(calcActivation || 2)}% activation, {calcTriggers || 20} triggers/mo, 20% creator split</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* ========== SECTION: RENDER - TAB 6: PREVIEW ========== */}
+              {/* TAB 6: Preview — The public-facing artist page. Gateway for all traffic. */}
               {/* Architecture: Backers back the ARTIST (badges here). ReadyStack backs the FAN (Deposits program). */}
-              {activeStep === 5 && (() => {
+              {activeStep === 6 && (() => {
                 const firstResident = storyParticipants.residents.find(r => r.name) || {};
                 const activeBckers = (mapping.angels || []).filter(b => b.lab && b.visible !== false);
                 const hasVideo = !!youtubeEmbedUrl;
@@ -2190,24 +3709,39 @@
                         </div>
                       </div>
                     )}
-                    {/* Partners */}
+                    {/* Partners — enhanced with traffic + links */}
                     {partners.filter(p => p.name).length > 0 && (
                       <div>
                         <p className="text-sm text-slate-500 uppercase tracking-wider mb-4 font-semibold">Partners</p>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {partners.filter(p => p.name).map((partner, idx) => (
-                            <div key={idx} className="card-bg p-4 text-center hover:border-indigo-500/30 transition-all">
-                              {partner.imageUrl ? (
-                                <img src={partner.imageUrl} alt={partner.name} className="w-12 h-12 rounded-full mx-auto mb-3 object-cover" />
-                              ) : (
-                                <div className="w-12 h-12 rounded-full mx-auto mb-3 bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                                  <span className="text-indigo-400 font-bold">{partner.name.charAt(0)}</span>
+                          {partners.filter(p => p.name).map((partner, idx) => {
+                            const pTraffic = (partner.trafficSources || []).filter(s => s.url);
+                            const pLinks = [
+                              partner.landingUrl && 'Landing',
+                              partner.link && 'Website',
+                              partner.offerUrl && 'Offer',
+                              partner.promoUrl && 'Promo',
+                              ...(partner.extraLinks || []).filter(l => l.url).map(l => l.type)
+                            ].filter(Boolean);
+                            return (
+                              <div key={idx} className="card-bg p-4 text-center hover:border-orange-500/20 transition-all">
+                                <div className="w-12 h-12 rounded-xl mx-auto mb-3 bg-orange-500/10 border border-orange-500/15 flex items-center justify-center">
+                                  <span className="text-orange-400 font-bold">{partner.name.charAt(0)}</span>
                                 </div>
-                              )}
-                              <h4 className="text-sm font-bold text-white truncate">{partner.name}</h4>
-                              <p className="text-xs text-slate-500 truncate">{partner.company}</p>
-                            </div>
-                          ))}
+                                <h4 className="text-sm font-bold text-white truncate">{partner.name}</h4>
+                                <p className="text-xs text-slate-500 truncate">{partner.company}</p>
+                                {(pTraffic.length > 0 || pLinks.length > 0) && (
+                                  <div className="flex justify-center gap-1 mt-2 flex-wrap">
+                                    {pTraffic.map((s, si) => {
+                                      const info = TRAFFIC_SOURCE_OPTIONS.find(o => o.value === s.type);
+                                      return info ? <span key={'t'+si} className="w-2 h-2 rounded-full" style={{backgroundColor: info.color}} title={info.label}></span> : null;
+                                    })}
+                                    {pLinks.length > 0 && <span className="text-[8px] text-slate-600 ml-1">{pLinks.length} link{pLinks.length > 1 ? 's' : ''}</span>}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
