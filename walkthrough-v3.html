@@ -701,25 +701,38 @@
                         }
                     },
 
-                    // Frame 11: DO — Click OK or CONTINUE TO RESIDENTS
+                    // Frame 11: DO — Click OK to advance (scroll back up to video analysis)
                     {
-                        element: '#wt-continue-residents',
+                        element: '#wt-ok-btn',
                         onHighlightStarted: () => {
-                            // Activate the button
-                            const btn = document.getElementById('wt-continue-residents');
-                            btn.style.color = 'white';
-                            btn.style.borderColor = 'var(--border-mid)';
-                            btn.style.cursor = 'pointer';
-                            btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Scroll back up to the video analysis section
+                            const va = document.getElementById('wt-video-analysis');
+                            va.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Light up the Residents rail item
+                            const residentsRail = document.getElementById('wt-rail-residents');
+                            residentsRail.style.borderColor = 'rgba(124,140,255,0.6)';
+                            residentsRail.style.boxShadow = '0 0 20px rgba(124,140,255,0.3)';
+                            // Light up the OK button with accent glow
+                            const okBtn = document.getElementById('wt-ok-btn');
+                            okBtn.style.borderColor = 'rgba(124,140,255,0.6)';
+                            okBtn.style.boxShadow = '0 0 20px rgba(124,140,255,0.3)';
+                            // Light up the "Residents >" breadcrumb nav
+                            const bcNext = document.getElementById('wt-bc-next');
+                            bcNext.style.color = 'rgba(124,140,255,0.8)';
+                            bcNext.style.textShadow = '0 0 10px rgba(124,140,255,0.3)';
+                            // Activate the continue button too (in case it's visible)
+                            const contBtn = document.getElementById('wt-continue-residents');
+                            contBtn.style.color = 'white';
+                            contBtn.style.borderColor = 'var(--border-mid)';
+                            contBtn.style.cursor = 'pointer';
                         },
                         popover: {
                             title: 'Continue to Residents',
-                            description: 'Your market story is set — the problem, the audience, the strategy, and the automations are all defined from one video. <strong>Click CONTINUE TO RESIDENTS</strong> to assemble the people who\'ll populate your district.',
-                            side: 'top',
+                            description: 'Your market story is set — the problem, the audience, the strategy, and the automations are all defined from one video. <strong>Click OK</strong> to accept this analysis and move on to assembling the people who\'ll populate your district.',
+                            side: 'left',
                             align: 'center',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
-                                // Also allow clicking OK button
                                 const okBtn = document.getElementById('wt-ok-btn');
                                 const contBtn = document.getElementById('wt-continue-residents');
                                 const advance = () => {
