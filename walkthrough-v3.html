@@ -708,16 +708,19 @@
                             // Scroll back up to the video analysis section
                             const va = document.getElementById('wt-video-analysis');
                             va.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            // Light up the Residents rail item (strong glow + accent color)
+                            // Light up the Residents rail item — vivid green glow
                             const residentsRail = document.getElementById('wt-rail-residents');
-                            residentsRail.style.borderColor = 'rgba(124,140,255,0.8)';
-                            residentsRail.style.boxShadow = '0 0 25px rgba(124,140,255,0.4), inset 0 0 10px rgba(124,140,255,0.1)';
-                            residentsRail.style.background = 'rgba(124,140,255,0.12)';
-                            residentsRail.style.color = '#7c8cff';
-                            // Light up the OK button with accent glow
+                            residentsRail.style.borderColor = 'rgba(16,185,129,0.9)';
+                            residentsRail.style.boxShadow = '0 0 30px rgba(16,185,129,0.5), 0 0 60px rgba(16,185,129,0.2), inset 0 0 12px rgba(16,185,129,0.15)';
+                            residentsRail.style.background = 'rgba(16,185,129,0.15)';
+                            residentsRail.style.color = '#10b981';
+                            // Light up the OK button — vivid green glow to match
                             const okBtn = document.getElementById('wt-ok-btn');
-                            okBtn.style.borderColor = 'rgba(124,140,255,0.6)';
-                            okBtn.style.boxShadow = '0 0 20px rgba(124,140,255,0.3)';
+                            okBtn.style.background = 'rgba(16,185,129,0.3)';
+                            okBtn.style.borderColor = 'rgba(16,185,129,0.9)';
+                            okBtn.style.boxShadow = '0 0 30px rgba(16,185,129,0.5), 0 0 60px rgba(16,185,129,0.2)';
+                            okBtn.style.color = '#10b981';
+                            okBtn.style.fontWeight = '900';
                             // Light up the "Residents >" breadcrumb nav
                             const bcNext = document.getElementById('wt-bc-next');
                             bcNext.style.color = 'rgba(124,140,255,0.8)';
