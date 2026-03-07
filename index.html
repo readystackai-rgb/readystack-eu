@@ -2261,7 +2261,7 @@
                                     </ul>
                                     <div className="flex gap-2">
                                       <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
-                                      <button onClick={() => {}} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
+                                      <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
                                 ) : (
@@ -2273,7 +2273,7 @@
                                     )}
                                     <div className="flex gap-2">
                                       <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
-                                      <button onClick={() => {}} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
+                                      <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
                                 )}
@@ -3405,15 +3405,12 @@
                     ))}
                     {/* SVG Flows */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 1300" style={{ zIndex: 10 }}>
-                      <defs><filter id="relGlow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
                       {(nodes.flows || []).map((flow, i) => {
-                        const dx = flow.to.x - flow.from.x; const dy = flow.to.y - flow.from.y;
-                        const ctrl1X = flow.from.x + dx * 0.35; const ctrl1Y = flow.from.y + dy * 0.2;
-                        const ctrl2X = flow.to.x - dx * 0.35; const ctrl2Y = flow.to.y - dy * 0.2;
-                        const d = `M ${flow.from.x} ${flow.from.y} C ${ctrl1X} ${ctrl1Y}, ${ctrl2X} ${ctrl2Y}, ${flow.to.x} ${flow.to.y}`;
+                        const midY = (flow.from.y + flow.to.y) / 2;
+                        const d = `M ${flow.from.x},${flow.from.y} C ${flow.from.x},${midY} ${flow.to.x},${midY} ${flow.to.x},${flow.to.y}`;
                         return (
                           <g key={`rel-flow-${i}`}>
-                            <path d={d} stroke={flow.color} strokeWidth={flow.strokeWidth} fill="none" opacity={flow.isCrossArtist ? 0.2 : 0.4} filter="url(#relGlow)" />
+                            <path d={d} stroke={flow.color} strokeWidth={flow.strokeWidth} fill="none" opacity={flow.isCrossArtist ? 0.35 : 0.25} strokeDasharray={flow.isCrossArtist ? '8 5' : 'none'} />
                           </g>
                         );
                       })}
