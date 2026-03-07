@@ -405,9 +405,173 @@
 
                 </div><!-- end panel-define -->
 
-                <!-- ═══ PANEL: RESIDENTS (stub) ═══ -->
+                <!-- ═══ PANEL: RESIDENTS ═══ -->
                 <div id="panel-residents" class="content-panel">
-                    <p style="color: var(--text-muted); font-style: italic; text-align: center; padding-top: 200px;">Residents panel — building next...</p>
+
+                    <!-- Residents Header -->
+                    <div id="wt-residents-header" style="margin-bottom: 32px;">
+                        <h1 style="font-family: 'Inter', sans-serif; font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1;">Who's in Your District?</h1>
+                        <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">Review the tasks from the video and assemble a district to deepen the learning and help audiences execute lesson.</p>
+                    </div>
+
+                    <!-- Tasks Section (hidden initially, revealed by tour) -->
+                    <div id="wt-residents-tasks" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; margin-bottom: 32px;">
+                        <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 8px;">Tasks</h2>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Setup tasks and automations derived from your market story. These will populate the Preview card and JSON export.</p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <!-- Actions Column -->
+                            <div>
+                                <h3 style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-primary); margin-bottom: 10px;">Actions</h3>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; display: flex; gap: 8px; align-items: flex-start;">
+                                        <span style="color: var(--green); flex-shrink: 0;">✓</span>
+                                        <span>Identify your "smallest viable audience" by meticulously defining who you seek to serve and what specific problem you solve for them.</span>
+                                    </div>
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; display: flex; gap: 8px; align-items: flex-start;">
+                                        <span style="color: var(--green); flex-shrink: 0;">✓</span>
+                                        <span>Develop a "Purple Cow" offering or message that is truly remarkable and differentiates you from the commoditized market.</span>
+                                    </div>
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; display: flex; gap: 8px; align-items: flex-start;">
+                                        <span style="color: var(--green); flex-shrink: 0;">✓</span>
+                                        <span>Craft compelling stories that resonate deeply with your smallest viable audience and are easy for them to share.</span>
+                                    </div>
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; display: flex; gap: 8px; align-items: flex-start;">
+                                        <span style="color: var(--green); flex-shrink: 0;">✓</span>
+                                        <span>Prioritize consistency in your brand's message and delivery over a performative "authenticity."</span>
+                                    </div>
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; display: flex; gap: 8px; align-items: flex-start;">
+                                        <span style="color: var(--green); flex-shrink: 0;">✓</span>
+                                        <span>Shift focus from chasing broad attention to cultivating deep influence and trust within your identified niche.</span>
+                                    </div>
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; display: flex; gap: 8px; align-items: flex-start;">
+                                        <span style="color: var(--green); flex-shrink: 0;">✓</span>
+                                        <span>Implement mechanisms to measure genuine engagement and action, not just superficial metrics like views or likes.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Automations Column -->
+                            <div>
+                                <h3 style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-primary); margin-bottom: 10px;">Automations</h3>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; line-height: 1.5;">
+                                        <div><span style="font-weight: 900; color: var(--amber); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Trigger</span> <span style="color: var(--text-secondary);">New subscriber joins your specific niche email list.</span></div>
+                                        <div style="margin-top: 6px;"><span style="font-weight: 900; color: var(--text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Action</span> <span style="color: var(--text-secondary);">Initiate an automated email sequence that shares your core brand story and invites engagement in a private community.</span></div>
+                                    </div>
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; line-height: 1.5;">
+                                        <div><span style="font-weight: 900; color: var(--amber); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Trigger</span> <span style="color: var(--text-secondary);">An existing customer provides a positive review or testimonial.</span></div>
+                                        <div style="margin-top: 6px;"><span style="font-weight: 900; color: var(--text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Action</span> <span style="color: var(--text-secondary);">Send an automated thank you email with a shareable link or pre-written social media snippet.</span></div>
+                                    </div>
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; line-height: 1.5;">
+                                        <div><span style="font-weight: 900; color: var(--amber); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Trigger</span> <span style="color: var(--text-secondary);">A specific piece of "remarkable" content receives high engagement on social media.</span></div>
+                                        <div style="margin-top: 6px;"><span style="font-weight: 900; color: var(--text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Action</span> <span style="color: var(--text-secondary);">Automatically create a lookalike audience and launch a targeted ad campaign for a related, deeper-value offering.</span></div>
+                                    </div>
+                                    <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; font-size: 12px; line-height: 1.5;">
+                                        <div><span style="font-weight: 900; color: var(--amber); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Trigger</span> <span style="color: var(--text-secondary);">A website visitor spends more than 3 minutes on your "About Us" or "Why We're Different" page.</span></div>
+                                        <div style="margin-top: 6px;"><span style="font-weight: 900; color: var(--text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Action</span> <span style="color: var(--text-secondary);">Trigger a personalized pop-up or exit-intent offer for a free "Purple Cow" audit or a unique brand positioning guide.</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Suggested Roles Section (hidden initially) -->
+                    <div id="wt-suggested-roles" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; margin-bottom: 32px;">
+                        <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 6px;">Suggested Roles</h2>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">Click a role to assign it to a participant slot.</p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Branding &amp; Identity Designers</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Niche Marketing Consultants</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Community Building Platforms</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Storytelling Coaches</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Independent Creators</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">SaaS Founders</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Boutique Service Providers</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Online Educators</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Aspiring Authors</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Non-profit Organizers</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Product Developers (seeking market fit)</span>
+                            <span class="wt-role-chip" style="background: var(--surface); border: 1px solid var(--green-border); color: var(--green); padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">Public Speakers</span>
+                        </div>
+                    </div>
+
+                    <!-- Participants Section (hidden initially) -->
+                    <div id="wt-participants" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-primary);">Participants</h2>
+                            <span style="font-size: 12px; color: var(--green); font-weight: 600;">3 added</span>
+                        </div>
+
+                        <!-- Filter Tabs -->
+                        <div id="wt-filter-tabs" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
+                            <span style="background: rgba(124,140,255,0.15); border: 1px solid rgba(124,140,255,0.3); color: var(--accent); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700;">ALL 3</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">CONTENT 0</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">MARKETING 0</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">SALES 0</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">PRODUCT 0</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">SECURITY 0</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">FINANCE 0</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">STRATEGY 0</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">COMMUNITY 0</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">CUSTOMER SUCCESS 0</span>
+                            <span style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600;">BUSINESS OPERATIONS 0</span>
+                        </div>
+
+                        <!-- Participant Table -->
+                        <div id="wt-participant-table">
+                            <!-- Table Header -->
+                            <div style="display: grid; grid-template-columns: 2fr 2fr 2fr 2fr; gap: 8px; padding: 0 8px 8px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 8px;">
+                                <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Name</span>
+                                <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Company</span>
+                                <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Specialty</span>
+                                <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Email</span>
+                            </div>
+                            <!-- Rows -->
+                            <div class="wt-participant-row" style="display: grid; grid-template-columns: 2fr 2fr 2fr 2fr; gap: 8px; padding: 6px 8px;">
+                                <input type="text" value="Participant 1" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-secondary); font-family: inherit;" />
+                                <input type="text" placeholder="company" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); display: flex; justify-content: space-between; align-items: center;">Select specialty... <span style="font-size: 10px;">▾</span></div>
+                                <input type="text" placeholder="email" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                            </div>
+                            <div class="wt-participant-row" style="display: grid; grid-template-columns: 2fr 2fr 2fr 2fr; gap: 8px; padding: 6px 8px;">
+                                <input type="text" value="Participant 2" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-secondary); font-family: inherit;" />
+                                <input type="text" placeholder="company" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); display: flex; justify-content: space-between; align-items: center;">Select specialty... <span style="font-size: 10px;">▾</span></div>
+                                <input type="text" placeholder="email" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                            </div>
+                            <div class="wt-participant-row" style="display: grid; grid-template-columns: 2fr 2fr 2fr 2fr; gap: 8px; padding: 6px 8px;">
+                                <input type="text" value="Participant 3" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-secondary); font-family: inherit;" />
+                                <input type="text" placeholder="company" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); display: flex; justify-content: space-between; align-items: center;">Select specialty... <span style="font-size: 10px;">▾</span></div>
+                                <input type="text" placeholder="email" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                            </div>
+                            <div class="wt-participant-row" style="display: grid; grid-template-columns: 2fr 2fr 2fr 2fr; gap: 8px; padding: 6px 8px;">
+                                <input type="text" value="Participant 4" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                                <input type="text" placeholder="company" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); display: flex; justify-content: space-between; align-items: center;">Select specialty... <span style="font-size: 10px;">▾</span></div>
+                                <input type="text" placeholder="email" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                            </div>
+                            <div class="wt-participant-row" style="display: grid; grid-template-columns: 2fr 2fr 2fr 2fr; gap: 8px; padding: 6px 8px;">
+                                <input type="text" value="Participant 5" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                                <input type="text" placeholder="company" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); display: flex; justify-content: space-between; align-items: center;">Select specialty... <span style="font-size: 10px;">▾</span></div>
+                                <input type="text" placeholder="email" readonly style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-ghost); font-family: inherit;" />
+                            </div>
+
+                            <!-- Add Participant Button -->
+                            <div style="padding: 6px 8px; margin-top: 4px;">
+                                <button id="wt-add-participant" style="background: transparent; border: 1px solid var(--green-border); color: var(--green); padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s ease;">+ Participant</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Button + Footer (hidden initially) -->
+                    <div id="wt-residents-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
+                        <button id="wt-next-btn" style="background: rgba(124,140,255,0.15); border: 1px solid rgba(124,140,255,0.3); color: var(--accent); padding: 14px 48px; border-radius: 12px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s ease;">Next</button>
+                        <p style="margin-top: 12px; font-size: 12px; color: var(--text-ghost); font-style: italic;">Confirming your residents unlocks the District Map.</p>
+                    </div>
+
                 </div>
 
             </div><!-- end wt-content -->
@@ -755,13 +919,99 @@
                         }
                     },
 
-                    // ═══ RESIDENTS (stub — end of Define Market Story chunk) ═══
+                    // ═══ RESIDENTS SECTION ═══
+
+                    // Frame 12: OBSERVE — Residents Header (landing after OK click)
                     {
+                        element: '#wt-residents-header',
+                        onHighlightStarted: () => {
+                            // Scroll to top of residents panel
+                            const panel = document.getElementById('panel-residents');
+                            panel.scrollTo({ top: 0, behavior: 'smooth' });
+                        },
                         popover: {
-                            title: 'Residents — Coming Next',
-                            description: 'That\'s the complete Define Market Story flow. Review this section, then we\'ll build Residents next.',
+                            title: 'Welcome to Residents',
+                            description: 'This is where you assemble your district — the people who\'ll bring the video\'s lessons to life. The page is organized into <strong>Tasks</strong> (derived from the video analysis), <strong>Suggested Roles</strong>, and a <strong>Participants</strong> table.',
+                            side: 'bottom',
+                            align: 'center'
+                        }
+                    },
+
+                    // Frame 13: OBSERVE — Tasks section (reveal + highlight)
+                    {
+                        element: '#wt-residents-tasks',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-residents-tasks');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        },
+                        popover: {
+                            title: 'Tasks: Actions + Automations',
+                            description: 'These are the same tasks from Define Market Story — now carried forward as executable work. <strong>Actions</strong> become checklist items for residents. <strong>Automations</strong> fire when events happen. Together they form the operational backbone of the district.',
+                            side: 'top',
+                            align: 'center'
+                        }
+                    },
+
+                    // Frame 14: OBSERVE — Suggested Roles (reveal + highlight)
+                    {
+                        element: '#wt-suggested-roles',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-suggested-roles');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        },
+                        popover: {
+                            title: 'Suggested Roles',
+                            description: 'ReadyStack analyzed the video and suggested <strong>12 role types</strong> that would help execute the strategy — from Branding Designers to Public Speakers. Click a role chip to assign it to a participant slot. These are AI-generated based on the video content.',
+                            side: 'top',
+                            align: 'center'
+                        }
+                    },
+
+                    // Frame 15: OBSERVE — Participants table (reveal + highlight)
+                    {
+                        element: '#wt-participants',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-participants');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        },
+                        popover: {
+                            title: 'Participant Table',
+                            description: 'Add participants with their <strong>Name</strong>, <strong>Company</strong>, <strong>Specialty</strong> (from a dropdown matching the suggested roles), and <strong>Email</strong>. Filter tabs at the top let you view participants by department. The "+ Participant" button adds more rows.',
+                            side: 'top',
+                            align: 'center'
+                        }
+                    },
+
+                    // Frame 16: OBSERVE — Next button + footer (reveal + highlight)
+                    {
+                        element: '#wt-residents-footer',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-residents-footer');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        },
+                        popover: {
+                            title: 'Confirm & Continue',
+                            description: 'Once you\'ve added your residents, click <strong>NEXT</strong> to confirm the district roster. This unlocks the <strong>District Map</strong> — a visual network of all participants, roles, and connections. That\'s the end of the Residents section.',
+                            side: 'top',
+                            align: 'center',
                             doneBtnText: 'End Preview',
-                            showButtons: ['close']
+                            showButtons: ['previous', 'close']
                         }
                     }
                 ],
