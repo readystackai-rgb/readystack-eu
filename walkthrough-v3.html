@@ -100,6 +100,10 @@
         .auto-section.revealed { display: block; animation: fadeInUp 0.6s ease forwards; }
         .auto-section.revealed-grid { display: grid; animation: fadeInUp 0.6s ease forwards; }
         .auto-section.revealed-flex { display: flex; animation: fadeInUp 0.6s ease forwards; }
+
+        /* ── Checklist item stagger animation ── */
+        .wt-checklist-item { opacity: 0; transform: translateY(8px); transition: opacity 0.4s ease, transform 0.4s ease; }
+        .wt-checklist-item.visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
@@ -291,14 +295,14 @@
                         <div style="display: flex; flex-direction: column; gap: 0;">
                             <h4 style="font-size: 14px; font-weight: 700; color: white; font-style: italic; margin-bottom: 16px;">In this ReadyStack</h4>
                             <ul style="list-style: disc; padding-left: 16px; display: flex; flex-direction: column; gap: 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; font-style: italic;">
-                                <li>Identify and define your "smallest viable audience" with clear demographics and psychographics.</li>
-                                <li>Analyze your current brand messaging to ensure it communicates meaning and not just features or hype.</li>
-                                <li>Develop a consistent content and communication schedule, prioritizing sustained presence over sporadic viral attempts.</li>
-                                <li>Craft stories that resonate deeply with your smallest viable audience, encouraging organic sharing and discussion.</li>
-                                <li>Conduct a "not good enough" audit of your current offerings or content, seeking genuine feedback for meaningful improvement.</li>
-                                <li>Evaluate where your marketing efforts are currently focused and redirect resources from mass attention to niche engagement.</li>
+                                <li class="wt-checklist-item">Identify and define your "smallest viable audience" with clear demographics and psychographics.</li>
+                                <li class="wt-checklist-item">Analyze your current brand messaging to ensure it communicates meaning and not just features or hype.</li>
+                                <li class="wt-checklist-item">Develop a consistent content and communication schedule, prioritizing sustained presence over sporadic viral attempts.</li>
+                                <li class="wt-checklist-item">Craft stories that resonate deeply with your smallest viable audience, encouraging organic sharing and discussion.</li>
+                                <li class="wt-checklist-item">Conduct a "not good enough" audit of your current offerings or content, seeking genuine feedback for meaningful improvement.</li>
+                                <li class="wt-checklist-item">Evaluate where your marketing efforts are currently focused and redirect resources from mass attention to niche engagement.</li>
                             </ul>
-                            <div style="display: flex; gap: 8px; margin-top: 20px;">
+                            <div id="wt-video-buttons" style="display: flex; gap: 8px; margin-top: 20px; opacity: 0; transform: translateY(8px); transition: opacity 0.4s ease, transform 0.4s ease;">
                                 <button style="flex: 1; padding: 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border-mid); color: white; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;">Change Video</button>
                                 <button id="wt-ok-btn" style="padding: 12px 24px; border-radius: 12px; background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.4); color: var(--green); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;">OK</button>
                             </div>
@@ -500,28 +504,36 @@
                         }
                     },
 
-                    // Frame 2: OBSERVE — Focus on search, prompt to click in
+                    // Frame 2: DO — Click the search bar
                     {
                         element: '#wt-search-input',
                         popover: {
                             title: 'Start With a YouTube Search',
-                            description: 'Every district begins with an authority video that defines the problem your audience faces. Click the search bar and type your query — we\'ll search for <strong>"seth godin building a brand"</strong>.',
+                            description: 'Every district begins with an authority video that defines the problem your audience faces. <strong>Click the search bar</strong> to begin your search.',
                             side: 'bottom',
                             align: 'start',
-                            onNextClick: () => {
-                                // Auto-type the search query
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                // Add glow to make search bar visible
                                 const input = document.getElementById('wt-search-input');
-                                input.value = '';
-                                const text = 'seth godin building a brand';
-                                let i = 0;
-                                const typeChar = () => {
-                                    if (i < text.length) {
-                                        input.value += text[i]; i++;
-                                        setTimeout(typeChar, 60);
-                                    }
+                                input.style.borderColor = 'rgba(124,140,255,0.6)';
+                                input.style.boxShadow = '0 0 20px rgba(124,140,255,0.3), inset 0 0 8px rgba(124,140,255,0.1)';
+                                input._handler = () => {
+                                    input.removeEventListener('click', input._handler);
+                                    // Auto-type the search query
+                                    input.value = '';
+                                    const text = 'seth godin building a brand';
+                                    let i = 0;
+                                    const typeChar = () => {
+                                        if (i < text.length) {
+                                            input.value += text[i]; i++;
+                                            setTimeout(typeChar, 60);
+                                        }
+                                    };
+                                    typeChar();
+                                    setTimeout(() => driverObj.moveNext(), 2000);
                                 };
-                                typeChar();
-                                setTimeout(() => driverObj.moveNext(), 2000);
+                                input.addEventListener('click', input._handler);
                             }
                         }
                     },
@@ -537,6 +549,9 @@
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const btn = document.getElementById('wt-search-btn');
+                                btn.style.borderColor = 'rgba(124,140,255,0.6)';
+                                btn.style.boxShadow = '0 0 20px rgba(124,140,255,0.3)';
+                                btn.style.color = 'white';
                                 btn._handler = () => {
                                     btn.removeEventListener('click', btn._handler);
                                     // Show results
@@ -575,29 +590,55 @@
                                 row._handler = () => {
                                     row.removeEventListener('click', row._handler);
                                     row.classList.add('selected');
-                                    // Trigger auto-generation of all content
-                                    revealAutoSections();
-                                    setTimeout(() => driverObj.moveNext(), 1200);
+                                    // Only reveal the video analysis section first
+                                    const va = document.getElementById('wt-video-analysis');
+                                    va.classList.add('revealed-grid');
+                                    va.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    // Wait for scroll + render before advancing
+                                    setTimeout(() => driverObj.moveNext(), 2500);
                                 };
                                 row.addEventListener('click', row._handler);
                             }
                         }
                     },
 
-                    // Frame 6: OBSERVE — Video analysis auto-generated
+                    // Frame 6: OBSERVE — Video analysis + "In this ReadyStack" checklist populates
                     {
                         element: '#wt-video-analysis',
                         popover: {
                             title: 'In This ReadyStack',
                             description: 'The video is processing. ReadyStack extracts six key takeaways that will drive your district strategy — from identifying your smallest viable audience to redirecting resources toward niche engagement. You can click <strong>CHANGE VIDEO</strong> to pick a different one, or <strong>OK</strong> to proceed.',
                             side: 'top',
-                            align: 'center'
+                            align: 'center',
+                            onPopoverRender: () => {
+                                // Scroll video analysis into view
+                                const va = document.getElementById('wt-video-analysis');
+                                va.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                // Stagger-reveal checklist items one by one
+                                const items = document.querySelectorAll('.wt-checklist-item');
+                                items.forEach((item, i) => {
+                                    setTimeout(() => item.classList.add('visible'), (i + 1) * 400);
+                                });
+                                // Show CHANGE VIDEO / OK buttons after all checklist items
+                                setTimeout(() => {
+                                    const btns = document.getElementById('wt-video-buttons');
+                                    btns.style.opacity = '1';
+                                    btns.style.transform = 'translateY(0)';
+                                }, (items.length + 1) * 400);
+                            }
                         }
                     },
 
                     // Frame 7: OBSERVE — ReadyStack Brief
                     {
                         element: '#wt-brief',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-brief');
+                            if (!el.classList.contains('revealed')) {
+                                el.classList.add('revealed');
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        },
                         popover: {
                             title: 'The ReadyStack Brief',
                             description: 'A full narrative strategy brief — auto-generated from one YouTube video. This is the foundation document for your entire district: the market thesis, the approach, and how the automations connect the dots.',
@@ -609,6 +650,13 @@
                     // Frame 8: OBSERVE — Core Problem + Ideal Resident
                     {
                         element: '#wt-brief-cards',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-brief-cards');
+                            if (!el.classList.contains('revealed-grid')) {
+                                el.classList.add('revealed-grid');
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        },
                         popover: {
                             title: 'Core Problem + Ideal Resident',
                             description: 'AI extracted the core market problem and your ideal resident profile directly from the video. The problem statement defines <em>why</em> your district exists. The ideal resident defines <em>who</em> it serves.',
@@ -620,6 +668,13 @@
                     // Frame 9: OBSERVE — Network Map Seed
                     {
                         element: '#wt-network-seed',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-network-seed');
+                            if (!el.classList.contains('revealed')) {
+                                el.classList.add('revealed');
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        },
                         popover: {
                             title: 'Network Map Seed',
                             description: 'Three categories pre-populated from the video: <strong>Partners</strong> (Niche Branding Agencies, Content Strategy Consultants, Audience Research Platforms), <strong>Customers</strong> (Small Business Owners, Individual Content Creators, Startups), and <strong>Guests</strong> (Seth Godin, Marketing Educators, Community Managers). These become residents in your district.',
@@ -631,6 +686,13 @@
                     // Frame 10: OBSERVE — Actions + Automations
                     {
                         element: '#wt-actions-automations',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-actions-automations');
+                            if (!el.classList.contains('revealed-grid')) {
+                                el.classList.add('revealed-grid');
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        },
                         popover: {
                             title: 'Actions + Automations',
                             description: 'Ready-made tasks with checkmarks, plus trigger-based automations. The actions become checklist items for residents. The automations fire when events happen — like a new subscriber joining, triggering a personalized welcome sequence.',
@@ -642,6 +704,14 @@
                     // Frame 11: DO — Click OK or CONTINUE TO RESIDENTS
                     {
                         element: '#wt-continue-residents',
+                        onHighlightStarted: () => {
+                            // Activate the button
+                            const btn = document.getElementById('wt-continue-residents');
+                            btn.style.color = 'white';
+                            btn.style.borderColor = 'var(--border-mid)';
+                            btn.style.cursor = 'pointer';
+                            btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        },
                         popover: {
                             title: 'Continue to Residents',
                             description: 'Your market story is set — the problem, the audience, the strategy, and the automations are all defined from one video. <strong>Click CONTINUE TO RESIDENTS</strong> to assemble the people who\'ll populate your district.',
