@@ -206,7 +206,12 @@
         deposits: 'circle-dollar-sign', revenue_share: 'banknote',
         success: 'users-round', onboarding: 'users-round',
         substack: 'substack', article: 'file-text', blog: 'layout',
-        case_study: 'book-open', reviews_pricing: 'banknote', linkedin: 'linkedin'
+        case_study: 'book-open', reviews_pricing: 'banknote', linkedin: 'linkedin',
+        instagram: 'camera', twitter: 'twitter', tiktok: 'music',
+        email: 'mail', discord: 'message-circle', website: 'globe',
+        spotify: 'headphones', soundcloud: 'cloud', bandcamp: 'radio',
+        web: 'globe', music: 'headphones', podcast: 'mic',
+        newsletter: 'mail', community: 'users', forum: 'message-square'
       };
       const iconName = iconMap[type] || 'circle';
       useEffect(() => {
@@ -317,6 +322,7 @@
       const [obsMode, setObsMode] = useState('live');
       const [snapshotPeriod, setSnapshotPeriod] = useState('1week');
       const [flowTab, setFlowTab] = useState('ecosystem');
+      const [selectedArtist, setSelectedArtist] = useState(null);
       const [analyticsPeriod, setAnalyticsPeriod] = useState(30);
       const [lookerPeriod, setLookerPeriod] = useState('30');
       const [isLiveData, setIsLiveData] = useState(false);
@@ -341,7 +347,12 @@
       const [isNarrativePlaying, setIsNarrativePlaying] = useState(false);
       const narrativeInterval = useRef(null);
 
-      const [storyParticipants, setStoryParticipants] = useState({ residents: Array.from({length: 20}, () => ({name:'',company:'',specialty:'',email:''})) });
+      const [storyParticipants, setStoryParticipants] = useState({ residents: [
+        { name: 'Participant 1', company: '', specialty: '', email: '', source: '', status: '', jobContext: '', jobType: '' },
+        { name: 'Participant 2', company: '', specialty: '', email: '', source: '', status: '', jobContext: '', jobType: '' },
+        { name: 'Participant 3', company: '', specialty: '', email: '', source: '', status: '', jobContext: '', jobType: '' },
+        ...Array.from({length: 17}, () => ({name:'',company:'',specialty:'',email:'', source:'', status:'', jobContext:'', jobType:''}))
+      ] });
       const SPECIALTY_OPTIONS = ['Content / Media','Marketing / Growth','Sales / Revenue','Product / Engineering','Security / Compliance','Finance / Investment','Strategy / Advisory','Community / Events','Customer Success / Support','Business Operations'];
 
       // Candidate pool — the bench of people available to pick from per specialty
@@ -464,6 +475,41 @@
         ],
         learning: [], selecting: [], executing: [], expanding: [], angels: []
       });
+
+      const [mapEditingItem, setMapEditingItem] = useState(null);
+
+      const TRAFFIC_SOURCE_OPTIONS = [
+        { value: 'tiktok', label: 'TikTok', color: '#fe2c55' },
+        { value: 'instagram', label: 'Instagram', color: '#e1306c' },
+        { value: 'youtube', label: 'YouTube', color: '#ff0000' },
+        { value: 'email', label: 'Email / Newsletter', color: '#48c9b0' },
+        { value: 'discord', label: 'Discord', color: '#5865f2' },
+        { value: 'twitter', label: 'Twitter / X', color: '#1da1f2' },
+        { value: 'website', label: 'Website / Blog', color: '#94a3b8' },
+        { value: 'podcast', label: 'Podcast', color: '#8b5cf6' },
+        { value: 'paidads', label: 'Paid Ads', color: '#f97316' },
+        { value: 'linkedin', label: 'LinkedIn', color: '#0a66c2' },
+        { value: 'linkinbio', label: 'Link-in-Bio', color: '#64748b' },
+      ];
+
+      const LINK_TYPE_OPTIONS = [
+        { value: 'tutorial', label: 'Tutorial Video', quadrant: 'learning', color: '#ff2a1a' },
+        { value: 'logic_map', label: 'Logic Map', quadrant: 'learning', color: '#ff2a1a' },
+        { value: 'blog', label: 'Blog / Article', quadrant: 'learning', color: '#ff2a1a' },
+        { value: 'case_study', label: 'Case Study', quadrant: 'learning', color: '#ff2a1a' },
+        { value: 'product_tour', label: 'Product Tour', quadrant: 'selecting', color: '#ffd666' },
+        { value: 'demo', label: 'Live Demo', quadrant: 'selecting', color: '#ffd666' },
+        { value: 'pricing', label: 'Pricing Page', quadrant: 'selecting', color: '#ffd666' },
+        { value: 'comparison', label: 'Comparison', quadrant: 'selecting', color: '#ffd666' },
+        { value: 'webinar', label: 'Webinar / Workshop', quadrant: 'executing', color: '#48c9b0' },
+        { value: 'checkout', label: 'Checkout', quadrant: 'executing', color: '#48c9b0' },
+        { value: 'onboarding', label: 'Onboarding', quadrant: 'executing', color: '#48c9b0' },
+        { value: 'contract', label: 'Contract / Agreement', quadrant: 'executing', color: '#48c9b0' },
+        { value: 'affiliate', label: 'Affiliate Sign Up', quadrant: 'expanding', color: '#7c8cff' },
+        { value: 'referral', label: 'Referral Program', quadrant: 'expanding', color: '#7c8cff' },
+        { value: 'success_story', label: 'Success Story', quadrant: 'expanding', color: '#7c8cff' },
+        { value: 'community', label: 'Community', quadrant: 'expanding', color: '#7c8cff' },
+      ];
 
       // Auto-populate a cited creator into the first empty Resident slot
       // Migrate old data formats to {name, company, specialty} objects
@@ -1179,7 +1225,6 @@
         setYoutubeEmbedUrl(`https://www.youtube.com/embed/${video.id}`);
         setSelectedVideoData(video);
         setIsSearchPanelOpen(false);
-        setIsGeneratingStory(true);
         // Update YouTube source in mapping with actual video data
         setMapping(prev => {
           const ytIdx = prev.sources.findIndex(s => s.type === 'youtube');
@@ -1198,15 +1243,42 @@
           }
           return { ...prev, sources: [ytSource, ...prev.sources] };
         });
+        // Go straight into full story generation — no intermediate step
+        setIsGeneratingStory(true);
         try {
             let contentText = `Title: ${video.snippet.title}\nDescription: ${video.snippet.description}`;
             const transcript = await getTranscript(video.id);
             if (transcript) {
-                contentText = `TRANSCRIPT AVAILABLE:\n${transcript.substring(0, 4000)}`;
+                contentText += `\nTRANSCRIPT:\n${transcript.substring(0, 5000)}`;
             }
+            const systemPrompt = `You are a ReadyStack strategist. Your job is to analyze a YouTube video transcript and produce a ReadyStack Narrative.
+        A ReadyStack is a hosted, shareable asset that combines an anchor video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
+        Produce the following based strictly on the transcript provided:
+        1. Title: A compelling name for this ReadyStack — grounded and descriptive, no hyperbole or cheesy marketing language.
+        2. District Name: A short name (3-8 words) for this Dark Market District. This must be a plain-language description of the core problem the district addresses. Rules:
+           - Grounded and descriptive. Think file names, not headlines.
+           - NO hyperbole: never use words like "greatest", "unstoppable", "revolutionary", "ultimate", "game-changing", "cutting-edge", "next-gen", or similar marketing language.
+           - NO generic filler: never use "growth engine", "success blueprint", "opportunity", "transformation", or vague business jargon.
+           - Good examples: "B2B Cold Outreach Fatigue", "Creator Monetization Without Ads", "Agency Client Churn in SaaS", "Dark Buying Signal Blindness"
+           - Bad examples: "The Ultimate Growth Machine", "Revolutionary Marketing Platform", "Unstoppable Revenue Engine"
+        3. Problem: One paragraph on the core problem being solved and who feels it.
+        4. Resident: The ideal resident profile (who should own/deploy this).
+        5. Network: 3 Partners, 3 Customers, 3 Guests.
+        6. Checklist: 5-6 specific, actionable steps to take after watching.
+        7. Automations: 3-5 automations with Trigger, Action, and Outcome.
+        8. Narrative: 2-3 paragraphs telling the story of how this ReadyStack turns ideas into a compounding commercial asset.
 
-            const systemPrompt = "You are a ReadyStack story advisor. Generate 3-point outline for Dark Market District: 1. Hook, 2. Value, 3. CTA.";
-
+        You MUST return ONLY a valid JSON object matching this exact schema, with no markdown formatting:
+        {
+          "districtName": "string",
+          "title": "string",
+          "problem": "string",
+          "resident": "string",
+          "network": { "partners": ["string"], "customers": ["string"], "targets": ["string"] },
+          "checklist": ["string"],
+          "automations": [{ "trigger": "string", "action": "string", "outcome": "string" }],
+          "narrative": "string"
+        }`;
             const response = await fetch(CLOUD_FUNCTION_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1216,9 +1288,27 @@
                   userQuery: contentText
               })
             });
+            if (!response.ok) throw new Error("Cloud Function Error");
             const result = await response.json();
-            setStoryOutline(result.text);
-        } catch (e) { setStoryOutline("1. Hook: Awareness\n2. Value: Authority\n3. Action: Implement"); } finally { setIsGeneratingStory(false); }
+            let text = result.text;
+            if (!text) throw new Error("Undefined response from API");
+            text = text.replace(/```json|```/g, "").trim();
+            const storyData = JSON.parse(text);
+            setVideoStory(storyData);
+            setStackLabel(storyData.districtName || storyData.title || 'ReadyStack Campaign');
+        } catch (error) {
+            console.error("Story failed", error);
+            setVideoStory({
+              districtName: "API Connection Failure",
+              title: "Network Expansion Stack",
+              problem: "The API failed to return the brief. This usually happens due to key limits or missing backend handlers.",
+              resident: "Growth Operator",
+              network: { partners: ["Platform"], customers: ["Creators"], targets: ["Agencies"] },
+              checklist: ["Check API Key", "Review Console Logs"],
+              automations: [{ trigger: "Form Submit", action: "Send Email", outcome: "Lead Nurture" }],
+              narrative: "This narrative acts as a placeholder when the intelligence layer is disconnected. Ensure your keys are active to parse the transcript strategy."
+            });
+        } finally { setIsGeneratingStory(false); }
       };
 
       const resolveMetadataById = async (id) => {
@@ -1314,7 +1404,7 @@
       };
 
       const handleNodeHover = (node) => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); setHoveredNode(node); };
-      const handleNodeLeave = () => { closeTimeoutRef.current = setTimeout(() => { setHoveredNode(null); }, 1200); };
+      const handleNodeLeave = () => { closeTimeoutRef.current = setTimeout(() => { setHoveredNode(null); }, 400); };
       const handleTooltipEnter = () => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); };
 
       const buildStoryDistrict = (targetTab) => {
@@ -1389,6 +1479,7 @@
 
       const nodes = useMemo(() => {
         const items = []; const centerX = 600;
+        const isRelational = flowTab === 'relational';
         const narrativeScale = obsMode === 'narrative' ? (1 + (playbackProgress * 0.05)) : 1;
         const driftFactor = obsMode === 'narrative' ? (playbackProgress * 2.5) : 0;
         const getStableJitter = (id, amount = 35) => { const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0); return ((hash % 100) / 100 - 0.5) * amount; };
@@ -1396,10 +1487,87 @@
         const timeMultiplier = lookerPeriod === '30' ? 1 : (lookerPeriod === '90' ? 3 : 12);
         const scaledTraffic = totalMonthlyTraffic * timeMultiplier;
 
+        /* ── RELATIONAL LAYOUT ── */
+        if (isRelational) {
+          const stageColorMap = { learning: '#ff2a1a', selecting: '#ffd666', executing: '#48c9b0', expanding: '#7c8cff' };
+          const stageArtistCount = {};
+          const allArtistNames = [];
+          const seen = new Set();
+          ['learning','selecting','executing','expanding'].forEach(stageId => {
+            (mapping[stageId] || []).forEach(p => {
+              const v = p.ven || 'Partner';
+              if (v !== 'ReadyStack' && !seen.has(v)) { seen.add(v); allArtistNames.push(v); }
+            });
+          });
+          allArtistNames.push('ReadyStack');
+          const numCols = allArtistNames.length;
+          const colWidth = 1080 / Math.max(numCols, 1);
+          const leftPad = 60;
+          const stageY = { learning: 200, selecting: 450, executing: 700, expanding: 950 };
+          const columnHeaders = allArtistNames.map((name, i) => ({ name, x: leftPad + (i * colWidth) + (colWidth / 2), y: 120 }));
+          const rowLabels = stages.map(s => ({ label: s.label, color: s.color, y: stageY[s.id] }));
+
+          stages.forEach(stage => {
+            const stageItems = mapping[stage.id] || [];
+            stageItems.forEach((p, idx) => {
+              const vendor = p.ven || 'Partner';
+              const colIdx = allArtistNames.indexOf(vendor === 'ReadyStack' || !allArtistNames.includes(vendor) ? 'ReadyStack' : vendor);
+              const cellKey = `${stage.id}-${colIdx}`;
+              const subIdx = stageArtistCount[cellKey] || 0;
+              stageArtistCount[cellKey] = subIdx + 1;
+              const baseX = leftPad + (colIdx * colWidth) + (colWidth / 2);
+              const baseY = stageY[stage.id] + subIdx * 58;
+              items.push({ id: `${stage.id}-${idx}`, label: p.lab || p.platform, vendor, stageId: stage.id, type: p.platform || 'node', color: stageColorMap[stage.id], url: p.pat, internal: !!p.internal, dedicated: !!p.dedicated, x: baseX, y: baseY, radius: 22, isSystem: true, ga4Count: (p.ga4Count || 1000) * timeMultiplier, price: p.price || 0 });
+            });
+          });
+
+          // Vertical flows: same artist across stages
+          const allFlows = [];
+          const stageOrder = ['learning','selecting','executing','expanding'];
+          allArtistNames.forEach(artistName => {
+            for (let s = 0; s < stageOrder.length - 1; s++) {
+              const fromNodes = items.filter(n => n.vendor === artistName && n.stageId === stageOrder[s]);
+              const toNodes = items.filter(n => n.vendor === artistName && n.stageId === stageOrder[s + 1]);
+              if (fromNodes.length && toNodes.length) {
+                allFlows.push({ from: fromNodes[fromNodes.length - 1], to: toNodes[0], speed: 5 + s, color: stageColorMap[stageOrder[s + 1]], strokeWidth: 1.8 });
+              }
+            }
+          });
+          // Cross-artist flows
+          stageOrder.forEach((stageId, si) => {
+            const nextStage = stageOrder[si + 1];
+            if (!nextStage) return;
+            for (let a = 0; a < allArtistNames.length - 1; a++) {
+              const fromArtist = allArtistNames[a];
+              const toArtist = allArtistNames[(a + 1) % (allArtistNames.length - 1)];
+              if (fromArtist === 'ReadyStack' || toArtist === 'ReadyStack') continue;
+              const fromNode = items.find(n => n.vendor === fromArtist && n.stageId === stageId && !n.internal);
+              const toNode = items.find(n => n.vendor === toArtist && n.stageId === nextStage && !n.internal);
+              if (fromNode && toNode) allFlows.push({ from: fromNode, to: toNode, speed: 8, color: '#c084fc', strokeWidth: 1.2, isCrossArtist: true });
+            }
+          });
+
+          const rsGrossRevenue = items.filter(n => n.stageId === 'executing' && n.price > 0 && n.internal).reduce((acc, n) => acc + n.ga4Count * n.price, 0);
+          const snapshotRevenueItems = items.filter(n => n.stageId === 'executing' && n.price > 0 && !n.internal).map(n => ({ label: n.vendor, amount: n.ga4Count * n.price }));
+          return { items, flows: allFlows, scaledTraffic, isRelational: true, columnHeaders, rowLabels, hangtimeVal: 4.5, searchingVal: 1.2, finance: { districtDividendsAmount: Math.round(rsGrossRevenue * 0.6), snapshotRevenueItems, totalSnapshotARR: snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0), investmentInItems: (mapping.angels || []).filter(a => a.platform !== 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), pendingInvestmentItems: (mapping.angels || []).filter(a => a.platform === 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), totalFinanceCapital: Math.round(rsGrossRevenue * 0.6) + snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0) }, counts: { buying: Math.round(scaledTraffic * 0.005), sharing: Math.round(scaledTraffic * 0.003), retention: Math.round(scaledTraffic * 0.004) }, probs: { buying: 82, sharing: 64, retention: 71 } };
+        }
+
+        /* ── ECOSYSTEM LAYOUT (original) ── */
         const entryNode = { id: 'ready-previews', label: 'ReadyStack Hub', vendor: 'ReadyStack', type: 'gateway', color: '#ffffff', x: centerX, y: 320, radius: 34, isSystem: true, ga4Count: 5200 };
         items.push(entryNode);
 
-        mapping.sources?.forEach((s, idx) => { const x = (centerX - 180) + (360 / (mapping.sources.length - 1 || 1)) * idx + getStableJitter(`src-${idx}`, 20); items.push({ id: `source-${idx}`, label: s.lab, vendor: s.ven, isTrafficSource: true, type: s.type, color: '#ffffff', x, y: 160, radius: 26, ga4Count: (s.ga4Count || 18420) * timeMultiplier }); });
+        /* Merge participant traffic sources with mapping.sources */
+        const allSources = [...(mapping.sources || [])];
+        (storyParticipants.residents || []).forEach(r => {
+          (r.trafficSources || []).forEach(ts => {
+            const alreadyExists = allSources.some(s => s.type === ts.type && s.ven === (r.name || '').trim());
+            if (!alreadyExists && ts.type) {
+              const label = (TRAFFIC_SOURCE_OPTIONS.find(o => o.value === ts.type) || {}).label || ts.type;
+              allSources.push({ ven: (r.name || '').trim(), lab: label + ' (' + (r.name || '').trim() + ')', type: ts.type, url: ts.url || '', ga4Count: 18420 });
+            }
+          });
+        });
+        allSources.forEach((s, idx) => { const x = (centerX - 180) + (360 / (allSources.length - 1 || 1)) * idx + getStableJitter(`src-${idx}`, 20); items.push({ id: `source-${idx}`, label: s.lab, vendor: s.ven, isTrafficSource: true, type: s.type, color: '#ffffff', x, y: 160, radius: 26, ga4Count: (s.ga4Count || 18420) * timeMultiplier }); });
         (mapping.angels || []).forEach((a, idx) => { let x, y; if (a.platform === 'awareness') { x = (centerX - 80) + (idx * 40); y = 80; } else if (a.platform === 'seed') { x = 200 + (idx * 40); y = 100; } else { x = 1000 - (idx * 40); y = 100; } items.push({ id: `angel-${idx}`, label: a.platform, vendor: a.lab || 'Angel', type: a.platform, color: a.platform === 'observer' ? '#ffd700' : '#10b981', x: x + getStableJitter(`ang-${idx}`), y: y + getStableJitter(`angy-${idx}`), radius: 26, isSystem: true, isAngel: true, investorClass: a.platform, startups: a.startups || [], amount: a.amount || 0, url: a.pat }); });
 
         const quadBounds = { learning: { xMin: 80, xMax: 520, yMin: 480, yMax: 720, color: '#ff2a1a' }, selecting: { xMin: 680, xMax: 1120, yMin: 480, yMax: 720, color: '#ffd666' }, executing: { xMin: 80, xMax: 520, yMin: 800, yMax: 1250, color: '#48c9b0' }, expanding: { xMin: 680, xMax: 1120, yMin: 800, yMax: 1250, color: '#7c8cff' } };
@@ -1444,7 +1612,7 @@
         const snapshotRevenueItems = items.filter(n => n.stageId === 'executing' && n.price > 0 && !n.internal).map(n => ({ label: n.vendor, amount: n.ga4Count * n.price, typePrefix: 'RESIDENT:' }));
 
         return { items, flows: allFlows, scaledTraffic, hangtimeVal: 4.5, searchingVal: 1.2, finance: { districtDividendsAmount: Math.round(rsGrossRevenue * 0.6), snapshotRevenueItems, totalSnapshotARR: snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0), investmentInItems: (mapping.angels || []).filter(a => a.platform !== 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), pendingInvestmentItems: (mapping.angels || []).filter(a => a.platform === 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), totalFinanceCapital: Math.round(rsGrossRevenue * 0.6) + snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0) }, counts: { buying: Math.round(scaledTraffic * 0.005), sharing: Math.round(scaledTraffic * 0.003), retention: Math.round(scaledTraffic * 0.004) }, probs: { buying: 82, sharing: 64, retention: 71 } };
-      }, [mapping, lookerPeriod, obsMode, playbackProgress]);
+      }, [mapping, lookerPeriod, obsMode, playbackProgress, flowTab, storyParticipants]);
 
       return (
 
@@ -1772,32 +1940,26 @@
                 )}
               </div>
 
-              <div className="mb-8 whitespace-nowrap">
-                <h3 className="text-xs font-black text-slate-300 uppercase tracking-[0.2em] mb-3">District Setup</h3>
-                <div className="w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-white/5">
-                  <div className="bg-indigo-500 h-full rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-500" style={{ width: `${Math.max(10, (['youtube', 'intro', 'mapper', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics', 'automation'].indexOf(activeTab) + 1) * 10)}%` }}></div>
-                </div>
-              </div>
+              {/* progress bar removed */}
 
-              <div className="space-y-3 flex-grow whitespace-nowrap overflow-hidden">
+              {/* ── LEFT RAIL: COMPOSE + OPERATIONS ── */}
+              <div className="flex-grow whitespace-nowrap overflow-hidden">
+
+                {/* ── COMPOSE section ── */}
+                <div className="mb-2">
+                  <h4 className="text-[10px] font-black text-indigo-400/70 uppercase tracking-[0.25em] mb-3 pl-1" style={{fontFamily:'Poppins,sans-serif'}}>Compose</h4>
+                </div>
+                <div className="space-y-3 mb-6">
                 {[
-                  { id: 'youtube', num: 1, label: 'Define Market Story', icon: 'play-circle' },
-                  { id: 'intro', num: 2, label: 'Residents', icon: 'users' },
-                  { id: 'mapper', num: 3, label: 'Links', icon: 'link' },
-                  { id: 'finance', num: 4, label: 'District Finance', icon: 'dollar-sign' },
-                  { id: 'observatory', num: 5, label: 'District Flow', icon: 'git-branch' },
-                  { id: 'connect', num: 6, label: 'Invite Residents', icon: 'send' },
-                  { id: 'looker', num: 7, label: 'Looker', icon: 'bar-chart-2' },
-                  { id: 'g4', num: 8, label: 'GA4', icon: 'activity' },
-                  { id: 'analytics', num: 9, label: 'Analytics', icon: 'trending-up' },
-                  { id: 'automation', num: 10, label: 'Automation', icon: 'zap' }
+                  { id: 'youtube', label: 'Define Market Story', icon: 'play-circle' },
+                  { id: 'intro', label: 'Residents', icon: 'users' },
+                  { id: 'mapper', label: 'Links', icon: 'link' },
+                  { id: 'preview', label: 'Preview', icon: 'eye' }
                 ].map(step => {
+                  const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics', 'automation'];
                   const isActive = activeTab === step.id;
-                  const railOrder = ['youtube', 'intro', 'mapper', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics', 'automation'];
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
-
-                  // Sequential unlock: lock everything after Residents until Residents is complete
                   const isLocked = stepIndex >= 2 && mapping.learning.length === 0;
                   const isCompleted = stepIndex < currentIndex;
 
@@ -1827,11 +1989,7 @@
                   } else {
                     return (
                       <div key={step.id} onClick={() => {
-                        if (activeTab === 'intro') {
-                            buildStoryDistrict(step.id);
-                        } else {
-                            setActiveTab(step.id);
-                        }
+                        if (activeTab === 'intro') { buildStoryDistrict(step.id); } else { setActiveTab(step.id); }
                       }} className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 flex items-center gap-3 transition-all cursor-pointer hover:bg-emerald-500/20">
                         {isCompleted ? (
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path></svg>
@@ -1843,6 +2001,74 @@
                     );
                   }
                 })}
+                </div>
+
+                {/* ── Divider ── */}
+                <div className="flex items-center gap-3 my-5 px-1">
+                  <div className="flex-grow h-px bg-white/10"></div>
+                </div>
+
+                {/* ── OPERATIONS section ── */}
+                <div className="mb-2">
+                  <h4 className="text-[10px] font-black text-amber-400/70 uppercase tracking-[0.25em] mb-3 pl-1" style={{fontFamily:'Poppins,sans-serif'}}>Operations</h4>
+                </div>
+                <div className="space-y-3">
+                {[
+                  { id: 'finance', label: 'District Finance', icon: 'dollar-sign' },
+                  { id: 'observatory', label: 'District Flow', icon: 'git-branch' },
+                  { id: 'connect', label: 'Invite Residents', icon: 'send' },
+                  { id: 'looker', label: 'Looker', icon: 'bar-chart-2' },
+                  { id: 'g4', label: 'GA4', icon: 'activity' },
+                  { id: 'analytics', label: 'Analytics', icon: 'trending-up' },
+                  { id: 'automation', label: 'Automation', icon: 'zap' }
+                ].map(step => {
+                  const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics', 'automation'];
+                  const isActive = activeTab === step.id;
+                  const currentIndex = railOrder.indexOf(activeTab);
+                  const stepIndex = railOrder.indexOf(step.id);
+                  const isLocked = stepIndex >= 2 && mapping.learning.length === 0;
+                  const isCompleted = stepIndex < currentIndex;
+
+                  const RailIcon = ({ name, cls }) => {
+                    const ref = useRef(null);
+                    useEffect(() => { if (ref.current && typeof lucide !== 'undefined') { ref.current.innerHTML = `<i data-lucide="${name}" style="width:14px;height:14px"></i>`; lucide.createIcons({ nameAttr: 'data-lucide' }); } }, [name]);
+                    return <span ref={ref} className={`inline-flex items-center justify-center shrink-0 ${cls || ''}`} style={{ width: 14, height: 14 }} />;
+                  };
+
+                  if (isActive) {
+                    return (
+                      <div key={step.id} className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-white flex flex-col gap-2 relative overflow-hidden shadow-[0_0_20px_rgba(245,158,11,0.1)] cursor-default">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>
+                        <div className="flex items-center gap-3">
+                          <RailIcon name={step.icon} cls="text-amber-400" />
+                          <span className="text-xs font-black uppercase tracking-widest">{step.label}</span>
+                        </div>
+                      </div>
+                    );
+                  } else if (isLocked) {
+                    return (
+                      <div key={step.id} className="p-4 rounded-xl border border-white/5 bg-[#020617]/50 text-slate-300 flex items-center gap-3 transition-all cursor-not-allowed">
+                        <RailIcon name={step.icon} cls="text-slate-300" />
+                        <span className="text-xs font-black uppercase tracking-widest">{step.label}</span>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div key={step.id} onClick={() => {
+                        if (activeTab === 'intro') { buildStoryDistrict(step.id); } else { setActiveTab(step.id); }
+                      }} className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 flex items-center gap-3 transition-all cursor-pointer hover:bg-emerald-500/20">
+                        {isCompleted ? (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        ) : (
+                            <RailIcon name={step.icon} cls="text-emerald-400" />
+                        )}
+                        <span className="text-xs font-black uppercase tracking-widest">{step.label}</span>
+                      </div>
+                    );
+                  }
+                })}
+                </div>
+
               </div>
             </div>
 
@@ -1850,7 +2076,7 @@
             <div className="flex-grow min-w-0 bg-[#0f172a]/30 border border-white/5 rounded-[40px] p-10 overflow-hidden shadow-inner relative min-h-[800px] transition-all duration-300">
 
               {/* ── District Name (Google Sheets style) ── */}
-              <div className="absolute top-14 left-20 z-[80] flex items-center gap-3">
+              <div className="absolute top-20 left-20 z-[80] flex items-center gap-3">
                 {isEditingName ? (
                   <input
                     autoFocus
@@ -1894,7 +2120,7 @@
               </div>
 
               {/* ── Work-area action buttons ── */}
-              <div className="absolute top-14 right-6 z-[90] flex items-center gap-2">
+              <div className="absolute top-20 right-6 z-[90] flex items-center gap-2">
                 {/* Save District */}
                 <button
                   onClick={() => {
@@ -1940,22 +2166,29 @@
 
             {/* ── TOP STEP NAVIGATION BAR (above everything) ── */}
             {(() => {
-              const stepList = [
-                { id: 'youtube', label: 'Define Market Story' },
-                { id: 'intro', label: 'Residents' },
-                { id: 'mapper', label: 'Links' },
-                { id: 'finance', label: 'District Finance' },
-                { id: 'observatory', label: 'District Flow' },
-                { id: 'connect', label: 'Invite Residents' },
-                { id: 'looker', label: 'Looker' },
-                { id: 'g4', label: 'GA4' },
-                { id: 'analytics', label: 'Analytics' },
-                { id: 'automation', label: 'Automation' }
+              const composeSteps = [
+                { id: 'youtube', label: 'Define Market Story', phase: 'compose' },
+                { id: 'intro', label: 'Residents', phase: 'compose' },
+                { id: 'mapper', label: 'Links', phase: 'compose' },
+                { id: 'preview', label: 'Preview', phase: 'compose' }
               ];
+              const opsSteps = [
+                { id: 'finance', label: 'District Finance', phase: 'operations' },
+                { id: 'observatory', label: 'District Flow', phase: 'operations' },
+                { id: 'connect', label: 'Invite Residents', phase: 'operations' },
+                { id: 'looker', label: 'Looker', phase: 'operations' },
+                { id: 'g4', label: 'GA4', phase: 'operations' },
+                { id: 'analytics', label: 'Analytics', phase: 'operations' },
+                { id: 'automation', label: 'Automation', phase: 'operations' }
+              ];
+              const stepList = [...composeSteps, ...opsSteps];
               const currentIdx = stepList.findIndex(s => s.id === activeTab);
               const prev = currentIdx > 0 ? stepList[currentIdx - 1] : null;
               const next = currentIdx < stepList.length - 1 ? stepList[currentIdx + 1] : null;
               const current = stepList[currentIdx];
+              const isCompose = current?.phase === 'compose';
+              const phaseLabel = isCompose ? 'Compose' : 'Operations';
+              const phaseColor = isCompose ? 'text-indigo-400' : 'text-amber-400';
               return (
                 <div className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between px-10 py-3 border-b border-white/5 bg-[#0f172a]/80 backdrop-blur-sm rounded-t-[40px]">
                   <div className="flex items-center gap-3 min-w-[200px]">
@@ -1968,8 +2201,6 @@
                     ) : <div />}
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-black text-indigo-400 uppercase tracking-widest" style={{fontFamily:'Poppins,sans-serif'}}>Build ReadyStack</span>
-                    <span className="text-white/10 mx-0.5">|</span>
                     <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">{currentIdx + 1} / {stepList.length}</span>
                     <span className="text-white/10">·</span>
                     <span className="text-xs font-black text-white uppercase tracking-wider">{current?.label}</span>
@@ -1988,9 +2219,9 @@
             })()}
 
             {activeTab === 'youtube' && (
-              <div className="max-w-5xl mx-auto animate-fade-in space-y-6 text-left pt-20 pb-10">
+              <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
                   <div className="space-y-3 mb-6">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter">DEFINE MARKET STORY</h3>
+                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">DEFINE MARKET STORY</h3>
                       <p className="text-slate-300 text-base font-medium">Search YouTube for a video of the problem your audience faces. Your district exists to solve it.</p>
                   </div>
 
@@ -2010,7 +2241,7 @@
                         {/* YouTube: selected video view */}
                         {youtubeEmbedUrl && !isSearchPanelOpen ? (
                           <div className="space-y-8 animate-fade-in">
-                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 bg-[#0f172a]/50 p-6 rounded-2xl border border-white/5">
+                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 bg-[#0f172a]/50 p-10 rounded-2xl border border-white/5">
                               <div className="lg:col-span-3">
                                 <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black">
                                   <iframe src={youtubeEmbedUrl} title="YouTube Preview" frameBorder="0" allowFullScreen className="w-full h-full"></iframe>
@@ -2028,66 +2259,76 @@
                                         </li>
                                       ))}
                                     </ul>
-                                    <button onClick={() => setIsSearchPanelOpen(true)} className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
+                                    <div className="flex gap-2">
+                                      <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
+                                      <button onClick={() => {}} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
+                                    </div>
                                   </div>
                                 ) : (
                                   <div className="space-y-4">
-                                    <button onClick={generateStoryFromVideo} disabled={isGeneratingStory || !selectedVideoData} className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg disabled:opacity-30 disabled:hover:bg-indigo-600">{isGeneratingStory ? 'Drafting...' : 'Draft Market Story'}</button>
-                                    <button onClick={() => setIsSearchPanelOpen(true)} className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
+                                    {isGeneratingStory ? (
+                                      <div className="w-full py-4 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-black text-sm uppercase tracking-widest text-center animate-pulse">Drafting Market Story...</div>
+                                    ) : (
+                                      <button onClick={generateStoryFromVideo} className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg">Re-Draft Market Story</button>
+                                    )}
+                                    <div className="flex gap-2">
+                                      <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
+                                      <button onClick={() => {}} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
+                                    </div>
                                   </div>
                                 )}
                               </div>
                             </div>
 
                             {videoStory && (
-                              <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl animate-fade-in space-y-6 text-left">
-                                <div className="space-y-3 border-b border-white/5 pb-4">
+                              <div className="bg-white/[0.02] border border-white/5 p-10 rounded-2xl animate-fade-in space-y-8 text-left">
+                                <div className="space-y-4 border-b border-white/5 pb-6">
                                   <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">ReadyStack Brief</p>
                                   <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter">{videoStory.title}</h4>
                                   <p className="text-xs text-slate-300 italic leading-relaxed">{videoStory.narrative}</p>
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                  <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-2">Core Problem</p>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                  <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
+                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-4">Core Problem</p>
                                     <p className="text-xs text-slate-300 leading-relaxed">{videoStory.problem}</p>
                                   </div>
-                                  <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-2">Ideal Resident</p>
+                                  <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
+                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-4">Ideal Resident</p>
                                     <p className="text-xs text-slate-300 leading-relaxed">{videoStory.resident}</p>
                                   </div>
                                 </div>
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                   <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Network Map Seed</p>
-                                  <div className="grid md:grid-cols-3 gap-3">
-                                    <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                      <p className="text-xs font-black text-white/40 uppercase mb-2">Partners</p>
-                                      <ul className="space-y-1.5">{videoStory.network?.partners?.map((p, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{p}</span></li>)}</ul>
+                                  <div className="grid md:grid-cols-3 gap-4">
+                                    <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
+                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Partners</p>
+                                      <ul className="space-y-2">{videoStory.network?.partners?.map((p, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{p}</span></li>)}</ul>
                                     </div>
-                                    <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                      <p className="text-xs font-black text-white/40 uppercase mb-2">Customers</p>
-                                      <ul className="space-y-1.5">{videoStory.network?.customers?.map((c, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{c}</span></li>)}</ul>
+                                    <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
+                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Customers</p>
+                                      <ul className="space-y-2">{videoStory.network?.customers?.map((c, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{c}</span></li>)}</ul>
                                     </div>
-                                    <div className="bg-[#0f172a]/50 p-4 rounded-xl border border-white/5">
-                                      <p className="text-xs font-black text-white/40 uppercase mb-2">Guests</p>
-                                      <ul className="space-y-1.5">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{t}</span></li>)}</ul>
+                                    <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
+                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Guests</p>
+                                      <ul className="space-y-2">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{t}</span></li>)}</ul>
                                     </div>
                                   </div>
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                  <div className="space-y-3">
+                                <div className="grid md:grid-cols-2 gap-6">
+                                  <div className="space-y-4">
                                     <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
-                                    <ul className="space-y-2">
+                                    <ul className="space-y-3">
                                       {videoStory.checklist?.map((c, i) => (
-                                        <li key={i} className="text-xs text-slate-300 flex items-start gap-2 bg-[#0f172a]/30 p-2.5 rounded-lg border border-white/5">
+                                        <li key={i} className="text-xs text-slate-300 flex items-start gap-2 bg-[#0f172a]/30 p-3 rounded-lg border border-white/5">
                                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 text-white/30 shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                           <span>{c}</span>
                                         </li>
                                       ))}
                                     </ul>
                                   </div>
-                                  <div className="space-y-3">
+                                  <div className="space-y-4">
                                     <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Automations</p>
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                       {videoStory.automations?.map((a, i) => (
                                         <div key={i} className="bg-[#0f172a]/50 p-3 rounded-lg border border-white/5 text-xs space-y-0.5">
                                           <div className="flex gap-1.5"><span className="font-black text-white/30 w-12">TRIGGER</span> <span className="text-slate-300">{a.trigger}</span></div>
@@ -2339,66 +2580,102 @@
 
 
 
-                    <div className="pt-4 text-center border-t border-white/5">
-                      <button onClick={() => setActiveTab('intro')} disabled={!youtubeEmbedUrl} className={`px-10 py-3.5 rounded-xl text-white uppercase font-black tracking-[0.15em] text-xs transition-all border ${!youtubeEmbedUrl ? 'opacity-30 cursor-not-allowed bg-[#020617] border-white/5' : 'bg-white/10 border-white/10 hover:bg-white/15'}`}>Continue to Residents</button>
+                    <div className="pt-12 text-center border-t border-white/5">
+                      <button onClick={() => setActiveTab('intro')} disabled={!youtubeEmbedUrl} className={`px-10 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-xs transition-all border ${!youtubeEmbedUrl ? 'opacity-30 cursor-not-allowed bg-[#020617] border-white/5' : 'bg-white/10 border-white/10 hover:bg-white/15'}`}>Continue to Residents</button>
                     </div>
                   </div>
               </div>
             )}
             {activeTab === 'intro' && (
-              <div className="max-w-7xl mx-auto animate-fade-in pt-20">
-                <div className="space-y-14">
-                    <div className="space-y-4">
+              <div className="max-w-7xl mx-auto animate-fade-in pt-28">
+                <div className="space-y-20">
+                    <div className="space-y-6">
                         <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>WHO'S IN YOUR DISTRICT?</h3>
-                        <p className="text-slate-300 text-base font-medium">Assemble your team. Select from AI-recommended roles or add your own.</p>
+                        <p className="text-slate-300 text-base font-medium">Review the tasks from the video and assemble a district to deepen the learning and help audiences execute lesson.</p>
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
 
-                    {/* ── AI-RECOMMENDED ROLES (jobs to be done) ── */}
-                    {videoStory && videoStory.network && (
-                      <div className="space-y-5">
-                        <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Jobs to Be Done</h5>
-                        <p className="text-slate-300 text-sm">Based on your market story analysis. Click a role to assign it — then fill in who owns it.</p>
-                        <div className="flex flex-wrap gap-3">
-                          {[
-                            ...(videoStory.network.partners || []).map(p => ({ name: p, type: 'Partner' })),
-                            ...(videoStory.network.customers || []).map(c => ({ name: c, type: 'Customer' })),
-                            ...(videoStory.network.targets || []).map(t => ({ name: t, type: 'Guest' }))
-                          ].map((role, idx) => {
-                            const alreadyAssigned = storyParticipants.residents.some(r => r.jobContext === role.name);
-                            const typeColors = { Partner: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/20', Customer: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20', Guest: 'bg-amber-500/15 text-amber-300 border-amber-500/20' };
-                            return (
-                              <button key={idx} disabled={alreadyAssigned}
-                                onClick={() => {
-                                  if (alreadyAssigned) return;
-                                  setStoryParticipants(prev => {
-                                    const next = [...prev.residents];
-                                    const emptyIdx = next.findIndex(r => !(r.name || '').trim() && !r.jobContext);
-                                    if (emptyIdx === -1) return prev;
-                                    next[emptyIdx] = { name: '', company: '', specialty: '', email: '', source: 'ai', status: 'assigned', jobContext: role.name, jobType: role.type };
-                                    return { ...prev, residents: next };
-                                  });
-                                }}
-                                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border ${alreadyAssigned ? 'bg-white/5 text-slate-300 border-white/5 cursor-default' : typeColors[role.type] + ' hover:brightness-125 cursor-pointer'}`}>
-                                {role.name}{alreadyAssigned ? ' ✓' : ''}
-                                <span className={`ml-2 text-xs uppercase tracking-wider opacity-60`}>{role.type}</span>
-                              </button>
-                            );
-                          })}
+                    {/* ── TASKS: Actions + Automations from AI analysis ── */}
+                    {videoStory && (videoStory.checklist || videoStory.automations) && (
+                      <div className="space-y-6">
+                        <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
+                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your market story. These will populate the Preview card and JSON export.</p>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
+                            <ul className="space-y-3">
+                              {(videoStory.checklist || []).map((c, i) => (
+                                <li key={i} className="text-xs text-slate-300 flex items-start gap-2 bg-[#0f172a]/30 p-3 rounded-lg border border-white/5">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 text-white/30 shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                  <span>{c}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="space-y-4">
+                            <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Automations</p>
+                            <div className="space-y-3">
+                              {(videoStory.automations || []).map((a, i) => (
+                                <div key={i} className="bg-[#0f172a]/50 p-3 rounded-lg border border-white/5 text-xs space-y-1">
+                                  <div className="flex gap-1.5"><span className="font-black text-white/30 w-14 shrink-0">TRIGGER</span> <span className="text-slate-300">{a.trigger}</span></div>
+                                  <div className="flex gap-1.5"><span className="font-black text-white/30 w-14 shrink-0">ACTION</span> <span className="text-slate-300">{a.action}</span></div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
+                      </div>
+                    )}
+
+                    {/* ── SUGGESTED ROLES: Click to assign to a participant ── */}
+                    {videoStory && videoStory.network && (
+                      <div className="space-y-4">
+                        <h5 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Suggested Roles</h5>
+                        <p className="text-slate-500 text-xs">Click a role to assign it to a participant slot.</p>
+                        {(() => {
+                          const allRoles = [
+                            ...(videoStory.network.partners || []).map(p => ({ name: p })),
+                            ...(videoStory.network.customers || []).map(c => ({ name: c })),
+                            ...(videoStory.network.targets || []).map(t => ({ name: t }))
+                          ];
+                          const unassigned = allRoles.filter(role => !storyParticipants.residents.some(r => r.jobContext === role.name));
+                          if (unassigned.length === 0) return <p className="text-emerald-400 text-xs font-medium">All roles assigned.</p>;
+                          return (
+                            <div className="flex flex-wrap gap-3 pt-1">
+                              {unassigned.map((role, idx) => (
+                                <button key={idx}
+                                  onClick={() => {
+                                    setStoryParticipants(prev => {
+                                      const next = [...prev.residents];
+                                      const emptyIdx = next.findIndex(r => !(r.name || '').trim() && !r.jobContext);
+                                      if (emptyIdx === -1) {
+                                        next.push({ name: '', company: '', specialty: '', email: '', source: 'ai', status: 'assigned', jobContext: role.name, jobType: '' });
+                                      } else {
+                                        next[emptyIdx] = { name: '', company: '', specialty: '', email: '', source: 'ai', status: 'assigned', jobContext: role.name, jobType: '' };
+                                      }
+                                      return { ...prev, residents: next };
+                                    });
+                                  }}
+                                  className="px-4 py-2 rounded-lg text-xs font-semibold transition-all border bg-indigo-500/10 text-indigo-300 border-indigo-500/15 hover:brightness-125 cursor-pointer">
+                                  {role.name}
+                                </button>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 
                     {/* ── CURRENT RESIDENTS (this district) ── */}
                     <div>
-                        <div className="bg-slate-900/30 p-8 rounded-2xl border border-white/[0.04] text-left">
-                            <div className="flex items-center justify-between mb-5">
-                              <h5 className="text-sm font-bold text-white uppercase tracking-widest" style={{fontFamily:'Poppins,sans-serif'}}>Residents</h5>
-                              <span className="text-xs text-slate-300">{storyParticipants.residents.filter(r => (r.name || '').trim()).length} / {storyParticipants.residents.length} added</span>
+                        <div className="bg-slate-900/30 p-12 rounded-2xl border border-white/[0.04] text-left">
+                            <div className="flex items-center justify-between mb-10">
+                              <h5 className="text-sm font-bold text-white uppercase tracking-widest" style={{fontFamily:'Poppins,sans-serif'}}>Participants</h5>
+                              <span className="text-xs text-slate-300">{storyParticipants.residents.filter(r => (r.name || '').trim()).length} added</span>
                             </div>
 
                             {/* Specialty filter pills with headcount */}
-                            <div className="flex flex-wrap gap-2 mb-6">
+                            <div className="flex flex-wrap gap-3 mb-10">
                               {['All', ...SPECIALTY_OPTIONS].map(spec => {
                                 const isActive = rosterFilter === spec;
                                 const headcount = spec === 'All'
@@ -2466,14 +2743,14 @@
 
                               // ALL MODE — editable rows
                               return (<>
-                              <div className="flex gap-2 mb-3 px-1">
+                              <div className="flex gap-2 mb-6 px-1">
                                 <span className="w-[25%] text-xs font-medium text-slate-300 uppercase tracking-wider">Name</span>
                                 <span className="w-[20%] text-xs font-medium text-slate-300 uppercase tracking-wider">Company</span>
                                 <span className="w-[30%] text-xs font-medium text-slate-300 uppercase tracking-wider">Specialty</span>
                                 <span className="w-[20%] text-xs font-medium text-slate-300 uppercase tracking-wider">Email</span>
                                 <span className="w-[5%]"></span>
                               </div>
-                              <div className="space-y-3">
+                              <div className="space-y-6">
                               {(() => {
                                 const filledCount = storyParticipants.residents.filter(r => (r.name || '').trim() || r.jobContext).length;
                                 const visibleCount = Math.min(storyParticipants.residents.length, Math.max(3, filledCount + 2));
@@ -2481,23 +2758,16 @@
                               })().map((r, i) => {
                                 const hasName = (r.name || '').trim();
                                 const rosterMatch = masterRoster.find(m => m.name.toLowerCase() === (r.name || '').toLowerCase().trim());
-                                const jobTypeColors = { Partner: 'text-indigo-400 border-indigo-500/20', Customer: 'text-emerald-400 border-emerald-500/20', Guest: 'text-amber-400 border-amber-500/20' };
                                 return (
-                                <div key={i} className="space-y-0">
-                                  {r.jobContext && (
-                                    <div className={`flex items-center gap-2 mb-1.5 pl-1`}>
-                                      <span className={`text-xs font-bold uppercase tracking-wider ${(jobTypeColors[r.jobType] || 'text-slate-300').split(' ')[0]}`}>{r.jobType || 'Role'}:</span>
-                                      <span className="text-xs text-slate-300 italic">{r.jobContext}</span>
-                                    </div>
-                                  )}
+                                <div key={i} className="space-y-1.5">
                                   <div className="flex gap-2 items-center group">
-                                    <input placeholder={r.jobContext ? `Who handles ${r.jobContext}?` : `Resident ${i+1}`} value={r.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], name: v}; return {...prev, residents: next}; }); }} className={`w-[25%] min-w-0 bg-[#020617]/80 border rounded-lg px-3 py-2.5 text-xs text-white focus:border-slate-600 outline-none ${r.jobContext && !hasName ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-slate-800/60'}`} />
-                                    <input placeholder="company" value={r.company} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], company: v}; return {...prev, residents: next}; }); }} className="w-[20%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-3 py-2.5 text-xs text-slate-300 focus:border-slate-600 outline-none" />
-                                    <select value={r.specialty} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], specialty: v}; return {...prev, residents: next}; }); }} className={`w-[30%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-3 py-2.5 text-xs outline-none cursor-pointer focus:border-slate-600 ${r.specialty ? 'text-white' : 'text-slate-300'}`}>
+                                    <input placeholder={`Participant ${i+1}`} value={r.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], name: v}; return {...prev, residents: next}; }); }} className={`w-[25%] min-w-0 bg-[#020617]/80 border rounded-lg px-4 py-3 text-sm text-white focus:border-slate-600 outline-none ${r.jobContext && !hasName ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-slate-800/60'}`} />
+                                    <input placeholder="company" value={r.company} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], company: v}; return {...prev, residents: next}; }); }} className="w-[20%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
+                                    <select value={r.specialty} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], specialty: v}; return {...prev, residents: next}; }); }} className={`w-[30%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm outline-none cursor-pointer focus:border-slate-600 ${r.specialty ? 'text-white' : 'text-slate-300'}`}>
                                       <option value="">Select specialty...</option>
                                       {SPECIALTY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                                     </select>
-                                    <input placeholder="email" value={r.email || ''} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], email: v}; return {...prev, residents: next}; }); }} className="w-[20%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-3 py-2.5 text-xs text-slate-300 focus:border-slate-600 outline-none" />
+                                    <input placeholder="email" value={r.email || ''} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], email: v}; return {...prev, residents: next}; }); }} className="w-[20%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
                                     <div className="w-[5%] flex items-center justify-center">
                                       {(hasName || r.jobContext) && (
                                         <button onClick={() => { setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = { name: '', company: '', specialty: '', email: '', source: '', status: '', jobContext: '', jobType: '' }; return {...prev, residents: next}; }); }} className="text-slate-300 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
@@ -2506,9 +2776,25 @@
                                       )}
                                     </div>
                                   </div>
+                                  {r.jobContext && (
+                                    <div className="pl-1">
+                                      <span className="text-xs font-semibold text-indigo-400 italic">{r.jobContext}</span>
+                                    </div>
+                                  )}
                                 </div>
                                 );
                               })}
+                              </div>
+                              <div className="pt-4">
+                                <button onClick={() => {
+                                  setStoryParticipants(prev => ({
+                                    ...prev,
+                                    residents: [...prev.residents, { name: '', company: '', specialty: '', email: '', source: '', status: '', jobContext: '', jobType: '' }]
+                                  }));
+                                }} className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-indigo-300 border border-indigo-500/20 bg-indigo-500/10 hover:bg-indigo-500/15 transition-all cursor-pointer">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                                  Participant
+                                </button>
                               </div>
                               </>);
                             })()}
@@ -2522,88 +2808,238 @@
             )}
 
             {activeTab === 'mapper' && (
-              <div className="space-y-10 animate-fade-in text-left pt-20">
-                <div className="space-y-3">
+              <div className="space-y-12 animate-fade-in text-left pt-28">
+                <div className="space-y-6">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>LINKS</h3>
                     <p className="text-slate-300 text-base font-medium">Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey.</p>
                 </div>
                 {/* ── District Identity Card ── */}
-                <div className="bg-[#0f172a] p-8 rounded-[32px] border border-white/5 shadow-inner">
+                <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner">
                     <div className="grid md:grid-cols-3 gap-6">
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <label className="text-xs font-black text-slate-300 uppercase tracking-widest">READYSTACK NAME</label>
                             <input type="text" value={stackLabel} onChange={(e) => setStackLabel(e.target.value)} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-4 text-xs text-white focus:border-indigo-500 outline-none transition-colors" />
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <label className="text-xs font-black text-slate-300 uppercase tracking-widest">LANDING PAGE URL</label>
                             <input type="text" value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-4 text-xs text-white focus:border-indigo-500 outline-none transition-colors" />
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <label className="text-xs font-black text-slate-300 uppercase tracking-widest">GA4 MASTER ID</label>
                             <input type="text" value={ga4Id} onChange={(e) => setGa4Id(e.target.value)} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-4 text-xs text-white focus:border-indigo-500 outline-none transition-colors" />
                         </div>
                     </div>
                 </div>
 
-                {/* ── LINKS: Partner-first rows × 5 journey columns ── */}
-                <div className="bg-[#0f172a] p-8 rounded-[32px] border border-white/5 shadow-inner space-y-6">
-                    <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                        <h4 className="text-[14px] font-black text-indigo-400 uppercase tracking-[0.2em] italic">DISTRICT LINKS</h4>
-                        <button onClick={addSource} className="text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">+ Add Engagement Item</button>
+                {/* ── LINKS: Resident rows × 4 journey columns ── */}
+                <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner space-y-8">
+                    <div className="border-b border-white/5 pb-6">
+                        <h4 className="text-[14px] font-black text-indigo-400 uppercase tracking-[0.2em] italic">DISTRICT MAP</h4>
+                        <p className="text-slate-300 text-sm mt-2">Each participant gets a row. Add links to map their role across the journey.</p>
                     </div>
 
-                    {/* 5-Column Headers */}
-                    <div className="grid grid-cols-5 gap-2 mb-4">
+                    {/* 5-Column Headers: Traffic + 4 Journey Stages */}
+                    <div className="grid grid-cols-5 gap-2">
                       <div className="text-center py-3 px-2 rounded-xl border border-white/10 bg-white/[0.03]">
-                        <p className="text-xs font-black text-white uppercase tracking-widest">Traffic</p>
-                        <p className="text-xs text-slate-300">Preview Page</p>
+                        <p className="text-[9px] font-bold text-white uppercase tracking-widest">Traffic</p>
+                        <p className="text-[7px] text-slate-500 mt-0.5">Sources</p>
                       </div>
-                      {stages.map(s => (
-                        <div key={s.id} className="text-center py-3 px-2 rounded-xl border" style={{ borderColor: s.color + '30', backgroundColor: s.color + '08' }}>
-                          <p className="text-xs font-black uppercase tracking-widest" style={{ color: s.color }}>{s.label}</p>
-                          <p className="text-xs text-slate-300">{s.id === 'learning' ? 'Watch / Read' : s.id === 'selecting' ? 'Tour / Demo' : s.id === 'executing' ? 'Buy / Build' : 'Share / Earn'}</p>
+                      {[
+                        { label: 'Learning', color: '#ff2a1a', sub: 'Watch / Read' },
+                        { label: 'Selecting', color: '#ffd666', sub: 'Tour / Demo' },
+                        { label: 'Executing', color: '#48c9b0', sub: 'Buy / Build' },
+                        { label: 'Expanding', color: '#7c8cff', sub: 'Share / Earn' },
+                      ].map(col => (
+                        <div key={col.label} className="text-center py-3 px-2 rounded-xl border" style={{ borderColor: col.color + '30', backgroundColor: col.color + '08' }}>
+                          <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: col.color }}>{col.label}</p>
+                          <p className="text-[7px] text-slate-500 mt-0.5">{col.sub}</p>
                         </div>
                       ))}
                     </div>
 
-                    {/* Partner Rows */}
+                    {/* ReadyStack Row — TOP of map */}
+                    <div className="bg-slate-900/30 p-5 rounded-2xl border border-indigo-500/20">
+                      <div className="flex items-center gap-4 mb-4">
+                        <ReadyStackLogo size={14} />
+                        <p className="text-sm font-bold text-indigo-400">ReadyStack</p>
+                        <span className="text-[9px] font-semibold text-white uppercase tracking-widest">- Host</span>
+                      </div>
+                      <div className="grid grid-cols-5 gap-2 items-start">
+                        <div className="text-center py-2">
+                          <p className="text-[10px] font-bold text-white leading-snug">Pays 40% of</p>
+                          <p className="text-[10px] font-bold text-white leading-snug">Hosting Automation Fees</p>
+                          <p className="text-[10px] font-bold text-white leading-snug">to drive WOM</p>
+                        </div>
+                        {[
+                          { key: 'learning', color: '#ff2a1a' },
+                          { key: 'selecting', color: '#ffd666' },
+                          { key: 'executing', color: '#48c9b0' },
+                          { key: 'expanding', color: '#7c8cff' },
+                        ].map(q => {
+                          const dedicated = (mapping[q.key] || []).filter(p => p.dedicated);
+                          return (
+                            <div key={q.key} className="space-y-1.5">
+                              {dedicated.length === 0 && <p className="text-[9px] text-slate-500 text-center py-3 italic">Empty</p>}
+                              {dedicated.map((item, di) => (
+                                <div key={di} className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 border" style={{ backgroundColor: q.color + '08', borderColor: q.color + '25' }}>
+                                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: q.color }}></span>
+                                  <span className="text-[10px] font-medium truncate" style={{ color: '#e2e8f0' }}>{item.lab}</span>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Participant Cards */}
                     {(() => {
                       const residents = storyParticipants.residents.filter(r => (r.name || '').trim());
                       if (residents.length === 0) return (
-                        <div className="text-center py-12 text-slate-300">
-                          <p className="text-sm font-bold uppercase italic tracking-widest">No residents yet</p>
-                          <p className="text-xs mt-2 opacity-60">Add residents in step 2 to populate the Links grid.</p>
+                        <div className="text-center py-16 text-slate-300">
+                          <p className="text-sm font-bold uppercase italic tracking-widest">No participants yet</p>
+                          <p className="text-xs mt-3 opacity-60">Add participants in the Residents step to populate the district map.</p>
                         </div>
                       );
                       return residents.map((resident, ri) => {
-                        const name = resident.name.trim();
-                        const getItems = (stageId) => (mapping[stageId] || []).filter(p => (p.ven || '').toLowerCase() === name.toLowerCase() && !p.dedicated);
-                        const trafficItems = (mapping.sources || []).filter(s => (s.author || s.ven || '').toLowerCase() === name.toLowerCase());
+                        const origIdx = storyParticipants.residents.indexOf(resident);
+                        const displayName = (resident.name || '').trim() || resident.jobContext || `Participant ${ri + 1}`;
+                        const trafficSources = resident.trafficSources || [];
+                        const extraLinks = resident.extraLinks || [];
+
+                        /* Build columns from mapping + extra links */
+                        const cols = {
+                          traffic: trafficSources.map((ts, ti) => ({ ...ts, label: (TRAFFIC_SOURCE_OPTIONS.find(o => o.value === ts.type) || {}).label || ts.type, srcIdx: ti })),
+                          learning: (mapping.learning || []).filter(p => (p.ven || '').toLowerCase() === displayName.toLowerCase()).map((p, pi) => ({ ...p, label: p.lab, stageIdx: (mapping.learning || []).indexOf(p) })),
+                          selecting: (mapping.selecting || []).filter(p => (p.ven || '').toLowerCase() === displayName.toLowerCase()).map((p, pi) => ({ ...p, label: p.lab, stageIdx: (mapping.selecting || []).indexOf(p) })),
+                          executing: (mapping.executing || []).filter(p => (p.ven || '').toLowerCase() === displayName.toLowerCase()).map((p, pi) => ({ ...p, label: p.lab, stageIdx: (mapping.executing || []).indexOf(p) })),
+                          expanding: (mapping.expanding || []).filter(p => (p.ven || '').toLowerCase() === displayName.toLowerCase()).map((p, pi) => ({ ...p, label: p.lab, stageIdx: (mapping.expanding || []).indexOf(p) })),
+                        };
+
                         return (
-                          <div key={ri} className="rounded-2xl border border-white/5 bg-[#020617]/50 overflow-hidden">
-                            <div className="px-6 py-3 border-b border-white/5 flex items-center gap-3">
-                              <span className="text-[12px] font-black text-white uppercase italic tracking-tight">{name}</span>
-                              {resident.specialty && <span className="text-xs font-bold text-indigo-400/60 uppercase tracking-widest">{resident.specialty}</span>}
+                          <div key={ri} className="bg-slate-900/30 p-5 rounded-2xl border border-white/[0.04]">
+                            {/* Header: Name + Add Button */}
+                            <div className="flex items-center gap-3 mb-4">
+                              <p className="text-sm font-bold text-white">{displayName}</p>
+                              {resident.jobContext && (resident.name || '').trim() && <span className="text-xs font-semibold text-indigo-400 italic">{resident.jobContext}</span>}
+                              <div className="relative">
+                                <button
+                                  onClick={() => setMapEditingItem(mapEditingItem === 'dropdown-'+origIdx ? null : 'dropdown-'+origIdx)}
+                                  className="bg-[#020617] border border-indigo-500/40 rounded-lg px-3 py-1.5 text-[10px] text-indigo-300 outline-none cursor-pointer hover:border-indigo-400 hover:text-indigo-200 transition-colors flex items-center gap-1"
+                                >
+                                  <span className="text-indigo-400 font-bold">+</span> Link
+                                </button>
+                                {/* Dropdown */}
+                                {mapEditingItem === 'dropdown-'+origIdx && (
+                                  <div className="absolute top-full left-0 mt-1 z-50 bg-[#0f172a] border border-slate-600 rounded-xl shadow-2xl w-64 max-h-80 overflow-y-auto">
+                                    {/* TRAFFIC */}
+                                    <div className="px-3 pt-3 pb-1">
+                                      <p className="text-[9px] font-bold text-white uppercase tracking-widest border-b border-slate-600 pb-1.5">Traffic</p>
+                                    </div>
+                                    {TRAFFIC_SOURCE_OPTIONS.map(o => (
+                                      <button key={'t-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                        const updated = [...storyParticipants.residents];
+                                        const sources = [...(updated[origIdx].trafficSources || [])];
+                                        sources.push({ type: o.value, url: '' });
+                                        updated[origIdx] = { ...updated[origIdx], trafficSources: sources };
+                                        setStoryParticipants({ ...storyParticipants, residents: updated });
+                                        setMapEditingItem(null);
+                                      }}>{o.label}</button>
+                                    ))}
+                                    {/* LEARNING */}
+                                    <div className="px-3 pt-3 pb-1">
+                                      <p className="text-[9px] font-bold uppercase tracking-widest border-b border-slate-600 pb-1.5" style={{color:'#ff2a1a'}}>Learning</p>
+                                    </div>
+                                    {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'learning').map(o => (
+                                      <button key={'l-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                        setMapping(prev => ({ ...prev, learning: [...(prev.learning || []), { ven: displayName, lab: o.label, platform: o.value, pat: '', isManual: true }] }));
+                                        setMapEditingItem(null);
+                                      }}>{o.label}</button>
+                                    ))}
+                                    {/* SELECTING */}
+                                    <div className="px-3 pt-3 pb-1">
+                                      <p className="text-[9px] font-bold uppercase tracking-widest border-b border-slate-600 pb-1.5" style={{color:'#ffd666'}}>Selecting</p>
+                                    </div>
+                                    {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'selecting').map(o => (
+                                      <button key={'s-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                        setMapping(prev => ({ ...prev, selecting: [...(prev.selecting || []), { ven: displayName, lab: o.label, platform: o.value, pat: '', isManual: true }] }));
+                                        setMapEditingItem(null);
+                                      }}>{o.label}</button>
+                                    ))}
+                                    {/* EXECUTING */}
+                                    <div className="px-3 pt-3 pb-1">
+                                      <p className="text-[9px] font-bold uppercase tracking-widest border-b border-slate-600 pb-1.5" style={{color:'#48c9b0'}}>Executing</p>
+                                    </div>
+                                    {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'executing').map(o => (
+                                      <button key={'e-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                        setMapping(prev => ({ ...prev, executing: [...(prev.executing || []), { ven: displayName, lab: o.label, platform: o.value, pat: '', isManual: true }] }));
+                                        setMapEditingItem(null);
+                                      }}>{o.label}</button>
+                                    ))}
+                                    {/* EXPANDING */}
+                                    <div className="px-3 pt-3 pb-1">
+                                      <p className="text-[9px] font-bold uppercase tracking-widest border-b border-slate-600 pb-1.5" style={{color:'#7c8cff'}}>Expanding</p>
+                                    </div>
+                                    {LINK_TYPE_OPTIONS.filter(o => o.quadrant === 'expanding').map(o => (
+                                      <button key={'x-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
+                                        setMapping(prev => ({ ...prev, expanding: [...(prev.expanding || []), { ven: displayName, lab: o.label, platform: o.value, pat: '', isManual: true }] }));
+                                        setMapEditingItem(null);
+                                      }}>{o.label}</button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <div className="grid grid-cols-5 gap-2 p-4">
+
+                            {/* 5-Column Pill Grid */}
+                            <div className="grid grid-cols-5 gap-2 items-start">
                               {/* Traffic column */}
                               <div className="space-y-1.5">
-                                {trafficItems.length === 0 && <p className="text-xs text-slate-300 text-center py-3 italic">No sources</p>}
-                                {trafficItems.map((s, si) => (
-                                  <div key={si} className="bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-white truncate">
-                                    <MediumIcon type={s.type} size={10} className="inline mr-1" />{s.lab}
+                                {cols.traffic.length === 0 && <p className="text-[9px] text-slate-500 text-center py-3 italic">No sources</p>}
+                                {cols.traffic.map((item, ti) => (
+                                  <div key={ti} className="group relative">
+                                    <div className="flex items-center gap-1.5 bg-[#020617]/60 rounded-lg px-2.5 py-2 border border-white/5 hover:border-white/15 transition-all cursor-pointer"
+                                      onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-t-'+ti ? null : origIdx+'-t-'+ti)}>
+                                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-white"></span>
+                                      <span className="text-[10px] text-white font-medium flex-1 truncate">{item.label}</span>
+                                      <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
+                                        className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                    </div>
+                                    {mapEditingItem === origIdx+'-t-'+ti && (
+                                      <input autoFocus placeholder="https://..." value={item.url || ''} onChange={(e) => { const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources[item.srcIdx] = { ...sources[item.srcIdx], url: e.target.value }; updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
+                                        onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+                                        className="mt-1 w-full bg-[#020617] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none focus:border-indigo-500" />
+                                    )}
                                   </div>
                                 ))}
                               </div>
-                              {/* Stage columns */}
-                              {stages.map(stage => {
-                                const items = getItems(stage.id);
+
+                              {/* Journey stage columns */}
+                              {[
+                                { key: 'learning', color: '#ff2a1a' },
+                                { key: 'selecting', color: '#ffd666' },
+                                { key: 'executing', color: '#48c9b0' },
+                                { key: 'expanding', color: '#7c8cff' },
+                              ].map(q => {
+                                const items = cols[q.key];
                                 return (
-                                  <div key={stage.id} className="space-y-1.5">
-                                    {items.length === 0 && <p className="text-xs text-slate-300 text-center py-3 italic">--</p>}
+                                  <div key={q.key} className="space-y-1.5">
+                                    {items.length === 0 && <p className="text-[9px] text-slate-500 text-center py-3 italic">Empty</p>}
                                     {items.map((item, ii) => (
-                                      <div key={ii} className="rounded-lg px-3 py-2 text-xs font-bold truncate border" style={{ borderColor: stage.color + '30', backgroundColor: stage.color + '08', color: stage.color }}>
-                                        <MediumIcon type={item.platform} size={10} className="inline mr-1" />{item.lab}
+                                      <div key={ii} className="group relative">
+                                        <div className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 border transition-all cursor-pointer hover:border-opacity-40"
+                                          style={{ backgroundColor: q.color + '08', borderColor: item.pat ? q.color + '25' : '#1e293b' }}
+                                          onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-'+q.key+'-'+ii ? null : origIdx+'-'+q.key+'-'+ii)}>
+                                          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.pat ? q.color : q.color + '60' }}></span>
+                                          <span className="text-[10px] font-medium flex-1 truncate" style={{ color: item.pat ? '#e2e8f0' : '#cbd5e1' }}>{item.label}{!item.pat && <span className="text-[8px] text-amber-400/70 ml-1">needs link</span>}</span>
+                                          <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
+                                            className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                        </div>
+                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && (
+                                          <input autoFocus placeholder="https://..." value={item.pat || ''} onChange={(e) => { handlePatternUpdate(q.key, item.stageIdx, 'pat', e.target.value); }}
+                                            onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+                                            className="mt-1 w-full bg-[#020617] border rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none" style={{ borderColor: q.color + '40' }} />
+                                        )}
                                       </div>
                                     ))}
                                   </div>
@@ -2615,48 +3051,19 @@
                       });
                     })()}
 
-                    {/* ReadyStack dedicated row */}
-                    <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 overflow-hidden">
-                      <div className="px-6 py-3 border-b border-indigo-500/20 flex items-center gap-3">
-                        <ReadyStackLogo size={16} />
-                        <span className="text-[12px] font-black text-indigo-400 uppercase italic tracking-tight">ReadyStack</span>
-                        <span className="text-xs font-bold text-indigo-400/40 uppercase tracking-widest">Platform Infrastructure</span>
-                      </div>
-                      <div className="grid grid-cols-5 gap-2 p-4">
-                        <div className="space-y-1.5">
-                          {(mapping.sources || []).filter(s => s.type === 'youtube' && !(s.author || '').trim()).map((s, si) => (
-                            <div key={si} className="bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-white truncate">
-                              <MediumIcon type={s.type} size={10} className="inline mr-1" />{s.lab}
-                            </div>
-                          ))}
-                        </div>
-                        {stages.map(stage => {
-                          const dedicated = (mapping[stage.id] || []).filter(p => p.dedicated);
-                          return (
-                            <div key={stage.id} className="space-y-1.5">
-                              {dedicated.map((item, di) => (
-                                <div key={di} className="rounded-lg px-3 py-2 text-xs font-bold truncate border" style={{ borderColor: stage.color + '30', backgroundColor: stage.color + '08', color: stage.color }}>
-                                  <MediumIcon type={item.platform} size={10} className="inline mr-1" />{item.lab}
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
                 </div>
 
-                <div className="py-6 text-center">
-                    <button onClick={() => setActiveTab('finance')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">CONTINUE TO DISTRICT FINANCE</button>
+                <div className="py-12 text-center">
+                    <button onClick={() => setActiveTab('preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Preview</button>
                 </div>
               </div>
             )}
 
             {/* ── INVITE RESIDENTS TAB ── */}
             {activeTab === 'connect' && (
-              <div className="max-w-4xl mx-auto animate-fade-in pt-20">
-                <div className="space-y-10">
-                  <div className="space-y-3">
+              <div className="max-w-4xl mx-auto animate-fade-in pt-28">
+                <div className="space-y-12">
+                  <div className="space-y-6">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter">INVITE RESIDENTS</h3>
                     <p className="text-slate-300 text-base font-medium">Let your featured sources know you're spreading the word.</p>
                   </div>
@@ -2675,9 +3082,9 @@
                       );
                     }
                     return (
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         {citedAuthors.map((a, i) => (
-                          <div key={i} className="bg-[#0f172a]/60 p-6 rounded-[32px] border border-white/5 shadow-inner flex items-center justify-between">
+                          <div key={i} className="bg-[#0f172a]/60 p-8 rounded-[32px] border border-white/5 shadow-inner flex items-center justify-between">
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white">
                                 {a.platform === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-red-400"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
@@ -2702,41 +3109,145 @@
                             </div>
                           </div>
                         ))}
-                        <div className="text-center pt-6">
+                        <div className="text-center pt-8">
                           <p className="text-xs text-slate-300 italic">Notify sends an invitation to participate in your district. Mechanism coming soon.</p>
                         </div>
                       </div>
                     );
                   })()}
 
-                  <div className="text-center py-6">
-                    <button onClick={() => setActiveTab('looker')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Looker</button>
+                  <div className="text-center py-12">
+                    <button onClick={() => setActiveTab('preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Preview</button>
                   </div>
                 </div>
               </div>
             )}
 
 
+            {activeTab === 'preview' && (
+              <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
+                <div className="space-y-12">
+                  <div className="space-y-4">
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>PREVIEW</h3>
+                    <p className="text-slate-300 text-base font-medium">Review everything you've composed before shipping to ReadyStack Operations.</p>
+                  </div>
+
+                  {/* ── Market Story Summary ── */}
+                  <div className="bg-[#020617]/50 p-10 rounded-[32px] border border-white/5 shadow-inner space-y-6">
+                    <h4 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Market Story</h4>
+                    {videoStory ? (
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-6">
+                          {youtubeEmbedUrl && (
+                            <div className="w-48 h-28 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                              <iframe src={youtubeEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen></iframe>
+                            </div>
+                          )}
+                          <div className="space-y-2 flex-grow">
+                            <p className="text-white font-bold text-lg">{videoStory.title || 'Untitled'}</p>
+                            <p className="text-slate-300 text-sm leading-relaxed">{videoStory.summary || 'No summary generated.'}</p>
+                          </div>
+                        </div>
+                        {videoStory.themes && videoStory.themes.length > 0 && (
+                          <div className="flex flex-wrap gap-2 pt-2">
+                            {videoStory.themes.map((t, i) => (
+                              <span key={i} className="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-300 text-xs font-semibold border border-indigo-500/20">{t}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-slate-300 text-sm italic">No market story defined yet. Go back to Define Market Story to get started.</p>
+                    )}
+                  </div>
+
+                  {/* ── Residents Summary ── */}
+                  <div className="bg-[#020617]/50 p-10 rounded-[32px] border border-white/5 shadow-inner space-y-6">
+                    <h4 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Residents</h4>
+                    {(() => {
+                      const filled = storyParticipants.residents.filter(r => (r.name || '').trim());
+                      if (filled.length === 0) return <p className="text-slate-300 text-sm italic">No residents added yet.</p>;
+                      return (
+                        <div className="space-y-3">
+                          {filled.map((r, i) => (
+                            <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                              <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 text-xs font-black">{(r.name || '?')[0].toUpperCase()}</div>
+                              <div className="flex-grow">
+                                <p className="text-white text-sm font-bold">{r.name}</p>
+                                {r.jobContext && <p className="text-slate-300 text-xs">{r.jobType}: {r.jobContext}</p>}
+                              </div>
+                              <div className="text-slate-300 text-xs">{r.company || ''}</div>
+                              <div className="text-slate-300 text-xs">{r.specialty || ''}</div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* ── Links Summary ── */}
+                  <div className="bg-[#020617]/50 p-10 rounded-[32px] border border-white/5 shadow-inner space-y-6">
+                    <h4 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Links</h4>
+                    {(() => {
+                      const totalLinks = Object.values(mapping.learning || {}).flat().length + Object.values(mapping.buying || {}).flat().length + Object.values(mapping.sharing || {}).flat().length;
+                      if (totalLinks === 0) return <p className="text-slate-300 text-sm italic">No links mapped yet.</p>;
+                      return (
+                        <div className="grid grid-cols-3 gap-6">
+                          {[
+                            { key: 'learning', label: 'Learning', color: 'indigo' },
+                            { key: 'buying', label: 'Buying', color: 'emerald' },
+                            { key: 'sharing', label: 'Sharing', color: 'amber' }
+                          ].map(cat => {
+                            const items = Object.entries(mapping[cat.key] || {});
+                            const count = items.reduce((sum, [, urls]) => sum + urls.length, 0);
+                            return (
+                              <div key={cat.key} className="space-y-2">
+                                <p className={`text-xs font-black uppercase tracking-wider text-${cat.color}-400`}>{cat.label}</p>
+                                <p className="text-white text-2xl font-black">{count}</p>
+                                <p className="text-slate-300 text-xs">{count === 1 ? 'link' : 'links'} mapped</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* ── Ship to Operations ── */}
+                  <div className="text-center py-8 space-y-6">
+                    <div className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-emerald-400"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                      <span className="text-emerald-300 text-sm font-bold uppercase tracking-wider">Compose phase complete</span>
+                    </div>
+                    <div>
+                      <button onClick={() => setActiveTab('finance')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Operations</button>
+                    </div>
+                    <p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic">Your composed district will ship as JSON to ReadyStack when you're ready.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeTab === 'finance' && (
-              <div className="max-w-4xl mx-auto animate-fade-in pt-20">
-                <div className="space-y-10">
-                  <div className="space-y-3">
+              <div className="max-w-4xl mx-auto animate-fade-in pt-28">
+                <div className="space-y-12">
+                  <div className="space-y-6">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT FINANCE</h3>
                     <p className="text-slate-300 text-base font-medium">Manage angel participation and view your district revenue snapshot.</p>
                   </div>
 
                   {/* Angel Investors — full form */}
-                  <div className="p-10 rounded-[40px] bg-amber-500/5 border border-amber-500/20 shadow-2xl text-left">
-                    <h4 className="text-amber-400 text-[12px] font-black uppercase tracking-[0.3em] mb-10 italic text-left">ANGEL INVESTORS</h4>
-                    <div className="space-y-6 text-left">
+                  <div className="p-12 rounded-[40px] bg-amber-500/5 border border-amber-500/20 shadow-2xl text-left">
+                    <h4 className="text-amber-400 text-[12px] font-black uppercase tracking-[0.3em] mb-12 italic text-left">ANGEL INVESTORS</h4>
+                    <div className="space-y-8 text-left">
                       {(mapping.angels || []).map((a, scoutIdx) => (
-                        <div key={scoutIdx} className="bg-[#0f172a] p-8 rounded-3xl border border-slate-800 shadow-xl space-y-6 text-left">
+                        <div key={scoutIdx} className="bg-[#0f172a] p-10 rounded-3xl border border-slate-800 shadow-xl space-y-8 text-left">
                            <div className="grid grid-cols-12 gap-4 items-center group text-left">
                               <div className="col-span-11 grid grid-cols-4 gap-4 text-left">
-                                 <div className="space-y-1 text-left"><label className="text-xs font-black uppercase text-slate-300 text-left">Investor Name</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-mono text-left" placeholder="Investor Name" value={a.lab} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'lab', e.target.value)} /></div>
-                                 <div className="space-y-1 text-left"><label className="text-xs font-black uppercase text-slate-300 text-left">Class</label><select className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs outline-none text-left" value={a.platform} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'platform', e.target.value)}><option value="observer">Observation Angel</option><option value="awareness">District Awareness Angel</option><option value="seed">Investment Angel</option></select></div>
-                                 <div className="space-y-1 text-left"><label className="text-xs font-black uppercase text-slate-300 text-left">{a.platform === 'observer' ? 'Pending Investment' : 'Investment'}</label><input type="number" min="50000" step="10000" className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-mono text-left" value={a.amount} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'amount', parseInt(e.target.value))} /></div>
-                                 <div className="space-y-1 text-left"><label className="text-xs font-black uppercase text-slate-300 text-left">Portfolio</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-mono text-left" placeholder="URL" value={a.pat} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'pat', e.target.value)} /></div>
+                                 <div className="space-y-2 text-left"><label className="text-xs font-black uppercase text-slate-300 text-left">Investor Name</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-mono text-left" placeholder="Investor Name" value={a.lab} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'lab', e.target.value)} /></div>
+                                 <div className="space-y-2 text-left"><label className="text-xs font-black uppercase text-slate-300 text-left">Class</label><select className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs outline-none text-left" value={a.platform} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'platform', e.target.value)}><option value="observer">Observation Angel</option><option value="awareness">District Awareness Angel</option><option value="seed">Investment Angel</option></select></div>
+                                 <div className="space-y-2 text-left"><label className="text-xs font-black uppercase text-slate-300 text-left">{a.platform === 'observer' ? 'Pending Investment' : 'Investment'}</label><input type="number" min="50000" step="10000" className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-mono text-left" value={a.amount} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'amount', parseInt(e.target.value))} /></div>
+                                 <div className="space-y-2 text-left"><label className="text-xs font-black uppercase text-slate-300 text-left">Portfolio</label><input className="w-full bg-[#0a0f1e] border border-slate-700 rounded-lg px-3 py-2 text-white text-xs font-mono text-left" placeholder="URL" value={a.pat} onChange={(e) => handlePatternUpdate('angels', scoutIdx, 'pat', e.target.value)} /></div>
                               </div>
                               <div className="flex items-center gap-2 text-left">
                                 <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity text-left">
@@ -2746,7 +3257,7 @@
                                 <button onClick={() => removePattern('angels', scoutIdx)} className="text-slate-300 hover:text-red-500 flex justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg></button>
                               </div>
                            </div>
-                           {a.platform === 'seed' && (<div className="pl-6 border-l-2 border-emerald-500/20 space-y-4 text-left"><h5 className="text-xs font-black text-emerald-400 uppercase tracking-widest italic text-left">Startup Allocations</h5><div className="flex flex-wrap gap-3 text-left">{a.startups?.map((startupVen, startupIdx) => (
+                           {a.platform === 'seed' && (<div className="pl-8 border-l-2 border-emerald-500/20 space-y-6 text-left"><h5 className="text-xs font-black text-emerald-400 uppercase tracking-widest italic text-left">Startup Allocations</h5><div className="flex flex-wrap gap-3 text-left">{a.startups?.map((startupVen, startupIdx) => (
                                <div key={startupIdx} className="flex items-center gap-2 bg-[#0a0f1e] border border-emerald-500/30 rounded-full pl-4 pr-2 py-1.5 shadow-inner text-left">
                                    <select className="bg-transparent text-white text-xs outline-none font-bold italic uppercase tracking-tight text-left" value={startupVen} onChange={(e) => updateScoutStartup(scoutIdx, startupIdx, e.target.value)}>
                                        {(mapping.learning || []).map((p, pIdx) => <option key={pIdx} value={p.ven}>{p.ven || `Partner ${pIdx+1}`}</option>)}
@@ -2760,136 +3271,64 @@
                   </div>
 
                   {/* Revenue Snapshot */}
-                  <div className="bg-[#0f172a]/60 p-6 rounded-[32px] border border-white/5 shadow-inner text-left">
-                    <h5 className="text-xs font-black text-white/70 uppercase tracking-widest mb-4">DISTRICT REVENUE SNAPSHOT</h5>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-[#020617] rounded-xl p-4 border border-white/5 text-center">
-                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-1">Residents</p>
+                  <div className="bg-[#0f172a]/60 p-8 rounded-[32px] border border-white/5 shadow-inner text-left">
+                    <h5 className="text-xs font-black text-white/70 uppercase tracking-widest mb-6">DISTRICT REVENUE SNAPSHOT</h5>
+                    <div className="grid grid-cols-3 gap-6">
+                      <div className="bg-[#020617] rounded-xl p-6 border border-white/5 text-center">
+                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-2">Residents</p>
                         <p className="text-2xl font-black text-white">{storyParticipants.residents.filter(r => (r.name || '').trim()).length}</p>
                       </div>
-                      <div className="bg-[#020617] rounded-xl p-4 border border-white/5 text-center">
-                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-1">Angel Investors</p>
+                      <div className="bg-[#020617] rounded-xl p-6 border border-white/5 text-center">
+                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-2">Angel Investors</p>
                         <p className="text-2xl font-black text-white">{(mapping.angels || []).length}</p>
                       </div>
-                      <div className="bg-[#020617] rounded-xl p-4 border border-white/5 text-center">
-                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-1">Pending Capital</p>
+                      <div className="bg-[#020617] rounded-xl p-6 border border-white/5 text-center">
+                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-2">Pending Capital</p>
                         <p className="text-2xl font-black text-white">${(mapping.angels || []).reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-center py-6"><button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-4">Continue to District Flow.</p></div>
+                  <div className="text-center py-12"><button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-6">Continue to District Flow.</p></div>
                 </div>
               </div>
             )}
 
             {activeTab === 'observatory' && (
-              <div className="space-y-5 animate-fade-in font-sans text-left relative pt-20">
-                <div className="flex justify-between items-center border-b border-white/5 pb-8 relative z-[600]">
-                    <div className="flex items-center gap-12 text-left">
-                      {/* Flow Tab Switcher */}
-                      <div className="flex items-center gap-1 bg-slate-900 rounded-xl p-1.5 border border-slate-800 shadow-inner">
-                        {[
-                          { id: 'ecosystem', label: 'Ecosystem' },
-                          { id: 'relational', label: 'Relational' },
-                          { id: 'cross', label: 'Cross-Pollination' }
-                        ].map(tab => (
-                          <button key={tab.id} onClick={() => setFlowTab(tab.id)} className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${flowTab === tab.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-300 hover:text-slate-300'}`}>{tab.label}</button>
-                        ))}
-                      </div>
-                      {/* Stage Legend — always visible */}
-                      <div className="flex items-center gap-6 bg-white/5 px-6 py-3 rounded-2xl border border-white/10 shadow-inner">
-                        {stages.map(s => (
-                          <div key={s.id} className="flex items-center gap-2">
-                            <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.3)]" style={{ backgroundColor: s.color }}></div>
-                            <span className="text-xs font-black uppercase text-slate-300 tracking-widest">{s.label}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="relative cursor-help py-2" onMouseEnter={() => setIncomeLegendHover(true)} onMouseLeave={() => setIncomeLegendHover(false)}>
-                        <span className={`text-xs font-black uppercase tracking-[0.2em] transition-colors ${incomeLegendHover ? 'text-fuchsia-400' : 'text-slate-300'}`}>District Finance</span>
-                        <div className={`absolute top-full right-0 mt-4 bg-slate-950/95 backdrop-blur-2xl border border-fuchsia-500/20 p-8 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.8)] w-[420px] transition-all duration-300 pointer-events-none ${incomeLegendHover ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                           <div className="space-y-6">
-                              <h5 className="text-xs font-black text-white uppercase italic tracking-[0.2em] border-b border-white/10 pb-4 text-left">District Finance Overview</h5>
-
-                              {nodes.finance.districtDividendsAmount > 0 && (
-                                <div className="pb-4 border-b border-white/10 text-left">
-                                  <div className="flex justify-between items-start gap-2">
-                                    <div className="text-left">
-                                      <p className="text-xs font-black uppercase tracking-[0.2em] italic" style={{ color: 'var(--accent)' }}>District Dividends</p>
-                                      <p className="text-xs text-slate-300 italic mt-0.5">60% of ReadyStack automation fees</p>
-                                    </div>
-                                    <span className="text-[15px] font-black tabular-nums" style={{ color: 'var(--accent)' }}>${(nodes.finance.districtDividendsAmount).toLocaleString()}</span>
-                                  </div>
-                                </div>
-                              )}
-
-                              <div className="space-y-2 text-left">
-                                <p className="text-xs font-black text-emerald-400 uppercase tracking-widest mb-1 italic opacity-80 text-left">Snapshot of Revenue</p>
-                                <div className="space-y-1.5 overflow-visible border-b border-white/5 pb-4">
-                                  {nodes.finance.snapshotRevenueItems.length > 0 ? nodes.finance.snapshotRevenueItems.map((item, idx) => (
-                                    <div key={`rev-${idx}`} className="flex justify-between items-end gap-2 text-xs font-bold">
-                                       <div className="flex items-center gap-1 min-w-0">
-                                          <span className="text-slate-300 shrink-0 uppercase tracking-tighter text-left">{item.typePrefix}</span>
-                                          <span className="text-white uppercase truncate italic text-left">{item.label}</span>
-                                       </div>
-                                       <div className="flex-grow border-b border-dotted border-white/10 mb-1 text-left"></div>
-                                       <span className="text-indigo-300 tabular-nums shrink-0 text-left">${(item.amount).toLocaleString()}</span>
-                                    </div>
-                                  )) : <p className="text-xs text-slate-300 italic">No revenue assets identified.</p>}
-                                </div>
-                                <div className="flex justify-between items-center pt-2">
-                                   <span className="text-xs font-black text-emerald-400 uppercase tracking-widest italic text-left">Total Snapshot ARR</span>
-                                   <span className="text-[12px] font-black text-white tabular-nums text-left">${(nodes.finance.totalSnapshotARR).toLocaleString()}</span>
-                                </div>
-                              </div>
-
-                              <div className="space-y-2 pt-2 border-t border-white/10 text-left">
-                                <p className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-1 italic opacity-80 text-left">Investment In</p>
-                                <div className="space-y-1.5 overflow-visible">
-                                  {nodes.finance.investmentInItems.length > 0 ? nodes.finance.investmentInItems.map((item, idx) => (
-                                    <div key={`inv-${idx}`} className="flex justify-between items-end gap-2 text-xs font-bold">
-                                       <span className="text-white uppercase truncate italic text-left">{item.label}</span>
-                                       <div className="flex-grow border-b border-dotted border-white/10 mb-1 text-left"></div>
-                                       <span className="text-indigo-300 tabular-nums shrink-0 text-left">${(item.amount).toLocaleString()}</span>
-                                    </div>
-                                  )) : <p className="text-xs text-slate-300 italic text-left">No active investments.</p>}
-                                </div>
-                              </div>
-
-                              <div className="space-y-2 pt-2 border-t border-white/10 text-left">
-                                <p className="text-xs font-black text-amber-500 uppercase tracking-widest mb-1 italic opacity-80 text-left">Pending Investment</p>
-                                <div className="space-y-1.5 overflow-visible">
-                                  {nodes.finance.pendingInvestmentItems.length > 0 ? nodes.finance.pendingInvestmentItems.map((item, idx) => (
-                                    <div key={`pend-${idx}`} className="flex justify-between items-end gap-2 text-xs font-bold opacity-60">
-                                       <span className="text-white uppercase truncate italic text-left">{item.label}</span>
-                                       <div className="flex-grow border-b border-dotted border-white/10 mb-1 text-left text-left"></div>
-                                       <span className="text-indigo-300 tabular-nums shrink-0 text-left">${(item.amount).toLocaleString()}</span>
-                                    </div>
-                                  )) : <p className="text-xs text-slate-300 italic text-left text-left">No pending capital.</p>}
-                                </div>
-                              </div>
-
-                              <div className="pt-4 border-t-2 border-white/20 flex justify-between items-center">
-                                 <span className="text-xs font-black text-white uppercase italic tracking-widest text-left">Total District Capital</span>
-                                 <span className="text-[16px] font-black text-fuchsia-400 tabular-nums text-left">${(nodes.finance.totalFinanceCapital || 0).toLocaleString()}</span>
-                              </div>
-                           </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 text-left">
-                      <div className="flex items-center gap-2 bg-slate-900 rounded-xl p-1.5 border border-slate-800 shadow-inner">
-                        <button onClick={() => { setObsMode('live'); setIsNarrativePlaying(false); }} className={`px-8 py-2 rounded-lg text-xs font-black uppercase flex items-center gap-2 transition-all text-left ${obsMode === 'live' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-300 hover:text-slate-300'}`}>
-                          <div className={`w-1.5 h-1.5 rounded-full ${obsMode === 'live' ? 'bg-white animate-pulse' : 'bg-slate-600'}`}></div> LIVE
-                        </button>
-                        <div className="flex items-center text-left"><select value={obsMode === 'snapshot' ? snapshotPeriod : ''} onChange={(e) => { setObsMode('snapshot'); setSnapshotPeriod(e.target.value); setIsNarrativePlaying(false); }} className={`bg-transparent px-4 py-2 rounded-lg text-xs font-black uppercase outline-none transition-all cursor-pointer text-left ${obsMode === 'snapshot' ? 'text-white' : 'text-slate-300 hover:text-slate-300'}`}><option value="" disabled>SNAPSHOT</option><option value="1week">1 Week Ago</option><option value="2weeks">2 Weeks Ago</option><option value="1month">1 Month Ago</option></select></div>
-                      </div>
-                      <button onClick={toggleNarrative} className={`px-8 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-3 transition-all border text-left ${isNarrativePlaying ? 'bg-fuchsia-600 border-fuchsia-400 text-white shadow-[0_0_25px_rgba(192,38,211,0.5)]' : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/30'}`}>{isNarrativePlaying ? <i data-lucide="pause" className="w-3 h-3 text-left"></i> : <i data-lucide="play" className="w-3 h-3 text-left"></i>}{isNarrativePlaying ? `Month ${playbackProgress + 1}` : 'Narrative'}</button>
-                    </div>
+              <div className="space-y-8 animate-fade-in font-sans text-left relative pt-28">
+                {/* Title */}
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-bold text-white" style={{fontFamily:'Poppins,sans-serif'}}>District Flow</h1>
+                  <p className="text-slate-400">Visualize your district ecosystem in motion</p>
                 </div>
+
+                {/* Row 1: Tab Switcher */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1 bg-slate-900 rounded-xl p-1 border border-slate-800">
+                    {[
+                      { id: 'ecosystem', label: 'Ecosystem' },
+                      { id: 'relational', label: 'Relational' },
+                      { id: 'cross', label: 'Cross-Pollination' }
+                    ].map(tab => (
+                      <button key={tab.id} onClick={() => { setFlowTab(tab.id); if (tab.id !== 'cross') setSelectedArtist(null); }} className={`px-5 py-2 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all ${flowTab === tab.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>{tab.label}</button>
+                    ))}
+                  </div>
+                  <span className="text-[10px] text-slate-600">{flowTab === 'ecosystem' ? 'Live traffic ecosystem — organic flow' : flowTab === 'relational' ? 'Organized cause & effect — participant columns × journey stages' : 'Cross-pollination paths between participants'}</span>
+                </div>
+
+                {/* Row 2: Live / Snapshot / Narrative */}
+                <div className="flex items-center gap-4 text-left">
+                  <div className="flex items-center gap-2 bg-slate-900 rounded-xl p-1.5 border border-slate-800 shadow-inner">
+                    <button onClick={() => { setObsMode('live'); setIsNarrativePlaying(false); }} className={`px-8 py-2 rounded-lg text-xs font-black uppercase flex items-center gap-2 transition-all text-left ${obsMode === 'live' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-300 hover:text-slate-300'}`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${obsMode === 'live' ? 'bg-white animate-pulse' : 'bg-slate-600'}`}></div> LIVE
+                    </button>
+                    <div className="flex items-center text-left"><select value={obsMode === 'snapshot' ? snapshotPeriod : ''} onChange={(e) => { setObsMode('snapshot'); setSnapshotPeriod(e.target.value); setIsNarrativePlaying(false); }} className={`bg-transparent px-4 py-2 rounded-lg text-xs font-black uppercase outline-none transition-all cursor-pointer text-left ${obsMode === 'snapshot' ? 'text-white' : 'text-slate-300 hover:text-slate-300'}`}><option value="" disabled>SNAPSHOT</option><option value="1week">1 Week Ago</option><option value="2weeks">2 Weeks Ago</option><option value="1month">1 Month Ago</option></select></div>
+                  </div>
+                  <button onClick={toggleNarrative} className={`px-8 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-3 transition-all border text-left ${isNarrativePlaying ? 'bg-fuchsia-600 border-fuchsia-400 text-white shadow-[0_0_25px_rgba(192,38,211,0.5)]' : 'bg-slate-900 border-white/10 text-slate-300 hover:border-white/30'}`}>{isNarrativePlaying ? <i data-lucide="pause" className="w-3 h-3 text-left"></i> : <i data-lucide="play" className="w-3 h-3 text-left"></i>}{isNarrativePlaying ? `Month ${playbackProgress + 1}` : 'Narrative'}</button>
+                </div>
+
                 {/* ── ECOSYSTEM VIEW: Original hub-and-spoke SVG ── */}
-                {flowTab === 'ecosystem' && (
+                {flowTab === 'ecosystem' && (<>
                 <div className="overflow-x-auto bg-[#020617] py-5 relative text-left w-full">
                   <div className="bg-[#01040d] rounded-[64px] border border-white/5 shadow-2xl relative overflow-hidden w-[1200px] h-[1300px] mx-auto">
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 1300">
@@ -2914,102 +3353,164 @@
                         );
                       })}
                     </svg>
+                    {/* Quadrant Labels */}
+                    <div className="absolute" style={{ left: 100, top: 500, color: '#ff2a1a', opacity: 0.6, fontSize: '11px', fontWeight: 900, fontStyle: 'italic', letterSpacing: '0.4em', textTransform: 'uppercase', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>DISCOVER</div>
+                    <div className="absolute" style={{ left: 700, top: 500, color: '#ffd666', opacity: 0.6, fontSize: '11px', fontWeight: 900, fontStyle: 'italic', letterSpacing: '0.4em', textTransform: 'uppercase', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>ENGAGE</div>
+                    <div className="absolute" style={{ left: 100, top: 820, color: '#48c9b0', opacity: 0.6, fontSize: '11px', fontWeight: 900, fontStyle: 'italic', letterSpacing: '0.4em', textTransform: 'uppercase', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>CONNECT</div>
+                    <div className="absolute" style={{ left: 700, top: 820, color: '#7c8cff', opacity: 0.6, fontSize: '11px', fontWeight: 900, fontStyle: 'italic', letterSpacing: '0.4em', textTransform: 'uppercase', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>SUPPORT</div>
+                    {/* Traffic Sources Label */}
+                    <div className="absolute" style={{ left: 60, top: 120, color: '#ffffff', fontSize: '11px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.7, pointerEvents: 'none' }}>TRAFFIC SOURCES</div>
+
+                    {/* Nodes */}
                     {nodes.items.map(n => {
                       const iconColor = n.type === 'youtube' ? '#f87171' : n.type === 'substack' ? '#fb923c' : n.type === 'reddit' ? '#f97316' : '#ffffff';
                       return (
-                      <div key={n.id} className="absolute node-container" style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20 }} onMouseEnter={() => handleNodeHover(n)} onMouseLeave={handleNodeLeave}><div className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' : n.isSystem ? 'rounded-xl border-[2.5px] rotate-45' : 'rounded-full border-[2px]'}`} style={{ borderColor: n.color, width: `${n.radius * 2}px`, height: `${n.radius * 2}px`, color: iconColor }}><div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}><MediumIcon type={n.type} size={n.radius * 0.9} /></div></div></div>
+                      <div key={n.id} className="absolute node-container" style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20, pointerEvents: 'none' }}><div className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' : n.isSystem ? 'rounded-xl border-[2.5px] rotate-45' : 'rounded-full border-[2px]'}`} style={{ borderColor: n.color, width: `${n.radius * 2}px`, height: `${n.radius * 2}px`, color: iconColor, pointerEvents: 'auto' }} onMouseEnter={() => handleNodeHover(n)} onMouseLeave={handleNodeLeave}><div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}><MediumIcon type={n.type} size={n.radius * 0.9} /></div></div></div>
                       );
                     })}
+                  </div>
+                </div>
+                {/* Quadrant Stats */}
+                <div className="grid grid-cols-4 gap-4">
+                  {[
+                    { label: 'DISCOVER', color: '#ff2a1a', count: (nodes.items || []).filter(n => n.stageId === 'learning').length },
+                    { label: 'ENGAGE', color: '#ffd666', count: (nodes.items || []).filter(n => n.stageId === 'selecting').length },
+                    { label: 'CONNECT', color: '#48c9b0', count: (nodes.items || []).filter(n => n.stageId === 'executing').length },
+                    { label: 'SUPPORT', color: '#7c8cff', count: (nodes.items || []).filter(n => n.stageId === 'expanding').length },
+                  ].map(q => (
+                    <div key={q.label} className="bg-[#01040d] rounded-2xl border border-white/5 p-5 text-center">
+                      <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: q.color }}>{q.label}</p>
+                      <p className="text-2xl font-black text-white">{q.count}</p>
+                      <p className="text-[9px] text-slate-500 mt-1">{(q.count * 820).toLocaleString()} interactions</p>
+                    </div>
+                  ))}
+                </div>
+                </>)}
+
+                {/* ── RELATIONAL VIEW: SVG node-based grid with flow paths ── */}
+                {flowTab === 'relational' && (
+                <div className="overflow-x-auto bg-[#020617] py-5 relative text-left w-full">
+                  <div className="bg-[#01040d] rounded-[64px] border border-white/5 shadow-2xl relative overflow-hidden w-[1200px] h-[1300px] mx-auto">
+                    {/* Column Headers */}
+                    {nodes.columnHeaders && nodes.columnHeaders.map((col, i) => (
+                      <div key={`col-${i}`} className="absolute" style={{ left: col.x, top: col.y, transform: 'translateX(-50%)', zIndex: 30 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: col.name === 'ReadyStack' ? '#7c8cff' : '#ffffff', fontFamily: 'Poppins, sans-serif', textAlign: 'center', padding: '6px 16px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>{col.name}</div>
+                      </div>
+                    ))}
+                    {/* Row Labels */}
+                    {(nodes.rowLabels || []).map((row, i) => (
+                      <div key={`row-${i}`} className="absolute" style={{ left: 18, top: row.y, transform: 'translateY(-50%) rotate(-90deg)', transformOrigin: 'center center', zIndex: 30 }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: row.color, textTransform: 'uppercase', letterSpacing: '2px', opacity: 0.6 }}>{row.label}</span>
+                      </div>
+                    ))}
+                    {/* SVG Flows */}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 1300" style={{ zIndex: 10 }}>
+                      <defs><filter id="relGlow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+                      {(nodes.flows || []).map((flow, i) => {
+                        const dx = flow.to.x - flow.from.x; const dy = flow.to.y - flow.from.y;
+                        const ctrl1X = flow.from.x + dx * 0.35; const ctrl1Y = flow.from.y + dy * 0.2;
+                        const ctrl2X = flow.to.x - dx * 0.35; const ctrl2Y = flow.to.y - dy * 0.2;
+                        const d = `M ${flow.from.x} ${flow.from.y} C ${ctrl1X} ${ctrl1Y}, ${ctrl2X} ${ctrl2Y}, ${flow.to.x} ${flow.to.y}`;
+                        return (
+                          <g key={`rel-flow-${i}`}>
+                            <path d={d} stroke={flow.color} strokeWidth={flow.strokeWidth} fill="none" opacity={flow.isCrossArtist ? 0.2 : 0.4} filter="url(#relGlow)" />
+                          </g>
+                        );
+                      })}
+                    </svg>
+                    {/* Nodes */}
+                    {nodes.items.map(n => (
+                      <div key={n.id} className="absolute" style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20 }}>
+                        <div className="relative" style={{ width: n.radius * 2, height: n.radius * 2 }}>
+                          <div className="absolute inset-0 rounded-full" style={{ background: n.color, opacity: 0.15, boxShadow: `0 0 ${n.radius}px ${n.color}40` }}></div>
+                          <div className="absolute inset-1 rounded-full border-2" style={{ borderColor: n.color, opacity: 0.6 }}></div>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span style={{ fontSize: '10px', color: n.color, fontWeight: 700 }}>{(n.label || '').substring(0, 2).toUpperCase()}</span>
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
                 )}
 
-                {/* ── RELATIONAL VIEW: Participant columns x Stage rows grid ── */}
-                {flowTab === 'relational' && (
-                <div className="bg-[#01040d] rounded-[32px] border border-white/5 shadow-2xl p-8 overflow-x-auto">
-                  {(() => {
-                    const residents = storyParticipants.residents.filter(r => (r.name || '').trim());
-                    const cols = ['ReadyStack', ...residents.map(r => r.name.trim())];
-                    return (
-                      <div style={{ minWidth: Math.max(800, cols.length * 160) }}>
-                        {/* Column headers */}
-                        <div className="flex gap-2 mb-6 pl-28">
-                          {cols.map((name, ci) => (
-                            <div key={ci} className="flex-1 text-center">
-                              <div className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight ${name === 'ReadyStack' ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20' : 'text-white bg-white/[0.04] border border-white/10'}`}>{name}</div>
-                            </div>
-                          ))}
-                        </div>
-                        {/* Stage rows */}
-                        {stages.map(stage => (
-                          <div key={stage.id} className="flex gap-2 mb-3 items-stretch">
-                            <div className="w-24 shrink-0 flex items-center justify-end pr-4">
-                              <span className="text-xs font-black uppercase tracking-widest opacity-60" style={{ color: stage.color }}>{stage.label}</span>
-                            </div>
-                            {cols.map((name, ci) => {
-                              const items = name === 'ReadyStack'
-                                ? (mapping[stage.id] || []).filter(p => p.dedicated)
-                                : (mapping[stage.id] || []).filter(p => (p.ven || '').toLowerCase() === name.toLowerCase() && !p.dedicated);
-                              return (
-                                <div key={ci} className="flex-1 min-h-[60px] rounded-xl border p-2 space-y-1" style={{ borderColor: stage.color + '15', backgroundColor: stage.color + '05' }}>
-                                  {items.length === 0 && <p className="text-xs text-slate-300 text-center py-4 italic">--</p>}
-                                  {items.map((item, ii) => (
-                                    <div key={ii} className="rounded-lg px-2 py-1.5 text-xs font-bold truncate" style={{ backgroundColor: stage.color + '15', color: stage.color }}>
-                                      <MediumIcon type={item.platform} size={9} className="inline mr-1" />{item.lab}
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()}
+                {/* ── CROSS-POLLINATION VIEW: Ecosystem SVG clone + participant focus pills ── */}
+                {flowTab === 'cross' && (<>
+                {/* Participant Focus Pills */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-bold uppercase text-slate-600 mr-2 tracking-wider">Focus</span>
+                  <button onClick={() => setSelectedArtist(null)} className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all border ${!selectedArtist ? 'bg-white/10 border-white/30 text-white shadow-lg' : 'bg-transparent border-white/5 text-slate-500'}`}>All Participants</button>
+                  {storyParticipants.residents.filter(r => (r.name || '').trim()).map(r => (
+                    <button key={r.name} onClick={() => setSelectedArtist(selectedArtist === r.name ? null : r.name)} className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all border ${selectedArtist === r.name ? 'bg-fuchsia-600/20 border-fuchsia-400/50 text-fuchsia-300' : 'bg-transparent border-white/5 text-slate-500'}`}>{r.name}</button>
+                  ))}
                 </div>
+
+                {/* Cross-Pollination Banner (shows when participant selected) */}
+                {selectedArtist && (
+                  <div className="flex items-center gap-3 px-4 py-2 bg-fuchsia-950/30 border border-fuchsia-500/20 rounded-xl">
+                    <div className="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse"></div>
+                    <span className="text-[11px] text-fuchsia-300 font-semibold">{selectedArtist}: cross-pollination paths detected</span>
+                    <span className="text-[10px] text-slate-500">Gravity lines show where {selectedArtist}'s content pulls traffic into other participants' ecosystems</span>
+                  </div>
                 )}
 
-                {/* ── CROSS-POLLINATION VIEW: Per-participant focus with gravity lines ── */}
-                {flowTab === 'cross' && (
-                <div className="bg-[#01040d] rounded-[32px] border border-white/5 shadow-2xl p-8 space-y-8">
-                  <p className="text-xs text-slate-300 font-bold uppercase tracking-widest italic">How each resident connects across all four stages. Lines show shared-stage proximity.</p>
-                  {(() => {
-                    const residents = storyParticipants.residents.filter(r => (r.name || '').trim());
-                    if (residents.length === 0) return <p className="text-center text-slate-300 py-12 italic">Add residents to see cross-pollination paths.</p>;
-                    return residents.map((resident, ri) => {
-                      const name = resident.name.trim();
-                      const stageData = stages.map(stage => {
-                        const items = (mapping[stage.id] || []).filter(p => (p.ven || '').toLowerCase() === name.toLowerCase() && !p.dedicated);
-                        return { stage, items };
-                      });
-                      const hasAny = stageData.some(sd => sd.items.length > 0);
-                      if (!hasAny) return null;
+                {/* Ecosystem SVG Clone — filtered by selectedArtist */}
+                <div className="overflow-x-auto bg-[#020617] py-5 relative text-left w-full">
+                  <div className="bg-[#01040d] rounded-[64px] border border-white/5 shadow-2xl relative overflow-hidden w-[1200px] h-[1300px] mx-auto">
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 1300">
+                      {nodes.flows?.map((flow, i) => {
+                        const fromV = (flow.from.vendor || '').toLowerCase(); const toV = (flow.to.vendor || '').toLowerCase(); const sel = (selectedArtist || '').toLowerCase();
+                        const fromIsSelected = fromV === sel || flow.from.id === 'ready-previews' || flow.from.isTrafficSource || flow.from.isAngel;
+                        const toIsSelected = toV === sel || flow.to.id === 'ready-previews' || flow.to.isTrafficSource || flow.to.isAngel;
+                        const touchesSelected = fromV === sel || toV === sel;
+                        const isFlowVisible = !selectedArtist || touchesSelected || (fromIsSelected && toIsSelected);
+                        const midX = (flow.from.x + flow.to.x) / 2; const midY = (flow.from.y + flow.to.y) / 2; const dx = flow.to.x - flow.from.x; const dy = flow.to.y - flow.from.y; const dist = Math.sqrt(dx*dx + dy*dy); const offset = dist * 0.2; const cpX = midX - (dy / dist) * offset; const cpY = midY + (dx / dist) * offset; const d = `M ${flow.from.x},${flow.from.y} Q ${cpX},${cpY} ${flow.to.x},${flow.to.y}`;
+                        const isFunding = flow.isFunding; const isCrossParticipant = fromV !== toV && fromV && toV;
+                        const pathColor = isCrossParticipant && !isFunding ? '#22c55e' : (flow.color || '#ffffff');
+                        const strokeW = isFunding ? (flow.strokeWidth || 3.5) : (isCrossParticipant ? 2.5 : (flow.strokeWidth || 1.2));
+                        const opac = isFlowVisible ? (isFunding ? 0.9 : (touchesSelected ? 0.7 : 0.15)) : 0.02;
+                        const dashArray = isCrossParticipant && !isFunding ? '12 6' : 'none';
+                        return (
+                            <g key={`xpoll-road-${i}`}>
+                                <path d={d} className="path-connector text-left" style={{ stroke: pathColor, strokeWidth: strokeW, opacity: opac, transition: 'opacity 0.5s ease', strokeDasharray: dashArray }} />
+                            </g>
+                        );
+                      })}
+                    </svg>
+                    {/* Quadrant Labels */}
+                    <div className="absolute" style={{ left: 100, top: 500, color: '#ff2a1a', opacity: 0.6, fontSize: '11px', fontWeight: 900, fontStyle: 'italic', letterSpacing: '0.4em', textTransform: 'uppercase', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>DISCOVER</div>
+                    <div className="absolute" style={{ left: 700, top: 500, color: '#ffd666', opacity: 0.6, fontSize: '11px', fontWeight: 900, fontStyle: 'italic', letterSpacing: '0.4em', textTransform: 'uppercase', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>ENGAGE</div>
+                    <div className="absolute" style={{ left: 100, top: 820, color: '#48c9b0', opacity: 0.6, fontSize: '11px', fontWeight: 900, fontStyle: 'italic', letterSpacing: '0.4em', textTransform: 'uppercase', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>CONNECT</div>
+                    <div className="absolute" style={{ left: 700, top: 820, color: '#7c8cff', opacity: 0.6, fontSize: '11px', fontWeight: 900, fontStyle: 'italic', letterSpacing: '0.4em', textTransform: 'uppercase', pointerEvents: 'none', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>SUPPORT</div>
+                    {/* Traffic Sources Label */}
+                    <div className="absolute" style={{ left: 60, top: 120, color: '#ffffff', fontSize: '11px', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.7, pointerEvents: 'none' }}>TRAFFIC SOURCES</div>
+
+                    {/* Nodes — dim non-selected participant nodes */}
+                    {nodes.items.map(n => {
+                      const isNodeVisible = !selectedArtist || (n.vendor || '').toLowerCase() === selectedArtist.toLowerCase() || n.isAngel || n.isTrafficSource || n.id === 'ready-previews';
+                      const iconColor = n.type === 'youtube' ? '#f87171' : n.type === 'substack' ? '#fb923c' : n.type === 'reddit' ? '#f97316' : '#ffffff';
                       return (
-                        <div key={ri} className="bg-[#020617] rounded-2xl border border-white/5 p-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <span className="text-[13px] font-black text-white uppercase italic tracking-tight">{name}</span>
-                            {resident.specialty && <span className="text-xs font-bold text-indigo-400/50 uppercase tracking-widest">{resident.specialty}</span>}
-                          </div>
-                          <div className="grid grid-cols-4 gap-3">
-                            {stageData.map(({ stage, items }) => (
-                              <div key={stage.id} className="space-y-1.5">
-                                <p className="text-xs font-black uppercase tracking-widest opacity-60 mb-2" style={{ color: stage.color }}>{stage.label}</p>
-                                {items.length === 0 && <p className="text-xs text-slate-300 italic py-2">No items</p>}
-                                {items.map((item, ii) => (
-                                  <div key={ii} className="rounded-lg px-3 py-2 text-xs font-bold border" style={{ borderColor: stage.color + '30', backgroundColor: stage.color + '08', color: stage.color }}>
-                                    <MediumIcon type={item.platform} size={10} className="inline mr-1" />{item.lab}
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                      <div key={n.id} className="absolute node-container" style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20, opacity: isNodeVisible ? 1 : 0.08, transition: 'opacity 0.5s ease', pointerEvents: 'none' }}><div className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' : n.isSystem ? 'rounded-xl border-[2.5px] rotate-45' : 'rounded-full border-[2px]'}`} style={{ borderColor: n.color, width: `${n.radius * 2}px`, height: `${n.radius * 2}px`, color: iconColor, pointerEvents: 'auto' }} onMouseEnter={() => handleNodeHover(n)} onMouseLeave={handleNodeLeave}><div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}><MediumIcon type={n.type} size={n.radius * 0.9} /></div></div></div>
                       );
-                    });
-                  })()}
+                    })}
+                  </div>
                 </div>
-                )}
+                {/* Quadrant Stats */}
+                <div className="grid grid-cols-4 gap-4">
+                  {[
+                    { label: 'DISCOVER', color: '#ff2a1a', count: (nodes.items || []).filter(n => n.stageId === 'learning' && (!selectedArtist || (n.vendor || '').toLowerCase() === selectedArtist.toLowerCase())).length },
+                    { label: 'ENGAGE', color: '#ffd666', count: (nodes.items || []).filter(n => n.stageId === 'selecting' && (!selectedArtist || (n.vendor || '').toLowerCase() === selectedArtist.toLowerCase())).length },
+                    { label: 'CONNECT', color: '#48c9b0', count: (nodes.items || []).filter(n => n.stageId === 'executing' && (!selectedArtist || (n.vendor || '').toLowerCase() === selectedArtist.toLowerCase())).length },
+                    { label: 'SUPPORT', color: '#7c8cff', count: (nodes.items || []).filter(n => n.stageId === 'expanding' && (!selectedArtist || (n.vendor || '').toLowerCase() === selectedArtist.toLowerCase())).length },
+                  ].map(q => (
+                    <div key={q.label} className="bg-[#01040d] rounded-2xl border border-white/5 p-5 text-center">
+                      <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: q.color }}>{q.label}</p>
+                      <p className="text-2xl font-black text-white">{q.count}</p>
+                      <p className="text-[9px] text-slate-500 mt-1">{(q.count * 820).toLocaleString()} interactions</p>
+                    </div>
+                  ))}
+                </div>
+                </>)}
               </div>
             )}
 
