@@ -1024,34 +1024,26 @@
                             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         },
                         popover: {
-                            title: 'Enter a Participant Name',
-                            description: 'Now enter the name of a Branding &amp; Identity Designer to be part of this district. This is how you begin to work with the people you meet on social media and start moving forward together — to educate an audience and be there for them if and when they need your help to execute the ideas of the video. <strong>Click the name field</strong> to type a name.',
+                            title: 'Add a Participant',
+                            description: 'Now you\'ll add a Branding &amp; Identity Designer to your district. This is how you begin to work with the people you meet on social media and start moving forward together — to educate an audience and be there for them if and when they need your help to execute the ideas of the video. <strong>Click the name field</strong> to add a participant.',
                             side: 'bottom',
                             align: 'start',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const nameInput = document.getElementById('wt-p1-name');
-                                nameInput.readOnly = false;
-                                nameInput.style.cursor = 'text';
+                                nameInput.style.cursor = 'pointer';
                                 nameInput.style.borderColor = 'rgba(16,185,129,0.6)';
                                 nameInput.style.boxShadow = '0 0 12px rgba(16,185,129,0.2)';
                                 const handler = () => {
                                     nameInput.removeEventListener('click', handler);
-                                    // Select all text so they can type over it
-                                    nameInput.select();
+                                    // Auto-populate with sample name on single click
+                                    nameInput.value = 'Jordan Rivera';
                                     nameInput.style.color = 'white';
+                                    nameInput.style.fontWeight = '600';
+                                    nameInput.style.borderColor = 'rgba(16,185,129,0.8)';
+                                    setTimeout(() => driverObj.moveNext(), 600);
                                 };
                                 nameInput.addEventListener('click', handler);
-                                // Listen for any typing to advance
-                                const keyHandler = (e) => {
-                                    if (e.key === 'Enter' || nameInput.value.length > 15) {
-                                        nameInput.removeEventListener('keyup', keyHandler);
-                                        nameInput.readOnly = true;
-                                        nameInput.style.cursor = 'default';
-                                        setTimeout(() => driverObj.moveNext(), 400);
-                                    }
-                                };
-                                nameInput.addEventListener('keyup', keyHandler);
                             }
                         }
                     },
