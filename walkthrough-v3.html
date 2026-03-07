@@ -480,14 +480,23 @@
 
                     // ═══ DEFINE MARKET STORY ═══
 
-                    // Frame 1: OBSERVE — Welcome, show the layout
+                    // Frame 1: DO — Click Define Market Story in the rail
                     {
-                        element: '#wt-rail',
+                        element: '#wt-rail-define',
                         popover: {
                             title: 'The Storyteller',
-                            description: 'Welcome to the Dark Market District Storyteller. The left rail guides you through 11 steps in two phases: <strong>Compose</strong> builds your district, <strong>Operations</strong> runs it. We\'re starting at step 1: Define Market Story.',
+                            description: 'Welcome to the Dark Market District Storyteller. The left rail guides you through 11 steps in two phases: <strong>Compose</strong> builds your district, <strong>Operations</strong> runs it. <strong>Click Define Market Story</strong> to begin.',
                             side: 'right',
-                            align: 'start'
+                            align: 'start',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const railItem = document.getElementById('wt-rail-define');
+                                railItem._handler = () => {
+                                    railItem.removeEventListener('click', railItem._handler);
+                                    driverObj.moveNext();
+                                };
+                                railItem.addEventListener('click', railItem._handler);
+                            }
                         }
                     },
 
