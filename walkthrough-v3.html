@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadyStack | Interactive Walkthrough v3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;700;900&display=swap');
+
+        :root {
+            --base: #020617;
+            --surface: #0f172a;
+            --surface-light: rgba(15, 23, 42, 0.8);
+            --border-subtle: rgba(255,255,255,0.05);
+            --border-mid: rgba(255,255,255,0.1);
+            --border-strong: rgba(255,255,255,0.2);
+            --accent: #7c8cff;
+            --accent-indigo: #6366f1;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --text-dim: #475569;
+            --text-ghost: #334155;
+            --green: #10b981;
+            --green-bg: rgba(16, 185, 129, 0.08);
+            --green-border: rgba(16, 185, 129, 0.2);
+            --red-yt: #dc2626;
+            --amber: #f59e0b;
+            --compose-accent: #818cf8;
+            --ops-accent: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background-color: var(--base); color: var(--text-secondary); font-family: 'Inter', sans-serif; }
+
+        /* ── Driver.js dark theme ── */
+        .driver-popover { background: var(--surface) !important; color: var(--text-primary) !important; border: 1px solid rgba(124,140,255,0.4) !important; border-radius: 16px !important; box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 40px rgba(124,140,255,0.15) !important; max-width: 380px !important; padding: 0 !important; }
+        .driver-popover * { font-family: 'Inter', sans-serif !important; }
+        .driver-popover-title { font-family: 'Poppins', sans-serif !important; font-size: 15px !important; font-weight: 800 !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; padding: 20px 24px 0 24px !important; line-height: 1.3 !important; }
+        .driver-popover-description { color: var(--text-secondary) !important; font-size: 13px !important; line-height: 1.7 !important; padding: 8px 24px 0 24px !important; }
+        .driver-popover-footer { padding: 16px 24px 20px 24px !important; border-top: none !important; }
+        .driver-popover-prev-btn { background: transparent !important; color: var(--text-muted) !important; border: 1px solid var(--border-mid) !important; border-radius: 10px !important; font-size: 11px !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; padding: 8px 16px !important; text-shadow: none !important; }
+        .driver-popover-prev-btn:hover { background: rgba(255,255,255,0.05) !important; color: white !important; }
+        .driver-popover-next-btn, .driver-popover-close-btn { background: var(--accent) !important; color: var(--base) !important; border: none !important; border-radius: 10px !important; font-size: 11px !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; padding: 8px 20px !important; text-shadow: none !important; }
+        .driver-popover-next-btn:hover, .driver-popover-close-btn:hover { background: #6578cc !important; }
+        .driver-popover-progress-text { color: var(--text-dim) !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: 0.15em !important; text-transform: uppercase !important; }
+        .driver-popover-arrow { border-color: var(--surface) !important; }
+
+        /* ── Rail ── */
+        .phase-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; padding: 4px 0 8px 14px; }
+        .rail-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; white-space: nowrap; position: relative; border: 1px solid transparent; color: var(--text-muted); transition: all 0.2s ease; }
+        .rail-item.active { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.5); color: white; box-shadow: 0 0 20px rgba(99,102,241,0.15); }
+        .rail-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent-indigo); border-radius: 0 2px 2px 0; }
+        .rail-item.complete { color: var(--green); border-color: var(--green-border); background: var(--green-bg); }
+        .rail-item.locked { color: var(--text-ghost); background: rgba(2,6,23,0.5); border-color: rgba(255,255,255,0.03); cursor: not-allowed; }
+        .rail-icon { width: 14px; height: 14px; flex-shrink: 0; }
+
+        /* ── Panels ── */
+        .content-panel { display: none; }
+        .content-panel.visible { display: block; }
+        .progress-fill { height: 100%; border-radius: 9999px; background: var(--accent-indigo); box-shadow: 0 0 10px rgba(99,102,241,0.5); transition: width 0.5s ease; }
+
+        /* ── Search ── */
+        .search-box { background: rgba(2,6,23,0.5); border: 1px solid var(--border-mid); border-radius: 16px; padding: 14px 16px; color: white; font-size: 14px; width: 100%; outline: none; font-family: 'Inter', sans-serif; }
+        .search-box::placeholder { color: var(--text-ghost); }
+        .search-box:focus { border-color: rgba(124,140,255,0.4); }
+
+        /* ── Video rows ── */
+        .video-row { display: flex; gap: 16px; padding: 16px; background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; cursor: pointer; transition: all 0.3s ease; }
+        .video-row:hover { border-color: rgba(124,140,255,0.3); background: rgba(15,23,42,0.8); }
+        .video-row.selected { border-color: rgba(99,102,241,0.6); background: rgba(99,102,241,0.08); box-shadow: 0 0 30px rgba(99,102,241,0.1); }
+        .video-thumb { width: 160px; min-width: 160px; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; background: #1e293b; }
+        .video-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ── Brief cards ── */
+        .brief-card { background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; }
+        .brief-label { font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; }
+
+        /* ── Network columns ── */
+        .network-col { background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 20px; }
+
+        /* ── Animations ── */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-up { animation: slideUp 0.5s ease forwards; }
+        .fade-in { animation: fadeInUp 0.5s ease forwards; }
+
+        /* ── Action icons ── */
+        .action-icon { background: var(--base); border: 1px solid var(--border-mid); padding: 8px; border-radius: 12px; color: var(--text-muted); cursor: pointer; }
+        .action-icon:hover { color: white; border-color: var(--border-strong); }
+
+        /* ── Start overlay ── */
+        .start-overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.95); display: flex; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(8px); }
+
+        /* ── Auto-gen sections (hidden by default) ── */
+        .auto-section { display: none; }
+        .auto-section.revealed { display: block; animation: fadeInUp 0.6s ease forwards; }
+        .auto-section.revealed-grid { display: grid; animation: fadeInUp 0.6s ease forwards; }
+        .auto-section.revealed-flex { display: flex; animation: fadeInUp 0.6s ease forwards; }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ START SCREEN ═══ -->
+    <div class="start-overlay" id="startScreen">
+        <div style="text-align: center; max-width: 480px; padding: 48px;">
+            <div style="margin-bottom: 24px;">
+                <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width: 64px; height: auto; border-radius: 10px; margin: 0 auto;" />
+            </div>
+            <h1 style="font-family: 'Poppins', sans-serif; font-size: 32px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 16px;">Build Your First<br/>Dark Market District</h1>
+            <p style="color: var(--text-muted); font-size: 14px; line-height: 1.8; margin-bottom: 32px;">See how ReadyStack turns a single YouTube video into a living business district — with residents, journey maps, three network visualizations, analytics, and automated operations.</p>
+            <button onclick="beginWalkthrough()" style="background: var(--accent); color: var(--base); border: none; padding: 14px 40px; border-radius: 12px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; cursor: pointer; font-family: 'Poppins', sans-serif;">Take the Tour</button>
+            <div style="margin-top: 16px;"><span style="color: var(--text-ghost); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">About 3 minutes</span></div>
+        </div>
+    </div>
+
+    <!-- ═══ SIMULATED READYSTACK UI ═══ -->
+    <div style="width: 100%; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
+
+        <!-- HEADER -->
+        <header style="background: linear-gradient(135deg, var(--surface) 0%, var(--base) 100%); border-bottom: 1px solid var(--border-mid); width: 100%; flex-shrink: 0;">
+            <div style="width: 100%; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="height: 36px; width: auto; border-radius: 6px;" />
+                    <span style="font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; color: white;">ReadyStack</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255,255,255,0.5);">Pricing</span>
+                    <button style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-strong); padding: 10px 24px; border-radius: 9999px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: white; cursor: pointer; font-family: 'Poppins', sans-serif;">Login</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- DARK MARKET DISTRICT BAR -->
+        <div style="background: var(--surface); border-bottom: 1px solid var(--border-subtle); width: 100%; flex-shrink: 0;">
+            <div style="width: 100%; padding: 20px 24px; display: flex; align-items: center; gap: 16px;">
+                <button style="padding: 8px; border-radius: 8px; color: var(--text-muted); background: transparent; border: none; cursor: pointer; font-size: 16px;">&#9664;</button>
+                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; border: 1px solid var(--border-strong);">
+                    <svg width="20" height="20" viewBox="0 0 20 20"><rect x="1" y="1" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.5)"/><rect x="12" y="1" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.3)"/><rect x="1" y="12" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.3)"/><rect x="12" y="12" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.5)"/></svg>
+                </div>
+                <h2 style="font-size: 24px; font-weight: 900; color: white; font-style: italic; text-transform: uppercase; letter-spacing: -0.05em; font-family: 'Inter', sans-serif;">Dark Market District</h2>
+            </div>
+        </div>
+
+        <!-- MAIN LAYOUT -->
+        <div style="display: flex; flex: 1; overflow: hidden; padding: 24px 16px;">
+
+            <!-- LEFT RAIL -->
+            <div id="wt-rail" style="width: 260px; flex-shrink: 0; background: var(--surface-light); border: 1px solid var(--border-subtle); border-radius: 24px; padding: 20px; margin-right: 24px; display: flex; flex-direction: column; overflow-y: auto;">
+                <div style="margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-mid);">
+                    <h3 style="font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 8px;">My Districts</h3>
+                    <p style="font-size: 10px; color: var(--text-ghost); font-style: italic;">Log in to see your districts</p>
+                </div>
+
+                <div class="phase-label" style="color: var(--compose-accent);">Compose</div>
+                <div class="rail-item active" id="wt-rail-define" data-step="define">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4m-10-10h4m12 0h4"/></svg>
+                    <span>Define Market Story</span>
+                </div>
+                <div class="rail-item" id="wt-rail-residents" data-step="residents" style="color: var(--green); border-color: var(--green-border); background: var(--green-bg);">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Residents</span>
+                </div>
+                <div class="rail-item" id="wt-rail-links" data-step="links">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    <span>Links</span>
+                </div>
+                <div class="rail-item" id="wt-rail-preview" data-step="preview">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>Preview</span>
+                </div>
+
+                <div class="phase-label" style="color: var(--ops-accent); margin-top: 12px;">Operations</div>
+                <div class="rail-item" id="wt-rail-finance" data-step="finance">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span>District Finance</span>
+                </div>
+                <div class="rail-item" id="wt-rail-flow" data-step="flow">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                    <span>District Flow</span>
+                </div>
+                <div class="rail-item locked" id="wt-rail-invite" data-step="invite">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    <span>Invite Residents</span>
+                </div>
+                <div class="rail-item locked" id="wt-rail-looker" data-step="looker">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span>Looker</span>
+                </div>
+                <div class="rail-item locked" id="wt-rail-ga4" data-step="ga4">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span>GA4</span>
+                </div>
+                <div class="rail-item locked" id="wt-rail-analytics" data-step="analytics">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/></svg>
+                    <span>Analytics</span>
+                </div>
+                <div class="rail-item locked" id="wt-rail-automation" data-step="automation">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span>Automation</span>
+                </div>
+            </div>
+
+            <!-- MAIN CONTENT -->
+            <div id="wt-content" style="flex-grow: 1; min-width: 0; background: rgba(15,23,42,0.3); border: 1px solid var(--border-subtle); border-radius: 32px; padding: 32px 40px; overflow-y: auto; position: relative;">
+
+                <!-- Top bar: breadcrumb + district name + actions -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div id="wt-breadcrumb" style="display: flex; align-items: center; gap: 8px;">
+                        <span id="wt-bc-counter" style="font-size: 10px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em;">1 / 11</span>
+                        <span style="font-size: 10px; color: var(--text-ghost);">&middot;</span>
+                        <span id="wt-bc-current" style="font-size: 10px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.1em;">Define Market Story</span>
+                    </div>
+                    <span id="wt-bc-next" style="font-size: 10px; font-weight: 600; color: var(--text-ghost); text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;">Residents &gt;</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 20 20"><rect x="1" y="1" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.3)"/><rect x="12" y="1" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.2)"/><rect x="1" y="12" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.2)"/><rect x="12" y="12" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.3)"/></svg>
+                        <span style="font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.3);">Untitled District</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" style="width: 12px; height: 12px; cursor: pointer;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    </div>
+                    <div id="wt-actions" style="display: flex; gap: 8px;">
+                        <button class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+                        <button class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
+                        <button class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
+                    </div>
+                </div>
+
+                <!-- ═══ PANEL: DEFINE MARKET STORY ═══ -->
+                <div id="panel-define" class="content-panel visible">
+
+                    <h3 style="font-size: 28px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: -0.03em; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Define Market Story</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">Search YouTube for a video of the problem your audience faces. Your district exists to solve it.</p>
+
+                    <!-- YouTube pill -->
+                    <div style="margin-bottom: 24px;">
+                        <span style="display: inline-flex; align-items: center; gap: 8px; background: var(--red-yt); color: white; padding: 10px 20px; border-radius: 9999px; font-size: 13px; font-weight: 800; cursor: pointer;">
+                            <svg viewBox="0 0 24 24" fill="white" style="width: 18px; height: 18px;"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8z"/><polygon fill="var(--red-yt)" points="9.75 15.02 15.5 12 9.75 8.98"/></svg>
+                            YouTube
+                        </span>
+                    </div>
+
+                    <!-- Search area -->
+                    <div id="wt-search-area" style="background: rgba(2,6,23,0.4); padding: 32px; border-radius: 24px; border: 1px solid var(--border-subtle);">
+                        <div id="wt-search-row" style="display: flex; gap: 12px; margin-bottom: 0;">
+                            <input id="wt-search-input" type="text" class="search-box" placeholder="Search YouTube or paste a video link..." readonly style="flex: 1;" />
+                            <button id="wt-search-btn" style="background: var(--surface); border: 1px solid var(--border-strong); color: white; padding: 14px 28px; border-radius: 14px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; white-space: nowrap;">Search / Resolve</button>
+                        </div>
+
+                        <!-- Video results (hidden until search) -->
+                        <div id="wt-results" style="display: none; flex-direction: column; gap: 12px; margin-top: 20px;">
+                            <div class="video-row" id="wt-video-1" onclick="selectVideo(this)">
+                                <div class="video-thumb"><img src="https://img.youtube.com/vi/SbHDPJNYHek/mqdefault.jpg" alt="505 Podcast Seth Godin" /></div>
+                                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px;">
+                                    <p style="font-size: 14px; font-weight: 600; color: white; line-height: 1.4;">How to Build a Magnetic Brand that Sells Itself ft. Seth Godin</p>
+                                    <p style="font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">The 505 Podcast</p>
+                                    <p style="font-size: 12px; color: var(--text-secondary);">185,623 views</p>
+                                </div>
+                            </div>
+                            <div class="video-row" id="wt-video-2" onclick="selectVideo(this)">
+                                <div class="video-thumb"><img src="https://img.youtube.com/vi/HL3KDMCGsXM/mqdefault.jpg" alt="Behind the Brand" /></div>
+                                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px;">
+                                    <p style="font-size: 14px; font-weight: 600; color: white; line-height: 1.4;">How to Build a Brand - Seth Godin</p>
+                                    <p style="font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Behind the Brand</p>
+                                    <p style="font-size: 12px; color: var(--text-secondary);">18,760 views</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CONTINUE TO RESIDENTS (always visible, grayed until ready) -->
+                    <div style="margin-top: 24px; text-align: center;">
+                        <button id="wt-continue-residents" style="background: transparent; border: 1px solid var(--border-subtle); padding: 14px 48px; border-radius: 12px; color: var(--text-ghost); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; cursor: default;">Continue to Residents</button>
+                    </div>
+
+                    <!-- ═══ AUTO-GENERATED CONTENT (appears after video selection) ═══ -->
+
+                    <!-- Video embed + In this ReadyStack -->
+                    <div id="wt-video-analysis" class="auto-section" style="margin-top: 32px; grid-template-columns: 3fr 2fr; gap: 24px; background: rgba(15,23,42,0.5); padding: 32px; border-radius: 24px; border: 1px solid var(--border-subtle);">
+                        <div>
+                            <div style="width: 100%; aspect-ratio: 16/9; background: url('https://img.youtube.com/vi/SbHDPJNYHek/hqdefault.jpg') center/cover no-repeat; border-radius: 16px; border: 1px solid var(--border-mid); display: flex; align-items: center; justify-content: center; position: relative;">
+                                <!-- 505 badge -->
+                                <div style="position: absolute; top: 12px; left: 12px; background: #f59e0b; color: var(--base); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900;">505</div>
+                                <svg viewBox="0 0 68 48" style="width: 68px; height: 48px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="#212121" fill-opacity="0.8"/><path d="M45 24L27 14v20" fill="#fff"/></svg>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0;">
+                            <h4 style="font-size: 14px; font-weight: 700; color: white; font-style: italic; margin-bottom: 16px;">In this ReadyStack</h4>
+                            <ul style="list-style: disc; padding-left: 16px; display: flex; flex-direction: column; gap: 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; font-style: italic;">
+                                <li>Identify and define your "smallest viable audience" with clear demographics and psychographics.</li>
+                                <li>Analyze your current brand messaging to ensure it communicates meaning and not just features or hype.</li>
+                                <li>Develop a consistent content and communication schedule, prioritizing sustained presence over sporadic viral attempts.</li>
+                                <li>Craft stories that resonate deeply with your smallest viable audience, encouraging organic sharing and discussion.</li>
+                                <li>Conduct a "not good enough" audit of your current offerings or content, seeking genuine feedback for meaningful improvement.</li>
+                                <li>Evaluate where your marketing efforts are currently focused and redirect resources from mass attention to niche engagement.</li>
+                            </ul>
+                            <div style="display: flex; gap: 8px; margin-top: 20px;">
+                                <button style="flex: 1; padding: 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border-mid); color: white; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;">Change Video</button>
+                                <button id="wt-ok-btn" style="padding: 12px 24px; border-radius: 12px; background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.4); color: var(--green); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;">OK</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ReadyStack Brief -->
+                    <div id="wt-brief" class="auto-section" style="margin-top: 24px; padding: 32px; background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 24px;">
+                        <div style="font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 12px;">ReadyStack Brief</div>
+                        <h4 style="font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 900; color: white; text-transform: uppercase; font-style: italic; line-height: 1.2; margin-bottom: 16px;">Building Brands on Trust and Smallest Viable Audiences</h4>
+                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">This ReadyStack provides a structured approach for creators, marketers, and businesses to transcend the pitfalls of chasing fleeting attention and instead cultivate a deeply loyal &ldquo;smallest viable audience.&rdquo; By guiding users through the principles championed by Seth Godin &mdash; focusing on trust, meaning, and consistency &mdash; it offers a clear pathway to building a brand that truly resonates. The integrated checklist empowers immediate action, moving users from theoretical understanding to practical application, such as defining their niche and crafting shareable, meaningful stories. Through its embedded automations, this ReadyStack ensures that every interaction is purposefully designed to build trust and deepen engagement. For instance, new niche platform followers receive targeted welcomes, and consistent content consumers are invited into more intimate community spaces. This systematic approach transforms sporadic engagements into a compounding asset: a highly segmented, engaged audience that feels seen and understood. This audience, in turn, becomes the most powerful marketing channel, organically spreading stories and advocating for the brand, reducing reliance on expensive, broad-reach advertising. Ultimately, this ReadyStack shifts the paradigm from volume to value. It enables a business to convert initial ideas about niche marketing and brand meaning into a self-sustaining commercial engine. The consistent application of these strategies fosters remarkable products and services that naturally stand out, attracting the right customers who are eager to buy, rather than needing to be &ldquo;sold to.&rdquo; The outcome is not just increased sales, but a robust, resilient brand built on genuine connection and lasting influence, creating a foundation for sustained growth and profitability.</p>
+                    </div>
+
+                    <!-- Core Problem + Ideal Resident -->
+                    <div id="wt-brief-cards" class="auto-section" style="grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
+                        <div class="brief-card">
+                            <div class="brief-label">Core Problem</div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7;">Creators, marketers, and businesses often expend significant effort chasing broad attention and high view counts, mistakenly believing these metrics equate to influence, sales, or brand loyalty. This leads to ineffective marketing strategies focused on hype and generic content, failing to build trust or resonate deeply with any specific audience. They feel frustrated by a lack of genuine engagement, poor conversion rates, and the unsustainable effort required to maintain fleeting attention, ultimately missing the opportunity to cultivate a loyal, passionate &ldquo;smallest viable audience.&rdquo;</p>
+                        </div>
+                        <div class="brief-card">
+                            <div class="brief-label">Ideal Resident</div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.7;">Marketers, entrepreneurs, content creators, and small business owners struggling with brand differentiation and effective audience engagement, who are seeking to build a loyal customer base rather than just chasing viral trends or broad reach.</p>
+                        </div>
+                    </div>
+
+                    <!-- Network Map Seed -->
+                    <div id="wt-network-seed" class="auto-section" style="margin-top: 24px;">
+                        <div class="brief-label" style="margin-bottom: 12px;">Network Map Seed</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                            <div class="network-col">
+                                <div style="font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Partners</div>
+                                <ul style="list-style: none; font-size: 12px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px; padding-left: 0;">
+                                    <li style="display: flex; align-items: flex-start; gap: 6px;"><span style="color: var(--text-ghost);">&ndash;</span> Niche Branding Agencies</li>
+                                    <li style="display: flex; align-items: flex-start; gap: 6px;"><span style="color: var(--text-ghost);">&ndash;</span> Content Strategy Consultants</li>
+                                    <li style="display: flex; align-items: flex-start; gap: 6px;"><span style="color: var(--text-ghost);">&ndash;</span> Audience Research Platforms</li>
+                                </ul>
+                            </div>
+                            <div class="network-col">
+                                <div style="font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Customers</div>
+                                <ul style="list-style: none; font-size: 12px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px; padding-left: 0;">
+                                    <li style="display: flex; align-items: flex-start; gap: 6px;"><span style="color: var(--text-ghost);">&ndash;</span> Small Business Owners</li>
+                                    <li style="display: flex; align-items: flex-start; gap: 6px;"><span style="color: var(--text-ghost);">&ndash;</span> Individual Content Creators</li>
+                                    <li style="display: flex; align-items: flex-start; gap: 6px;"><span style="color: var(--text-ghost);">&ndash;</span> Startups Seeking Market Entry</li>
+                                </ul>
+                            </div>
+                            <div class="network-col">
+                                <div style="font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Guests</div>
+                                <ul style="list-style: none; font-size: 12px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px; padding-left: 0;">
+                                    <li style="display: flex; align-items: flex-start; gap: 6px;"><span style="color: var(--text-ghost);">&ndash;</span> Seth Godin</li>
+                                    <li style="display: flex; align-items: flex-start; gap: 6px;"><span style="color: var(--text-ghost);">&ndash;</span> Marketing Educators/Coaches</li>
+                                    <li style="display: flex; align-items: flex-start; gap: 6px;"><span style="color: var(--text-ghost);">&ndash;</span> Community Managers</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions + Automations -->
+                    <div id="wt-actions-automations" class="auto-section" style="grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
+                        <div>
+                            <div class="brief-label">Actions</div>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 16px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 8px;">
+                                    <span style="color: var(--text-ghost);">&#10003;</span> Identify and define your &ldquo;smallest viable audience&rdquo; with clear demographics and psychographics.
+                                </div>
+                                <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 16px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 8px;">
+                                    <span style="color: var(--text-ghost);">&#10003;</span> Analyze your current brand messaging to ensure it communicates meaning and not just features or hype.
+                                </div>
+                                <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 16px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 8px;">
+                                    <span style="color: var(--text-ghost);">&#10003;</span> Develop a consistent content and communication schedule, prioritizing sustained presence over sporadic viral attempts.
+                                </div>
+                                <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 16px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 8px;">
+                                    <span style="color: var(--text-ghost);">&#10003;</span> Craft stories that resonate deeply with your smallest viable audience, encouraging organic sharing and discussion.
+                                </div>
+                                <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 16px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 8px;">
+                                    <span style="color: var(--text-ghost);">&#10003;</span> Conduct a &ldquo;not good enough&rdquo; audit of your current offerings or content, seeking genuine feedback for meaningful improvement.
+                                </div>
+                                <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 16px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 8px;">
+                                    <span style="color: var(--text-ghost);">&#10003;</span> Evaluate where your marketing efforts are currently focused and redirect resources from mass attention to niche engagement.
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="brief-label">Automations</div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 16px; font-size: 12px;">
+                                    <div><span style="font-weight: 900; color: var(--amber); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Trigger</span> <span style="color: var(--text-secondary);">New follower on a key niche platform (e.g., specific LinkedIn group, specialized forum).</span></div>
+                                    <div style="margin-top: 6px;"><span style="font-weight: 900; color: var(--text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Action</span> <span style="color: var(--text-secondary);">Send a personalized welcome message inviting engagement on a specific topic.</span></div>
+                                </div>
+                                <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 16px; font-size: 12px;">
+                                    <div><span style="font-weight: 900; color: var(--amber); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Trigger</span> <span style="color: var(--text-secondary);">Engagement with a &ldquo;meaning-driven&rdquo; piece of content (e.g., a blog post about solving a specific niche problem).</span></div>
+                                    <div style="margin-top: 6px;"><span style="font-weight: 900; color: var(--text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Action</span> <span style="color: var(--text-secondary);">Tag the user as &ldquo;Niche Engaged&rdquo; and add to a segment for relevant follow-up.</span></div>
+                                </div>
+                                <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 16px; font-size: 12px;">
+                                    <div><span style="font-weight: 900; color: var(--amber); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Trigger</span> <span style="color: var(--text-secondary);">A prospect engages with multiple pieces of consistent brand content over time (e.g., three blog posts or videos).</span></div>
+                                    <div style="margin-top: 6px;"><span style="font-weight: 900; color: var(--text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;">Action</span> <span style="color: var(--text-secondary);">Send a personalized invitation to join an exclusive community or become a brand representative.</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- end panel-define -->
+
+                <!-- ═══ PANEL: RESIDENTS (stub) ═══ -->
+                <div id="panel-residents" class="content-panel">
+                    <p style="color: var(--text-muted); font-style: italic; text-align: center; padding-top: 200px;">Residents panel — building next...</p>
+                </div>
+
+            </div><!-- end wt-content -->
+        </div><!-- end main layout -->
+    </div>
+
+    <!-- ═══ TOUR ENGINE ═══ -->
+    <script>
+        let driverObj;
+
+        function setActiveRail(step) {
+            document.querySelectorAll('.rail-item').forEach(el => {
+                if (el.dataset.step === step) el.className = 'rail-item active';
+                else if (!el.classList.contains('complete') && !el.classList.contains('locked')) {
+                    // keep current class
+                }
+            });
+        }
+        function setCompleteRail(step) {
+            const el = document.querySelector(`[data-step="${step}"]`);
+            if (el) { el.className = 'rail-item complete'; }
+        }
+        function showPanel(id) {
+            document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('visible'));
+            document.getElementById(id)?.classList.add('visible');
+        }
+        function updateBreadcrumb(num, total, current, next) {
+            document.getElementById('wt-bc-counter').textContent = num + ' / ' + total;
+            document.getElementById('wt-bc-current').textContent = current;
+            document.getElementById('wt-bc-next').textContent = next ? next + ' >' : '';
+        }
+
+        // Reveal auto-generated sections with staggered animation
+        function revealAutoSections() {
+            const sections = ['wt-video-analysis', 'wt-brief', 'wt-brief-cards', 'wt-network-seed', 'wt-actions-automations'];
+            const gridSections = ['wt-video-analysis', 'wt-brief-cards', 'wt-actions-automations'];
+            sections.forEach((id, i) => {
+                setTimeout(() => {
+                    const el = document.getElementById(id);
+                    if (gridSections.includes(id)) {
+                        el.classList.add('revealed-grid');
+                    } else {
+                        el.classList.add('revealed');
+                    }
+                    // Scroll to keep new content in view
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, i * 600);
+            });
+            // Enable continue button
+            setTimeout(() => {
+                const btn = document.getElementById('wt-continue-residents');
+                btn.style.color = 'white';
+                btn.style.borderColor = 'var(--border-mid)';
+                btn.style.cursor = 'pointer';
+            }, sections.length * 600);
+        }
+
+        function selectVideo(el) {
+            document.querySelectorAll('.video-row').forEach(r => r.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function beginWalkthrough() {
+            document.getElementById('startScreen').style.display = 'none';
+
+            driverObj = window.driver.js.driver({
+                showProgress: true,
+                animate: true,
+                allowClose: false,
+                overlayColor: 'rgba(2, 6, 23, 0.75)',
+                stagePadding: 8,
+                stageRadius: 16,
+                steps: [
+
+                    // ═══ DEFINE MARKET STORY ═══
+
+                    // Frame 1: OBSERVE — Welcome, show the layout
+                    {
+                        element: '#wt-rail',
+                        popover: {
+                            title: 'The Storyteller',
+                            description: 'Welcome to the Dark Market District Storyteller. The left rail guides you through 11 steps in two phases: <strong>Compose</strong> builds your district, <strong>Operations</strong> runs it. We\'re starting at step 1: Define Market Story.',
+                            side: 'right',
+                            align: 'start'
+                        }
+                    },
+
+                    // Frame 2: OBSERVE — Focus on search, prompt to click in
+                    {
+                        element: '#wt-search-input',
+                        popover: {
+                            title: 'Start With a YouTube Search',
+                            description: 'Every district begins with an authority video that defines the problem your audience faces. Click the search bar and type your query — we\'ll search for <strong>"seth godin building a brand"</strong>.',
+                            side: 'bottom',
+                            align: 'start',
+                            onNextClick: () => {
+                                // Auto-type the search query
+                                const input = document.getElementById('wt-search-input');
+                                input.value = '';
+                                const text = 'seth godin building a brand';
+                                let i = 0;
+                                const typeChar = () => {
+                                    if (i < text.length) {
+                                        input.value += text[i]; i++;
+                                        setTimeout(typeChar, 60);
+                                    }
+                                };
+                                typeChar();
+                                setTimeout(() => driverObj.moveNext(), 2000);
+                            }
+                        }
+                    },
+
+                    // Frame 3: DO — Click SEARCH / RESOLVE
+                    {
+                        element: '#wt-search-btn',
+                        popover: {
+                            title: 'Click Search / Resolve',
+                            description: 'Your query is ready. <strong>Click SEARCH / RESOLVE</strong> to query the YouTube API. ReadyStack will return matching videos ranked by relevance to your market story.',
+                            side: 'left',
+                            align: 'start',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const btn = document.getElementById('wt-search-btn');
+                                btn._handler = () => {
+                                    btn.removeEventListener('click', btn._handler);
+                                    // Show results
+                                    const results = document.getElementById('wt-results');
+                                    results.style.display = 'flex';
+                                    results.style.animation = 'slideUp 0.5s ease forwards';
+                                    setTimeout(() => driverObj.moveNext(), 600);
+                                };
+                                btn.addEventListener('click', btn._handler);
+                            }
+                        }
+                    },
+
+                    // Frame 4: OBSERVE — Results appear
+                    {
+                        element: '#wt-results',
+                        popover: {
+                            title: 'Video Results',
+                            description: 'Two results from YouTube. The top hit — <strong>"How to Build a Magnetic Brand that Sells Itself ft. Seth Godin"</strong> from THE 505 PODCAST with 185,623 views — is exactly the kind of authority content that anchors a district.',
+                            side: 'left',
+                            align: 'start'
+                        }
+                    },
+
+                    // Frame 5: DO — Select the video
+                    {
+                        element: '#wt-video-1',
+                        popover: {
+                            title: 'Select This Video',
+                            description: 'This is your market story — the problem your audience faces, anchored by an authority voice. <strong>Click this video</strong> to set your district\'s foundation. ReadyStack will automatically generate the full analysis.',
+                            side: 'bottom',
+                            align: 'start',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const row = document.getElementById('wt-video-1');
+                                row._handler = () => {
+                                    row.removeEventListener('click', row._handler);
+                                    row.classList.add('selected');
+                                    // Trigger auto-generation of all content
+                                    revealAutoSections();
+                                    setTimeout(() => driverObj.moveNext(), 1200);
+                                };
+                                row.addEventListener('click', row._handler);
+                            }
+                        }
+                    },
+
+                    // Frame 6: OBSERVE — Video analysis auto-generated
+                    {
+                        element: '#wt-video-analysis',
+                        popover: {
+                            title: 'In This ReadyStack',
+                            description: 'The video is processing. ReadyStack extracts six key takeaways that will drive your district strategy — from identifying your smallest viable audience to redirecting resources toward niche engagement. You can click <strong>CHANGE VIDEO</strong> to pick a different one, or <strong>OK</strong> to proceed.',
+                            side: 'top',
+                            align: 'center'
+                        }
+                    },
+
+                    // Frame 7: OBSERVE — ReadyStack Brief
+                    {
+                        element: '#wt-brief',
+                        popover: {
+                            title: 'The ReadyStack Brief',
+                            description: 'A full narrative strategy brief — auto-generated from one YouTube video. This is the foundation document for your entire district: the market thesis, the approach, and how the automations connect the dots.',
+                            side: 'top',
+                            align: 'center'
+                        }
+                    },
+
+                    // Frame 8: OBSERVE — Core Problem + Ideal Resident
+                    {
+                        element: '#wt-brief-cards',
+                        popover: {
+                            title: 'Core Problem + Ideal Resident',
+                            description: 'AI extracted the core market problem and your ideal resident profile directly from the video. The problem statement defines <em>why</em> your district exists. The ideal resident defines <em>who</em> it serves.',
+                            side: 'top',
+                            align: 'center'
+                        }
+                    },
+
+                    // Frame 9: OBSERVE — Network Map Seed
+                    {
+                        element: '#wt-network-seed',
+                        popover: {
+                            title: 'Network Map Seed',
+                            description: 'Three categories pre-populated from the video: <strong>Partners</strong> (Niche Branding Agencies, Content Strategy Consultants, Audience Research Platforms), <strong>Customers</strong> (Small Business Owners, Individual Content Creators, Startups), and <strong>Guests</strong> (Seth Godin, Marketing Educators, Community Managers). These become residents in your district.',
+                            side: 'top',
+                            align: 'center'
+                        }
+                    },
+
+                    // Frame 10: OBSERVE — Actions + Automations
+                    {
+                        element: '#wt-actions-automations',
+                        popover: {
+                            title: 'Actions + Automations',
+                            description: 'Ready-made tasks with checkmarks, plus trigger-based automations. The actions become checklist items for residents. The automations fire when events happen — like a new subscriber joining, triggering a personalized welcome sequence.',
+                            side: 'top',
+                            align: 'center'
+                        }
+                    },
+
+                    // Frame 11: DO — Click OK or CONTINUE TO RESIDENTS
+                    {
+                        element: '#wt-continue-residents',
+                        popover: {
+                            title: 'Continue to Residents',
+                            description: 'Your market story is set — the problem, the audience, the strategy, and the automations are all defined from one video. <strong>Click CONTINUE TO RESIDENTS</strong> to assemble the people who\'ll populate your district.',
+                            side: 'top',
+                            align: 'center',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                // Also allow clicking OK button
+                                const okBtn = document.getElementById('wt-ok-btn');
+                                const contBtn = document.getElementById('wt-continue-residents');
+                                const advance = () => {
+                                    okBtn.removeEventListener('click', advance);
+                                    contBtn.removeEventListener('click', advance);
+                                    setCompleteRail('define');
+                                    setActiveRail('residents');
+                                    updateBreadcrumb(2, 11, 'Residents', 'Links');
+                                    showPanel('panel-residents');
+                                    setTimeout(() => driverObj.moveNext(), 300);
+                                };
+                                okBtn.addEventListener('click', advance);
+                                contBtn.addEventListener('click', advance);
+                            }
+                        }
+                    },
+
+                    // ═══ RESIDENTS (stub — end of Define Market Story chunk) ═══
+                    {
+                        popover: {
+                            title: 'Residents — Coming Next',
+                            description: 'That\'s the complete Define Market Story flow. Review this section, then we\'ll build Residents next.',
+                            doneBtnText: 'End Preview',
+                            showButtons: ['close']
+                        }
+                    }
+                ],
+                onDestroyed: () => {}
+            });
+
+            driverObj.drive();
+        }
+    </script>
+
+</body>
+</html>
