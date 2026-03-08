@@ -889,6 +889,9 @@
                                     railItem.removeEventListener('click', railItem._handler);
                                     railItem.classList.remove('do-pulse');
 
+                                    // Dismiss the "Start Here" popover immediately so user sees the typing
+                                    driverObj.moveNext();
+
                                     // Lift the search area ABOVE the Driver.js overlay so typing is visible
                                     const searchArea = document.getElementById('wt-search-area');
                                     searchArea.style.position = 'relative';
@@ -905,15 +908,14 @@
                                             input.value += text[i]; i++;
                                             setTimeout(typeChar, 60);
                                         } else {
-                                            // Typing done — drop z-index and advance
+                                            // Typing done — drop z-index
                                             setTimeout(() => {
                                                 searchArea.style.position = '';
                                                 searchArea.style.zIndex = '';
-                                                driverObj.moveNext();
                                             }, 500);
                                         }
                                     };
-                                    setTimeout(typeChar, 300);
+                                    setTimeout(typeChar, 200);
                                 };
                                 railItem.addEventListener('click', railItem._handler);
                             }
@@ -1166,14 +1168,14 @@
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => {
-                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }, 100);
                         },
                         popover: {
                             title: 'Tasks: Actions + Automations',
                             description: 'These are the same tasks from Define Market Story — now carried forward as executable work. <strong>Actions</strong> become checklist items for residents. <strong>Automations</strong> fire when events happen. Together they form the operational backbone of the district.',
-                            side: 'top',
-                            align: 'center'
+                            side: 'bottom',
+                            align: 'start'
                         }
                     },
 
@@ -1191,7 +1193,7 @@
                         popover: {
                             title: 'Suggested Roles',
                             description: 'ReadyStack analyzed the video and suggested <strong>12 role types</strong> that would help execute the strategy — from Branding Designers to Public Speakers. These are AI-generated based on the video content. You\'ll assign one to a participant next.',
-                            side: 'top',
+                            side: 'bottom',
                             align: 'center'
                         }
                     },
@@ -1274,13 +1276,13 @@
                     {
                         element: '#wt-participants',
                         onHighlightStarted: () => {
-                            document.getElementById('wt-participants').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            document.getElementById('wt-participants').scrollIntoView({ behavior: 'smooth', block: 'start' });
                         },
                         popover: {
                             title: 'Participant Table',
                             description: 'You\'ve just assigned a role and entered a name — that\'s the core workflow. Repeat for each participant: add their <strong>Name</strong>, <strong>Company</strong>, <strong>Specialty</strong>, and <strong>Email</strong>. Filter tabs at the top let you view participants by department. The "+ Participant" button adds more rows.',
-                            side: 'top',
-                            align: 'center'
+                            side: 'right',
+                            align: 'start'
                         }
                     },
 
@@ -1369,7 +1371,7 @@
                             title: 'ReadyStack Identity',
                             description: 'Your district\'s core identity — the <strong>ReadyStack Name</strong>, the <strong>Landing Page URL</strong> where audiences will arrive, and the <strong>GA4 Master ID</strong> for tracking engagement across all touchpoints.',
                             side: 'bottom',
-                            align: 'center'
+                            align: 'start'
                         }
                     },
 
@@ -1385,8 +1387,8 @@
                         popover: {
                             title: 'The District Map',
                             description: 'The map organizes every touchpoint across five journey stages: <strong>Traffic</strong> (sources), <strong>Learning</strong> (watch/read), <strong>Selecting</strong> (tour/demo), <strong>Executing</strong> (buy/build), and <strong>Expanding</strong> (share/earn). Each participant gets a row with links mapped across these stages.',
-                            side: 'top',
-                            align: 'center'
+                            side: 'right',
+                            align: 'start'
                         }
                     },
 
@@ -1399,8 +1401,8 @@
                         popover: {
                             title: 'ReadyStack Funds Your District',
                             description: 'This is how ReadyStack funds awareness for your district. ReadyStack <strong>pays 40% of hosting automation fees as lifetime income</strong> to drive word-of-mouth. The HOST row shows ReadyStack\'s own engagement links — from the walkthrough process to checkout. <strong>Click OK</strong> to acknowledge.',
-                            side: 'top',
-                            align: 'center',
+                            side: 'bottom',
+                            align: 'start',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const row = document.getElementById('wt-host-row');
