@@ -1199,14 +1199,14 @@
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => {
-                                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }, 100);
                         },
                         popover: {
                             title: 'Suggested Roles',
                             description: 'ReadyStack analyzed the video and suggested <strong>12 role types</strong> that would help execute the strategy — from Branding Designers to Public Speakers. These are AI-generated based on the video content. You\'ll assign one to a participant next.',
-                            side: 'top',
-                            align: 'center'
+                            side: 'right',
+                            align: 'start'
                         }
                     },
 
@@ -1214,7 +1214,7 @@
                     {
                         element: '#wt-role-branding',
                         onHighlightStarted: () => {
-                            document.getElementById('wt-role-branding').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            document.getElementById('wt-role-branding').scrollIntoView({ behavior: 'smooth', block: 'start' });
                             // Also reveal participants so it's visible below
                             const parts = document.getElementById('wt-participants');
                             parts.style.opacity = '1';
@@ -1223,7 +1223,7 @@
                         popover: {
                             title: 'Assign a Role',
                             description: 'Let\'s assign a role to your first participant. <strong>Click "Branding &amp; Identity Designers"</strong> to select this specialty. It will populate into Participant 1\'s specialty field.',
-                            side: 'bottom',
+                            side: 'right',
                             align: 'start',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
@@ -1399,8 +1399,20 @@
                         popover: {
                             title: 'The District Map',
                             description: 'The map organizes every touchpoint across five journey stages: <strong>Traffic</strong> (sources), <strong>Learning</strong> (watch/read), <strong>Selecting</strong> (tour/demo), <strong>Executing</strong> (buy/build), and <strong>Expanding</strong> (share/earn). Each participant gets a row with links mapped across these stages.',
-                            side: 'right',
-                            align: 'end'
+                            side: 'top',
+                            align: 'end',
+                            onPopoverRender: () => {
+                                // Force popover to lower-right so it doesn't block the map center
+                                const popover = document.querySelector('.driver-popover');
+                                if (popover) {
+                                    popover.style.position = 'fixed';
+                                    popover.style.right = '40px';
+                                    popover.style.bottom = '40px';
+                                    popover.style.left = 'auto';
+                                    popover.style.top = 'auto';
+                                    popover.classList.remove('caret-top','caret-bottom','caret-left','caret-right');
+                                }
+                            }
                         }
                     },
 
