@@ -123,6 +123,30 @@
       70%  { box-shadow: 0 0 0 10px rgba(124, 140, 255, 0); }
       100% { box-shadow: 0 0 0 0 rgba(124, 140, 255, 0); }
     }
+
+    /* === DISTRICT INVITATION — NODE GLOW SYSTEM === */
+    @keyframes nodeGlow {
+      0%, 100% {
+        box-shadow: 0 0 8px 2px rgba(124, 140, 255, 0.4),
+                    0 0 20px 6px rgba(124, 140, 255, 0.15);
+      }
+      50% {
+        box-shadow: 0 0 12px 4px rgba(124, 140, 255, 0.6),
+                    0 0 30px 10px rgba(124, 140, 255, 0.25);
+      }
+    }
+    .node-glow {
+      animation: nodeGlow 2.5s ease-in-out infinite;
+      border: 1px solid rgba(124, 140, 255, 0.5);
+      z-index: 10;
+    }
+    .node-dimmed {
+      opacity: 0.45;
+      transition: opacity 0.3s ease;
+    }
+    .node-dimmed:hover {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -406,6 +430,16 @@
       const [rosterMode, setRosterMode] = useState('edit'); // 'edit' | 'roster' | 'invite'
       const [rosterFilter, setRosterFilter] = useState('All');
       // showRosterPanel removed — pills now populate directly
+
+      // === INVITATION SYSTEM STATE ===
+      const [districtRole, setDistrictRole] = useState(null); // 'creator' | 'resident' | null
+      const [residentEmail, setResidentEmail] = useState(null); // authenticated resident's email
+      const [inviteModalData, setInviteModalData] = useState(null); // { url, participantName, role } when modal is open
+      const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
+      const [highlightVendor, setHighlightVendor] = useState(null); // participant name to glow in District Flow
+      const [isInviteMode, setIsInviteMode] = useState(false); // true when arrived via invite URL (pre-auth)
+      const isResident = districtRole === 'resident';
+      const isCreator = districtRole === 'creator' || !districtRole; // default to creator for backward compat
 
       // Persist masterRoster to localStorage whenever it changes
       useEffect(() => {
@@ -863,12 +897,86 @@
         const sessionId = params.get('rs_session');
         const email     = params.get('rs_email');
 
+        // ── Invite mode URL params (from join.html redirect) ──
+        const urlSheet = params.get('sheet');
+        const urlInviteToken = params.get('invite');
+        const urlNodeIdx = params.get('node');
+        const isInviteModeUrl = !!urlInviteToken;
+
+        // ── INVITE MODE (pre-auth): Load district + show District Flow ──
+        if (isInviteModeUrl && urlSheet) {
+          const decodeJwtPayload = (token) => {
+            try {
+              const parts = token.split('.');
+              if (parts.length !== 3) return null;
+              const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+              const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+              return JSON.parse(atob(padded));
+            } catch (e) { return null; }
+          };
+
+          const invitePayload = decodeJwtPayload(urlInviteToken);
+          if (invitePayload) {
+            // Store invite token for OAuth flow resume
+            localStorage.setItem('rs_pending_invite', urlInviteToken);
+            localStorage.setItem('rs_invite_sheet', urlSheet);
+
+            // Set state for invite mode rendering
+            setIsInviteMode(true);
+            setRsSheetId(urlSheet);
+            setActiveTab('observatory');
+
+            // Set highlight vendor from JWT payload
+            if (invitePayload.participantName) {
+              setHighlightVendor(invitePayload.participantName);
+            }
+
+            // Load district data without auth (uses loadDistrictByInvite CF task)
+            callAdvisor('loadDistrictByInvite', {
+              data: { inviteToken: urlInviteToken }
+            }).then(districtData => {
+              if (districtData) {
+                if (districtData.districtName) setStackLabel(districtData.districtName);
+                if (districtData.mapping) setMapping(districtData.mapping);
+                if (districtData.storyParticipants) setStoryParticipants(districtData.storyParticipants);
+                if (districtData.videoData) setVideoData(districtData.videoData);
+                if (districtData.videoStory) setVideoStory(districtData.videoStory);
+              }
+            }).catch(err => {
+              console.warn('Could not load district for invite mode:', err);
+            });
+
+            // Clean URL (keep sheet + invite for bookmarking)
+            window.history.replaceState({}, '', window.location.pathname + '?sheet=' + urlSheet + '&invite=' + urlInviteToken + '&node=' + (urlNodeIdx || ''));
+          }
+
+          // Don't fall through to normal auth flow — invite mode is pre-auth
+          if (!sessionId) return;
+        }
+
         if (sessionId && email) {
           // Returning from Google OAuth persist and clean URL
           localStorage.setItem('rs_session', sessionId);
           localStorage.setItem('rs_email',   email);
           setRsSession({ sessionId, email });
           window.history.replaceState({}, '', window.location.pathname);
+
+          // ── Check for pending invite from /join page ──
+          const pendingInvite = localStorage.getItem('rs_pending_invite');
+          if (pendingInvite) {
+            localStorage.removeItem('rs_pending_invite');
+            // Accept the invite — this will set role, load district, etc.
+            acceptPendingInvite(pendingInvite, email, sessionId);
+            return; // Skip normal state restoration — invite flow handles everything
+          }
+
+          // ── If returning from OAuth with invite params still in URL ──
+          if (isInviteModeUrl && urlSheet) {
+            setRsSheetId(urlSheet);
+            localStorage.setItem('rs_sheet_id', urlSheet);
+            handleLoadDistrict(urlSheet);
+            return; // Skip normal restore — invite accept flow will set role
+          }
 
           // Restore app state that was persisted before OAuth redirect
           const savedState = localStorage.getItem('rs_app_state');
@@ -907,6 +1015,12 @@
           }
           const storedSheetId = localStorage.getItem('rs_sheet_id');
           if (storedSheetId) setRsSheetId(storedSheetId);
+
+          // Detect role if we have both session and sheet
+          if (storedSession && storedEmail && storedSheetId) {
+            // Defer to avoid calling before callAdvisor is ready
+            setTimeout(() => detectDistrictRole(storedSheetId, storedEmail), 500);
+          }
         }
       }, []);
 
@@ -939,6 +1053,89 @@
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Request failed');
         return json;
+      };
+
+      // ── Generate invite link for a participant ──
+      const generateInviteLink = async (participantIndex) => {
+        if (!rsSession?.sessionId || !rsSheetId) return;
+        setIsGeneratingInvite(true);
+        try {
+          const participant = storyParticipants.residents[participantIndex];
+          if (!participant || !(participant.name || '').trim()) return;
+
+          const result = await callAdvisor('generateInviteLink', {
+            data: {
+              sheetId: rsSheetId,
+              participantRow: participantIndex,
+              districtName: stackLabel || 'My District',
+              participantName: participant.name.trim(),
+              role: participant.specialty || 'Participant',
+              company: participant.company || ''
+            }
+          });
+
+          if (result.inviteUrl) {
+            // Update participant status to Invited
+            setStoryParticipants(prev => {
+              const next = [...prev.residents];
+              next[participantIndex] = {
+                ...next[participantIndex],
+                status: 'Invited'
+              };
+              return { ...prev, residents: next };
+            });
+
+            // Show copy modal
+            setInviteModalData({
+              url: result.inviteUrl,
+              participantName: participant.name.trim(),
+              role: participant.specialty || 'Participant'
+            });
+          }
+        } catch (err) {
+          console.error('Failed to generate invite:', err);
+        } finally {
+          setIsGeneratingInvite(false);
+        }
+      };
+
+      // ── Detect district role (creator vs resident) ──
+      const detectDistrictRole = async (sheetId, sessionEmail) => {
+        if (!sheetId || !sessionEmail) {
+          setDistrictRole(null);
+          return;
+        }
+        try {
+          const result = await callAdvisor('getDistrictRole', {
+            data: { sheetId, email: sessionEmail }
+          });
+          setDistrictRole(result.role || null); // 'creator' | 'resident' | 'none'
+          if (result.role === 'resident') {
+            setResidentEmail(sessionEmail);
+          }
+        } catch (err) {
+          console.error('Role detection failed:', err);
+          setDistrictRole(null); // default to no-role (will show creator for owner)
+        }
+      };
+
+      // ── Accept invite (called after OAuth return with pending invite) ──
+      const acceptPendingInvite = async (inviteToken, email, sessionId) => {
+        try {
+          const result = await callAdvisor('acceptInvite', {
+            data: { inviteToken, email }
+          }, sessionId);
+
+          if (result.success && result.sheetId) {
+            setRsSheetId(result.sheetId);
+            localStorage.setItem('rs_sheet_id', result.sheetId);
+            setDistrictRole('resident');
+            setResidentEmail(email);
+            await handleLoadDistrict(result.sheetId);
+          }
+        } catch (err) {
+          console.error('Accept invite failed:', err);
+        }
       };
 
       const persistAppState = () => {
@@ -1101,6 +1298,14 @@
 
           setRsSheetId(sheetId);
           localStorage.setItem('rs_sheet_id', sheetId);
+
+          // Detect creator vs resident role for this district
+          const currentEmail = localStorage.getItem('rs_email');
+          if (currentEmail) {
+            detectDistrictRole(sheetId, currentEmail);
+          } else {
+            setDistrictRole(null); // not authenticated = creator by default
+          }
         } catch (e) {
           console.error('Load failed:', e);
         }
@@ -1856,7 +2061,7 @@
           <main className="w-full py-8 px-4 flex items-start">
 
             {/* LEFT ONBOARDING RAIL */}
-            <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
+            <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen && !isInviteMode ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
 
               {/* NEW MY DISTRICTS SECTION */}
               <div className="mb-6 border-b border-white/10 pb-6">
@@ -1954,7 +2159,7 @@
                   { id: 'youtube', label: 'Define Market Story', icon: 'play-circle' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Links', icon: 'link' },
-                  { id: 'preview', label: 'Tasks and Agents', icon: 'list' }
+                  ...(isResident ? [] : [{ id: 'preview', label: 'Tasks and Agents', icon: 'list' }])
                 ].map(step => {
                   const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
@@ -2008,19 +2213,23 @@
                   <div className="flex-grow h-px bg-white/10"></div>
                 </div>
 
-                {/* ── OPERATIONS section ── */}
+                {/* ── OPERATIONS section — residents see only District Flow ── */}
+                {!isResident && (
                 <div className="mb-2">
                   <h4 className="text-[10px] font-black text-amber-400/70 uppercase tracking-[0.25em] mb-3 pl-1" style={{fontFamily:'Poppins,sans-serif'}}>Operations</h4>
                 </div>
+                )}
                 <div className="space-y-3">
-                {[
+                {(isResident ? [
+                  { id: 'observatory', label: 'District Flow', icon: 'git-branch' }
+                ] : [
                   { id: 'finance', label: 'District Finance', icon: 'dollar-sign' },
                   { id: 'observatory', label: 'District Flow', icon: 'git-branch' },
                   { id: 'connect', label: 'My Residents', icon: 'send' },
                   { id: 'looker', label: 'Looker', icon: 'bar-chart-2' },
                   { id: 'g4', label: 'GA4', icon: 'activity' },
                   { id: 'analytics', label: 'Analytics', icon: 'trending-up' },
-                ].map(step => {
+                ]).map(step => {
                   const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
@@ -2120,7 +2329,8 @@
 
               {/* ── Work-area action buttons ── */}
               <div className="absolute top-20 right-6 z-[90] flex items-center gap-2">
-                {/* Save District */}
+                {/* Save District — hidden for residents */}
+                {!isResident && (
                 <button
                   onClick={() => {
                     if (!rsSession) { initiateGoogleAuth(); return; }
@@ -2136,6 +2346,7 @@
                     <polyline points="7 3 7 8 15 8"/>
                   </svg>
                 </button>
+                )}
                 {/* Studio */}
                 <a
                   href="https://mks.bridgemailsystem.com/pms/loginS.jsp"
@@ -2237,7 +2448,7 @@
                     {(searchPlatform || 'youtube') === 'youtube' && (
                       <div className="space-y-6">
                         {/* YouTube: selected video view */}
-                        {youtubeEmbedUrl && !isSearchPanelOpen ? (
+                        {youtubeEmbedUrl && (!isSearchPanelOpen || isResident) ? (
                           <div className="space-y-8 animate-fade-in">
                             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 bg-[#0f172a]/50 p-10 rounded-2xl border border-white/5">
                               <div className="lg:col-span-3">
@@ -2258,7 +2469,7 @@
                                       ))}
                                     </ul>
                                     <div className="flex gap-2">
-                                      <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
+                                      {!isResident && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
                                       <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
@@ -2267,10 +2478,10 @@
                                     {isGeneratingStory ? (
                                       <div className="w-full py-4 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-black text-sm uppercase tracking-widest text-center animate-pulse">Drafting Market Story...</div>
                                     ) : (
-                                      <button onClick={generateStoryFromVideo} className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg">Re-Draft Market Story</button>
+                                      {!isResident && <button onClick={generateStoryFromVideo} className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg">Re-Draft Market Story</button>}
                                     )}
                                     <div className="flex gap-2">
-                                      <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
+                                      {!isResident && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
                                       <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
@@ -2742,11 +2953,18 @@
                               // ALL MODE — editable rows
                               return (<>
                               <div className="flex gap-2 mb-6 px-1">
-                                <span className="w-[25%] text-xs font-medium text-slate-300 uppercase tracking-wider">Name</span>
-                                <span className="w-[20%] text-xs font-medium text-slate-300 uppercase tracking-wider">Company</span>
-                                <span className="w-[30%] text-xs font-medium text-slate-300 uppercase tracking-wider">Specialty</span>
-                                <span className="w-[20%] text-xs font-medium text-slate-300 uppercase tracking-wider">Email</span>
-                                <span className="w-[5%]"></span>
+                                <span className={`${isResident ? 'w-[30%]' : 'w-[22%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Name</span>
+                                <span className="w-[18%] text-xs font-medium text-slate-300 uppercase tracking-wider">Company</span>
+                                <span className={`${isResident ? 'w-[30%]' : 'w-[25%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Specialty</span>
+                                {!isResident && (
+                                  <span className="w-[17%] text-xs font-medium text-slate-300 uppercase tracking-wider">Email</span>
+                                )}
+                                {!isResident && rsSession && rsSheetId && (
+                                  <span className="w-[13%] text-xs font-medium text-slate-300 uppercase tracking-wider text-center">Invite</span>
+                                )}
+                                {!isResident && (
+                                  <span className="w-[5%]"></span>
+                                )}
                               </div>
                               <div className="space-y-6">
                               {(() => {
@@ -2757,22 +2975,67 @@
                                 const hasName = (r.name || '').trim();
                                 const rosterMatch = masterRoster.find(m => m.name.toLowerCase() === (r.name || '').toLowerCase().trim());
                                 return (
-                                <div key={i} className="space-y-1.5">
+                                <div key={i} className={`space-y-1.5 ${isResident && residentEmail && (r.email || '').toLowerCase() === residentEmail.toLowerCase() ? 'ring-1 ring-indigo-500/30 rounded-xl p-2 bg-indigo-500/5' : ''}`}>
                                   <div className="flex gap-2 items-center group">
-                                    <input placeholder={`Participant ${i+1}`} value={r.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], name: v}; return {...prev, residents: next}; }); }} className={`w-[25%] min-w-0 bg-[#020617]/80 border rounded-lg px-4 py-3 text-sm text-white focus:border-slate-600 outline-none ${r.jobContext && !hasName ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-slate-800/60'}`} />
-                                    <input placeholder="company" value={r.company} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], company: v}; return {...prev, residents: next}; }); }} className="w-[20%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
-                                    <select value={r.specialty} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], specialty: v}; return {...prev, residents: next}; }); }} className={`w-[30%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm outline-none cursor-pointer focus:border-slate-600 ${r.specialty ? 'text-white' : 'text-slate-300'}`}>
-                                      <option value="">Select specialty...</option>
-                                      {SPECIALTY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                                    </select>
-                                    <input placeholder="email" value={r.email || ''} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], email: v}; return {...prev, residents: next}; }); }} className="w-[20%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
-                                    <div className="w-[5%] flex items-center justify-center">
-                                      {(hasName || r.jobContext) && (
-                                        <button onClick={() => { setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = { name: '', company: '', specialty: '', email: '', source: '', status: '', jobContext: '', jobType: '' }; return {...prev, residents: next}; }); }} className="text-slate-300 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                                        </button>
-                                      )}
-                                    </div>
+                                    {isResident ? (
+                                      <>
+                                        <div className="w-[30%] min-w-0 px-4 py-3 text-sm text-white truncate">
+                                          {r.name || `Participant ${i+1}`}
+                                          {residentEmail && (r.email || '').toLowerCase() === residentEmail.toLowerCase() && (
+                                            <span className="ml-2 text-[9px] font-black text-indigo-400 uppercase tracking-widest">You</span>
+                                          )}
+                                        </div>
+                                        <div className="w-[18%] min-w-0 px-4 py-3 text-sm text-slate-300 truncate">{r.company || ''}</div>
+                                        <div className="w-[30%] min-w-0 px-4 py-3 text-sm text-slate-300 truncate">{r.specialty || ''}</div>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <input placeholder={`Participant ${i+1}`} value={r.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], name: v}; return {...prev, residents: next}; }); }} className={`w-[22%] min-w-0 bg-[#020617]/80 border rounded-lg px-4 py-3 text-sm text-white focus:border-slate-600 outline-none ${r.jobContext && !hasName ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-slate-800/60'}`} />
+                                        <input placeholder="company" value={r.company} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], company: v}; return {...prev, residents: next}; }); }} className="w-[18%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
+                                        <select value={r.specialty} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], specialty: v}; return {...prev, residents: next}; }); }} className={`w-[25%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm outline-none cursor-pointer focus:border-slate-600 ${r.specialty ? 'text-white' : 'text-slate-300'}`}>
+                                          <option value="">Select specialty...</option>
+                                          {SPECIALTY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                        <input placeholder="email" value={r.email || ''} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], email: v}; return {...prev, residents: next}; }); }} className="w-[17%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
+
+                                        {rsSession && rsSheetId ? (
+                                          <div className="w-[13%] flex items-center justify-center">
+                                            {hasName && (
+                                              r.status === 'Active' ? (
+                                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                  Active
+                                                </span>
+                                              ) : r.status === 'Invited' ? (
+                                                <button
+                                                  onClick={() => generateInviteLink(i)}
+                                                  disabled={isGeneratingInvite}
+                                                  className="text-[10px] font-black text-amber-400 uppercase tracking-widest hover:text-amber-300 transition-colors cursor-pointer"
+                                                >
+                                                  Invited
+                                                </button>
+                                              ) : (
+                                                <button
+                                                  onClick={() => generateInviteLink(i)}
+                                                  disabled={isGeneratingInvite}
+                                                  className="px-3 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:bg-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
+                                                >
+                                                  {isGeneratingInvite ? '...' : 'Invite'}
+                                                </button>
+                                              )
+                                            )}
+                                          </div>
+                                        ) : null}
+
+                                        <div className="w-[5%] flex items-center justify-center">
+                                          {(hasName || r.jobContext) && (
+                                            <button onClick={() => { setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = { name: '', company: '', specialty: '', email: '', source: '', status: '', jobContext: '', jobType: '' }; return {...prev, residents: next}; }); }} className="text-slate-300 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
+                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                            </button>
+                                          )}
+                                        </div>
+                                      </>
+                                    )}
                                   </div>
                                   {r.jobContext && (
                                     <div className="pl-1">
@@ -2783,6 +3046,7 @@
                                 );
                               })}
                               </div>
+                              {!isResident && (
                               <div className="pt-4">
                                 <button onClick={() => {
                                   setStoryParticipants(prev => ({
@@ -2794,13 +3058,14 @@
                                   Participant
                                 </button>
                               </div>
+                              )}
                               </>);
                             })()}
 
                         </div>
                     </div>
 
-                    <div className="text-center py-10"><button onClick={() => buildStoryDistrict('mapper')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">Confirming your residents unlocks the District Map.</p></div>
+                    <div className="text-center py-10"><button onClick={() => isResident ? setActiveTab('mapper') : buildStoryDistrict('mapper')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">Confirming your residents unlocks the District Map.</p></div>
                 </div>
               </div>
             )}
@@ -2811,7 +3076,8 @@
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>LINKS</h3>
                     <p className="text-slate-300 text-base font-medium">Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey.</p>
                 </div>
-                {/* ── District Identity Card ── */}
+                {/* ── District Identity Card — hidden for residents ── */}
+                {!isResident && (
                 <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner">
                     <div className="grid md:grid-cols-3 gap-6">
                         <div className="space-y-4">
@@ -2828,6 +3094,7 @@
                         </div>
                     </div>
                 </div>
+                )}
 
                 {/* ── LINKS: Resident rows × 4 journey columns ── */}
                 <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner space-y-8">
@@ -2920,7 +3187,7 @@
                             <div className="flex items-center gap-3 mb-4">
                               <p className="text-sm font-bold text-white">{displayName}</p>
                               {resident.jobContext && (resident.name || '').trim() && <span className="text-xs font-semibold text-indigo-400 italic">{resident.jobContext}</span>}
-                              <div className="relative">
+                              {!isResident && (<div className="relative">
                                 <button
                                   onClick={() => setMapEditingItem(mapEditingItem === 'dropdown-'+origIdx ? null : 'dropdown-'+origIdx)}
                                   className="bg-[#020617] border border-indigo-500/40 rounded-lg px-3 py-1.5 text-[10px] text-indigo-300 outline-none cursor-pointer hover:border-indigo-400 hover:text-indigo-200 transition-colors flex items-center gap-1"
@@ -2986,7 +3253,7 @@
                                     ))}
                                   </div>
                                 )}
-                              </div>
+                              </div>)}
                             </div>
 
                             {/* 5-Column Pill Grid */}
@@ -3000,10 +3267,10 @@
                                       onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-t-'+ti ? null : origIdx+'-t-'+ti)}>
                                       <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-white"></span>
                                       <span className="text-[10px] text-white font-medium flex-1 truncate">{item.label}</span>
-                                      <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
-                                        className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                      {!isResident && <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
+                                        className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                     </div>
-                                    {mapEditingItem === origIdx+'-t-'+ti && (
+                                    {mapEditingItem === origIdx+'-t-'+ti && !isResident && (
                                       <input autoFocus placeholder="https://..." value={item.url || ''} onChange={(e) => { const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources[item.srcIdx] = { ...sources[item.srcIdx], url: e.target.value }; updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
                                         onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                         className="mt-1 w-full bg-[#020617] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none focus:border-indigo-500" />
@@ -3030,10 +3297,10 @@
                                           onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-'+q.key+'-'+ii ? null : origIdx+'-'+q.key+'-'+ii)}>
                                           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.pat ? q.color : q.color + '60' }}></span>
                                           <span className="text-[10px] font-medium flex-1 truncate" style={{ color: item.pat ? '#e2e8f0' : '#cbd5e1' }}>{item.label}{!item.pat && <span className="text-[8px] text-amber-400/70 ml-1">needs link</span>}</span>
-                                          <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
-                                            className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                          {!isResident && <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
+                                            className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                         </div>
-                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && (
+                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && !isResident && (
                                           <input autoFocus placeholder="https://..." value={item.pat || ''} onChange={(e) => { handlePatternUpdate(q.key, item.stageIdx, 'pat', e.target.value); }}
                                             onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                             className="mt-1 w-full bg-[#020617] border rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none" style={{ borderColor: q.color + '40' }} />
@@ -3052,13 +3319,13 @@
                 </div>
 
                 <div className="py-12 text-center">
-                    <button onClick={() => setActiveTab('preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Tasks and Agents</button>
+                    <button onClick={() => setActiveTab(isResident ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{isResident ? 'Continue to District Flow' : 'Continue to Tasks and Agents'}</button>
                 </div>
               </div>
             )}
 
             {/* ── INVITE RESIDENTS TAB ── */}
-            {activeTab === 'connect' && (
+            {activeTab === 'connect' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-12">
                   <div className="space-y-6">
@@ -3115,7 +3382,7 @@
                   })()}
 
                   <div className="text-center py-12">
-                    <button onClick={() => setActiveTab('preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Tasks and Agents</button>
+                    <button onClick={() => setActiveTab(isResident ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{isResident ? 'Continue to District Flow' : 'Continue to Tasks and Agents'}</button>
                   </div>
                 </div>
               </div>
@@ -3226,7 +3493,7 @@
               </div>
             )}
 
-            {activeTab === 'finance' && (
+            {activeTab === 'finance' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-12">
                   <div className="space-y-6">
@@ -3363,7 +3630,7 @@
                     {nodes.items.map(n => {
                       const iconColor = n.type === 'youtube' ? '#f87171' : n.type === 'substack' ? '#fb923c' : n.type === 'reddit' ? '#f97316' : '#ffffff';
                       return (
-                      <div key={n.id} className="absolute node-container" style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20, pointerEvents: 'none' }}><div className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' : n.isSystem ? 'rounded-xl border-[2.5px] rotate-45' : 'rounded-full border-[2px]'}`} style={{ borderColor: n.color, width: `${n.radius * 2}px`, height: `${n.radius * 2}px`, color: iconColor, pointerEvents: 'auto' }} onMouseEnter={() => handleNodeHover(n)} onMouseLeave={handleNodeLeave}><div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}><MediumIcon type={n.type} size={n.radius * 0.9} /></div></div></div>
+                      <div key={n.id} className="absolute node-container" data-vendor={n.vendor} data-node-id={n.id} style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20, pointerEvents: 'none' }}><div className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' : n.isSystem ? 'rounded-xl border-[2.5px] rotate-45' : 'rounded-full border-[2px]'} ${highlightVendor && n.vendor === highlightVendor ? 'node-glow' : ''} ${highlightVendor && n.vendor !== highlightVendor ? 'node-dimmed' : ''}`} style={{ borderColor: n.color, width: `${n.radius * 2}px`, height: `${n.radius * 2}px`, color: iconColor, pointerEvents: 'auto' }} onMouseEnter={() => handleNodeHover(n)} onMouseLeave={handleNodeLeave}><div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}><MediumIcon type={n.type} size={n.radius * 0.9} /></div></div></div>
                       );
                     })}
                   </div>
@@ -3506,11 +3773,38 @@
                   ))}
                 </div>
                 </>)}
+
+                {/* ── INVITE MODE: Join This District CTA Panel ── */}
+                {isInviteMode && !rsSession && (
+                  <div className="mt-8 mx-auto max-w-lg">
+                    <div className="bg-[#0f172a] border border-white/10 rounded-3xl p-8 text-center space-y-6">
+                      <div>
+                        <h3 className="text-lg font-black text-white uppercase tracking-tight" style={{fontFamily:'Poppins,sans-serif'}}>
+                          {highlightVendor || 'You'} — Join This District
+                        </h3>
+                        <p className="text-sm text-slate-300 mt-2">{stackLabel || 'This District'}</p>
+                      </div>
+
+                      <button
+                        onClick={() => initiateGoogleAuth()}
+                        className="w-full py-4 rounded-xl bg-white text-slate-900 font-black text-sm uppercase tracking-widest transition-all shadow-lg hover:bg-slate-100 flex items-center justify-center gap-3"
+                      >
+                        <svg viewBox="0 0 48 48" className="w-5 h-5"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                        Sign in with Google
+                      </button>
+
+                      <p className="text-[10px] text-slate-500">
+                        Sign in to join this district and connect with other residents.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
 
 
-            {activeTab === 'looker' && (
+            {activeTab === 'looker' && !isResident && (
               <div className="space-y-12 animate-fade-in text-left font-sans pt-20">
                 <div className="flex justify-between items-center border-b border-white/5 pb-10">
                     <div className="flex bg-white/5 px-6 py-3 rounded-2xl border border-white/10 shadow-inner"><span className="text-xs font-black text-slate-300 uppercase tracking-widest mr-3 opacity-60">Reporting Period:</span><span className="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Jan 01, 2026 - Jan 31, 2026</span></div>
@@ -3543,7 +3837,7 @@
               </div>
             )}
 
-            {activeTab === 'g4' && (
+            {activeTab === 'g4' && !isResident && (
               <div className="bg-white rounded-[40px] shadow-2xl overflow-hidden animate-fade-in text-left font-sans pt-20">
                 <div className="bg-[#f8f9fa] border-b border-slate-200 px-10 py-6 flex justify-between items-center">
                   <div className="flex items-center gap-4"><i data-lucide="table" className="w-6 h-6 text-indigo-600"></i><h4 className="text-[#3c4043] font-bold text-lg tracking-tight leading-none uppercase italic">GA4 Registry Log</h4></div>
@@ -3561,7 +3855,7 @@
             )}
 
             {/* ── ANALYTICS TAB ── */}
-            {activeTab === 'analytics' && (
+            {activeTab === 'analytics' && !isResident && (
               <div className="space-y-10 animate-fade-in text-left font-sans pt-20">
                 {/* Period selector */}
                 <div className="flex justify-between items-center border-b border-white/5 pb-8">
@@ -3704,6 +3998,58 @@
 
             </div>
 
+
+          {/* ── INVITE LINK MODAL ── */}
+          {inviteModalData && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setInviteModalData(null)}>
+              <div className="bg-[#0f172a] border border-white/10 rounded-3xl p-8 max-w-lg w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="text-center space-y-6">
+                  <div>
+                    <h3 className="text-lg font-black text-white uppercase tracking-tight" style={{fontFamily:'Poppins,sans-serif'}}>Invite Link Ready</h3>
+                    <p className="text-sm text-slate-300 mt-2">
+                      Send this link to <span className="text-white font-bold">{inviteModalData.participantName}</span> via your preferred channel.
+                    </p>
+                  </div>
+
+                  <div className="bg-[#020617] border border-slate-700 rounded-xl p-4 flex items-center gap-3">
+                    <input
+                      readOnly
+                      value={inviteModalData.url}
+                      className="flex-1 bg-transparent text-xs text-slate-300 font-mono outline-none truncate"
+                      onClick={(e) => e.target.select()}
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(inviteModalData.url);
+                        const btn = document.getElementById('copy-invite-btn');
+                        if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+                      }}
+                      id="copy-invite-btn"
+                      className="px-4 py-2 bg-indigo-500 text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-indigo-400 transition-colors shrink-0"
+                    >
+                      Copy
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+                      Role: {inviteModalData.role}
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      Link expires in 30 days. The first person to sign in claims this invite.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setInviteModalData(null)}
+                    className="text-xs text-slate-300 hover:text-white transition-colors font-bold uppercase tracking-widest"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           </main>
         </div>
