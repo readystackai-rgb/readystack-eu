@@ -872,13 +872,36 @@
                     <!-- Flow Header -->
                     <div id="wt-flow-header" style="margin-bottom: 32px;">
                         <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">District Flow</h1>
-                        <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">The automation backbone of your district. See how triggers, actions, and integrations work together to run operations on autopilot.</p>
+                        <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">Your district's operational workflow. Content coming soon.</p>
+                    </div>
+
+                    <!-- Placeholder content -->
+                    <div id="wt-flow-placeholder" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 48px 32px; margin-bottom: 32px; text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🔧</div>
+                        <h2 style="font-size: 20px; font-weight: 900; color: white; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">District Flow</h2>
+                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 400px; margin: 0 auto;">This section will detail how your district's operational workflows are configured and managed. Stay tuned.</p>
+                    </div>
+
+                    <!-- Flow Footer -->
+                    <div id="wt-flow-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
+                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Continue to Preview.</p>
+                        <button id="wt-continue-preview-btn" style="background: var(--accent); border: none; color: white; padding: 14px 48px; border-radius: 14px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; box-shadow: 0 0 30px rgba(124,140,255,0.3); transition: all 0.2s ease;">Next</button>
+                    </div>
+
+                </div><!-- end panel-flow -->
+
+                <!-- ═══ PREVIEW PANEL (automation content saved from District Flow) ═══ -->
+                <div id="panel-preview" class="content-panel">
+
+                    <!-- Preview Header -->
+                    <div id="pv-header" style="margin-bottom: 32px;">
+                        <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">Preview</h1>
+                        <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">See how your district's automations, integrations, and workflows come together before going live.</p>
                     </div>
 
                     <!-- Automation Pipeline -->
-                    <div id="wt-flow-pipeline" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                    <div id="pv-pipeline" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
                         <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 20px;">Hosted Automation Pipeline</h2>
-                        <!-- 5-stage pipeline visualization -->
                         <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 24px;">
                             <div style="background: rgba(100,116,139,0.15); border: 1px solid rgba(100,116,139,0.25); border-radius: 10px; padding: 14px 8px; text-align: center;">
                                 <div style="font-size: 18px; margin-bottom: 6px;">🎯</div>
@@ -910,9 +933,8 @@
                     </div>
 
                     <!-- Active Automations -->
-                    <div id="wt-active-automations" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; margin-bottom: 32px;">
+                    <div id="pv-automations" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; margin-bottom: 32px;">
                         <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 16px;">Active Automations</h2>
-                        <!-- Automation 1 -->
                         <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px;">
                             <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-top: 6px; flex-shrink: 0; box-shadow: 0 0 8px rgba(16,185,129,0.5);"></div>
                             <div style="flex: 1;">
@@ -923,7 +945,6 @@
                                 <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;"><span style="color: var(--amber); font-weight: 700;">TRIGGER:</span> New subscriber joins niche email list → <span style="color: var(--green); font-weight: 700;">ACTION:</span> Initiate automated email sequence sharing core brand story and inviting engagement in a private community.</p>
                             </div>
                         </div>
-                        <!-- Automation 2 -->
                         <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px;">
                             <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-top: 6px; flex-shrink: 0; box-shadow: 0 0 8px rgba(16,185,129,0.5);"></div>
                             <div style="flex: 1;">
@@ -934,7 +955,6 @@
                                 <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;"><span style="color: var(--amber); font-weight: 700;">TRIGGER:</span> Customer provides a positive review or testimonial → <span style="color: var(--green); font-weight: 700;">ACTION:</span> Send automated thank you email with a shareable link and pre-written social media snippet.</p>
                             </div>
                         </div>
-                        <!-- Automation 3 -->
                         <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px;">
                             <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-top: 6px; flex-shrink: 0; box-shadow: 0 0 8px rgba(16,185,129,0.5);"></div>
                             <div style="flex: 1;">
@@ -948,7 +968,7 @@
                     </div>
 
                     <!-- Integration Hub -->
-                    <div id="wt-integrations" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                    <div id="pv-integrations" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
                         <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 16px;">Integration Hub</h2>
                         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                             <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px; padding: 16px; text-align: center;">
@@ -974,17 +994,17 @@
                         </div>
                     </div>
 
-                    <!-- Flow Footer / Tour Complete -->
-                    <div id="wt-flow-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
+                    <!-- Preview Footer -->
+                    <div id="pv-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
                         <div style="background: var(--surface); border: 1px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 32px; margin-bottom: 20px;">
-                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--green); margin-bottom: 12px;">District Setup Complete</div>
-                            <h2 style="font-size: 24px; font-weight: 900; color: white; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Your District Is Ready</h2>
-                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 500px; margin: 0 auto;">You've defined your market story, assembled residents, mapped links, reviewed your financial model, and activated your automation flows. Your district is operational.</p>
+                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--green); margin-bottom: 12px;">Preview Complete</div>
+                            <h2 style="font-size: 24px; font-weight: 900; color: white; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Your Automations Are Ready</h2>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 500px; margin: 0 auto;">You've previewed the automation pipeline, active workflows, and integration hub. Everything is wired up and ready to power your district.</p>
                         </div>
-                        <button id="wt-complete-btn" style="background: var(--green); border: none; color: white; padding: 14px 48px; border-radius: 14px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; box-shadow: 0 0 30px rgba(16,185,129,0.3); transition: all 0.2s ease;">Launch District</button>
+                        <button id="pv-continue-btn" style="background: var(--accent); border: none; color: white; padding: 14px 48px; border-radius: 14px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; box-shadow: 0 0 30px rgba(124,140,255,0.3); transition: all 0.2s ease;">Continue</button>
                     </div>
 
-                </div><!-- end panel-flow -->
+                </div><!-- end panel-preview -->
 
             </div><!-- end wt-content -->
         </div><!-- end main layout -->
@@ -1553,7 +1573,7 @@
                                     btn.classList.remove('do-pulse');
                                     setCompleteRail('residents');
                                     setActiveRail('links');
-                                    updateBreadcrumb(3, 11, 'Links', 'Preview');
+                                    updateBreadcrumb(3, 11, 'Links', 'District Finance');
                                     showPanel('panel-links');
                                     setTimeout(() => driverObj.moveNext(), 300);
                                 };
@@ -1810,7 +1830,7 @@
                                     btn.classList.remove('do-pulse');
                                     setCompleteRail('finance');
                                     setActiveRail('flow');
-                                    updateBreadcrumb(5, 11, 'District Flow', '');
+                                    updateBreadcrumb(5, 11, 'District Flow', 'Preview');
                                     showPanel('panel-flow');
                                     setTimeout(() => driverObj.moveNext(), 300);
                                 };
@@ -1819,7 +1839,7 @@
                         }
                     },
 
-                    // ═══ DISTRICT FLOW SECTION ═══
+                    // ═══ DISTRICT FLOW SECTION (placeholder) ═══
 
                     // Frame 29: OBSERVE — Flow Header (landing)
                     {
@@ -1827,20 +1847,78 @@
                         onHighlightStarted: () => {
                             const panel = document.getElementById('panel-flow');
                             panel.scrollTo({ top: 0, behavior: 'smooth' });
+                            // Reveal the placeholder
+                            const ph = document.getElementById('wt-flow-placeholder');
+                            if (ph) { ph.style.opacity = '1'; ph.style.transform = 'translateY(0)'; }
                         },
                         popover: {
-                            title: 'Welcome to District Flow',
-                            description: 'This is the operational brain of your district. Every automation you defined in the market story is now a live, running workflow \u2014 triggering actions, sending emails, and tracking results across all participants.',
+                            title: 'District Flow',
+                            description: 'This section will house your district\u2019s operational workflows \u2014 the day-to-day systems that keep everything running. Content is being built out. For now, let\u2019s continue to Preview.',
                             side: 'bottom',
                             align: 'start'
                         }
                     },
 
-                    // Frame 30: OBSERVE — Automation Pipeline
+                    // Frame 30: DO — Continue to Preview
                     {
-                        element: '#wt-flow-pipeline',
+                        element: '#wt-flow-footer',
                         onHighlightStarted: () => {
-                            const el = document.getElementById('wt-flow-pipeline');
+                            const el = document.getElementById('wt-flow-footer');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+                            // Light up the Preview rail item
+                            const previewRail = document.getElementById('wt-rail-preview');
+                            previewRail.style.borderColor = 'rgba(124,140,255,0.6)';
+                            previewRail.style.boxShadow = '0 0 20px rgba(124,140,255,0.3)';
+                            previewRail.style.background = 'rgba(124,140,255,0.1)';
+                            previewRail.style.color = 'var(--accent)';
+                        },
+                        popover: {
+                            title: 'Continue to Preview',
+                            description: 'Let\u2019s move on to the Preview section where you\u2019ll see your automation pipeline, live workflows, and integration hub in action. <strong>Click CONTINUE</strong> to preview your district.',
+                            side: 'top',
+                            align: 'center',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const btn = document.getElementById('wt-continue-preview-btn');
+                                btn.classList.add('do-pulse');
+                                const advance = () => {
+                                    btn.removeEventListener('click', advance);
+                                    btn.classList.remove('do-pulse');
+                                    setCompleteRail('flow');
+                                    setActiveRail('preview');
+                                    updateBreadcrumb(6, 11, 'Preview', '');
+                                    showPanel('panel-preview');
+                                    setTimeout(() => driverObj.moveNext(), 300);
+                                };
+                                btn.addEventListener('click', advance);
+                            }
+                        }
+                    },
+
+                    // ═══ PREVIEW SECTION ═══
+
+                    // Frame 31: OBSERVE — Preview Header (landing)
+                    {
+                        element: '#pv-header',
+                        onHighlightStarted: () => {
+                            const panel = document.getElementById('panel-preview');
+                            panel.scrollTo({ top: 0, behavior: 'smooth' });
+                        },
+                        popover: {
+                            title: 'Welcome to Preview',
+                            description: 'This is where you see everything come together. Your automation pipeline, live workflows, and integrations \u2014 all wired up and ready to power your district.',
+                            side: 'bottom',
+                            align: 'start'
+                        }
+                    },
+
+                    // Frame 32: OBSERVE — Automation Pipeline
+                    {
+                        element: '#pv-pipeline',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('pv-pipeline');
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
@@ -1866,11 +1944,11 @@
                         }
                     },
 
-                    // Frame 31: OBSERVE — Active Automations
+                    // Frame 33: OBSERVE — Active Automations
                     {
-                        element: '#wt-active-automations',
+                        element: '#pv-automations',
                         onHighlightStarted: () => {
-                            const el = document.getElementById('wt-active-automations');
+                            const el = document.getElementById('pv-automations');
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
@@ -1882,24 +1960,24 @@
                             align: 'start',
                             onPopoverRender: () => {
                                 // Also reveal integrations
-                                const integ = document.getElementById('wt-integrations');
+                                const integ = document.getElementById('pv-integrations');
                                 if (integ) { integ.style.opacity = '1'; integ.style.transform = 'translateY(0)'; }
                             }
                         }
                     },
 
-                    // Frame 32: OBSERVE — Tour Complete
+                    // Frame 34: OBSERVE — Tour Complete
                     {
-                        element: '#wt-flow-footer',
+                        element: '#pv-footer',
                         onHighlightStarted: () => {
-                            const el = document.getElementById('wt-flow-footer');
+                            const el = document.getElementById('pv-footer');
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
                         },
                         popover: {
-                            title: 'District Setup Complete',
-                            description: 'You\u2019ve built a complete district from a single YouTube video \u2014 market story, residents, links, financial model, and automation flows. Your district is ready to launch. Click <strong>Launch District</strong> to go live.',
+                            title: 'Preview Complete',
+                            description: 'You\u2019ve built a complete district from a single YouTube video \u2014 market story, residents, links, angel investors, and automation flows. Your district is ready to launch.',
                             side: 'top',
                             align: 'center',
                             doneBtnText: 'Finish Tour',
