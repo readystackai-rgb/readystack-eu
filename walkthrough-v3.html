@@ -1662,7 +1662,7 @@
                         }
                     },
 
-                    // Frame 22: DO — Acknowledge the ReadyStack HOST / 40% funding banner
+                    // Frame 22: OBSERVE — ReadyStack HOST / 40% funding banner
                     {
                         element: '#wt-host-row',
                         onHighlightStarted: () => {
@@ -1670,21 +1670,9 @@
                         },
                         popover: {
                             title: 'ReadyStack Funds Your District',
-                            description: 'This is how ReadyStack funds awareness for your district. ReadyStack <strong>pays 40% of hosting automation fees as lifetime income</strong> to drive word-of-mouth. The HOST row shows ReadyStack\'s own engagement links — from the walkthrough process to checkout. <strong>Click OK</strong> to acknowledge.',
+                            description: 'This is how ReadyStack funds awareness for your district. ReadyStack <strong>pays 40% of hosting automation fees as lifetime income</strong> to drive word-of-mouth for every participant. The HOST row shows ReadyStack\'s own engagement links — from the walkthrough process to checkout.',
                             side: 'bottom',
-                            align: 'start',
-                            showButtons: ['previous'],
-                            onPopoverRender: () => {
-                                const row = document.getElementById('wt-host-row');
-                                row.classList.add('do-pulse');
-                                const handler = () => {
-                                    row.removeEventListener('click', handler);
-                                    row.classList.remove('do-pulse');
-                                    row.style.cursor = 'default';
-                                    setTimeout(() => driverObj.moveNext(), 400);
-                                };
-                                row.addEventListener('click', handler);
-                            }
+                            align: 'start'
                         }
                     },
 
