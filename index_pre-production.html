@@ -437,8 +437,9 @@
       const [inviteModalData, setInviteModalData] = useState(null); // { url, participantName, role } when modal is open
       const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
       const [inviteError, setInviteError] = useState(null); // participant index that failed, or null
-      const [highlightVendor, setHighlightVendor] = useState(null); // participant name to glow in District Flow
+      const [highlightVendor, setHighlightVendor] = useState(null); // participant name to glow in District Ecosystem
       const [residentSortBy, setResidentSortBy] = useState('name'); // 'name' | 'status' | 'specialty' | 'company'
+      const [inviteExpiryDays, setInviteExpiryDays] = useState(30); // configurable invite link validity
       const [isInviteMode, setIsInviteMode] = useState(false); // true when arrived via invite URL (pre-auth)
       const isResident = districtRole === 'resident';
       const isCreator = districtRole === 'creator' || !districtRole; // default to creator for backward compat
@@ -905,7 +906,7 @@
         const urlNodeIdx = params.get('node');
         const isInviteModeUrl = !!urlInviteToken;
 
-        // ── INVITE MODE (pre-auth): Load district + show District Flow ──
+        // ── INVITE MODE (pre-auth): Load district + show District Ecosystem ──
         if (isInviteModeUrl && urlSheet) {
           const decodeJwtPayload = (token) => {
             try {
@@ -1072,17 +1073,19 @@
               districtName: stackLabel || 'My District',
               participantName: participant.name.trim(),
               role: participant.specialty || 'Participant',
-              company: participant.company || ''
+              company: participant.company || '',
+              expiryDays: inviteExpiryDays
             }
           });
 
           if (result.inviteUrl) {
-            // Update participant status to Invited
+            // Update participant status to Invited with timestamp
             setStoryParticipants(prev => {
               const next = [...prev.residents];
               next[participantIndex] = {
                 ...next[participantIndex],
-                status: 'Invited'
+                status: 'Invited',
+                invitedAt: new Date().toISOString()
               };
               return { ...prev, residents: next };
             });
@@ -2217,7 +2220,7 @@
                   <div className="flex-grow h-px bg-white/10"></div>
                 </div>
 
-                {/* ── OPERATIONS section — residents see only District Flow ── */}
+                {/* ── OPERATIONS section — residents see only District Ecosystem ── */}
                 {!isResident && (
                 <div className="mb-2">
                   <h4 className="text-[10px] font-black text-amber-400/70 uppercase tracking-[0.25em] mb-3 pl-1" style={{fontFamily:'Poppins,sans-serif'}}>Operations</h4>
@@ -2225,10 +2228,10 @@
                 )}
                 <div className="space-y-3">
                 {(isResident ? [
-                  { id: 'observatory', label: 'District Flow', icon: 'git-branch' }
+                  { id: 'observatory', label: 'District Ecosystem', icon: 'git-branch' }
                 ] : [
                   { id: 'finance', label: 'District Finance', icon: 'dollar-sign' },
-                  { id: 'observatory', label: 'District Flow', icon: 'git-branch' },
+                  { id: 'observatory', label: 'District Ecosystem', icon: 'git-branch' },
                   { id: 'connect', label: 'My Residents', icon: 'send' },
                   { id: 'looker', label: 'Looker', icon: 'bar-chart-2' },
                   { id: 'g4', label: 'GA4', icon: 'activity' },
@@ -2388,7 +2391,7 @@
               ];
               const opsSteps = [
                 { id: 'finance', label: 'District Finance', phase: 'operations' },
-                { id: 'observatory', label: 'District Flow', phase: 'operations' },
+                { id: 'observatory', label: 'District Ecosystem', phase: 'operations' },
                 { id: 'connect', label: 'My Residents', phase: 'operations' },
                 { id: 'looker', label: 'Looker', phase: 'operations' },
                 { id: 'g4', label: 'GA4', phase: 'operations' },
@@ -3323,7 +3326,7 @@
                 </div>
 
                 <div className="py-12 text-center">
-                    <button onClick={() => setActiveTab(isResident ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{isResident ? 'Continue to District Flow' : 'Continue to Tasks and Agents'}</button>
+                    <button onClick={() => setActiveTab(isResident ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{isResident ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
                 </div>
               </div>
             )}
@@ -3339,8 +3342,18 @@
 
                   {(() => {
                     // Build resident list from storyParticipants (named rows only)
+                    const now = Date.now();
+                    const expiryMs = inviteExpiryDays * 24 * 60 * 60 * 1000;
                     const residents = (storyParticipants.residents || [])
-                      .map((r, i) => ({ ...r, _idx: i }))
+                      .map((r, i) => {
+                        // Derive effective status: check for expired invites
+                        let effectiveStatus = r.status || '';
+                        if (r.status === 'Invited' && r.invitedAt) {
+                          const elapsed = now - new Date(r.invitedAt).getTime();
+                          if (elapsed > expiryMs) effectiveStatus = 'Expired';
+                        }
+                        return { ...r, _idx: i, effectiveStatus };
+                      })
                       .filter(r => (r.name || '').trim());
 
                     if (residents.length === 0) {
@@ -3356,10 +3369,10 @@
                     }
 
                     // Sort residents
-                    const statusOrder = { 'Active': 0, 'Invited': 1, '': 2 };
+                    const statusOrder = { 'Active': 0, 'Invited': 1, 'Expired': 2, '': 3 };
                     const sorted = [...residents].sort((a, b) => {
                       if (residentSortBy === 'status') {
-                        return (statusOrder[a.status] ?? 2) - (statusOrder[b.status] ?? 2) || (a.name || '').localeCompare(b.name || '');
+                        return (statusOrder[a.effectiveStatus] ?? 3) - (statusOrder[b.effectiveStatus] ?? 3) || (a.name || '').localeCompare(b.name || '');
                       }
                       if (residentSortBy === 'specialty') {
                         return (a.specialty || '').localeCompare(b.specialty || '') || (a.name || '').localeCompare(b.name || '');
@@ -3371,14 +3384,26 @@
                     });
 
                     // Stats
-                    const activeCount = residents.filter(r => r.status === 'Active').length;
-                    const invitedCount = residents.filter(r => r.status === 'Invited').length;
-                    const pendingCount = residents.length - activeCount - invitedCount;
+                    const activeCount = residents.filter(r => r.effectiveStatus === 'Active').length;
+                    const invitedCount = residents.filter(r => r.effectiveStatus === 'Invited').length;
+                    const expiredCount = residents.filter(r => r.effectiveStatus === 'Expired').length;
+                    const pendingCount = residents.length - activeCount - invitedCount - expiredCount;
 
                     return (
                       <div className="space-y-6">
+                        {/* Invite link expiry setting */}
+                        <div className="flex items-center gap-3 bg-[#0f172a]/40 px-5 py-3 rounded-xl border border-white/5">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-400 flex-shrink-0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invite link valid for</span>
+                          {[7, 14, 30, 60, 90].map(d => (
+                            <button key={d} onClick={() => setInviteExpiryDays(d)} className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${inviteExpiryDays === d ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-500 hover:text-slate-300'}`}>
+                              {d}d
+                            </button>
+                          ))}
+                        </div>
+
                         {/* Status summary bar */}
-                        <div className="flex items-center gap-6 bg-[#0f172a]/60 p-5 rounded-2xl border border-white/5">
+                        <div className="flex items-center gap-5 flex-wrap bg-[#0f172a]/60 p-5 rounded-2xl border border-white/5">
                           <div className="flex items-center gap-2">
                             <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
                             <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Active <span className="text-white">{activeCount}</span></span>
@@ -3387,6 +3412,12 @@
                             <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
                             <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Invite Pending <span className="text-white">{invitedCount}</span></span>
                           </div>
+                          {expiredCount > 0 && (
+                            <div className="flex items-center gap-2">
+                              <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Expired <span className="text-white">{expiredCount}</span></span>
+                            </div>
+                          )}
                           <div className="flex items-center gap-2">
                             <div className="w-2.5 h-2.5 rounded-full bg-slate-500"></div>
                             <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Not Invited <span className="text-white">{pendingCount}</span></span>
@@ -3403,10 +3434,18 @@
 
                         {/* Resident cards */}
                         {sorted.map((r) => {
-                          const statusLabel = r.status === 'Active' ? 'Active' : r.status === 'Invited' ? 'Invite Pending' : 'Not Invited';
-                          const statusTextClass = r.status === 'Active' ? 'text-emerald-400' : r.status === 'Invited' ? 'text-amber-400' : 'text-slate-400';
-                          const dotColor = r.status === 'Active' ? 'bg-emerald-400' : r.status === 'Invited' ? 'bg-amber-400' : 'bg-slate-500';
-                          const borderColor = r.status === 'Active' ? 'border-emerald-500/20' : r.status === 'Invited' ? 'border-amber-500/20' : 'border-white/5';
+                          const es = r.effectiveStatus;
+                          const statusLabel = es === 'Active' ? 'Active' : es === 'Invited' ? 'Invite Pending' : es === 'Expired' ? 'Expired' : 'Not Invited';
+                          const statusTextClass = es === 'Active' ? 'text-emerald-400' : es === 'Invited' ? 'text-amber-400' : es === 'Expired' ? 'text-red-400' : 'text-slate-400';
+                          const dotColor = es === 'Active' ? 'bg-emerald-400' : es === 'Invited' ? 'bg-amber-400' : es === 'Expired' ? 'bg-red-400' : 'bg-slate-500';
+                          const borderColor = es === 'Active' ? 'border-emerald-500/20' : es === 'Invited' ? 'border-amber-500/20' : es === 'Expired' ? 'border-red-500/20' : 'border-white/5';
+
+                          // Days remaining for active invites
+                          let daysInfo = '';
+                          if (es === 'Invited' && r.invitedAt) {
+                            const daysLeft = Math.ceil((new Date(r.invitedAt).getTime() + expiryMs - now) / (24*60*60*1000));
+                            daysInfo = daysLeft + 'd left';
+                          }
 
                           return (
                             <div key={r._idx} className={`bg-[#0f172a]/60 p-6 rounded-[24px] border ${borderColor} shadow-inner flex items-center justify-between transition-all`}>
@@ -3428,13 +3467,30 @@
                                 <div className="flex items-center gap-2">
                                   <div className={`w-2 h-2 rounded-full ${dotColor}`}></div>
                                   <span className={`text-[10px] font-black uppercase tracking-widest ${statusTextClass}`}>{statusLabel}</span>
+                                  {daysInfo && <span className="text-[9px] text-slate-500 font-bold">{daysInfo}</span>}
                                 </div>
                                 {/* Action button */}
-                                {r.status === 'Active' ? (
+                                {es === 'Active' ? (
                                   <div className="px-3 py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-[10px] font-black uppercase tracking-widest text-emerald-400">
                                     Joined
                                   </div>
-                                ) : r.status === 'Invited' ? (
+                                ) : es === 'Expired' ? (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => { setStoryParticipants(prev => { const next = [...prev.residents]; next[r._idx] = { ...next[r._idx], status: '', invitedAt: '' }; return { ...prev, residents: next }; }); }}
+                                      className="px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-white/10 transition-all cursor-pointer"
+                                    >
+                                      Dismiss
+                                    </button>
+                                    <button
+                                      onClick={() => generateInviteLink(r._idx)}
+                                      disabled={isGeneratingInvite || inviteError === r._idx}
+                                      className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50 ${inviteError === r._idx ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20'}`}
+                                    >
+                                      {isGeneratingInvite ? '...' : inviteError === r._idx ? 'Failed' : 'Re-invite'}
+                                    </button>
+                                  </div>
+                                ) : es === 'Invited' ? (
                                   <button
                                     onClick={() => generateInviteLink(r._idx)}
                                     disabled={isGeneratingInvite || inviteError === r._idx}
@@ -3460,7 +3516,7 @@
                   })()}
 
                   <div className="text-center py-12">
-                    <button onClick={() => setActiveTab(isResident ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{isResident ? 'Continue to District Flow' : 'Continue to Tasks and Agents'}</button>
+                    <button onClick={() => setActiveTab(isResident ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{isResident ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
                   </div>
                 </div>
               </div>
@@ -3632,7 +3688,7 @@
                     </div>
                   </div>
 
-                  <div className="text-center py-12"><button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-6">Continue to District Flow.</p></div>
+                  <div className="text-center py-12"><button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-6">Continue to District Ecosystem.</p></div>
                 </div>
               </div>
             )}
@@ -3641,7 +3697,7 @@
               <div className="space-y-8 animate-fade-in font-sans text-left relative pt-28">
                 {/* Title */}
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold text-white" style={{fontFamily:'Poppins,sans-serif'}}>District Flow</h1>
+                  <h1 className="text-3xl font-bold text-white" style={{fontFamily:'Poppins,sans-serif'}}>District Ecosystem</h1>
                   <p className="text-slate-400">Visualize your district ecosystem in motion</p>
                 </div>
 
@@ -4114,7 +4170,7 @@
                       Role: {inviteModalData.role}
                     </p>
                     <p className="text-[10px] text-slate-500">
-                      Link expires in 30 days. The first person to sign in claims this invite.
+                      Link expires in {inviteExpiryDays} days. The first person to sign in claims this invite.
                     </p>
                   </div>
 
