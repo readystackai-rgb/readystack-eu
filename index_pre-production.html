@@ -436,6 +436,7 @@
       const [residentEmail, setResidentEmail] = useState(null); // authenticated resident's email
       const [inviteModalData, setInviteModalData] = useState(null); // { url, participantName, role } when modal is open
       const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
+      const [inviteError, setInviteError] = useState(null); // participant index that failed, or null
       const [highlightVendor, setHighlightVendor] = useState(null); // participant name to glow in District Flow
       const [isInviteMode, setIsInviteMode] = useState(false); // true when arrived via invite URL (pre-auth)
       const isResident = districtRole === 'resident';
@@ -1094,6 +1095,8 @@
           }
         } catch (err) {
           console.error('Failed to generate invite:', err);
+          setInviteError(participantIndex);
+          setTimeout(() => setInviteError(null), 4000);
         } finally {
           setIsGeneratingInvite(false);
         }
@@ -3009,18 +3012,18 @@
                                               ) : r.status === 'Invited' ? (
                                                 <button
                                                   onClick={() => generateInviteLink(i)}
-                                                  disabled={isGeneratingInvite}
-                                                  className="text-[10px] font-black text-amber-400 uppercase tracking-widest hover:text-amber-300 transition-colors cursor-pointer"
+                                                  disabled={isGeneratingInvite || inviteError === i}
+                                                  className={`text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer disabled:opacity-50 ${inviteError === i ? 'text-red-400' : 'text-amber-400 hover:text-amber-300'}`}
                                                 >
-                                                  Invited
+                                                  {isGeneratingInvite ? '...' : inviteError === i ? 'Failed' : 'Invited'}
                                                 </button>
                                               ) : (
                                                 <button
                                                   onClick={() => generateInviteLink(i)}
-                                                  disabled={isGeneratingInvite}
-                                                  className="px-3 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:bg-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
+                                                  disabled={isGeneratingInvite || inviteError === i}
+                                                  className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50 ${inviteError === i ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20'}`}
                                                 >
-                                                  {isGeneratingInvite ? '...' : 'Invite'}
+                                                  {isGeneratingInvite ? '...' : inviteError === i ? 'Failed' : 'Invite'}
                                                 </button>
                                               )
                                             )}
