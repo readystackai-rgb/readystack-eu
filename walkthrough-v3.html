@@ -98,37 +98,41 @@
             cursor: pointer !important;
         }
 
-        /* ── Popover speech-bubble caret (Driver.js v1.3.1 = border-triangle) ── */
-        .driver-popover-arrow {
+        /* ── Hide native Driver.js arrow, use clip-path triangle caret ── */
+        .driver-popover-arrow { display: none !important; }
+        .driver-popover { overflow: visible !important; }
+        .driver-popover::before {
+            content: '' !important;
+            display: none !important;
+            position: absolute !important;
+            width: 24px !important;
+            height: 24px !important;
+            background: rgba(124,140,255,0.7) !important;
+            pointer-events: none !important;
+        }
+        /* Triangle on LEFT edge → points left at target */
+        .driver-popover.caret-left::before {
             display: block !important;
-            width: 0 !important;
-            height: 0 !important;
-            background: transparent !important;
-            border: 10px solid transparent !important;
+            left: -24px !important; top: 20px !important;
+            clip-path: polygon(0% 50%, 100% 0%, 100% 100%) !important;
         }
-        .driver-popover-arrow-side-left {
-            border-left-color: var(--surface) !important;
-            border-right-color: transparent !important;
-            border-top-color: transparent !important;
-            border-bottom-color: transparent !important;
+        /* Triangle on RIGHT edge → points right at target */
+        .driver-popover.caret-right::before {
+            display: block !important;
+            right: -24px !important; left: auto !important; top: 20px !important;
+            clip-path: polygon(100% 50%, 0% 0%, 0% 100%) !important;
         }
-        .driver-popover-arrow-side-right {
-            border-right-color: var(--surface) !important;
-            border-left-color: transparent !important;
-            border-top-color: transparent !important;
-            border-bottom-color: transparent !important;
+        /* Triangle on TOP edge → points up at target */
+        .driver-popover.caret-top::before {
+            display: block !important;
+            top: -24px !important; left: 28px !important;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%) !important;
         }
-        .driver-popover-arrow-side-top {
-            border-top-color: var(--surface) !important;
-            border-bottom-color: transparent !important;
-            border-left-color: transparent !important;
-            border-right-color: transparent !important;
-        }
-        .driver-popover-arrow-side-bottom {
-            border-bottom-color: var(--surface) !important;
-            border-top-color: transparent !important;
-            border-left-color: transparent !important;
-            border-right-color: transparent !important;
+        /* Triangle on BOTTOM edge → points down at target */
+        .driver-popover.caret-bottom::before {
+            display: block !important;
+            bottom: -24px !important; top: auto !important; left: 28px !important;
+            clip-path: polygon(50% 100%, 0% 0%, 100% 0%) !important;
         }
 
         /* ── Action icons ── */
@@ -848,8 +852,23 @@
                 animate: true,
                 allowClose: false,
                 overlayColor: 'rgba(2, 6, 23, 0.75)',
-                stagePadding: 8,
+                stagePadding: 10,
+                popoverOffset: 28,
                 stageRadius: 16,
+                onHighlighted: () => {
+                    // Detect arrow side from Driver.js arrow classes → set caret class on popover
+                    const arrow = document.querySelector('.driver-popover-arrow');
+                    const popover = document.querySelector('.driver-popover');
+                    if (popover) {
+                        popover.classList.remove('caret-left','caret-right','caret-top','caret-bottom');
+                        if (arrow) {
+                            if (arrow.classList.contains('driver-popover-arrow-side-right')) popover.classList.add('caret-left');
+                            else if (arrow.classList.contains('driver-popover-arrow-side-left')) popover.classList.add('caret-right');
+                            else if (arrow.classList.contains('driver-popover-arrow-side-bottom')) popover.classList.add('caret-top');
+                            else if (arrow.classList.contains('driver-popover-arrow-side-top')) popover.classList.add('caret-bottom');
+                        }
+                    }
+                },
                 steps: [
 
                     // ═══ DEFINE MARKET STORY ═══
@@ -858,8 +877,8 @@
                     {
                         element: '#wt-rail-define',
                         popover: {
-                            title: 'The Storyteller',
-                            description: 'Welcome to the Dark Market District Storyteller. The left rail guides you through 11 steps in two phases: <strong>Compose</strong> builds your district, <strong>Operations</strong> runs it. <strong>Click Define Market Story</strong> to begin.',
+                            title: 'Start Here',
+                            description: 'This is the Storyteller — your session starts with the left rail. <strong>Compose</strong> builds your district, <strong>Operations</strong> runs it. <strong>Click Define Market Story</strong> to begin.',
                             side: 'right',
                             align: 'start',
                             showButtons: ['previous'],
