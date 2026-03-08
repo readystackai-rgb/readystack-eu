@@ -438,6 +438,7 @@
       const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
       const [inviteError, setInviteError] = useState(null); // participant index that failed, or null
       const [highlightVendor, setHighlightVendor] = useState(null); // participant name to glow in District Flow
+      const [residentSortBy, setResidentSortBy] = useState('name'); // 'name' | 'status' | 'specialty' | 'company'
       const [isInviteMode, setIsInviteMode] = useState(false); // true when arrived via invite URL (pre-auth)
       const isResident = districtRole === 'resident';
       const isCreator = districtRole === 'creator' || !districtRole; // default to creator for backward compat
@@ -3327,59 +3328,133 @@
               </div>
             )}
 
-            {/* ── INVITE RESIDENTS TAB ── */}
+            {/* ── MY RESIDENTS TAB ── */}
             {activeTab === 'connect' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-12">
                   <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">INVITE RESIDENTS</h3>
-                    <p className="text-slate-300 text-base font-medium">Let your featured sources know you're spreading the word.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">MY RESIDENTS</h3>
+                    <p className="text-slate-300 text-base font-medium">Track who you've invited and their onboarding status.</p>
                   </div>
 
                   {(() => {
-                    const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.lab || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
-                    if (citedAuthors.length === 0) {
+                    // Build resident list from storyParticipants (named rows only)
+                    const residents = (storyParticipants.residents || [])
+                      .map((r, i) => ({ ...r, _idx: i }))
+                      .filter(r => (r.name || '').trim());
+
+                    if (residents.length === 0) {
                       return (
                         <div className="text-center py-16">
                           <div className="bg-[#0f172a]/60 p-10 rounded-[32px] border border-white/5 shadow-inner inline-block">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-slate-300 mx-auto mb-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                            <p className="text-slate-300 text-base font-medium">Feature voices first, then connect with them here.</p>
+                            <p className="text-slate-300 text-base font-medium">Add participants to your district first, then invite them here.</p>
                             <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Define Market Story</button>
                           </div>
                         </div>
                       );
                     }
+
+                    // Sort residents
+                    const statusOrder = { 'Active': 0, 'Invited': 1, '': 2 };
+                    const sorted = [...residents].sort((a, b) => {
+                      if (residentSortBy === 'status') {
+                        return (statusOrder[a.status] ?? 2) - (statusOrder[b.status] ?? 2) || (a.name || '').localeCompare(b.name || '');
+                      }
+                      if (residentSortBy === 'specialty') {
+                        return (a.specialty || '').localeCompare(b.specialty || '') || (a.name || '').localeCompare(b.name || '');
+                      }
+                      if (residentSortBy === 'company') {
+                        return (a.company || '').localeCompare(b.company || '') || (a.name || '').localeCompare(b.name || '');
+                      }
+                      return (a.name || '').localeCompare(b.name || '');
+                    });
+
+                    // Stats
+                    const activeCount = residents.filter(r => r.status === 'Active').length;
+                    const invitedCount = residents.filter(r => r.status === 'Invited').length;
+                    const pendingCount = residents.length - activeCount - invitedCount;
+
                     return (
                       <div className="space-y-6">
-                        {citedAuthors.map((a, i) => (
-                          <div key={i} className="bg-[#0f172a]/60 p-8 rounded-[32px] border border-white/5 shadow-inner flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white">
-                                {a.platform === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-red-400"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
-                                {a.platform === 'substack' && <SubstackIcon size={18} className="text-orange-400" />}
-                                {a.platform === 'reddit' && <RedditIcon size={18} className="text-orange-500" />}
-                                {!['youtube','substack','reddit'].includes(a.platform) && <span className="font-black text-sm">{a.name.charAt(0).toUpperCase()}</span>}
-                              </div>
-                              <div className="text-left">
-                                <p className="text-sm font-bold text-white">{a.name}</p>
-                                <p className="text-xs text-slate-300 uppercase tracking-wider">{a.platform}{a.url ? ` \u2022 ` : ''}{a.url && <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors">View source</a>}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              {a.url && (
-                                <a href={a.url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all">
-                                  Visit
-                                </a>
-                              )}
-                              <button className="px-4 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs font-black text-indigo-400 uppercase tracking-widest hover:bg-indigo-500/20 transition-all">
-                                Notify
-                              </button>
-                            </div>
+                        {/* Status summary bar */}
+                        <div className="flex items-center gap-6 bg-[#0f172a]/60 p-5 rounded-2xl border border-white/5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Active <span className="text-white">{activeCount}</span></span>
                           </div>
-                        ))}
-                        <div className="text-center pt-8">
-                          <p className="text-xs text-slate-300 italic">Notify sends an invitation to participate in your district. Mechanism coming soon.</p>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Invite Pending <span className="text-white">{invitedCount}</span></span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-slate-500"></div>
+                            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Not Invited <span className="text-white">{pendingCount}</span></span>
+                          </div>
+                          <div className="ml-auto flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sort:</span>
+                            {['name','status','specialty','company'].map(key => (
+                              <button key={key} onClick={() => setResidentSortBy(key)} className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${residentSortBy === key ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:text-slate-200'}`}>
+                                {key}
+                              </button>
+                            ))}
+                          </div>
                         </div>
+
+                        {/* Resident cards */}
+                        {sorted.map((r) => {
+                          const statusLabel = r.status === 'Active' ? 'Active' : r.status === 'Invited' ? 'Invite Pending' : 'Not Invited';
+                          const statusTextClass = r.status === 'Active' ? 'text-emerald-400' : r.status === 'Invited' ? 'text-amber-400' : 'text-slate-400';
+                          const dotColor = r.status === 'Active' ? 'bg-emerald-400' : r.status === 'Invited' ? 'bg-amber-400' : 'bg-slate-500';
+                          const borderColor = r.status === 'Active' ? 'border-emerald-500/20' : r.status === 'Invited' ? 'border-amber-500/20' : 'border-white/5';
+
+                          return (
+                            <div key={r._idx} className={`bg-[#0f172a]/60 p-6 rounded-[24px] border ${borderColor} shadow-inner flex items-center justify-between transition-all`}>
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center">
+                                  <span className="font-black text-sm text-white">{(r.name || '?').charAt(0).toUpperCase()}</span>
+                                </div>
+                                <div className="text-left">
+                                  <p className="text-sm font-bold text-white">{r.name}</p>
+                                  <p className="text-xs text-slate-400">
+                                    {r.company && <span>{r.company}</span>}
+                                    {r.company && r.specialty && <span> &bull; </span>}
+                                    {r.specialty && <span className="text-slate-300">{r.specialty}</span>}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                {/* Status badge */}
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${dotColor}`}></div>
+                                  <span className={`text-[10px] font-black uppercase tracking-widest ${statusTextClass}`}>{statusLabel}</span>
+                                </div>
+                                {/* Action button */}
+                                {r.status === 'Active' ? (
+                                  <div className="px-3 py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                                    Joined
+                                  </div>
+                                ) : r.status === 'Invited' ? (
+                                  <button
+                                    onClick={() => generateInviteLink(r._idx)}
+                                    disabled={isGeneratingInvite || inviteError === r._idx}
+                                    className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50 ${inviteError === r._idx ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'}`}
+                                  >
+                                    {isGeneratingInvite ? '...' : inviteError === r._idx ? 'Failed' : 'Re-invite'}
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => generateInviteLink(r._idx)}
+                                    disabled={isGeneratingInvite || inviteError === r._idx}
+                                    className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50 ${inviteError === r._idx ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20'}`}
+                                  >
+                                    {isGeneratingInvite ? '...' : inviteError === r._idx ? 'Failed' : 'Invite'}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     );
                   })()}
