@@ -2389,6 +2389,17 @@
                     {
                         element: '#wt-flow-header',
                         onHighlightStarted: () => {
+                            // Enable scroll forwarding: wheel events on the Driver.js overlay
+                            // get forwarded to #wt-content so user can scroll the full 820px canvas
+                            // without breaking Driver.js click handling on highlighted elements.
+                            const content = document.getElementById('wt-content');
+                            if (!window._flowScrollHandler) {
+                                window._flowScrollHandler = (e) => {
+                                    content.scrollTop += e.deltaY;
+                                    e.preventDefault();
+                                };
+                                document.addEventListener('wheel', window._flowScrollHandler, { passive: false });
+                            }
                             const panel = document.getElementById('panel-flow');
                             panel.scrollTo({ top: 0, behavior: 'smooth' });
                             // Reveal tabs + modes
@@ -2404,7 +2415,7 @@
                         },
                         popover: {
                             title: 'District Flow',
-                            description: 'Your district\u2019s live traffic ecosystem. Three tabs \u2014 <strong>Ecosystem</strong>, <strong>Relational</strong>, and <strong>Cross-Pollination</strong> \u2014 show your network from different angles. The Ecosystem view is the default: a hub-and-spoke SVG with traffic sources flowing into four quadrants.',
+                            description: 'Your district\u2019s live traffic ecosystem. Three tabs \u2014 <strong>Ecosystem</strong>, <strong>Relational</strong>, and <strong>Cross-Pollination</strong> \u2014 show your network from different angles. The Ecosystem view is the default: a hub-and-spoke SVG with traffic sources flowing into four quadrants. <strong>Scroll to explore</strong> the full canvas.',
                             side: 'bottom',
                             align: 'start'
                         }
@@ -2414,7 +2425,10 @@
                     {
                         element: '#wt-quadrant-stats',
                         onHighlightStarted: () => {
-                            document.getElementById('wt-quadrant-stats').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Scroll stats into view within the content area
+                            const stats = document.getElementById('wt-quadrant-stats');
+                            const content = document.getElementById('wt-content');
+                            content.scrollTo({ top: stats.offsetTop - 100, behavior: 'smooth' });
                         },
                         popover: {
                             title: 'Quadrant Stats',
@@ -2470,27 +2484,14 @@
                     {
                         element: '#wt-view-relational',
                         onHighlightStarted: () => {
-                            const panel = document.getElementById('panel-flow');
-                            panel.scrollTo({ top: 0, behavior: 'smooth' });
+                            const content = document.getElementById('wt-content');
+                            content.scrollTo({ top: 0, behavior: 'smooth' });
                         },
                         popover: {
                             title: 'Relational View',
-                            description: 'A structured grid: participant columns (YouTube, Participant 1, Participant 2, Participant 3, ReadyStack) \u00d7 journey stages (Learning, Selecting, Executing, Expanding). Each node shows a 2-letter abbreviation. Vertical lines connect nodes within columns, while dashed purple lines show cross-participant flows.',
+                            description: 'A structured grid: participant columns (YouTube, Participant 1, Participant 2, Participant 3, ReadyStack) \u00d7 journey stages (Learning, Selecting, Executing, Expanding). Each node shows a 2-letter abbreviation. <strong>Scroll</strong> to explore the full grid.',
                             side: 'left',
-                            align: 'start',
-                            onPopoverRender: () => {
-                                setTimeout(() => {
-                                    const p = document.querySelector('.driver-popover');
-                                    if (p) {
-                                        p.style.position = 'fixed';
-                                        p.style.top = '140px';
-                                        p.style.right = '40px';
-                                        p.style.left = 'auto';
-                                        p.style.bottom = 'auto';
-                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right');
-                                    }
-                                }, 50);
-                            }
+                            align: 'start'
                         }
                     },
 
@@ -2541,27 +2542,14 @@
                     {
                         element: '#wt-view-cross',
                         onHighlightStarted: () => {
-                            const panel = document.getElementById('panel-flow');
-                            panel.scrollTo({ top: 0, behavior: 'smooth' });
+                            const content = document.getElementById('wt-content');
+                            content.scrollTo({ top: 0, behavior: 'smooth' });
                         },
                         popover: {
                             title: 'Cross-Pollination View',
-                            description: 'Green dashed lines highlight cross-participant paths \u2014 where one participant\u2019s content pulls traffic into another\u2019s ecosystem. Use the <strong>Focus</strong> pills to isolate a single participant and see their gravity lines.',
+                            description: 'Green dashed lines highlight cross-participant paths \u2014 where one participant\u2019s content pulls traffic into another\u2019s ecosystem. Use the <strong>Focus</strong> pills to isolate a single participant. <strong>Scroll</strong> to see the full map.',
                             side: 'left',
-                            align: 'start',
-                            onPopoverRender: () => {
-                                setTimeout(() => {
-                                    const p = document.querySelector('.driver-popover');
-                                    if (p) {
-                                        p.style.position = 'fixed';
-                                        p.style.top = '140px';
-                                        p.style.right = '40px';
-                                        p.style.left = 'auto';
-                                        p.style.bottom = 'auto';
-                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right');
-                                    }
-                                }, 50);
-                            }
+                            align: 'start'
                         }
                     },
 
@@ -2594,6 +2582,11 @@
                                 const advance = () => {
                                     btn.removeEventListener('click', advance);
                                     btn.classList.remove('do-pulse');
+                                    // Remove scroll forwarding when leaving District Flow
+                                    if (window._flowScrollHandler) {
+                                        document.removeEventListener('wheel', window._flowScrollHandler);
+                                        delete window._flowScrollHandler;
+                                    }
                                     setCompleteRail('flow');
                                     setActiveRail('preview');
                                     updateBreadcrumb(6, 11, 'Preview', '');
