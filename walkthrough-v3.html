@@ -88,6 +88,33 @@
         .slide-up { animation: slideUp 0.5s ease forwards; }
         .fade-in { animation: fadeInUp 0.5s ease forwards; }
 
+        /* ── DO step pulse glow ── */
+        @keyframes pulseGlow {
+            0%   { box-shadow: 0 0 8px rgba(124,140,255,0.4), 0 0 20px rgba(124,140,255,0.15); }
+            50%  { box-shadow: 0 0 20px rgba(124,140,255,0.7), 0 0 50px rgba(124,140,255,0.3), 0 0 80px rgba(124,140,255,0.1); }
+            100% { box-shadow: 0 0 8px rgba(124,140,255,0.4), 0 0 20px rgba(124,140,255,0.15); }
+        }
+        .do-pulse {
+            animation: pulseGlow 1.8s ease-in-out infinite;
+            border-color: rgba(124,140,255,0.7) !important;
+            cursor: pointer !important;
+        }
+
+        /* ── Popover speech-bubble caret ── */
+        .driver-popover-arrow {
+            display: block !important;
+        }
+        .driver-popover-arrow-side-left,
+        .driver-popover-arrow-side-right,
+        .driver-popover-arrow-side-top,
+        .driver-popover-arrow-side-bottom {
+            border: 8px solid transparent !important;
+        }
+        .driver-popover-arrow-side-bottom { border-top-color: var(--surface) !important; }
+        .driver-popover-arrow-side-top { border-bottom-color: var(--surface) !important; }
+        .driver-popover-arrow-side-left { border-right-color: var(--surface) !important; }
+        .driver-popover-arrow-side-right { border-left-color: var(--surface) !important; }
+
         /* ── Action icons ── */
         .action-icon { background: var(--base); border: 1px solid var(--border-mid); padding: 8px; border-radius: 12px; color: var(--text-muted); cursor: pointer; }
         .action-icon:hover { color: white; border-color: var(--border-strong); }
@@ -252,7 +279,7 @@
                     <div id="wt-search-area" style="background: rgba(2,6,23,0.4); padding: 32px; border-radius: 24px; border: 1px solid var(--border-subtle);">
                         <div id="wt-search-row" style="display: flex; gap: 12px; margin-bottom: 0;">
                             <input id="wt-search-input" type="text" class="search-box" placeholder="Search YouTube or paste a video link..." readonly style="flex: 1;" />
-                            <button id="wt-search-btn" style="background: var(--surface); border: 1px solid var(--border-strong); color: white; padding: 14px 28px; border-radius: 14px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; white-space: nowrap;">Search / Resolve</button>
+                            <button id="wt-search-btn" style="background: var(--surface); border: 1px solid var(--border-strong); color: white; padding: 14px 28px; border-radius: 14px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; white-space: nowrap;">Search</button>
                         </div>
 
                         <!-- Video results (hidden until search) -->
@@ -822,65 +849,44 @@
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const railItem = document.getElementById('wt-rail-define');
+                                railItem.classList.add('do-pulse');
                                 railItem._handler = () => {
                                     railItem.removeEventListener('click', railItem._handler);
-                                    driverObj.moveNext();
-                                };
-                                railItem.addEventListener('click', railItem._handler);
-                            }
-                        }
-                    },
-
-                    // Frame 2: DO — Click the search bar
-                    {
-                        element: '#wt-search-input',
-                        popover: {
-                            title: 'Start With a YouTube Search',
-                            description: 'Every district begins with an authority video that defines the problem your audience faces. <strong>Click the search bar</strong> to begin your search.',
-                            side: 'bottom',
-                            align: 'start',
-                            showButtons: ['previous'],
-                            onPopoverRender: () => {
-                                // Add glow to make search bar visible
-                                const input = document.getElementById('wt-search-input');
-                                input.style.borderColor = 'rgba(124,140,255,0.6)';
-                                input.style.boxShadow = '0 0 20px rgba(124,140,255,0.3), inset 0 0 8px rgba(124,140,255,0.1)';
-                                input._handler = () => {
-                                    input.removeEventListener('click', input._handler);
-                                    // Auto-type the search query
+                                    railItem.classList.remove('do-pulse');
+                                    // Auto-type the search query after click
+                                    const input = document.getElementById('wt-search-input');
                                     input.value = '';
                                     const text = 'seth godin building a brand';
                                     let i = 0;
                                     const typeChar = () => {
                                         if (i < text.length) {
                                             input.value += text[i]; i++;
-                                            setTimeout(typeChar, 60);
+                                            setTimeout(typeChar, 50);
                                         }
                                     };
                                     typeChar();
                                     setTimeout(() => driverObj.moveNext(), 2000);
                                 };
-                                input.addEventListener('click', input._handler);
+                                railItem.addEventListener('click', railItem._handler);
                             }
                         }
                     },
 
-                    // Frame 3: DO — Click SEARCH / RESOLVE
+                    // Frame 2: DO — Click SEARCH
                     {
                         element: '#wt-search-btn',
                         popover: {
-                            title: 'Click Search / Resolve',
-                            description: 'Your query is ready. <strong>Click SEARCH / RESOLVE</strong> to query the YouTube API. ReadyStack will return matching videos ranked by relevance to your market story.',
+                            title: 'Search YouTube',
+                            description: 'Your query is ready. <strong>Click SEARCH</strong> to find authority videos that anchor your district strategy.',
                             side: 'left',
                             align: 'start',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const btn = document.getElementById('wt-search-btn');
-                                btn.style.borderColor = 'rgba(124,140,255,0.6)';
-                                btn.style.boxShadow = '0 0 20px rgba(124,140,255,0.3)';
-                                btn.style.color = 'white';
+                                btn.classList.add('do-pulse');
                                 btn._handler = () => {
                                     btn.removeEventListener('click', btn._handler);
+                                    btn.classList.remove('do-pulse');
                                     // Show results
                                     const results = document.getElementById('wt-results');
                                     results.style.display = 'flex';
@@ -892,7 +898,7 @@
                         }
                     },
 
-                    // Frame 4: OBSERVE — Results appear
+                    // Frame 3: OBSERVE — Results appear
                     {
                         element: '#wt-results',
                         popover: {
@@ -903,7 +909,7 @@
                         }
                     },
 
-                    // Frame 5: DO — Select the video
+                    // Frame 4: DO — Select the video
                     {
                         element: '#wt-video-1',
                         popover: {
@@ -914,8 +920,10 @@
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const row = document.getElementById('wt-video-1');
+                                row.classList.add('do-pulse');
                                 row._handler = () => {
                                     row.removeEventListener('click', row._handler);
+                                    row.classList.remove('do-pulse');
                                     row.classList.add('selected');
                                     // Only reveal the video analysis section first
                                     const va = document.getElementById('wt-video-analysis');
@@ -1066,10 +1074,12 @@
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const okBtn = document.getElementById('wt-ok-btn');
+                                okBtn.classList.add('do-pulse');
                                 const contBtn = document.getElementById('wt-continue-residents');
                                 const advance = () => {
                                     okBtn.removeEventListener('click', advance);
                                     contBtn.removeEventListener('click', advance);
+                                    okBtn.classList.remove('do-pulse');
                                     setCompleteRail('define');
                                     setActiveRail('residents');
                                     updateBreadcrumb(2, 11, 'Residents', 'Links');
@@ -1156,8 +1166,10 @@
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const chip = document.getElementById('wt-role-branding');
+                                chip.classList.add('do-pulse');
                                 const handler = () => {
                                     chip.removeEventListener('click', handler);
+                                    chip.classList.remove('do-pulse');
                                     // Animate the chip as "selected"
                                     chip.style.background = 'rgba(16,185,129,0.25)';
                                     chip.style.borderColor = 'rgba(16,185,129,0.7)';
@@ -1194,11 +1206,10 @@
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const nameInput = document.getElementById('wt-p1-name');
-                                nameInput.style.cursor = 'pointer';
-                                nameInput.style.borderColor = 'rgba(16,185,129,0.6)';
-                                nameInput.style.boxShadow = '0 0 12px rgba(16,185,129,0.2)';
+                                nameInput.classList.add('do-pulse');
                                 const handler = () => {
                                     nameInput.removeEventListener('click', handler);
+                                    nameInput.classList.remove('do-pulse');
                                     // Auto-populate with sample name on single click
                                     nameInput.value = 'Jordan Rivera';
                                     nameInput.style.color = 'white';
@@ -1265,8 +1276,10 @@
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const btn = document.getElementById('wt-next-btn');
+                                btn.classList.add('do-pulse');
                                 const advance = () => {
                                     btn.removeEventListener('click', advance);
+                                    btn.classList.remove('do-pulse');
                                     setCompleteRail('residents');
                                     setActiveRail('links');
                                     updateBreadcrumb(3, 11, 'Links', 'Preview');
@@ -1342,15 +1355,12 @@
                             align: 'center',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
-                                // Add a clickable OK overlay on the host row
                                 const row = document.getElementById('wt-host-row');
-                                row.style.cursor = 'pointer';
-                                row.style.borderColor = 'rgba(16,185,129,0.6)';
-                                row.style.boxShadow = '0 0 20px rgba(16,185,129,0.2)';
+                                row.classList.add('do-pulse');
                                 const handler = () => {
                                     row.removeEventListener('click', handler);
+                                    row.classList.remove('do-pulse');
                                     row.style.cursor = 'default';
-                                    row.style.boxShadow = 'none';
                                     setTimeout(() => driverObj.moveNext(), 400);
                                 };
                                 row.addEventListener('click', handler);
