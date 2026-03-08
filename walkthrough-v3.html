@@ -134,6 +134,12 @@
             bottom: -24px !important; top: auto !important; left: 28px !important;
             clip-path: polygon(50% 100%, 0% 0%, 100% 0%) !important;
         }
+        /* Caret on BOTTOM-RIGHT — for steps where target is on the right */
+        .driver-popover.caret-bottom-right::before {
+            display: block !important;
+            bottom: -24px !important; top: auto !important; left: auto !important; right: 28px !important;
+            clip-path: polygon(50% 100%, 0% 0%, 100% 0%) !important;
+        }
 
         /* ── Action icons ── */
         .action-icon { background: var(--base); border: 1px solid var(--border-mid); padding: 8px; border-radius: 12px; color: var(--text-muted); cursor: pointer; }
@@ -1123,6 +1129,12 @@
                             align: 'end',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
+                                // Move caret to right side so it points down at the OK button
+                                const popover = document.querySelector('.driver-popover');
+                                if (popover) {
+                                    popover.classList.remove('caret-bottom');
+                                    popover.classList.add('caret-bottom-right');
+                                }
                                 const okBtn = document.getElementById('wt-ok-btn');
                                 okBtn.classList.add('do-pulse');
                                 const contBtn = document.getElementById('wt-continue-residents');
@@ -1187,13 +1199,13 @@
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => {
-                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }, 100);
                         },
                         popover: {
                             title: 'Suggested Roles',
                             description: 'ReadyStack analyzed the video and suggested <strong>12 role types</strong> that would help execute the strategy — from Branding Designers to Public Speakers. These are AI-generated based on the video content. You\'ll assign one to a participant next.',
-                            side: 'bottom',
+                            side: 'top',
                             align: 'center'
                         }
                     },
@@ -1388,7 +1400,7 @@
                             title: 'The District Map',
                             description: 'The map organizes every touchpoint across five journey stages: <strong>Traffic</strong> (sources), <strong>Learning</strong> (watch/read), <strong>Selecting</strong> (tour/demo), <strong>Executing</strong> (buy/build), and <strong>Expanding</strong> (share/earn). Each participant gets a row with links mapped across these stages.',
                             side: 'right',
-                            align: 'start'
+                            align: 'end'
                         }
                     },
 
