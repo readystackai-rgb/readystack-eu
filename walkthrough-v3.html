@@ -978,7 +978,7 @@
                                     va.classList.add('revealed-grid');
                                     va.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                     // Wait for scroll + render before advancing
-                                    setTimeout(() => driverObj.moveNext(), 2500);
+                                    setTimeout(() => driverObj.moveNext(), 1200);
                                 };
                                 row.addEventListener('click', row._handler);
                             }
@@ -1118,7 +1118,7 @@
                             title: 'Continue to Residents',
                             description: 'Your market story is set — the problem, the audience, the strategy, and the automations are all defined from one video. <strong>Click OK</strong> to accept this analysis and move on to assembling the people who\'ll populate your district.',
                             side: 'left',
-                            align: 'center',
+                            align: 'end',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const okBtn = document.getElementById('wt-ok-btn');
