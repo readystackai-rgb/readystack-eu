@@ -790,6 +790,237 @@
 
                 </div>
 
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- DISTRICT FINANCE PANEL                                     -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="panel-finance" class="content-panel">
+
+                    <!-- Finance Header -->
+                    <div id="wt-finance-header" style="margin-bottom: 32px;">
+                        <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">District Finance</h1>
+                        <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">Your district's financial model. ReadyStack pays 40% of hosting automation fees as lifetime income to fund word-of-mouth growth.</p>
+                    </div>
+
+                    <!-- Revenue Model -->
+                    <div id="wt-revenue-model" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px;">
+                        <!-- Hosting Fee Card -->
+                        <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px;">
+                            <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--amber); margin-bottom: 16px;">Hosting Automation Fee</h2>
+                            <div style="font-size: 42px; font-weight: 900; color: white; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">$97<span style="font-size: 16px; color: var(--text-muted); font-weight: 600;">/mo</span></div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">Per-participant hosted automation fee. Covers email sequences, trigger-based workflows, analytics tracking, and district infrastructure.</p>
+                            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-size: 12px; color: var(--text-muted);">Email Automation</span><span style="font-size: 12px; color: var(--green);">Included</span></div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-size: 12px; color: var(--text-muted);">Trigger Workflows</span><span style="font-size: 12px; color: var(--green);">Included</span></div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-size: 12px; color: var(--text-muted);">GA4 Analytics</span><span style="font-size: 12px; color: var(--green);">Included</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span style="font-size: 12px; color: var(--text-muted);">Landing Pages</span><span style="font-size: 12px; color: var(--green);">Included</span></div>
+                            </div>
+                        </div>
+                        <!-- 40% Revenue Share Card -->
+                        <div style="background: var(--surface); border: 1px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 24px;">
+                            <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--green); margin-bottom: 16px;">40% Lifetime Revenue Share</h2>
+                            <div style="font-size: 42px; font-weight: 900; color: var(--green); margin-bottom: 8px; font-family: 'Poppins', sans-serif;">$38.80<span style="font-size: 16px; color: var(--text-muted); font-weight: 600;">/mo</span></div>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">Per participant, per month — paid to you as lifetime income for every referral that stays active. ReadyStack funds your district's growth by sharing revenue directly.</p>
+                            <div style="margin-top: 16px; padding: 12px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px;">
+                                <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); margin-bottom: 4px;">How It Works</div>
+                                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Share your district link → participant signs up → ReadyStack hosts their automation → you earn 40% of their monthly fee, forever.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Earnings Projection Table -->
+                    <div id="wt-earnings-table" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                        <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 16px;">Projected Earnings — Dark Market District</h2>
+                        <!-- Table Header -->
+                        <div style="display: grid; grid-template-columns: 2fr 2fr 1.5fr 1.5fr 1.5fr; gap: 8px; padding: 0 8px 10px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 8px;">
+                            <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Participant</span>
+                            <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Role</span>
+                            <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Monthly Fee</span>
+                            <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green);">Your 40%</span>
+                            <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green);">Annual</span>
+                        </div>
+                        <!-- Row 1 -->
+                        <div style="display: grid; grid-template-columns: 2fr 2fr 1.5fr 1.5fr 1.5fr; gap: 8px; padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                            <span style="font-size: 13px; color: white; font-weight: 600;">Jordan Rivera</span>
+                            <span style="font-size: 12px; color: var(--green);">Branding &amp; Identity</span>
+                            <span style="font-size: 13px; color: var(--text-secondary);">$97.00</span>
+                            <span style="font-size: 13px; color: var(--green); font-weight: 700;">$38.80</span>
+                            <span style="font-size: 13px; color: var(--green); font-weight: 700;">$465.60</span>
+                        </div>
+                        <!-- Row 2 -->
+                        <div style="display: grid; grid-template-columns: 2fr 2fr 1.5fr 1.5fr 1.5fr; gap: 8px; padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                            <span style="font-size: 13px; color: white; font-weight: 600;">Mika Chen</span>
+                            <span style="font-size: 12px; color: var(--green);">Storytelling Coaches</span>
+                            <span style="font-size: 13px; color: var(--text-secondary);">$97.00</span>
+                            <span style="font-size: 13px; color: var(--green); font-weight: 700;">$38.80</span>
+                            <span style="font-size: 13px; color: var(--green); font-weight: 700;">$465.60</span>
+                        </div>
+                        <!-- Row 3 -->
+                        <div style="display: grid; grid-template-columns: 2fr 2fr 1.5fr 1.5fr 1.5fr; gap: 8px; padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                            <span style="font-size: 13px; color: white; font-weight: 600;">Sam Okafor</span>
+                            <span style="font-size: 12px; color: var(--green);">SaaS Founders</span>
+                            <span style="font-size: 13px; color: var(--text-secondary);">$97.00</span>
+                            <span style="font-size: 13px; color: var(--green); font-weight: 700;">$38.80</span>
+                            <span style="font-size: 13px; color: var(--green); font-weight: 700;">$465.60</span>
+                        </div>
+                        <!-- Totals -->
+                        <div style="display: grid; grid-template-columns: 2fr 2fr 1.5fr 1.5fr 1.5fr; gap: 8px; padding: 14px 8px 4px; margin-top: 4px; border-top: 2px solid var(--border-subtle);">
+                            <span style="font-size: 13px; color: white; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">Total</span>
+                            <span style="font-size: 12px; color: var(--text-muted);">3 Participants</span>
+                            <span style="font-size: 13px; color: var(--text-secondary); font-weight: 700;">$291.00</span>
+                            <span style="font-size: 15px; color: var(--green); font-weight: 900;">$116.40</span>
+                            <span style="font-size: 15px; color: var(--green); font-weight: 900;">$1,396.80</span>
+                        </div>
+                    </div>
+
+                    <!-- Payout Summary Cards -->
+                    <div id="wt-payout-summary" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px;">
+                        <div style="background: var(--surface); border: 1px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 20px; text-align: center;">
+                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 8px;">Monthly Income</div>
+                            <div style="font-size: 28px; font-weight: 900; color: var(--green); font-family: 'Poppins', sans-serif;">$116.40</div>
+                            <div style="font-size: 11px; color: var(--text-ghost); margin-top: 4px;">3 active participants</div>
+                        </div>
+                        <div style="background: var(--surface); border: 1px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 20px; text-align: center;">
+                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 8px;">Annual Projection</div>
+                            <div style="font-size: 28px; font-weight: 900; color: var(--green); font-family: 'Poppins', sans-serif;">$1,396.80</div>
+                            <div style="font-size: 11px; color: var(--text-ghost); margin-top: 4px;">Lifetime recurring</div>
+                        </div>
+                        <div style="background: var(--surface); border: 1px solid rgba(168,85,247,0.3); border-radius: 16px; padding: 20px; text-align: center;">
+                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 8px;">At 25 Participants</div>
+                            <div style="font-size: 28px; font-weight: 900; color: rgb(168,85,247); font-family: 'Poppins', sans-serif;">$11,640</div>
+                            <div style="font-size: 11px; color: var(--text-ghost); margin-top: 4px;">$970/mo lifetime</div>
+                        </div>
+                    </div>
+
+                    <!-- Finance Footer -->
+                    <div id="wt-finance-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
+                        <p style="font-size: 13px; color: var(--text-ghost); margin-bottom: 16px;">Revenue grows as your district grows. Every new participant adds $38.80/mo to your lifetime income.</p>
+                        <button id="wt-continue-flow-btn" style="background: transparent; border: 2px solid var(--border-mid); color: white; padding: 14px 48px; border-radius: 14px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; transition: all 0.2s ease;">Continue to District Flow</button>
+                    </div>
+
+                </div><!-- end panel-finance -->
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- DISTRICT FLOW PANEL                                        -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <div id="panel-flow" class="content-panel">
+
+                    <!-- Flow Header -->
+                    <div id="wt-flow-header" style="margin-bottom: 32px;">
+                        <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">District Flow</h1>
+                        <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">The automation backbone of your district. See how triggers, actions, and integrations work together to run operations on autopilot.</p>
+                    </div>
+
+                    <!-- Automation Pipeline -->
+                    <div id="wt-flow-pipeline" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                        <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 20px;">Hosted Automation Pipeline</h2>
+                        <!-- 5-stage pipeline visualization -->
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 24px;">
+                            <div style="background: rgba(100,116,139,0.15); border: 1px solid rgba(100,116,139,0.25); border-radius: 10px; padding: 14px 8px; text-align: center;">
+                                <div style="font-size: 18px; margin-bottom: 6px;">🎯</div>
+                                <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary);">Trigger</div>
+                                <div style="font-size: 9px; color: var(--text-ghost); margin-top: 2px;">Event fires</div>
+                            </div>
+                            <div style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); border-radius: 10px; padding: 14px 8px; text-align: center;">
+                                <div style="font-size: 18px; margin-bottom: 6px;">⚡</div>
+                                <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--amber);">Process</div>
+                                <div style="font-size: 9px; color: var(--text-ghost); margin-top: 2px;">Logic runs</div>
+                            </div>
+                            <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px; padding: 14px 8px; text-align: center;">
+                                <div style="font-size: 18px; margin-bottom: 6px;">📧</div>
+                                <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green);">Action</div>
+                                <div style="font-size: 9px; color: var(--text-ghost); margin-top: 2px;">Send / Create</div>
+                            </div>
+                            <div style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); border-radius: 10px; padding: 14px 8px; text-align: center;">
+                                <div style="font-size: 18px; margin-bottom: 6px;">📊</div>
+                                <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);">Track</div>
+                                <div style="font-size: 9px; color: var(--text-ghost); margin-top: 2px;">GA4 logs</div>
+                            </div>
+                            <div style="background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.25); border-radius: 10px; padding: 14px 8px; text-align: center;">
+                                <div style="font-size: 18px; margin-bottom: 6px;">🔄</div>
+                                <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgb(168,85,247);">Loop</div>
+                                <div style="font-size: 9px; color: var(--text-ghost); margin-top: 2px;">Re-engage</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">Every automation follows this pipeline: an event <strong style="color: var(--text-primary);">triggers</strong> a workflow, the system <strong style="color: var(--amber);">processes</strong> the logic, an <strong style="color: var(--green);">action</strong> executes (email, tag, invite), GA4 <strong style="color: var(--accent);">tracks</strong> the result, and the system <strong style="color: rgb(168,85,247);">loops</strong> back for re-engagement.</p>
+                    </div>
+
+                    <!-- Active Automations -->
+                    <div id="wt-active-automations" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; margin-bottom: 32px;">
+                        <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 16px;">Active Automations</h2>
+                        <!-- Automation 1 -->
+                        <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-top: 6px; flex-shrink: 0; box-shadow: 0 0 8px rgba(16,185,129,0.5);"></div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="font-size: 13px; font-weight: 700; color: white;">New Subscriber Welcome Sequence</span>
+                                    <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); background: rgba(16,185,129,0.1); padding: 3px 8px; border-radius: 6px;">Active</span>
+                                </div>
+                                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;"><span style="color: var(--amber); font-weight: 700;">TRIGGER:</span> New subscriber joins niche email list → <span style="color: var(--green); font-weight: 700;">ACTION:</span> Initiate automated email sequence sharing core brand story and inviting engagement in a private community.</p>
+                            </div>
+                        </div>
+                        <!-- Automation 2 -->
+                        <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-top: 6px; flex-shrink: 0; box-shadow: 0 0 8px rgba(16,185,129,0.5);"></div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="font-size: 13px; font-weight: 700; color: white;">Testimonial Thank-You Flow</span>
+                                    <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); background: rgba(16,185,129,0.1); padding: 3px 8px; border-radius: 6px;">Active</span>
+                                </div>
+                                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;"><span style="color: var(--amber); font-weight: 700;">TRIGGER:</span> Customer provides a positive review or testimonial → <span style="color: var(--green); font-weight: 700;">ACTION:</span> Send automated thank you email with a shareable link and pre-written social media snippet.</p>
+                            </div>
+                        </div>
+                        <!-- Automation 3 -->
+                        <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 16px;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-top: 6px; flex-shrink: 0; box-shadow: 0 0 8px rgba(16,185,129,0.5);"></div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="font-size: 13px; font-weight: 700; color: white;">High-Engagement Retargeting</span>
+                                    <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); background: rgba(16,185,129,0.1); padding: 3px 8px; border-radius: 6px;">Active</span>
+                                </div>
+                                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;"><span style="color: var(--amber); font-weight: 700;">TRIGGER:</span> Visitor spends 3+ minutes on "About Us" or "Why We're Different" → <span style="color: var(--green); font-weight: 700;">ACTION:</span> Trigger personalized pop-up or exit-intent offer for a free audit or brand positioning guide.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Integration Hub -->
+                    <div id="wt-integrations" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                        <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 16px;">Integration Hub</h2>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                            <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px; padding: 16px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">⚡</div>
+                                <div style="font-size: 12px; font-weight: 800; color: var(--amber); margin-bottom: 4px;">Zapier</div>
+                                <div style="font-size: 10px; color: var(--text-ghost);">5,000+ apps</div>
+                            </div>
+                            <div style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 16px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">📧</div>
+                                <div style="font-size: 12px; font-weight: 800; color: var(--green); margin-bottom: 4px;">Email</div>
+                                <div style="font-size: 10px; color: var(--text-ghost);">SMTP / API</div>
+                            </div>
+                            <div style="background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2); border-radius: 12px; padding: 16px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">🔗</div>
+                                <div style="font-size: 12px; font-weight: 800; color: var(--accent); margin-bottom: 4px;">Webhooks</div>
+                                <div style="font-size: 10px; color: var(--text-ghost);">Custom events</div>
+                            </div>
+                            <div style="background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.2); border-radius: 12px; padding: 16px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
+                                <div style="font-size: 12px; font-weight: 800; color: rgb(168,85,247); margin-bottom: 4px;">GA4</div>
+                                <div style="font-size: 10px; color: var(--text-ghost);">Analytics</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flow Footer / Tour Complete -->
+                    <div id="wt-flow-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
+                        <div style="background: var(--surface); border: 1px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 32px; margin-bottom: 20px;">
+                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--green); margin-bottom: 12px;">District Setup Complete</div>
+                            <h2 style="font-size: 24px; font-weight: 900; color: white; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Your District Is Ready</h2>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 500px; margin: 0 auto;">You've defined your market story, assembled residents, mapped links, reviewed your financial model, and activated your automation flows. Your district is operational.</p>
+                        </div>
+                        <button id="wt-complete-btn" style="background: var(--green); border: none; color: white; padding: 14px 48px; border-radius: 14px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; box-shadow: 0 0 30px rgba(16,185,129,0.3); transition: all 0.2s ease;">Launch District</button>
+                    </div>
+
+                </div><!-- end panel-flow -->
+
             </div><!-- end wt-content -->
         </div><!-- end main layout -->
     </div>
@@ -1237,7 +1468,7 @@
                             title: 'Assign a Role',
                             description: 'Let\'s assign a role to your first participant. <strong>Click "Branding &amp; Identity Designers"</strong> to select this specialty. It will populate into Participant 1\'s specialty field.',
                             side: 'bottom',
-                            align: 'center',
+                            align: 'start',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const chip = document.getElementById('wt-role-branding');
@@ -1471,7 +1702,7 @@
                         }
                     },
 
-                    // Frame 24: OBSERVE — Continue to Preview footer
+                    // Frame 24: DO — Continue to District Finance
                     {
                         element: '#wt-links-footer',
                         onHighlightStarted: () => {
@@ -1479,13 +1710,232 @@
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+                            // Light up the Finance rail item
+                            const financeRail = document.getElementById('wt-rail-finance');
+                            financeRail.style.borderColor = 'rgba(245,158,11,0.6)';
+                            financeRail.style.boxShadow = '0 0 20px rgba(245,158,11,0.3)';
+                            financeRail.style.background = 'rgba(245,158,11,0.1)';
+                            financeRail.style.color = 'var(--amber)';
                         },
                         popover: {
-                            title: 'Continue to Preview',
-                            description: 'Once your links are mapped, click <strong>CONTINUE TO PREVIEW</strong> to see how your district will look to your audience. That\'s the end of the Links section.',
+                            title: 'Continue to District Finance',
+                            description: 'Your links are mapped across all five journey stages. Next, see how your district generates revenue — the 40\u0025 lifetime income model that funds your growth. <strong>Click CONTINUE</strong> to see your financial model.',
                             side: 'top',
                             align: 'center',
-                            doneBtnText: 'End Preview',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const btn = document.getElementById('wt-continue-preview');
+                                if (btn) {
+                                    btn.textContent = 'Continue to District Finance';
+                                    btn.classList.add('do-pulse');
+                                    const advance = () => {
+                                        btn.removeEventListener('click', advance);
+                                        btn.classList.remove('do-pulse');
+                                        setCompleteRail('links');
+                                        setActiveRail('finance');
+                                        updateBreadcrumb(4, 11, 'District Finance', 'District Flow');
+                                        showPanel('panel-finance');
+                                        setTimeout(() => driverObj.moveNext(), 300);
+                                    };
+                                    btn.addEventListener('click', advance);
+                                }
+                            }
+                        }
+                    },
+
+                    // ═══ DISTRICT FINANCE SECTION ═══
+
+                    // Frame 25: OBSERVE — Finance Header (landing)
+                    {
+                        element: '#wt-finance-header',
+                        onHighlightStarted: () => {
+                            const panel = document.getElementById('panel-finance');
+                            panel.scrollTo({ top: 0, behavior: 'smooth' });
+                        },
+                        popover: {
+                            title: 'Welcome to District Finance',
+                            description: 'This is where your district becomes a business. ReadyStack\u2019s financial model is simple: you share your district, participants sign up, and you earn <strong>40\u0025 of every hosting automation fee</strong> \u2014 for life.',
+                            side: 'bottom',
+                            align: 'start'
+                        }
+                    },
+
+                    // Frame 26: OBSERVE — Revenue Model (40% breakdown)
+                    {
+                        element: '#wt-revenue-model',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-revenue-model');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                        },
+                        popover: {
+                            title: 'The Revenue Model',
+                            description: 'Left: the <strong>$97/month hosting fee</strong> each participant pays for automation infrastructure. Right: your <strong>$38.80/month share</strong> \u2014 40\u0025 of that fee, paid to you as lifetime recurring income for every active participant you refer.',
+                            side: 'bottom',
+                            align: 'start',
+                            onPopoverRender: () => {
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.bottom = '40px';
+                                        p.style.right = '40px';
+                                        p.style.left = 'auto';
+                                        p.style.top = 'auto';
+                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right');
+                                    }
+                                }, 50);
+                            }
+                        }
+                    },
+
+                    // Frame 27: OBSERVE — Earnings Projection Table
+                    {
+                        element: '#wt-earnings-table',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-earnings-table');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                        },
+                        popover: {
+                            title: 'Earnings Breakdown',
+                            description: 'Every participant in your district generates <strong>$38.80/month</strong> in lifetime income. With just 3 participants \u2014 Jordan, Mika, and Sam \u2014 that\u2019s <strong>$116.40/month</strong> or <strong>$1,396.80/year</strong>. Scale to 25 participants and you\u2019re earning nearly $1,000/month.',
+                            side: 'bottom',
+                            align: 'start',
+                            onPopoverRender: () => {
+                                // Also reveal payout summary
+                                const payout = document.getElementById('wt-payout-summary');
+                                if (payout) { payout.style.opacity = '1'; payout.style.transform = 'translateY(0)'; }
+                            }
+                        }
+                    },
+
+                    // Frame 28: DO — Continue to District Flow
+                    {
+                        element: '#wt-finance-footer',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-finance-footer');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => {
+                                document.getElementById('wt-continue-flow-btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                            // Light up the Flow rail item
+                            const flowRail = document.getElementById('wt-rail-flow');
+                            flowRail.style.borderColor = 'rgba(168,85,247,0.6)';
+                            flowRail.style.boxShadow = '0 0 20px rgba(168,85,247,0.3)';
+                            flowRail.style.background = 'rgba(168,85,247,0.1)';
+                            flowRail.style.color = 'rgb(168,85,247)';
+                        },
+                        popover: {
+                            title: 'Continue to District Flow',
+                            description: 'Your financial model is set. Next, see the automation engine that powers everything \u2014 triggers, workflows, and integrations running on autopilot. <strong>Click CONTINUE</strong> to view your District Flow.',
+                            side: 'top',
+                            align: 'center',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const btn = document.getElementById('wt-continue-flow-btn');
+                                btn.classList.add('do-pulse');
+                                const advance = () => {
+                                    btn.removeEventListener('click', advance);
+                                    btn.classList.remove('do-pulse');
+                                    setCompleteRail('finance');
+                                    setActiveRail('flow');
+                                    updateBreadcrumb(5, 11, 'District Flow', '');
+                                    showPanel('panel-flow');
+                                    setTimeout(() => driverObj.moveNext(), 300);
+                                };
+                                btn.addEventListener('click', advance);
+                            }
+                        }
+                    },
+
+                    // ═══ DISTRICT FLOW SECTION ═══
+
+                    // Frame 29: OBSERVE — Flow Header (landing)
+                    {
+                        element: '#wt-flow-header',
+                        onHighlightStarted: () => {
+                            const panel = document.getElementById('panel-flow');
+                            panel.scrollTo({ top: 0, behavior: 'smooth' });
+                        },
+                        popover: {
+                            title: 'Welcome to District Flow',
+                            description: 'This is the operational brain of your district. Every automation you defined in the market story is now a live, running workflow \u2014 triggering actions, sending emails, and tracking results across all participants.',
+                            side: 'bottom',
+                            align: 'start'
+                        }
+                    },
+
+                    // Frame 30: OBSERVE — Automation Pipeline
+                    {
+                        element: '#wt-flow-pipeline',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-flow-pipeline');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                        },
+                        popover: {
+                            title: 'The Automation Pipeline',
+                            description: 'Five stages power every automation: <strong>Trigger</strong> (an event fires), <strong>Process</strong> (logic evaluates conditions), <strong>Action</strong> (email/tag/invite executes), <strong>Track</strong> (GA4 logs the result), and <strong>Loop</strong> (re-engage for the next touchpoint). This runs 24/7 for every participant.',
+                            side: 'bottom',
+                            align: 'start',
+                            onPopoverRender: () => {
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.bottom = '40px';
+                                        p.style.right = '40px';
+                                        p.style.left = 'auto';
+                                        p.style.top = 'auto';
+                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right');
+                                    }
+                                }, 50);
+                            }
+                        }
+                    },
+
+                    // Frame 31: OBSERVE — Active Automations
+                    {
+                        element: '#wt-active-automations',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-active-automations');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                        },
+                        popover: {
+                            title: 'Live Automations',
+                            description: 'Three automations are now running for your district \u2014 the same ones defined from the Seth Godin video. The green dots mean they\u2019re <strong>active and processing</strong>. New subscriber? Welcome sequence fires. Testimonial received? Thank-you flow triggers. High engagement? Retargeting kicks in.',
+                            side: 'bottom',
+                            align: 'start',
+                            onPopoverRender: () => {
+                                // Also reveal integrations
+                                const integ = document.getElementById('wt-integrations');
+                                if (integ) { integ.style.opacity = '1'; integ.style.transform = 'translateY(0)'; }
+                            }
+                        }
+                    },
+
+                    // Frame 32: OBSERVE — Tour Complete
+                    {
+                        element: '#wt-flow-footer',
+                        onHighlightStarted: () => {
+                            const el = document.getElementById('wt-flow-footer');
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateY(0)';
+                            setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+                        },
+                        popover: {
+                            title: 'District Setup Complete',
+                            description: 'You\u2019ve built a complete district from a single YouTube video \u2014 market story, residents, links, financial model, and automation flows. Your district is ready to launch. Click <strong>Launch District</strong> to go live.',
+                            side: 'top',
+                            align: 'center',
+                            doneBtnText: 'Finish Tour',
                             showButtons: ['previous', 'close']
                         }
                     }
