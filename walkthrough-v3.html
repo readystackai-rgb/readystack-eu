@@ -47,7 +47,7 @@
         .driver-popover-next-btn, .driver-popover-close-btn { background: var(--accent) !important; color: var(--base) !important; border: none !important; border-radius: 10px !important; font-size: 11px !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; padding: 8px 20px !important; text-shadow: none !important; }
         .driver-popover-next-btn:hover, .driver-popover-close-btn:hover { background: #6578cc !important; }
         .driver-popover-progress-text { color: var(--text-dim) !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: 0.15em !important; text-transform: uppercase !important; }
-        .driver-popover-arrow { border-color: var(--surface) !important; }
+        .driver-popover-arrow { background-color: var(--surface) !important; border-color: rgba(124,140,255,0.4) !important; }
 
         /* ── Rail ── */
         .phase-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; padding: 4px 0 8px 14px; }
@@ -100,20 +100,16 @@
             cursor: pointer !important;
         }
 
-        /* ── Popover speech-bubble caret ── */
+        /* ── Popover speech-bubble caret (Driver.js v1.3.1 uses a rotated square, not borders) ── */
         .driver-popover-arrow {
             display: block !important;
+            width: 20px !important;
+            height: 20px !important;
+            background-color: var(--surface) !important;
+            border: 1px solid rgba(124,140,255,0.4) !important;
+            border-radius: 0 !important;
+            clip-path: none !important;
         }
-        .driver-popover-arrow-side-left,
-        .driver-popover-arrow-side-right,
-        .driver-popover-arrow-side-top,
-        .driver-popover-arrow-side-bottom {
-            border: 8px solid transparent !important;
-        }
-        .driver-popover-arrow-side-bottom { border-top-color: var(--surface) !important; }
-        .driver-popover-arrow-side-top { border-bottom-color: var(--surface) !important; }
-        .driver-popover-arrow-side-left { border-right-color: var(--surface) !important; }
-        .driver-popover-arrow-side-right { border-left-color: var(--surface) !important; }
 
         /* ── Action icons ── */
         .action-icon { background: var(--base); border: 1px solid var(--border-mid); padding: 8px; border-radius: 12px; color: var(--text-muted); cursor: pointer; }
@@ -853,19 +849,36 @@
                                 railItem._handler = () => {
                                     railItem.removeEventListener('click', railItem._handler);
                                     railItem.classList.remove('do-pulse');
-                                    // Auto-type the search query after click
+
+                                    // Temporarily dim overlay so typing is visible
+                                    const overlay = document.querySelector('.driver-overlay');
+                                    if (overlay) overlay.style.opacity = '0.3';
+
+                                    // Scroll search input into view & give it a glow border
                                     const input = document.getElementById('wt-search-input');
+                                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    input.style.borderColor = 'rgba(124,140,255,0.7)';
+                                    input.style.boxShadow = '0 0 16px rgba(124,140,255,0.4)';
                                     input.value = '';
+
+                                    // Type "seth godin building a brand" character by character
                                     const text = 'seth godin building a brand';
                                     let i = 0;
                                     const typeChar = () => {
                                         if (i < text.length) {
                                             input.value += text[i]; i++;
-                                            setTimeout(typeChar, 50);
+                                            setTimeout(typeChar, 60);
+                                        } else {
+                                            // Typing done — brief pause then advance
+                                            setTimeout(() => {
+                                                input.style.borderColor = '';
+                                                input.style.boxShadow = '';
+                                                if (overlay) overlay.style.opacity = '';
+                                                driverObj.moveNext();
+                                            }, 500);
                                         }
                                     };
-                                    typeChar();
-                                    setTimeout(() => driverObj.moveNext(), 2000);
+                                    setTimeout(typeChar, 400); // short pause so user sees cursor land in input
                                 };
                                 railItem.addEventListener('click', railItem._handler);
                             }
