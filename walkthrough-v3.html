@@ -1119,7 +1119,7 @@
                         popover: {
                             title: 'Continue to Residents',
                             description: 'Your market story is set — the problem, the audience, the strategy, and the automations are all defined from one video. <strong>Click OK</strong> to accept this analysis and move on to assembling the people who\'ll populate your district.',
-                            side: 'left',
+                            side: 'top',
                             align: 'end',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
@@ -1156,7 +1156,7 @@
                             title: 'Welcome to Residents',
                             description: 'This is where you assemble your district — the people who\'ll bring the video\'s lessons to life. The page is organized into <strong>Tasks</strong> (derived from the video analysis), <strong>Suggested Roles</strong>, and a <strong>Participants</strong> table.',
                             side: 'bottom',
-                            align: 'center'
+                            align: 'start'
                         }
                     },
 
@@ -1174,7 +1174,7 @@
                         popover: {
                             title: 'Tasks: Actions + Automations',
                             description: 'These are the same tasks from Define Market Story — now carried forward as executable work. <strong>Actions</strong> become checklist items for residents. <strong>Automations</strong> fire when events happen. Together they form the operational backbone of the district.',
-                            side: 'bottom',
+                            side: 'right',
                             align: 'start'
                         }
                     },
@@ -1288,13 +1288,13 @@
 
                     // Frame 18: DO — Click NEXT to advance to Links
                     {
-                        element: '#wt-residents-footer',
+                        element: '#wt-next-btn',
                         onHighlightStarted: () => {
                             const el = document.getElementById('wt-residents-footer');
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => {
-                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                document.getElementById('wt-next-btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }, 100);
                             // Also auto-populate Participants 2 & 3 with names + roles
                             const rows = document.querySelectorAll('.wt-participant-row');
@@ -1322,7 +1322,7 @@
                             title: 'Continue to Links',
                             description: 'Your residents are set — Jordan Rivera, Mika Chen, and Sam Okafor are ready to build this district. <strong>Click NEXT</strong> to move on to Links, where you\'ll map each resident\'s engagement touchpoints across the audience journey.',
                             side: 'top',
-                            align: 'center',
+                            align: 'start',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const btn = document.getElementById('wt-next-btn');
@@ -1354,7 +1354,7 @@
                             title: 'Welcome to Links',
                             description: 'Links map the engagement items each resident brings to your district. Every link is a touchpoint in your audience\'s journey — from first discovering content to buying, building, and sharing.',
                             side: 'bottom',
-                            align: 'center'
+                            align: 'start'
                         }
                     },
 
