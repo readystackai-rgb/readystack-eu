@@ -306,7 +306,7 @@
                         <div id="wt-results" style="display: none; flex-direction: column; gap: 12px; margin-top: 20px;">
                             <div class="video-row" id="wt-video-1" onclick="selectVideo(this)">
                                 <div class="video-thumb" id="wt-thumb-1"><img src="https://img.youtube.com/vi/SbHDPJNYHek/mqdefault.jpg" alt="505 Podcast Seth Godin" /></div>
-                                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px;">
+                                <div id="wt-video-1-info" style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px;">
                                     <p style="font-size: 14px; font-weight: 600; color: white; line-height: 1.4;">How to Build a Magnetic Brand that Sells Itself ft. Seth Godin</p>
                                     <p style="font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">The 505 Podcast</p>
                                     <p style="font-size: 12px; color: var(--text-secondary);">185,623 views</p>
@@ -957,14 +957,14 @@
                         }
                     },
 
-                    // Frame 4: DO — Select the video (popover over the thumbnail)
+                    // Frame 4: DO — Select the video (popover points at title, whole row glows)
                     {
-                        element: '#wt-thumb-1',
+                        element: '#wt-video-1',
                         popover: {
                             title: 'Select This Video',
                             description: 'This is your market story — the problem your audience faces, anchored by an authority voice. <strong>Click this video</strong> to set your district\'s foundation. ReadyStack will automatically generate the full analysis.',
-                            side: 'bottom',
-                            align: 'center',
+                            side: 'right',
+                            align: 'start',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const row = document.getElementById('wt-video-1');
