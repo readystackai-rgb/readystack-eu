@@ -438,8 +438,8 @@
       const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
       const [inviteError, setInviteError] = useState(null); // participant index that failed, or null
       const [highlightVendor, setHighlightVendor] = useState(null); // participant name to glow in District Ecosystem
-      const [residentSortBy, setResidentSortBy] = useState('name'); // 'name' | 'status' | 'specialty' | 'company'
-      const [inviteExpiryDays, setInviteExpiryDays] = useState(30); // configurable invite link validity
+      const [residentSortBy, setResidentSortBy] = useState('recent'); // 'recent' | 'name' | 'status' | 'specialty' | 'company'
+      const [inviteExpiryDays, setInviteExpiryDays] = useState(7); // configurable invite link validity (default 7d per Jay)
       const [isInviteMode, setIsInviteMode] = useState(false); // true when arrived via invite URL (pre-auth)
       const isResident = districtRole === 'resident';
       const isCreator = districtRole === 'creator' || !districtRole; // default to creator for backward compat
@@ -3393,9 +3393,15 @@
                       );
                     }
 
-                    // Sort residents
+                    // Sort residents (default: most recent activity first)
                     const statusOrder = { 'Active': 0, 'Invited': 1, 'Expired': 2, '': 3 };
+                    const getActivityTime = (r) => r.invitedAt ? new Date(r.invitedAt).getTime() : 0;
                     const sorted = [...residents].sort((a, b) => {
+                      if (residentSortBy === 'recent') {
+                        const ta = getActivityTime(a), tb = getActivityTime(b);
+                        if (ta || tb) return tb - ta; // most recent activity first
+                        return b._idx - a._idx; // fallback: most recently added
+                      }
                       if (residentSortBy === 'status') {
                         return (statusOrder[a.effectiveStatus] ?? 3) - (statusOrder[b.effectiveStatus] ?? 3) || (a.name || '').localeCompare(b.name || '');
                       }
@@ -3449,7 +3455,7 @@
                           </div>
                           <div className="ml-auto flex items-center gap-2">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sort:</span>
-                            {['name','status','specialty','company'].map(key => (
+                            {['recent','name','status','specialty','company'].map(key => (
                               <button key={key} onClick={() => setResidentSortBy(key)} className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${residentSortBy === key ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:text-slate-200'}`}>
                                 {key}
                               </button>
