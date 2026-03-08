@@ -869,464 +869,568 @@
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 <div id="panel-flow" class="content-panel">
 
-                    <!-- ═══ DISTRICT FLOW — Matching production index.html (observatory tab) ═══ -->
+<!-- ═══ DISTRICT FLOW — Matching production index.html (observatory tab) ═══ -->
 
-                    <!-- Title (production lines 3300-3303) -->
-                    <div id="wt-flow-header" style="margin-bottom: 32px;">
-                        <h1 style="font-size: 30px; font-weight: 700; color: white; font-family: 'Poppins', sans-serif; line-height: 1.2;">District Flow</h1>
-                        <p style="margin-top: 8px; font-size: 14px; color: #94a3b8;">Visualize your district ecosystem in motion</p>
+<!-- Title (production lines 3300-3303) -->
+<div id="wt-flow-header" style="margin-bottom: 32px;">
+    <h1 style="font-size: 30px; font-weight: 700; color: white; font-family: 'Poppins', sans-serif; line-height: 1.2;">District Flow</h1>
+    <p style="margin-top: 8px; font-size: 14px; color: #94a3b8;">Visualize your district ecosystem in motion</p>
+</div>
+
+<!-- Row 1: Tab Switcher (production lines 3306-3317) -->
+<div id="wt-flow-tabs" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; gap: 4px; background: #0f172a; border-radius: 12px; padding: 4px; border: 1px solid #1e293b;">
+        <button id="wt-tab-ecosystem" style="padding: 8px 20px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.2s ease; background: #4f46e5; color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.4);">Ecosystem</button>
+        <button id="wt-tab-relational" style="padding: 8px 20px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.2s ease; background: transparent; color: #64748b;">Relational</button>
+        <button id="wt-tab-cross" style="padding: 8px 20px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.2s ease; background: transparent; color: #64748b;">Cross-Pollination</button>
+    </div>
+    <span id="wt-tab-description" style="font-size: 10px; color: #475569;">Live traffic ecosystem — organic flow</span>
+</div>
+
+<!-- Row 2: Live / Snapshot / Narrative mode toggles (production lines 3320-3328) -->
+<div id="wt-flow-modes" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; gap: 8px; background: #0f172a; border-radius: 12px; padding: 6px; border: 1px solid #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);">
+        <button id="wt-mode-live" style="padding: 8px 32px; border-radius: 8px; font-size: 12px; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220,38,38,0.4);">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: white; display: inline-block; animation: pulse 2s infinite;"></span> LIVE
+        </button>
+        <select style="background: transparent; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 900; text-transform: uppercase; border: none; outline: none; cursor: pointer; color: #cbd5e1; appearance: auto;">
+            <option value="" disabled selected>SNAPSHOT</option>
+            <option value="1week">1 Week Ago</option>
+            <option value="2weeks">2 Weeks Ago</option>
+            <option value="1month">1 Month Ago</option>
+        </select>
+    </div>
+    <button style="padding: 12px 32px; border-radius: 12px; font-size: 12px; font-weight: 900; text-transform: uppercase; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.1); background: #0f172a; color: #94a3b8; cursor: pointer;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        Narrative
+    </button>
+</div>
+
+<!-- ════ ECOSYSTEM VIEW (default, visible) ════ -->
+<div id="wt-view-ecosystem" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease;">
+
+    <!-- Hub-and-Spoke SVG Canvas (production lines 3332-3371) -->
+    <div style="overflow-x: auto; background: #020617; padding: 20px 0; width: 100%;">
+        <div id="wt-ecosystem-canvas" style="background: #01040d; border-radius: 64px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; width: 760px; height: 820px; margin: 0 auto;">
+
+            <!-- SVG Connection Lines -->
+            <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 760 820">
+                <!-- Traffic Sources to Hub -->
+                <path d="M 280,90 Q 320,140 370,180" stroke="#ffffff" stroke-width="1.5" fill="none" opacity="0.3"/>
+                <path d="M 380,80 Q 380,130 380,180" stroke="#ffffff" stroke-width="1.5" fill="none" opacity="0.3"/>
+                <path d="M 480,90 Q 440,140 390,180" stroke="#ffffff" stroke-width="1.5" fill="none" opacity="0.3"/>
+
+                <!-- Hub to DISCOVER nodes (red) -->
+                <path d="M 370,235 Q 280,270 180,310" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 370,240 Q 240,290 140,360" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 370,245 Q 220,310 120,420" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 370,250 Q 210,340 100,470" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 370,255 Q 200,370 80,540" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
+
+                <!-- Hub to ENGAGE nodes (yellow) -->
+                <path d="M 390,235 Q 480,270 580,310" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 390,240 Q 520,290 620,360" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 390,245 Q 540,310 640,420" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 390,250 Q 550,340 660,470" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 390,255 Q 560,370 680,540" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
+
+                <!-- Hub to CONNECT nodes (teal) -->
+                <path d="M 365,250 Q 240,380 160,520" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 365,260 Q 220,410 140,600" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 365,270 Q 210,440 120,680" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 365,275 Q 200,470 100,740" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 365,280 Q 190,500 80,780" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.15"/>
+
+                <!-- Hub to SUPPORT nodes (indigo) -->
+                <path d="M 395,250 Q 520,380 600,520" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 395,260 Q 540,410 620,600" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 395,270 Q 550,440 640,680" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 395,275 Q 560,470 660,740" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.15"/>
+                <path d="M 395,280 Q 570,500 680,780" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.15"/>
+
+                <!-- Angel investor funding lines (green paths) -->
+                <path d="M 620,100 Q 500,150 395,210" stroke="#10b981" stroke-width="2.5" fill="none" opacity="0.9"/>
+                <path d="M 560,60 Q 480,120 395,200" stroke="#10b981" stroke-width="2.5" fill="none" opacity="0.9"/>
+                <path d="M 680,80 Q 540,140 395,210" stroke="#ffd700" stroke-width="2.5" fill="none" opacity="0.9"/>
+            </svg>
+
+            <!-- Quadrant Labels -->
+            <div style="position: absolute; left: 60px; top: 380px; color: #ff2a1a; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">DISCOVER</div>
+            <div style="position: absolute; left: 680px; top: 380px; color: #ffd666; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">ENGAGE</div>
+            <div style="position: absolute; left: 60px; top: 600px; color: #48c9b0; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">CONNECT</div>
+            <div style="position: absolute; left: 680px; top: 600px; color: #7c8cff; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">SUPPORT</div>
+
+            <!-- Traffic Sources Label -->
+            <div style="position: absolute; left: 40px; top: 50px; color: #ffffff; font-size: 11px; font-weight: 900; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.7; pointer-events: none;">TRAFFIC SOURCES</div>
+
+            <!-- Traffic Source: YouTube (x=280,y=90) -->
+            <div style="position: absolute; left: 280px; top: 90px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffffff; width: 44px; height: 44px; color: #ef4444;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </div>
+            </div>
+
+            <!-- Traffic Source: YouTube P1 (x=380,y=80) -->
+            <div style="position: absolute; left: 380px; top: 80px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffffff; width: 44px; height: 44px; color: #ef4444;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </div>
+            </div>
+
+            <!-- Traffic Source: YouTube P2 (x=480,y=90) -->
+            <div style="position: absolute; left: 480px; top: 90px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffffff; width: 44px; height: 44px; color: #ef4444;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </div>
+            </div>
+
+            <!-- ReadyStack Hub (center diamond) (x=380,y=220) -->
+            <div style="position: absolute; left: 380px; top: 220px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2.5px solid #ffffff; width: 68px; height: 68px; transform: rotate(45deg);">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7c8cff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Row 1: Tab Switcher (production lines 3306-3317) -->
-                    <div id="wt-flow-tabs" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
-                        <div style="display: flex; align-items: center; gap: 4px; background: #0f172a; border-radius: 12px; padding: 4px; border: 1px solid #1e293b;">
-                            <button id="wt-tab-ecosystem" style="padding: 8px 20px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.2s ease; background: #4f46e5; color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.4);">Ecosystem</button>
-                            <button id="wt-tab-relational" style="padding: 8px 20px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.2s ease; background: transparent; color: #64748b;">Relational</button>
-                            <button id="wt-tab-cross" style="padding: 8px 20px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: none; cursor: pointer; transition: all 0.2s ease; background: transparent; color: #64748b;">Cross-Pollination</button>
-                        </div>
-                        <span id="wt-tab-description" style="font-size: 10px; color: #475569;">Live traffic ecosystem — organic flow</span>
+            <!-- Angel Investor: Seed (x=620,y=100, green) -->
+            <div style="position: absolute; left: 620px; top: 100px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 4px double #10b981; width: 52px; height: 52px; color: #10b981; animation: pulse 2s infinite;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+            </div>
+
+            <!-- Angel Investor: Awareness (x=560,y=60, green) -->
+            <div style="position: absolute; left: 560px; top: 60px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #10b981; width: 40px; height: 40px; color: #10b981;">
+                    <div style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></div>
+                </div>
+            </div>
+
+            <!-- Angel Investor: Observer (x=680,y=80, gold) -->
+            <div style="position: absolute; left: 680px; top: 80px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffd700; width: 40px; height: 40px; color: #ffd700;">
+                    <div style="width: 6px; height: 6px; border-radius: 50%; background: #ffd700;"></div>
+                </div>
+            </div>
+
+            <!-- ════ DISCOVER NODES (RED, left side) ════ -->
+            <!-- DISCOVER 1: Video (circle) (x=180,y=310) -->
+            <div style="position: absolute; left: 180px; top: 310px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ff2a1a; width: 48px; height: 48px; color: #ff2a1a;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                </div>
+            </div>
+
+            <!-- DISCOVER 2: Layout-Grid (diamond) (x=140,y=360) -->
+            <div style="position: absolute; left: 140px; top: 360px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #ff2a1a; width: 44px; height: 44px; color: #ff2a1a; transform: rotate(45deg);">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Row 2: Live / Snapshot / Narrative mode toggles (production lines 3320-3328) -->
-                    <div id="wt-flow-modes" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
-                        <div style="display: flex; align-items: center; gap: 8px; background: #0f172a; border-radius: 12px; padding: 6px; border: 1px solid #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);">
-                            <button id="wt-mode-live" style="padding: 8px 32px; border-radius: 8px; font-size: 12px; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220,38,38,0.4);">
-                                <span style="width: 6px; height: 6px; border-radius: 50%; background: white; display: inline-block; animation: pulse 2s infinite;"></span> LIVE
-                            </button>
-                            <select style="background: transparent; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 900; text-transform: uppercase; border: none; outline: none; cursor: pointer; color: #cbd5e1; appearance: auto;">
-                                <option value="" disabled selected>SNAPSHOT</option>
-                                <option value="1week">1 Week Ago</option>
-                                <option value="2weeks">2 Weeks Ago</option>
-                                <option value="1month">1 Month Ago</option>
-                            </select>
-                        </div>
-                        <button style="padding: 12px 32px; border-radius: 12px; font-size: 12px; font-weight: 900; text-transform: uppercase; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.1); background: #0f172a; color: #94a3b8; cursor: pointer;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                            Narrative
-                        </button>
+            <!-- DISCOVER 3: Layout (circle) (x=120,y=420) -->
+            <div style="position: absolute; left: 120px; top: 420px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ff2a1a; width: 48px; height: 48px; color: #ff2a1a;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+                </div>
+            </div>
+
+            <!-- DISCOVER 4: Book-Open (diamond) (x=100,y=470) -->
+            <div style="position: absolute; left: 100px; top: 470px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #ff2a1a; width: 44px; height: 44px; color: #ff2a1a; transform: rotate(45deg);">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                     </div>
+                </div>
+            </div>
 
-                    <!-- ════ ECOSYSTEM VIEW (default, visible) ════ -->
-                    <div id="wt-view-ecosystem" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease;">
+            <!-- DISCOVER 5: File-Text (circle) (x=80,y=540) -->
+            <div style="position: absolute; left: 80px; top: 540px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ff2a1a; width: 48px; height: 48px; color: #ff2a1a;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                </div>
+            </div>
 
-                        <!-- Hub-and-Spoke SVG Canvas (production lines 3332-3371) -->
-                        <div style="overflow-x: auto; background: #020617; padding: 20px 0; width: 100%;">
-                            <div id="wt-ecosystem-canvas" style="background: #01040d; border-radius: 64px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; width: 760px; height: 820px; margin: 0 auto;">
+            <!-- ════ ENGAGE NODES (YELLOW, right side) ════ -->
+            <!-- ENGAGE 1: Mouse-Pointer (circle) (x=580,y=310) -->
+            <div style="position: absolute; left: 580px; top: 310px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffd666; width: 48px; height: 48px; color: #ffd666;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 4 7.07 17 2.51-7.39L21 11.07z"/></svg>
+                </div>
+            </div>
 
-                                <!-- SVG Connection Lines -->
-                                <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 760 820">
-                                    <!-- Hub to DISCOVER nodes -->
-                                    <path d="M 380,210 Q 200,260 140,340" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 230,280 180,400" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 250,300 200,460" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <!-- Hub to ENGAGE nodes -->
-                                    <path d="M 380,210 Q 480,280 560,340" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 500,300 600,400" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 510,310 620,460" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <!-- Hub to CONNECT nodes -->
-                                    <path d="M 380,210 Q 220,420 160,560" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 260,440 220,620" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 280,460 260,680" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <!-- Hub to SUPPORT nodes -->
-                                    <path d="M 380,210 Q 500,420 580,560" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 520,440 620,620" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 530,460 640,680" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <!-- Traffic Source to Hub -->
-                                    <path d="M 380,90 Q 380,140 380,190" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.3"/>
-                                    <!-- Angel investor funding lines -->
-                                    <path d="M 660,160 Q 540,180 400,200" stroke="#c084fc" stroke-width="3.5" fill="none" opacity="0.9"/>
-                                </svg>
-
-                                <!-- Quadrant Labels (production lines 3357-3360) -->
-                                <div style="position: absolute; left: 60px; top: 330px; color: #ff2a1a; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">DISCOVER</div>
-                                <div style="position: absolute; left: 440px; top: 330px; color: #ffd666; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">ENGAGE</div>
-                                <div style="position: absolute; left: 60px; top: 540px; color: #48c9b0; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">CONNECT</div>
-                                <div style="position: absolute; left: 440px; top: 540px; color: #7c8cff; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">SUPPORT</div>
-
-                                <!-- Traffic Sources Label (production line 3362) -->
-                                <div style="position: absolute; left: 40px; top: 70px; color: #ffffff; font-size: 11px; font-weight: 900; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.7; pointer-events: none;">TRAFFIC SOURCES</div>
-
-                                <!-- Traffic Source: YouTube node -->
-                                <div style="position: absolute; left: 380px; top: 90px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #f87171; width: 44px; height: 44px; color: #f87171;">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                                    </div>
-                                </div>
-
-                                <!-- ReadyStack Hub (center diamond) (production line 3556) -->
-                                <div style="position: absolute; left: 380px; top: 210px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2.5px solid #ffffff; width: 68px; height: 68px; transform: rotate(45deg);">
-                                        <div style="transform: rotate(-45deg);">
-                                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7c8cff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Angel Investor node (top-right) -->
-                                <div style="position: absolute; left: 660px; top: 160px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 4px double #c084fc; width: 48px; height: 48px; color: #ffffff; animation: pulse 2s infinite;">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                                    </div>
-                                </div>
-
-                                <!-- DISCOVER Nodes (red) -->
-                                <div style="position: absolute; left: 140px; top: 340px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 50%; border: 2px solid #ff2a1a; width: 36px; height: 36px; color: #f87171;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 180px; top: 400px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 12px; border: 2.5px solid #ff2a1a; width: 32px; height: 32px; transform: rotate(45deg);">
-                                        <div style="transform: rotate(-45deg); color: #ffffff;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 200px; top: 460px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 50%; border: 2px solid #ff2a1a; width: 30px; height: 30px; color: #ffffff;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                                    </div>
-                                </div>
-
-                                <!-- ENGAGE Nodes (yellow) -->
-                                <div style="position: absolute; left: 560px; top: 340px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 50%; border: 2px solid #ffd666; width: 36px; height: 36px; color: #ffffff;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 600px; top: 400px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 50%; border: 2px solid #ffd666; width: 32px; height: 32px; color: #ffffff;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 620px; top: 460px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 12px; border: 2.5px solid #ffd666; width: 30px; height: 30px; transform: rotate(45deg);">
-                                        <div style="transform: rotate(-45deg); color: #ffffff;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
-                                    </div>
-                                </div>
-
-                                <!-- CONNECT Nodes (teal) -->
-                                <div style="position: absolute; left: 160px; top: 560px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 50%; border: 2px solid #48c9b0; width: 36px; height: 36px; color: #ffffff;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 220px; top: 620px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 50%; border: 2px solid #48c9b0; width: 30px; height: 30px; color: #ffffff;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 260px; top: 680px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 50%; border: 2px solid #48c9b0; width: 28px; height: 28px; color: #ffffff;">
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                                    </div>
-                                </div>
-
-                                <!-- SUPPORT Nodes (indigo) -->
-                                <div style="position: absolute; left: 580px; top: 560px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 50%; border: 2px solid #7c8cff; width: 36px; height: 36px; color: #ffffff;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 620px; top: 620px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 12px; border: 2.5px solid #7c8cff; width: 30px; height: 30px; transform: rotate(45deg);">
-                                        <div style="transform: rotate(-45deg); color: #ffffff;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 640px; top: 680px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 50%; border: 2px solid #7c8cff; width: 28px; height: 28px; color: #ffffff;">
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- Quadrant Stats (production lines 3374-3387) -->
-                        <div id="wt-quadrant-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px;">
-                            <div style="background: #01040d; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; text-align: center;">
-                                <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; color: #ff2a1a;">DISCOVER</p>
-                                <p style="font-size: 24px; font-weight: 900; color: white;">3</p>
-                                <p style="font-size: 9px; color: #64748b; margin-top: 4px;">2,460 interactions</p>
-                            </div>
-                            <div style="background: #01040d; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; text-align: center;">
-                                <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; color: #ffd666;">ENGAGE</p>
-                                <p style="font-size: 24px; font-weight: 900; color: white;">3</p>
-                                <p style="font-size: 9px; color: #64748b; margin-top: 4px;">2,460 interactions</p>
-                            </div>
-                            <div style="background: #01040d; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; text-align: center;">
-                                <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; color: #48c9b0;">CONNECT</p>
-                                <p style="font-size: 24px; font-weight: 900; color: white;">3</p>
-                                <p style="font-size: 9px; color: #64748b; margin-top: 4px;">2,460 interactions</p>
-                            </div>
-                            <div style="background: #01040d; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; text-align: center;">
-                                <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; color: #7c8cff;">SUPPORT</p>
-                                <p style="font-size: 24px; font-weight: 900; color: white;">3</p>
-                                <p style="font-size: 9px; color: #64748b; margin-top: 4px;">2,460 interactions</p>
-                            </div>
-                        </div>
-                    </div><!-- end wt-view-ecosystem -->
-
-                    <!-- ════ RELATIONAL VIEW (hidden initially) ════ -->
-                    <div id="wt-view-relational" style="display: none; opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease;">
-
-                        <!-- Relational Grid Canvas (production lines 3392-3431) -->
-                        <div style="overflow-x: auto; background: #020617; padding: 20px 0; width: 100%;">
-                            <div id="wt-relational-canvas" style="background: #01040d; border-radius: 64px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; width: 760px; height: 820px; margin: 0 auto;">
-
-                                <!-- Column Headers (production lines 3395-3399) -->
-                                <div style="position: absolute; left: 160px; top: 80px; transform: translateX(-50%); z-index: 30;">
-                                    <div style="font-size: 13px; font-weight: 700; color: #ffffff; font-family: 'Poppins', sans-serif; text-align: center; padding: 6px 16px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">YouTube</div>
-                                </div>
-                                <div style="position: absolute; left: 350px; top: 80px; transform: translateX(-50%); z-index: 30;">
-                                    <div style="font-size: 13px; font-weight: 700; color: #ffffff; font-family: 'Poppins', sans-serif; text-align: center; padding: 6px 16px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">Seth Godin</div>
-                                </div>
-                                <div style="position: absolute; left: 540px; top: 80px; transform: translateX(-50%); z-index: 30;">
-                                    <div style="font-size: 13px; font-weight: 700; color: #7c8cff; font-family: 'Poppins', sans-serif; text-align: center; padding: 6px 16px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">ReadyStack</div>
-                                </div>
-
-                                <!-- Row Labels (production lines 3401-3405) -->
-                                <div style="position: absolute; left: 18px; top: 200px; transform: translateY(-50%) rotate(-90deg); transform-origin: center center; z-index: 30;">
-                                    <span style="font-size: 10px; font-weight: 800; color: #ff2a1a; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6;">LEARNING</span>
-                                </div>
-                                <div style="position: absolute; left: 18px; top: 370px; transform: translateY(-50%) rotate(-90deg); transform-origin: center center; z-index: 30;">
-                                    <span style="font-size: 10px; font-weight: 800; color: #ffd666; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6;">SELECTING</span>
-                                </div>
-                                <div style="position: absolute; left: 18px; top: 540px; transform: translateY(-50%) rotate(-90deg); transform-origin: center center; z-index: 30;">
-                                    <span style="font-size: 10px; font-weight: 800; color: #48c9b0; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6;">EXECUTING</span>
-                                </div>
-                                <div style="position: absolute; left: 18px; top: 710px; transform: translateY(-50%) rotate(-90deg); transform-origin: center center; z-index: 30;">
-                                    <span style="font-size: 10px; font-weight: 800; color: #7c8cff; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6;">EXPANDING</span>
-                                </div>
-
-                                <!-- SVG Vertical Flows (production lines 3407-3417) -->
-                                <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;" viewBox="0 0 760 820">
-                                    <!-- YouTube column vertical -->
-                                    <path d="M 160,220 C 160,295 160,295 160,370" stroke="#ffd666" stroke-width="1.8" fill="none" opacity="0.25"/>
-                                    <path d="M 160,390 C 160,465 160,465 160,540" stroke="#48c9b0" stroke-width="1.8" fill="none" opacity="0.25"/>
-                                    <path d="M 160,560 C 160,635 160,635 160,710" stroke="#7c8cff" stroke-width="1.8" fill="none" opacity="0.25"/>
-                                    <!-- Seth Godin column vertical -->
-                                    <path d="M 350,220 C 350,295 350,295 350,370" stroke="#ffd666" stroke-width="1.8" fill="none" opacity="0.25"/>
-                                    <path d="M 350,390 C 350,465 350,465 350,540" stroke="#48c9b0" stroke-width="1.8" fill="none" opacity="0.25"/>
-                                    <path d="M 350,560 C 350,635 350,635 350,710" stroke="#7c8cff" stroke-width="1.8" fill="none" opacity="0.25"/>
-                                    <!-- ReadyStack column vertical -->
-                                    <path d="M 540,220 C 540,295 540,295 540,370" stroke="#ffd666" stroke-width="1.8" fill="none" opacity="0.25"/>
-                                    <path d="M 540,390 C 540,465 540,465 540,540" stroke="#48c9b0" stroke-width="1.8" fill="none" opacity="0.25"/>
-                                    <path d="M 540,560 C 540,635 540,635 540,710" stroke="#7c8cff" stroke-width="1.8" fill="none" opacity="0.25"/>
-                                    <!-- Cross-artist flows (dashed purple) -->
-                                    <path d="M 170,220 C 260,295 260,295 340,370" stroke="#c084fc" stroke-width="1.2" fill="none" opacity="0.35" stroke-dasharray="8 5"/>
-                                    <path d="M 360,390 C 450,465 450,465 530,540" stroke="#c084fc" stroke-width="1.2" fill="none" opacity="0.35" stroke-dasharray="8 5"/>
-                                </svg>
-
-                                <!-- Relational Nodes with 2-letter abbreviations (production lines 3419-3429) -->
-                                <!-- LEARNING row -->
-                                <div style="position: absolute; left: 160px; top: 200px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #ff2a1a; opacity: 0.15; box-shadow: 0 0 22px rgba(255,42,26,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #ff2a1a; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #ff2a1a; font-weight: 700;">TU</span></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 350px; top: 200px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #ff2a1a; opacity: 0.15; box-shadow: 0 0 22px rgba(255,42,26,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #ff2a1a; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #ff2a1a; font-weight: 700;">LO</span></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 540px; top: 200px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #ff2a1a; opacity: 0.15; box-shadow: 0 0 22px rgba(255,42,26,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #ff2a1a; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #ff2a1a; font-weight: 700;">PR</span></div>
-                                    </div>
-                                </div>
-                                <!-- SELECTING row -->
-                                <div style="position: absolute; left: 160px; top: 370px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #ffd666; opacity: 0.15; box-shadow: 0 0 22px rgba(255,214,102,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #ffd666; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #ffd666; font-weight: 700;">DM</span></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 350px; top: 370px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #ffd666; opacity: 0.15; box-shadow: 0 0 22px rgba(255,214,102,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #ffd666; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #ffd666; font-weight: 700;">WB</span></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 540px; top: 370px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #ffd666; opacity: 0.15; box-shadow: 0 0 22px rgba(255,214,102,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #ffd666; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #ffd666; font-weight: 700;">LI</span></div>
-                                    </div>
-                                </div>
-                                <!-- EXECUTING row -->
-                                <div style="position: absolute; left: 160px; top: 540px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #48c9b0; opacity: 0.15; box-shadow: 0 0 22px rgba(72,201,176,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #48c9b0; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #48c9b0; font-weight: 700;">PT</span></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 350px; top: 540px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #48c9b0; opacity: 0.15; box-shadow: 0 0 22px rgba(72,201,176,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #48c9b0; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #48c9b0; font-weight: 700;">CO</span></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 540px; top: 540px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #48c9b0; opacity: 0.15; box-shadow: 0 0 22px rgba(72,201,176,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #48c9b0; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #48c9b0; font-weight: 700;">AP</span></div>
-                                    </div>
-                                </div>
-                                <!-- EXPANDING row -->
-                                <div style="position: absolute; left: 160px; top: 710px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #7c8cff; opacity: 0.15; box-shadow: 0 0 22px rgba(124,140,255,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #7c8cff; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #7c8cff; font-weight: 700;">SH</span></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 350px; top: 710px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #7c8cff; opacity: 0.15; box-shadow: 0 0 22px rgba(124,140,255,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #7c8cff; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #7c8cff; font-weight: 700;">AD</span></div>
-                                    </div>
-                                </div>
-                                <div style="position: absolute; left: 540px; top: 710px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="position: relative; width: 44px; height: 44px;">
-                                        <div style="position: absolute; inset: 0; border-radius: 50%; background: #7c8cff; opacity: 0.15; box-shadow: 0 0 22px rgba(124,140,255,0.25);"></div>
-                                        <div style="position: absolute; inset: 4px; border-radius: 50%; border: 2px solid #7c8cff; opacity: 0.6;"></div>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;"><span style="font-size: 10px; color: #7c8cff; font-weight: 700;">DV</span></div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div><!-- end wt-view-relational -->
-
-                    <!-- ════ CROSS-POLLINATION VIEW (hidden initially) ════ -->
-                    <div id="wt-view-cross" style="display: none; opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease;">
-
-                        <!-- Participant Focus Pills (production lines 3437-3443) -->
-                        <div id="wt-cross-pills" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
-                            <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #475569; margin-right: 8px; letter-spacing: 0.1em;">Focus</span>
-                            <button style="padding: 6px 16px; border-radius: 999px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">All Participants</button>
-                            <button id="wt-cross-pill-seth" style="padding: 6px 16px; border-radius: 999px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255,255,255,0.05); background: transparent; color: #64748b; cursor: pointer;">Seth Godin</button>
-                        </div>
-
-                        <!-- Cross-Pollination Banner (production lines 3445-3452) -->
-                        <div id="wt-cross-banner" style="display: none; align-items: center; gap: 12px; padding: 8px 16px; background: rgba(134,25,143,0.12); border: 1px solid rgba(192,132,252,0.2); border-radius: 12px; margin-bottom: 16px;">
-                            <div style="width: 8px; height: 8px; border-radius: 50%; background: #c084fc; animation: pulse 2s infinite;"></div>
-                            <span style="font-size: 11px; color: #d8b4fe; font-weight: 600;">Seth Godin: cross-pollination paths detected</span>
-                            <span style="font-size: 10px; color: #64748b;">Gravity lines show where Seth Godin's content pulls traffic into other participants' ecosystems</span>
-                        </div>
-
-                        <!-- Ecosystem SVG Clone with green dashed cross-participant lines (production lines 3455-3494) -->
-                        <div style="overflow-x: auto; background: #020617; padding: 20px 0; width: 100%;">
-                            <div id="wt-cross-canvas" style="background: #01040d; border-radius: 64px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; width: 760px; height: 820px; margin: 0 auto;">
-
-                                <!-- SVG with green dashed cross-participant lines -->
-                                <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 760 820">
-                                    <!-- Same hub connections as Ecosystem but with green dashed cross-participant paths -->
-                                    <path d="M 380,210 Q 200,260 140,340" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 230,280 180,400" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 480,280 560,340" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 500,300 600,400" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 220,420 160,560" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <path d="M 380,210 Q 500,420 580,560" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.15"/>
-                                    <!-- GREEN dashed cross-participant lines (the key differentiator) -->
-                                    <path d="M 140,340 Q 300,370 560,340" stroke="#22c55e" stroke-width="2.5" fill="none" opacity="0.7" stroke-dasharray="12 6"/>
-                                    <path d="M 180,400 Q 380,430 600,400" stroke="#22c55e" stroke-width="2.5" fill="none" opacity="0.7" stroke-dasharray="12 6"/>
-                                    <path d="M 200,460 Q 400,500 620,460" stroke="#22c55e" stroke-width="2.5" fill="none" opacity="0.5" stroke-dasharray="12 6"/>
-                                    <path d="M 160,560 Q 370,580 580,560" stroke="#22c55e" stroke-width="2.5" fill="none" opacity="0.5" stroke-dasharray="12 6"/>
-                                    <!-- Traffic Source to Hub -->
-                                    <path d="M 380,90 Q 380,140 380,190" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.3"/>
-                                </svg>
-
-                                <!-- Quadrant Labels -->
-                                <div style="position: absolute; left: 60px; top: 330px; color: #ff2a1a; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">DISCOVER</div>
-                                <div style="position: absolute; left: 440px; top: 330px; color: #ffd666; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">ENGAGE</div>
-                                <div style="position: absolute; left: 60px; top: 540px; color: #48c9b0; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">CONNECT</div>
-                                <div style="position: absolute; left: 440px; top: 540px; color: #7c8cff; opacity: 0.6; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">SUPPORT</div>
-                                <div style="position: absolute; left: 40px; top: 70px; color: #ffffff; font-size: 11px; font-weight: 900; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.7; pointer-events: none;">TRAFFIC SOURCES</div>
-
-                                <!-- Same node positions as Ecosystem but with opacity transitions -->
-                                <!-- YouTube traffic source -->
-                                <div style="position: absolute; left: 380px; top: 90px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #f87171; width: 44px; height: 44px; color: #f87171;">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                                    </div>
-                                </div>
-                                <!-- ReadyStack Hub -->
-                                <div style="position: absolute; left: 380px; top: 210px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2.5px solid #ffffff; width: 68px; height: 68px; transform: rotate(45deg);">
-                                        <div style="transform: rotate(-45deg);"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7c8cff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-                                    </div>
-                                </div>
-                                <!-- DISCOVER nodes -->
-                                <div style="position: absolute; left: 140px; top: 340px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; border-radius: 50%; border: 2px solid #ff2a1a; width: 36px; height: 36px; color: #f87171;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                                    </div>
-                                </div>
-                                <!-- ENGAGE nodes -->
-                                <div style="position: absolute; left: 560px; top: 340px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; border-radius: 50%; border: 2px solid #ffd666; width: 36px; height: 36px; color: #ffffff;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                                    </div>
-                                </div>
-                                <!-- CONNECT nodes -->
-                                <div style="position: absolute; left: 160px; top: 560px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; border-radius: 50%; border: 2px solid #48c9b0; width: 36px; height: 36px; color: #ffffff;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                                    </div>
-                                </div>
-                                <!-- SUPPORT nodes -->
-                                <div style="position: absolute; left: 580px; top: 560px; transform: translate(-50%, -50%); z-index: 20;">
-                                    <div style="display: flex; align-items: center; justify-content: center; background: #01040d; border-radius: 50%; border: 2px solid #7c8cff; width: 36px; height: 36px; color: #ffffff;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- Cross-Pollination Quadrant Stats -->
-                        <div id="wt-cross-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px;">
-                            <div style="background: #01040d; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; text-align: center;">
-                                <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; color: #ff2a1a;">DISCOVER</p>
-                                <p style="font-size: 24px; font-weight: 900; color: white;">3</p>
-                                <p style="font-size: 9px; color: #64748b; margin-top: 4px;">2,460 interactions</p>
-                            </div>
-                            <div style="background: #01040d; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; text-align: center;">
-                                <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; color: #ffd666;">ENGAGE</p>
-                                <p style="font-size: 24px; font-weight: 900; color: white;">3</p>
-                                <p style="font-size: 9px; color: #64748b; margin-top: 4px;">2,460 interactions</p>
-                            </div>
-                            <div style="background: #01040d; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; text-align: center;">
-                                <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; color: #48c9b0;">CONNECT</p>
-                                <p style="font-size: 24px; font-weight: 900; color: white;">3</p>
-                                <p style="font-size: 9px; color: #64748b; margin-top: 4px;">2,460 interactions</p>
-                            </div>
-                            <div style="background: #01040d; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 20px; text-align: center;">
-                                <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; color: #7c8cff;">SUPPORT</p>
-                                <p style="font-size: 24px; font-weight: 900; color: white;">3</p>
-                                <p style="font-size: 9px; color: #64748b; margin-top: 4px;">2,460 interactions</p>
-                            </div>
-                        </div>
-                    </div><!-- end wt-view-cross -->
-
-                    <!-- Flow Footer — Continue to Invite Residents (STORYBOARD Frame 30) -->
-                    <div id="wt-flow-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 32px; padding-bottom: 40px;">
-                        <button id="wt-continue-preview-btn" class="brand-glow-btn" style="background: #020617; border: none; color: white; padding: 20px 64px; border-radius: 12px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer; box-shadow: 0 0 30px rgba(124,140,255,0.3); transition: all 0.2s ease;">INVITE RESIDENTS</button>
-                        <p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-style: italic; line-height: 1; margin-top: 24px; opacity: 0.6;">Continue to Invite Residents.</p>
+            <!-- ENGAGE 2: Video (diamond) (x=620,y=360) -->
+            <div style="position: absolute; left: 620px; top: 360px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #ffd666; width: 44px; height: 44px; color: #ffd666; transform: rotate(45deg);">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
                     </div>
+                </div>
+            </div>
+
+            <!-- ENGAGE 3: Banknote (circle) (x=640,y=420) -->
+            <div style="position: absolute; left: 640px; top: 420px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffd666; width: 48px; height: 48px; color: #ffd666;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                </div>
+            </div>
+
+            <!-- ENGAGE 4: Play-Square (diamond) (x=660,y=470) -->
+            <div style="position: absolute; left: 660px; top: 470px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #ffd666; width: 44px; height: 44px; color: #ffd666; transform: rotate(45deg);">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ENGAGE 5: Shopping-Bag (circle) (x=680,y=540) -->
+            <div style="position: absolute; left: 680px; top: 540px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffd666; width: 48px; height: 48px; color: #ffd666;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                </div>
+            </div>
+
+            <!-- ════ CONNECT NODES (TEAL, bottom-left) ════ -->
+            <!-- CONNECT 1: Shopping-Cart (circle) (x=160,y=520) -->
+            <div style="position: absolute; left: 160px; top: 520px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #48c9b0; width: 48px; height: 48px; color: #48c9b0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                </div>
+            </div>
+
+            <!-- CONNECT 2: Users-Round (diamond) (x=140,y=600) -->
+            <div style="position: absolute; left: 140px; top: 600px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #48c9b0; width: 44px; height: 44px; color: #48c9b0; transform: rotate(45deg);">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONNECT 3: Video (circle) (x=120,y=680) -->
+            <div style="position: absolute; left: 120px; top: 680px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #48c9b0; width: 48px; height: 48px; color: #48c9b0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                </div>
+            </div>
+
+            <!-- CONNECT 4: Zap (diamond) (x=100,y=740) -->
+            <div style="position: absolute; left: 100px; top: 740px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #48c9b0; width: 44px; height: 44px; color: #48c9b0; transform: rotate(45deg);">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONNECT 5: Copy (circle) (x=80,y=780) -->
+            <div style="position: absolute; left: 80px; top: 780px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #48c9b0; width: 48px; height: 48px; color: #48c9b0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                </div>
+            </div>
+
+            <!-- ════ SUPPORT NODES (INDIGO, bottom-right) ════ -->
+            <!-- SUPPORT 1: User-Plus (circle) (x=600,y=520) -->
+            <div style="position: absolute; left: 600px; top: 520px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #7c8cff; width: 48px; height: 48px; color: #7c8cff;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                </div>
+            </div>
+
+            <!-- SUPPORT 2: Share-2 (diamond) (x=620,y=600) -->
+            <div style="position: absolute; left: 620px; top: 600px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #7c8cff; width: 44px; height: 44px; color: #7c8cff; transform: rotate(45deg);">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUPPORT 3: Users-Round (circle) (x=640,y=680) -->
+            <div style="position: absolute; left: 640px; top: 680px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #7c8cff; width: 48px; height: 48px; color: #7c8cff;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                </div>
+            </div>
+
+            <!-- SUPPORT 4: Users (diamond) (x=660,y=740) -->
+            <div style="position: absolute; left: 660px; top: 740px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #7c8cff; width: 44px; height: 44px; color: #7c8cff; transform: rotate(45deg);">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUPPORT 5: Banknote (circle) (x=680,y=780) -->
+            <div style="position: absolute; left: 680px; top: 780px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #7c8cff; width: 48px; height: 48px; color: #7c8cff;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quadrant Stats -->
+    <div id="wt-quadrant-stats" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;">
+        <div style="background: rgba(255, 42, 26, 0.1); border: 1px solid #ff2a1a; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 900; color: #ff2a1a;">5</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">DISCOVER</div>
+        </div>
+        <div style="background: rgba(255, 214, 102, 0.1); border: 1px solid #ffd666; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 900; color: #ffd666;">5</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">ENGAGE</div>
+        </div>
+        <div style="background: rgba(72, 201, 176, 0.1); border: 1px solid #48c9b0; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 900; color: #48c9b0;">5</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">CONNECT</div>
+        </div>
+        <div style="background: rgba(124, 140, 255, 0.1); border: 1px solid #7c8cff; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 900; color: #7c8cff;">5</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">SUPPORT</div>
+        </div>
+    </div>
+    <div style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; margin-top: 16px; font-size: 12px; color: #64748b;">4,100 total interactions</div>
+</div>
+
+<!-- ════ RELATIONAL VIEW ════ -->
+<div id="wt-view-relational" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: none;">
+
+    <!-- Relational Canvas -->
+    <div style="overflow-x: auto; background: #020617; padding: 20px 0; width: 100%;">
+        <div id="wt-relational-canvas" style="background: #01040d; border-radius: 64px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; width: 760px; height: 820px; margin: 0 auto;">
+
+            <!-- SVG Relational Paths -->
+            <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 760 820">
+                <!-- Row connecting lines -->
+                <!-- LEARNING to SELECTING -->
+                <path d="M 100,210 L 640,210" stroke="#ff2a1a" stroke-width="1.5" fill="none" opacity="0.2"/>
+                <!-- SELECTING to EXECUTING -->
+                <path d="M 100,380 L 640,380" stroke="#ffd666" stroke-width="1.5" fill="none" opacity="0.2"/>
+                <!-- EXECUTING to EXPANDING -->
+                <path d="M 100,550 L 640,550" stroke="#48c9b0" stroke-width="1.5" fill="none" opacity="0.2"/>
+
+                <!-- Cross-artist dashed purple lines -->
+                <line x1="100" x2="640" y1="300" y2="300" stroke="#9333ea" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.3"/>
+                <line x1="100" x2="640" y1="450" y2="450" stroke="#9333ea" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.3"/>
+                <line x1="100" x2="640" y1="620" y2="620" stroke="#9333ea" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.3"/>
+            </svg>
+
+            <!-- Row Labels -->
+            <div style="position: absolute; left: 20px; top: 200px; color: #ff2a1a; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; pointer-events: none;">LEARNING</div>
+            <div style="position: absolute; left: 20px; top: 370px; color: #ffd666; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; pointer-events: none;">SELECTING</div>
+            <div style="position: absolute; left: 20px; top: 540px; color: #48c9b0; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; pointer-events: none;">EXECUTING</div>
+            <div style="position: absolute; left: 20px; top: 710px; color: #7c8cff; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; pointer-events: none;">EXPANDING</div>
+
+            <!-- Column Headers -->
+            <div style="position: absolute; left: 100px; top: 50px; text-align: center; font-size: 11px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase;">YouTube</div>
+            <div style="position: absolute; left: 230px; top: 50px; text-align: center; font-size: 11px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase;">Participant 1</div>
+            <div style="position: absolute; left: 370px; top: 50px; text-align: center; font-size: 11px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase;">Participant 2</div>
+            <div style="position: absolute; left: 500px; top: 50px; text-align: center; font-size: 11px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase;">Participant 3</div>
+            <div style="position: absolute; left: 640px; top: 50px; text-align: center; font-size: 11px; font-weight: 700; color: #7c8cff; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 900;">ReadyStack</div>
+
+            <!-- YouTube Column - LEARNING -->
+            <div style="position: absolute; left: 100px; top: 200px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ff2a1a; width: 40px; height: 40px; color: #ffffff; font-size: 9px; font-weight: 900;">YT</div>
+            </div>
+
+            <!-- Participant 1 Column -->
+            <!-- P1 - LEARNING -->
+            <div style="position: absolute; left: 230px; top: 180px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ff2a1a; width: 40px; height: 40px; color: #ffffff; font-size: 9px; font-weight: 900;">P1</div>
+            </div>
+            <!-- P1 - SELECTING -->
+            <div style="position: absolute; left: 230px; top: 370px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffd666; width: 40px; height: 40px; color: #ffffff; font-size: 9px; font-weight: 900;">S1</div>
+            </div>
+
+            <!-- Participant 2 Column -->
+            <!-- P2 - LEARNING -->
+            <div style="position: absolute; left: 370px; top: 220px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ff2a1a; width: 40px; height: 40px; color: #ffffff; font-size: 9px; font-weight: 900;">P2</div>
+            </div>
+            <!-- P2 - EXECUTING -->
+            <div style="position: absolute; left: 370px; top: 540px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #48c9b0; width: 40px; height: 40px; color: #ffffff; font-size: 9px; font-weight: 900;">E2</div>
+            </div>
+
+            <!-- Participant 3 Column -->
+            <!-- P3 - SELECTING -->
+            <div style="position: absolute; left: 500px; top: 350px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffd666; width: 40px; height: 40px; color: #ffffff; font-size: 9px; font-weight: 900;">S3</div>
+            </div>
+            <!-- P3 - EXECUTING -->
+            <div style="position: absolute; left: 500px; top: 560px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #48c9b0; width: 40px; height: 40px; color: #ffffff; font-size: 9px; font-weight: 900;">E3</div>
+            </div>
+
+            <!-- ReadyStack Column -->
+            <!-- RS - EXPANDING -->
+            <div style="position: absolute; left: 640px; top: 710px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2.5px solid #7c8cff; width: 44px; height: 44px; color: #7c8cff;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════ CROSS-POLLINATION VIEW ════ -->
+<div id="wt-view-cross" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: none;">
+
+    <!-- Focus Pills -->
+    <div id="wt-cross-pills" style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+        <button style="padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #22c55e; background: #22c55e; color: #01040d; cursor: pointer; transition: all 0.2s ease;">All Participants</button>
+        <button id="wt-cross-pill-p1" style="padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #22c55e; background: transparent; color: #22c55e; cursor: pointer; transition: all 0.2s ease;">Participant 1</button>
+        <button style="padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #22c55e; background: transparent; color: #22c55e; cursor: pointer; transition: all 0.2s ease;">Participant 2</button>
+        <button style="padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #22c55e; background: transparent; color: #22c55e; cursor: pointer; transition: all 0.2s ease;">Participant 3</button>
+    </div>
+
+    <!-- Cross-Pollination Banner -->
+    <div id="wt-cross-banner" style="background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: #cbd5e1;">
+        <span style="color: #22c55e; font-weight: 700;">Cross-Pollination Mode:</span> Showing nodes where Participant 1 connected across multiple channels
+    </div>
+
+    <!-- Cross-Pollination Canvas (clone of ecosystem with green dashed lines) -->
+    <div style="overflow-x: auto; background: #020617; padding: 20px 0; width: 100%;">
+        <div id="wt-cross-canvas" style="background: #01040d; border-radius: 64px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; width: 760px; height: 820px; margin: 0 auto;">
+
+            <!-- SVG Cross-Pollination Paths (green dashed) -->
+            <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 760 820">
+                <!-- Green dashed cross-participant connection lines -->
+                <path d="M 280,90 Q 320,140 370,180" stroke="#22c55e" stroke-width="2" fill="none" opacity="0.6" stroke-dasharray="12 6"/>
+                <path d="M 380,220 Q 340,270 280,310" stroke="#22c55e" stroke-width="2" fill="none" opacity="0.6" stroke-dasharray="12 6"/>
+                <path d="M 380,220 Q 500,270 580,310" stroke="#22c55e" stroke-width="2" fill="none" opacity="0.6" stroke-dasharray="12 6"/>
+                <path d="M 380,220 Q 300,380 230,370" stroke="#22c55e" stroke-width="2" fill="none" opacity="0.6" stroke-dasharray="12 6"/>
+                <path d="M 380,220 Q 460,380 530,370" stroke="#22c55e" stroke-width="2" fill="none" opacity="0.6" stroke-dasharray="12 6"/>
+                <path d="M 280,90 Q 200,350 160,520" stroke="#22c55e" stroke-width="2" fill="none" opacity="0.6" stroke-dasharray="12 6"/>
+                <path d="M 480,90 Q 560,350 600,520" stroke="#22c55e" stroke-width="2" fill="none" opacity="0.6" stroke-dasharray="12 6"/>
+
+                <!-- Base ecosystem paths (lower opacity) -->
+                <path d="M 370,235 Q 280,270 180,310" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 370,240 Q 240,290 140,360" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 370,245 Q 220,310 120,420" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 370,250 Q 210,340 100,470" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 370,255 Q 200,370 80,540" stroke="#ff2a1a" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 390,235 Q 480,270 580,310" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 390,240 Q 520,290 620,360" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 390,245 Q 540,310 640,420" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 390,250 Q 550,340 660,470" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 390,255 Q 560,370 680,540" stroke="#ffd666" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 365,250 Q 240,380 160,520" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 365,260 Q 220,410 140,600" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 365,270 Q 210,440 120,680" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 365,275 Q 200,470 100,740" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 365,280 Q 190,500 80,780" stroke="#48c9b0" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 395,250 Q 520,380 600,520" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 395,260 Q 540,410 620,600" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 395,270 Q 550,440 640,680" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 395,275 Q 560,470 660,740" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.08"/>
+                <path d="M 395,280 Q 570,500 680,780" stroke="#7c8cff" stroke-width="1.2" fill="none" opacity="0.08"/>
+            </svg>
+
+            <!-- Quadrant Labels (low opacity) -->
+            <div style="position: absolute; left: 60px; top: 380px; color: #ff2a1a; opacity: 0.3; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">DISCOVER</div>
+            <div style="position: absolute; left: 680px; top: 380px; color: #ffd666; opacity: 0.3; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">ENGAGE</div>
+            <div style="position: absolute; left: 60px; top: 600px; color: #48c9b0; opacity: 0.3; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">CONNECT</div>
+            <div style="position: absolute; left: 680px; top: 600px; color: #7c8cff; opacity: 0.3; font-size: 11px; font-weight: 900; font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; pointer-events: none; writing-mode: vertical-rl; transform: rotate(180deg);">SUPPORT</div>
+
+            <!-- Traffic Sources Label (low opacity) -->
+            <div style="position: absolute; left: 40px; top: 50px; color: #ffffff; font-size: 11px; font-weight: 900; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.35; pointer-events: none;">TRAFFIC SOURCES</div>
+
+            <!-- All source and node circles (same positions, lower opacity for non-highlighted) -->
+            <!-- Traffic Source: YouTube -->
+            <div style="position: absolute; left: 280px; top: 90px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffffff; width: 44px; height: 44px; color: #ef4444; opacity: 1;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </div>
+            </div>
+
+            <!-- Traffic Source: YouTube P1 -->
+            <div style="position: absolute; left: 380px; top: 80px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffffff; width: 44px; height: 44px; color: #ef4444; opacity: 0.5;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </div>
+            </div>
+
+            <!-- Traffic Source: YouTube P2 -->
+            <div style="position: absolute; left: 480px; top: 90px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffffff; width: 44px; height: 44px; color: #ef4444; opacity: 1;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </div>
+            </div>
+
+            <!-- ReadyStack Hub -->
+            <div style="position: absolute; left: 380px; top: 220px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2.5px solid #ffffff; width: 68px; height: 68px; transform: rotate(45deg); opacity: 0.5;">
+                    <div style="transform: rotate(-45deg);">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7c8cff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample DISCOVER nodes (highlighted) -->
+            <div style="position: absolute; left: 180px; top: 310px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ff2a1a; width: 48px; height: 48px; color: #ff2a1a; opacity: 1;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                </div>
+            </div>
+
+            <!-- Sample ENGAGE nodes (highlighted) -->
+            <div style="position: absolute; left: 580px; top: 310px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #ffd666; width: 48px; height: 48px; color: #ffd666; opacity: 1;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 4 7.07 17 2.51-7.39L21 11.07z"/></svg>
+                </div>
+            </div>
+
+            <!-- Sample CONNECT nodes (fade) -->
+            <div style="position: absolute; left: 160px; top: 520px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #48c9b0; width: 48px; height: 48px; color: #48c9b0; opacity: 0.4;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                </div>
+            </div>
+
+            <!-- Sample SUPPORT nodes (fade) -->
+            <div style="position: absolute; left: 600px; top: 520px; transform: translate(-50%, -50%); z-index: 20;">
+                <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid #7c8cff; width: 48px; height: 48px; color: #7c8cff; opacity: 0.4;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cross-Pollination Stats -->
+    <div id="wt-cross-stats" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px;">
+        <div style="background: rgba(255, 42, 26, 0.1); border: 1px solid #ff2a1a; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 900; color: #ff2a1a;">5</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">DISCOVER</div>
+        </div>
+        <div style="background: rgba(255, 214, 102, 0.1); border: 1px solid #ffd666; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 900; color: #ffd666;">5</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">ENGAGE</div>
+        </div>
+        <div style="background: rgba(72, 201, 176, 0.1); border: 1px solid #48c9b0; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 900; color: #48c9b0;">5</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">CONNECT</div>
+        </div>
+        <div style="background: rgba(124, 140, 255, 0.1); border: 1px solid #7c8cff; border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 900; color: #7c8cff;">5</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">SUPPORT</div>
+        </div>
+    </div>
+    <div style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; margin-top: 16px; font-size: 12px; color: #64748b;">4,100 total interactions</div>
+</div>
+
+<!-- Footer -->
+<div id="wt-flow-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; display: flex; gap: 16px; margin-top: 32px; padding-top: 24px; border-top: 1px solid #1e293b;">
+    <button id="wt-continue-preview-btn" style="flex: 1; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #1e293b; background: #0f172a; color: #cbd5e1; cursor: pointer; transition: all 0.2s ease;">Continue to Next</button>
+</div>
+
 
                 </div><!-- end panel-flow -->
 
@@ -2371,7 +2475,7 @@
                         },
                         popover: {
                             title: 'Relational View',
-                            description: 'A structured grid: participant columns (YouTube, Seth Godin, ReadyStack) \u00d7 journey stages (Learning, Selecting, Executing, Expanding). Each node shows a 2-letter abbreviation. Static lines connect nodes vertically within columns, while dashed purple lines show cross-artist flows.',
+                            description: 'A structured grid: participant columns (YouTube, Participant 1, Participant 2, Participant 3, ReadyStack) \u00d7 journey stages (Learning, Selecting, Executing, Expanding). Each node shows a 2-letter abbreviation. Vertical lines connect nodes within columns, while dashed purple lines show cross-participant flows.',
                             side: 'left',
                             align: 'start',
                             onPopoverRender: () => {
