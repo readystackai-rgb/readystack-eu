@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join District — ReadyStack</title>
+
+  <!-- ── Open Graph Meta Tags (link preview cards for DM, iMessage, Slack, LinkedIn) ── -->
+  <!-- v1: Static values. Same image and generic text for all invites. -->
+  <!-- v2 (future): Server-side rendered dynamic OG tags per invite. -->
+  <meta property="og:title" content="You're Invited to a District" />
+  <meta property="og:description" content="You've been invited to explore this district. See where you fit in the ecosystem." />
+  <meta property="og:image" content="https://readystackai-rgb.github.io/readystack-eu/assets/og-invite-card.png" />
+  <meta property="og:url" content="https://readystackai-rgb.github.io/readystack-eu/join.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="You're Invited to a District" />
+  <meta name="twitter:description" content="You've been invited to explore this district." />
+  <meta name="twitter:image" content="https://readystackai-rgb.github.io/readystack-eu/assets/og-invite-card.png" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@400;600;700&display=swap');
+    body {
+      background-color: #0a0f1e;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      color: #cbd5e1;
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes logoGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+      50% { box-shadow: 0 0 35px rgba(255,255,255,0.4); }
+    }
+    .logo-glow {
+      animation: logoGlow 2s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ── REDIRECT TARGET ──
+    // join.html is a lightweight router. Valid tokens redirect to the Storyteller
+    // in invite mode. Expired/invalid tokens are handled here — no redirect.
+    const STORYTELLER_URL = 'index.html';
+    const CLOUD_FUNCTION_URL = "https://us-central1-gen-lang-client-0769430147.cloudfunctions.net/advisor";
+
+    // ── Decode JWT payload (client-side, no verification — just for display + routing) ──
+    const decodeJwtPayload = (token) => {
+      try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        const payload = parts[1];
+        const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+        const decoded = atob(padded);
+        return JSON.parse(decoded);
+      } catch (e) {
+        return null;
+      }
+    };
+
+    // ── Check if JWT is expired (client-side) ──
+    const isTokenExpired = (payload) => {
+      if (!payload || !payload.exp) return false;
+      return Date.now() >= payload.exp * 1000;
+    };
+
+    // ── Generic POST to Cloud Function ──
+    const callAdvisor = async (task, data = {}) => {
+      const body = { task, ...data };
+      const res = await fetch(CLOUD_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Request failed');
+      return json;
+    };
+
+    // ── ReadyStack Logo ──
+    const ReadyStackLogo = ({ glow }) => (
+      <div className="flex items-center gap-3 justify-center">
+        <div className={`bg-white p-1.5 rounded-full flex items-center justify-center border-2 border-white overflow-hidden ${glow ? 'logo-glow' : 'shadow-[0_0_30px_rgba(255,255,255,0.3)]'}`}>
+          <img
+            src="https://lh3.googleusercontent.com/d/1-cfFYPbbR6LgEbtV7J9__PNewwAnIZim"
+            alt="ReadyStack"
+            style={{ width: 28, height: 28, objectFit: 'contain' }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png';
+              e.target.style.filter = 'brightness(0)';
+            }}
+          />
+        </div>
+        <span className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          ReadyStack
+        </span>
+      </div>
+    );
+
+    // ── Main Join Page — Lightweight Router ──
+    // States: loading → (valid → redirect) | expired | expired_requested | invalid
+    // No OAuth here. Just decode + route + expired handling.
+    const JoinPage = () => {
+      const [state, setState] = useState('loading'); // loading | valid | expired | expired_requested | invalid
+      const [inviteData, setInviteData] = useState(null);
+      const [isRequesting, setIsRequesting] = useState(false);
+
+      useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('t');
+
+        // ── Missing token ──
+        if (!token) {
+          setState('invalid');
+          return;
+        }
+
+        // ── Decode JWT ──
+        const payload = decodeJwtPayload(token);
+        if (!payload) {
+          setState('invalid');
+          return;
+        }
+
+        // Compute expiry window from JWT iat/exp (dynamic — creator sets 7d/14d/30d/60d/90d)
+        let expiryDays = 7; // fallback default
+        if (payload.iat && payload.exp) {
+          expiryDays = Math.round((payload.exp - payload.iat) / 86400);
+        }
+
+        // Store parsed data for all states (valid + expired need it)
+        const data = {
+          token,
+          districtName: payload.districtName || 'District',
+          participantName: payload.participantName || 'Resident',
+          role: payload.role || 'Participant',
+          company: payload.company || '',
+          sheetId: payload.sheetId,
+          participantRow: payload.participantRow,
+          creatorName: payload.creatorName || 'the district creator',
+          expiryDays
+        };
+        setInviteData(data);
+
+        // ── Expired token (15-day window) ──
+        if (isTokenExpired(payload)) {
+          setState('expired');
+          return;
+        }
+
+        // ── Valid token — show loading state, then redirect ──
+        setState('valid');
+
+        // Build redirect URL and navigate after brief loading state (1-2s)
+        const redirectUrl = `${STORYTELLER_URL}?sheet=${encodeURIComponent(data.sheetId)}&invite=${encodeURIComponent(token)}&node=${encodeURIComponent(data.participantRow)}`;
+
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 1500);
+
+      }, []);
+
+      // ── Handle "Request New Invite" click ──
+      const handleRequestNewInvite = async () => {
+        if (!inviteData || isRequesting) return;
+        setIsRequesting(true);
+        try {
+          await callAdvisor('requestNewInvite', {
+            data: {
+              token: inviteData.token,
+              participantName: inviteData.participantName,
+              districtName: inviteData.districtName,
+              sheetId: inviteData.sheetId,
+              participantRow: inviteData.participantRow
+            }
+          });
+          setState('expired_requested');
+        } catch (err) {
+          // Even if the request fails, show a friendly message
+          setState('expired_requested');
+        } finally {
+          setIsRequesting(false);
+        }
+      };
+
+      // ── Loading State (initial, before JWT decode) ──
+      if (state === 'loading') {
+        return (
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest animate-pulse">
+              Loading invitation...
+            </div>
+          </div>
+        );
+      }
+
+      // ── Expired Token — with "Request New Invite" ──
+      if (state === 'expired') {
+        return (
+          <div className="min-h-screen flex items-center justify-center px-6">
+            <div className="text-center max-w-[420px] animate-fade-in space-y-8">
+              <ReadyStackLogo glow={true} />
+
+              <div className="space-y-4 mt-8">
+                <h2 className="text-lg font-black text-white uppercase" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  This invitation has expired.
+                </h2>
+                <div className="space-y-1">
+                  <p className="text-sm text-slate-400">
+                    It was valid for {inviteData?.expiryDays || 7} days.
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    Ask {inviteData?.creatorName} to send a new invite.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleRequestNewInvite}
+                disabled={isRequesting}
+                className="px-6 py-3 bg-indigo-500 text-white text-xs font-black uppercase tracking-wider rounded-xl hover:bg-indigo-400 transition-colors disabled:opacity-50"
+                style={{ fontFamily: 'Poppins, sans-serif' }}
+              >
+                {isRequesting ? 'Sending...' : 'Request New Invite'}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Expired — Request Sent Confirmation ──
+      if (state === 'expired_requested') {
+        return (
+          <div className="min-h-screen flex items-center justify-center px-6">
+            <div className="text-center max-w-[420px] animate-fade-in space-y-6">
+              <ReadyStackLogo glow={true} />
+
+              <div className="space-y-3 mt-8">
+                <h2 className="text-lg font-black text-emerald-400" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  Request sent.
+                </h2>
+                <p className="text-sm text-slate-400">
+                  {inviteData?.creatorName} will send you a new link.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Invalid / Missing Token ──
+      if (state === 'invalid') {
+        return (
+          <div className="min-h-screen flex items-center justify-center px-6">
+            <div className="text-center max-w-[420px] animate-fade-in space-y-6">
+              <ReadyStackLogo />
+              <div className="mt-8">
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  This link isn't valid. If you were expecting a district invitation, ask the person who sent it.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Valid Token — Brief Loading State Before Redirect ──
+      // Per INVITE_UX_SPEC.md v2 Section 5: Logo (white glow) + "Loading {districtName}..."
+      // + participant name + role. Shows for ~1.5 seconds.
+      return (
+        <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="text-center max-w-[420px] animate-fade-in space-y-6">
+
+            {/* Logo with glow ring */}
+            <ReadyStackLogo glow={true} />
+
+            {/* Loading district text */}
+            <div className="mt-8">
+              <p className="text-sm text-slate-400 animate-pulse">
+                Loading {inviteData?.districtName}...
+              </p>
+            </div>
+
+            {/* Participant info */}
+            <div className="space-y-1">
+              <p className="text-xs text-slate-500">
+                {inviteData?.participantName}
+              </p>
+              <p className="text-xs text-slate-500">
+                {inviteData?.role}
+              </p>
+            </div>
+
+          </div>
+        </div>
+      );
+    };
+
+    // ── Dynamic OG tag update (best-effort for JS-enabled crawlers) ──
+    // Most crawlers don't execute JS, so the static <meta> tags in <head> are the primary.
+    // But for crawlers that DO execute JS, we update the title dynamically.
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('t');
+    if (token) {
+      const payload = decodeJwtPayload(token);
+      if (payload?.creatorName) {
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        const twTitle = document.querySelector('meta[name="twitter:title"]');
+        if (ogTitle) ogTitle.content = `${payload.creatorName}'s District`;
+        if (twTitle) twTitle.content = `${payload.creatorName}'s District`;
+      }
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<JoinPage />);
+  </script>
+</body>
+</html>
