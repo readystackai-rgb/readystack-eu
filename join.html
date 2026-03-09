@@ -439,8 +439,51 @@
       document.getElementById('error-message').textContent = message;
     }
 
+    // ── Wix postMessage param passthrough ──
+    // When embedded in a Wix iframe, URL params don't reach this page.
+    // The Wix Velo code sends them via postMessage instead.
+    let _wixParamsReceived = false;
+
+    window.addEventListener('message', function (event) {
+      // Accept params from Wix parent (filesusr.com or readystack.ai)
+      if (event.data && event.data.type === 'wixParams' && !_wixParamsReceived) {
+        _wixParamsReceived = true;
+        const p = event.data.params || {};
+
+        // Build a fake search string from the Wix params
+        const search = '?' + Object.entries(p).map(
+          ([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)
+        ).join('&');
+
+        // Replace the URL so the rest of the code can read params normally
+        window.history.replaceState({}, '', window.location.pathname + search);
+
+        // Now run init with the params in place
+        init();
+      }
+    });
+
+    // Tell Wix parent we're ready to receive params
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'ready' }, '*');
+    }
+
     // ── Run on load ──
-    init();
+    // If we already have a ?t= param (GitHub Pages direct access), run immediately.
+    // If not, wait briefly for Wix postMessage. If nothing arrives, run anyway
+    // (will show "invalid" error, which is correct for no-token visits).
+    const _urlParams = new URLSearchParams(window.location.search);
+    if (_urlParams.get('t') || _urlParams.get('rs_session')) {
+      // Params already in URL — run now
+      init();
+    } else {
+      // No params — wait for Wix postMessage, with a timeout fallback
+      setTimeout(function () {
+        if (!_wixParamsReceived) {
+          init();  // No message came — run with whatever we have
+        }
+      }, 1500);
+    }
   </script>
 </body>
 </html>
