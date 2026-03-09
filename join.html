@@ -204,7 +204,7 @@
       // ── Loading State (initial, before JWT decode) ──
       if (state === 'loading') {
         return (
-          <div className="min-h-screen flex items-center justify-center">
+          <div className="min-h-screen flex flex-col items-center pt-[20vh]">
             <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest animate-pulse">
               Loading invitation...
             </div>
@@ -215,7 +215,7 @@
       // ── Expired Token — with "Request New Invite" ──
       if (state === 'expired') {
         return (
-          <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="min-h-screen flex flex-col items-center pt-[20vh] px-6">
             <div className="text-center max-w-[420px] animate-fade-in space-y-8">
               <ReadyStackLogo glow={true} />
 
@@ -249,7 +249,7 @@
       // ── Expired — Request Sent Confirmation ──
       if (state === 'expired_requested') {
         return (
-          <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="min-h-screen flex flex-col items-center pt-[20vh] px-6">
             <div className="text-center max-w-[420px] animate-fade-in space-y-6">
               <ReadyStackLogo glow={true} />
 
@@ -269,7 +269,7 @@
       // ── Invalid / Missing Token ──
       if (state === 'invalid') {
         return (
-          <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="min-h-screen flex flex-col items-center pt-[20vh] px-6">
             <div className="text-center max-w-[420px] animate-fade-in space-y-6">
               <ReadyStackLogo />
               <div className="mt-8">
@@ -286,7 +286,7 @@
       // Per INVITE_UX_SPEC.md v2 Section 5: Logo (white glow) + "Loading {districtName}..."
       // + participant name + role. Shows for ~1.5 seconds.
       return (
-        <div className="min-h-screen flex items-center justify-center px-6">
+        <div className="min-h-screen flex flex-col items-center pt-[20vh] px-6">
           <div className="text-center max-w-[420px] animate-fade-in space-y-6">
 
             {/* Logo with glow ring */}
