@@ -2070,10 +2070,10 @@
           <main className="w-full py-8 px-4 flex items-start">
 
             {/* LEFT ONBOARDING RAIL */}
-            <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen && !isInviteMode ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
+            <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
 
-              {/* NEW MY DISTRICTS SECTION */}
-              <div className="mb-6 border-b border-white/10 pb-6">
+              {/* NEW MY DISTRICTS SECTION — hidden in invite mode */}
+              {!isInviteMode && <div className="mb-6 border-b border-white/10 pb-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">My Districts</h3>
                   {rsSession && (
@@ -2152,7 +2152,7 @@
                     Log in to see your districts
                   </button>
                 )}
-              </div>
+              </div>}
 
               {/* progress bar removed */}
 
@@ -2166,7 +2166,7 @@
                 <div className="space-y-3 mb-6">
                 {[
                   { id: 'youtube', label: 'Define Market Story', icon: 'play-circle' },
-                  { id: 'intro', label: 'Residents', icon: 'users' },
+                  ...(!isInviteMode ? [{ id: 'intro', label: 'Residents', icon: 'users' }] : []),
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
                   ...(isResident ? [] : [{ id: 'preview', label: 'Tasks and Agents', icon: 'list' }])
                 ].map(step => {
@@ -2222,14 +2222,14 @@
                   <div className="flex-grow h-px bg-white/10"></div>
                 </div>
 
-                {/* ── OPERATIONS section — residents see only District Ecosystem ── */}
-                {!isResident && (
+                {/* ── OPERATIONS section — residents & invitees see only District Ecosystem ── */}
+                {!isResident && !isInviteMode && (
                 <div className="mb-2">
                   <h4 className="text-[10px] font-black text-amber-400/70 uppercase tracking-[0.25em] mb-3 pl-1" style={{fontFamily:'Poppins,sans-serif'}}>Operations</h4>
                 </div>
                 )}
                 <div className="space-y-3">
-                {(isResident ? [
+                {((isResident || isInviteMode) ? [
                   { id: 'observatory', label: 'District Ecosystem', icon: 'git-branch' }
                 ] : [
                   { id: 'finance', label: 'District Finance', icon: 'dollar-sign' },
@@ -2338,8 +2338,8 @@
 
               {/* ── Work-area action buttons ── */}
               <div className="absolute top-20 right-6 z-[90] flex items-center gap-2">
-                {/* Save District — hidden for residents */}
-                {!isResident && (
+                {/* Save District — hidden for residents and invitees */}
+                {!isResident && !isInviteMode && (
                 <button
                   onClick={() => {
                     if (!rsSession) { initiateGoogleAuth(); return; }
@@ -2478,7 +2478,7 @@
                                       ))}
                                     </ul>
                                     <div className="flex gap-2">
-                                      {!isResident && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
+                                      {!isResident && !isInviteMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
                                       <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
@@ -2486,11 +2486,11 @@
                                   <div className="space-y-4">
                                     {isGeneratingStory ? (
                                       <div className="w-full py-4 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-black text-sm uppercase tracking-widest text-center animate-pulse">Drafting Market Story...</div>
-                                    ) : !isResident ? (
+                                    ) : !isResident && !isInviteMode ? (
                                       <button onClick={generateStoryFromVideo} className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg">Re-Draft Market Story</button>
                                     ) : null}
                                     <div className="flex gap-2">
-                                      {!isResident && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
+                                      {!isResident && !isInviteMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
                                       <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
@@ -3105,11 +3105,11 @@
             {activeTab === 'mapper' && (
               <div className="space-y-12 animate-fade-in text-left pt-28">
                 <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>LINKS</h3>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENT LINKS</h3>
                     <p className="text-slate-300 text-base font-medium">Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey.</p>
                 </div>
-                {/* ── District Identity Card — hidden for residents ── */}
-                {!isResident && (
+                {/* ── District Identity Card — hidden for residents & invitees ── */}
+                {!isResident && !isInviteMode && (
                 <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner">
                     <div className="grid md:grid-cols-3 gap-6">
                         <div className="space-y-4">
@@ -3219,7 +3219,7 @@
                             <div className="flex items-center gap-3 mb-4">
                               <p className="text-sm font-bold text-white">{displayName}</p>
                               {resident.jobContext && (resident.name || '').trim() && <span className="text-xs font-semibold text-indigo-400 italic">{resident.jobContext}</span>}
-                              {!isResident && (<div className="relative">
+                              {!isResident && !isInviteMode && (<div className="relative">
                                 <button
                                   onClick={() => setMapEditingItem(mapEditingItem === 'dropdown-'+origIdx ? null : 'dropdown-'+origIdx)}
                                   className="bg-[#020617] border border-indigo-500/40 rounded-lg px-3 py-1.5 text-[10px] text-indigo-300 outline-none cursor-pointer hover:border-indigo-400 hover:text-indigo-200 transition-colors flex items-center gap-1"
@@ -3299,10 +3299,10 @@
                                       onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-t-'+ti ? null : origIdx+'-t-'+ti)}>
                                       <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-white"></span>
                                       <span className="text-[10px] text-white font-medium flex-1 truncate">{item.label}</span>
-                                      {!isResident && <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
+                                      {!isResident && !isInviteMode && <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
                                         className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                     </div>
-                                    {mapEditingItem === origIdx+'-t-'+ti && !isResident && (
+                                    {mapEditingItem === origIdx+'-t-'+ti && !isResident && !isInviteMode && (
                                       <input autoFocus placeholder="https://..." value={item.url || ''} onChange={(e) => { const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources[item.srcIdx] = { ...sources[item.srcIdx], url: e.target.value }; updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
                                         onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                         className="mt-1 w-full bg-[#020617] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none focus:border-indigo-500" />
@@ -3329,10 +3329,10 @@
                                           onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-'+q.key+'-'+ii ? null : origIdx+'-'+q.key+'-'+ii)}>
                                           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.pat ? q.color : q.color + '60' }}></span>
                                           <span className="text-[10px] font-medium flex-1 truncate" style={{ color: item.pat ? '#e2e8f0' : '#cbd5e1' }}>{item.label}{!item.pat && <span className="text-[8px] text-amber-400/70 ml-1">needs link</span>}</span>
-                                          {!isResident && <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
+                                          {!isResident && !isInviteMode && <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
                                             className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                         </div>
-                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && !isResident && (
+                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && !isResident && !isInviteMode && (
                                           <input autoFocus placeholder="https://..." value={item.pat || ''} onChange={(e) => { handlePatternUpdate(q.key, item.stageIdx, 'pat', e.target.value); }}
                                             onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                             className="mt-1 w-full bg-[#020617] border rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none" style={{ borderColor: q.color + '40' }} />
@@ -3351,7 +3351,7 @@
                 </div>
 
                 <div className="py-12 text-center">
-                    <button onClick={() => setActiveTab(isResident ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{isResident ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
                 </div>
               </div>
             )}
@@ -3550,7 +3550,7 @@
                   })()}
 
                   <div className="text-center py-12">
-                    <button onClick={() => setActiveTab(isResident ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{isResident ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
                   </div>
                 </div>
               </div>
@@ -3942,27 +3942,35 @@
                 </div>
                 </>)}
 
-                {/* ── INVITE MODE: Join This District CTA Panel ── */}
+                {/* ── INVITE MODE: CTA Panel (District Tour + Enter Our District) ── */}
                 {isInviteMode && !rsSession && (
                   <div className="mt-8 mx-auto max-w-lg">
                     <div className="bg-[#0f172a] border border-white/10 rounded-3xl p-8 text-center space-y-6">
                       <div>
                         <h3 className="text-lg font-black text-white uppercase tracking-tight" style={{fontFamily:'Poppins,sans-serif'}}>
-                          {highlightVendor || 'You'} — Join This District
+                          {highlightVendor || 'You'}
                         </h3>
-                        <p className="text-sm text-slate-300 mt-2">{stackLabel || 'This District'}</p>
+                        <p className="text-sm text-slate-400 mt-1">{(() => { const p = (storyParticipants.residents || []).find(r => (r.name || '').trim() === highlightVendor); return p?.specialty || 'Participant'; })()}</p>
+                        <p className="text-xs text-slate-500 uppercase tracking-widest mt-2">{stackLabel || 'This District'}</p>
                       </div>
 
-                      <button
-                        onClick={() => initiateGoogleAuth()}
-                        className="w-full py-4 rounded-xl bg-white text-slate-900 font-black text-sm uppercase tracking-widest transition-all shadow-lg hover:bg-slate-100 flex items-center justify-center gap-3"
-                      >
-                        <svg viewBox="0 0 48 48" className="w-5 h-5"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                        Sign in with Google
-                      </button>
+                      <div className="flex items-center justify-center gap-4">
+                        <button
+                          onClick={() => { /* Tour stub — will wire to guided tour system */ alert('District Tour coming soon — explore the tabs in the sidebar to learn more.'); }}
+                          className="px-6 py-3 rounded-xl border border-white/20 bg-transparent text-white text-xs font-black uppercase tracking-wider transition-all hover:border-white/40 hover:bg-white/5"
+                        >
+                          District Tour
+                        </button>
+                        <button
+                          onClick={() => initiateGoogleAuth()}
+                          className="px-6 py-3 rounded-xl bg-indigo-500 text-white text-xs font-black uppercase tracking-wider transition-all hover:bg-indigo-400 shadow-lg"
+                        >
+                          Enter Our District
+                        </button>
+                      </div>
 
-                      <p className="text-[10px] text-slate-500">
-                        Sign in to join this district and connect with other residents.
+                      <p className="text-xs text-slate-500">
+                        Explore the district, or become a resident.
                       </p>
                     </div>
                   </div>
