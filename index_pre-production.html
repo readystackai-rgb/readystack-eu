@@ -3129,10 +3129,14 @@
                                           {(() => {
                                             const profile = profilesData.find(p => p.email && r.email && p.email.toLowerCase() === r.email.toLowerCase());
                                             return profile?.photoUrl ? (
-                                              <img src={profile.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" referrerPolicy="no-referrer" />
-                                            ) : (
-                                              <div className="w-7 h-7 rounded-full bg-slate-600 flex items-center justify-center text-[10px] font-bold text-white uppercase flex-shrink-0">
+                                              <img src={profile.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" style={{border:'2px solid rgba(124,140,255,0.15)'}} referrerPolicy="no-referrer" />
+                                            ) : profile ? (
+                                              <div className="w-7 h-7 rounded-full bg-[#334155] flex items-center justify-center text-[10px] font-bold text-white uppercase flex-shrink-0">
                                                 {(r.name || '?')[0]}
+                                              </div>
+                                            ) : (
+                                              <div className="w-7 h-7 rounded-full bg-[#64748b]/30 flex items-center justify-center flex-shrink-0">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-slate-500"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                               </div>
                                             );
                                           })()}
