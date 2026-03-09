@@ -223,11 +223,11 @@
                 </div>
                 <div class="rail-item" id="wt-rail-links" data-step="links">
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                    <span>Links</span>
+                    <span>Resident Links</span>
                 </div>
-                <div class="rail-item" id="wt-rail-preview" data-step="preview">
-                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span>Preview</span>
+                <div class="rail-item" id="wt-rail-tasks" data-step="tasks">
+                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    <span>Tasks and Agents</span>
                 </div>
 
                 <div class="phase-label" style="color: var(--ops-accent); margin-top: 12px;">Operations</div>
@@ -237,11 +237,11 @@
                 </div>
                 <div class="rail-item" id="wt-rail-flow" data-step="flow">
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
-                    <span>District Flow</span>
+                    <span>District Ecosystem</span>
                 </div>
                 <div class="rail-item locked" id="wt-rail-invite" data-step="invite">
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    <span>Invite Residents</span>
+                    <span>My Residents</span>
                 </div>
                 <div class="rail-item locked" id="wt-rail-looker" data-step="looker">
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -255,10 +255,6 @@
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/></svg>
                     <span>Analytics</span>
                 </div>
-                <div class="rail-item locked" id="wt-rail-automation" data-step="automation">
-                    <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    <span>Automation</span>
-                </div>
             </div>
 
             <!-- MAIN CONTENT -->
@@ -267,7 +263,7 @@
                 <!-- Top bar: breadcrumb + district name + actions -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div id="wt-breadcrumb" style="display: flex; align-items: center; gap: 8px;">
-                        <span id="wt-bc-counter" style="font-size: 10px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em;">1 / 11</span>
+                        <span id="wt-bc-counter" style="font-size: 10px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em;">1 / 10</span>
                         <span style="font-size: 10px; color: var(--text-ghost);">&middot;</span>
                         <span id="wt-bc-current" style="font-size: 10px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.1em;">Define Market Story</span>
                     </div>
@@ -470,7 +466,7 @@
                     <!-- Tasks Section (hidden initially, revealed by tour) -->
                     <div id="wt-residents-tasks" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; margin-bottom: 32px;">
                         <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 8px;">Tasks</h2>
-                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Setup tasks and automations derived from your market story. These will populate the Preview card and JSON export.</p>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Setup tasks and automations derived from your market story. These will populate the Tasks and Agents card and JSON export.</p>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <!-- Actions Column -->
@@ -641,7 +637,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
                             <div>
                                 <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); display: block; margin-bottom: 6px;">ReadyStack Name</span>
-                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--text-secondary);">ReadyStack Campaign</div>
+                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--accent-indigo);"><span style="color: var(--accent-indigo);">ReadyStack</span> Campaign</div>
                             </div>
                             <div>
                                 <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); display: block; margin-bottom: 6px;">Landing Page URL</span>
@@ -718,7 +714,7 @@
                                 <div style="min-width: 120px; flex-shrink: 0;">
                                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                                         <span style="font-size: 14px; font-weight: 700; color: white;">Jordan Rivera</span>
-                                        <button style="background: rgba(124,140,255,0.15); border: 1px solid rgba(124,140,255,0.3); color: var(--accent); padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit;">+ Link</button>
+                                        <button id="wt-add-traffic-link" style="background: rgba(124,140,255,0.15); border: 1px solid rgba(124,140,255,0.3); color: var(--accent); padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit;">+ Link</button>
                                     </div>
                                     <div style="font-size: 11px; color: var(--text-ghost); font-style: italic;">No sources</div>
                                 </div>
@@ -783,9 +779,9 @@
                         </div>
                     </div>
 
-                    <!-- Continue to Preview Button -->
+                    <!-- Continue to District Finance Button -->
                     <div id="wt-links-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
-                        <button id="wt-continue-preview" style="background: rgba(124,140,255,0.15); border: 1px solid rgba(124,140,255,0.3); color: var(--accent); padding: 14px 48px; border-radius: 12px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s ease;">Continue to Preview</button>
+                        <button id="wt-continue-preview" style="background: rgba(124,140,255,0.15); border: 1px solid rgba(124,140,255,0.3); color: var(--accent); padding: 14px 48px; border-radius: 12px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s ease;">Continue to District Finance</button>
                     </div>
 
                 </div>
@@ -813,20 +809,6 @@
                                 <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Company</span>
                                 <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--amber);">Pledge</span>
                                 <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Status</span>
-                            </div>
-                            <!-- Angel row 1 (hidden, revealed by tour) -->
-                            <div id="wt-angel-row-1" style="display: grid; grid-template-columns: 2fr 2fr 1.5fr 1fr; gap: 8px; padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); opacity: 0; transform: translateY(8px); transition: opacity 0.4s ease, transform 0.4s ease;">
-                                <span style="font-size: 13px; color: white; font-weight: 600;">Alex Mendez</span>
-                                <span style="font-size: 12px; color: var(--text-secondary);">Meridian Ventures</span>
-                                <span style="font-size: 13px; color: var(--amber); font-weight: 700;">$5,000</span>
-                                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green); background: rgba(16,185,129,0.1); padding: 3px 8px; border-radius: 6px; text-align: center;">Confirmed</span>
-                            </div>
-                            <!-- Angel row 2 (hidden, revealed by tour) -->
-                            <div id="wt-angel-row-2" style="display: grid; grid-template-columns: 2fr 2fr 1.5fr 1fr; gap: 8px; padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); opacity: 0; transform: translateY(8px); transition: opacity 0.4s ease, transform 0.4s ease;">
-                                <span style="font-size: 13px; color: white; font-weight: 600;">Priya Kapoor</span>
-                                <span style="font-size: 12px; color: var(--text-secondary);">Kapoor Capital</span>
-                                <span style="font-size: 13px; color: var(--amber); font-weight: 700;">$10,000</span>
-                                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber); background: rgba(245,158,11,0.1); padding: 3px 8px; border-radius: 6px; text-align: center;">Pending</span>
                             </div>
                         </div>
 
@@ -858,22 +840,22 @@
 
                     <!-- Finance Footer -->
                     <div id="wt-finance-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
-                        <p style="font-size: 13px; color: var(--text-ghost); margin-bottom: 16px;">Continue to District Flow.</p>
+                        <p style="font-size: 13px; color: var(--text-ghost); margin-bottom: 16px;">Continue to District Ecosystem.</p>
                         <button id="wt-continue-flow-btn" style="background: transparent; border: 2px solid var(--border-mid); color: white; padding: 14px 48px; border-radius: 14px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; transition: all 0.2s ease;">Next</button>
                     </div>
 
                 </div><!-- end panel-finance -->
 
                 <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- DISTRICT FLOW PANEL                                        -->
+                <!-- DISTRICT ECOSYSTEM PANEL                                   -->
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 <div id="panel-flow" class="content-panel">
 
-<!-- ═══ DISTRICT FLOW — Matching production index.html (observatory tab) ═══ -->
+<!-- ═══ DISTRICT ECOSYSTEM — Matching production index.html (observatory tab) ═══ -->
 
 <!-- Title (production lines 3300-3303) -->
 <div id="wt-flow-header" style="margin-bottom: 32px;">
-    <h1 style="font-size: 30px; font-weight: 700; color: white; font-family: 'Poppins', sans-serif; line-height: 1.2;">District Flow</h1>
+    <h1 style="font-size: 30px; font-weight: 700; color: white; font-family: 'Poppins', sans-serif; line-height: 1.2;">District Ecosystem</h1>
     <p style="margin-top: 8px; font-size: 14px; color: #94a3b8;">Visualize your district ecosystem in motion</p>
 </div>
 
@@ -1434,13 +1416,13 @@
 
                 </div><!-- end panel-flow -->
 
-                <!-- ═══ PREVIEW PANEL (automation content saved from District Flow) ═══ -->
+                <!-- ═══ TASKS AND AGENTS PANEL (automation content saved from District Ecosystem) ═══ -->
                 <div id="panel-preview" class="content-panel">
 
-                    <!-- Preview Header -->
+                    <!-- Tasks and Agents Header -->
                     <div id="pv-header" style="margin-bottom: 32px;">
-                        <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">Preview</h1>
-                        <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">See how your district's automations, integrations, and workflows come together before going live.</p>
+                        <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">Tasks and Agents</h1>
+                        <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack.</p>
                     </div>
 
                     <!-- Automation Pipeline -->
@@ -1538,12 +1520,12 @@
                         </div>
                     </div>
 
-                    <!-- Preview Footer -->
+                    <!-- Tasks and Agents Footer -->
                     <div id="pv-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
                         <div style="background: var(--surface); border: 1px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 32px; margin-bottom: 20px;">
-                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--green); margin-bottom: 12px;">Preview Complete</div>
+                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--green); margin-bottom: 12px;">Tasks and Agents Complete</div>
                             <h2 style="font-size: 24px; font-weight: 900; color: white; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Your Automations Are Ready</h2>
-                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 500px; margin: 0 auto;">You've previewed the automation pipeline, active workflows, and integration hub. Everything is wired up and ready to power your district.</p>
+                            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 500px; margin: 0 auto;">You've reviewed the automation pipeline, active workflows, and integration hub. Everything is wired up and ready to power your district.</p>
                         </div>
                         <button id="pv-continue-btn" style="background: var(--accent); border: none; color: white; padding: 14px 48px; border-radius: 14px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; box-shadow: 0 0 30px rgba(124,140,255,0.3); transition: all 0.2s ease;">Continue</button>
                     </div>
@@ -1621,12 +1603,16 @@
                 stagePadding: 10,
                 popoverOffset: 28,
                 stageRadius: 16,
+                onDestroyStarted: () => {
+                    // Clean up any lingering DO pulse states
+                    document.querySelectorAll('.do-pulse').forEach(el => el.classList.remove('do-pulse'));
+                },
                 onHighlighted: () => {
                     // Detect arrow side from Driver.js arrow classes → set caret class on popover
                     const arrow = document.querySelector('.driver-popover-arrow');
                     const popover = document.querySelector('.driver-popover');
                     if (popover) {
-                        popover.classList.remove('caret-left','caret-right','caret-top','caret-bottom');
+                        popover.classList.remove('caret-left','caret-right','caret-top','caret-bottom','caret-bottom-right');
                         if (arrow) {
                             if (arrow.classList.contains('driver-popover-arrow-side-right')) popover.classList.add('caret-left');
                             else if (arrow.classList.contains('driver-popover-arrow-side-left')) popover.classList.add('caret-right');
@@ -1904,7 +1890,7 @@
                                     okBtn.classList.remove('do-pulse');
                                     setCompleteRail('define');
                                     setActiveRail('residents');
-                                    updateBreadcrumb(2, 11, 'Residents', 'Links');
+                                    updateBreadcrumb(2, 10, 'Residents', 'Resident Links');
                                     showPanel('panel-residents');
                                     setTimeout(() => driverObj.moveNext(), 300);
                                 };
@@ -2117,7 +2103,7 @@
                                     btn.classList.remove('do-pulse');
                                     setCompleteRail('residents');
                                     setActiveRail('links');
-                                    updateBreadcrumb(3, 11, 'Links', 'District Finance');
+                                    updateBreadcrumb(3, 10, 'Resident Links', 'District Finance');
                                     showPanel('panel-links');
                                     setTimeout(() => driverObj.moveNext(), 300);
                                 };
@@ -2205,7 +2191,45 @@
                         }
                     },
 
-                    // Frame 23: OBSERVE — Participant rows in Links
+                    // Frame 23: DO — Add a Traffic Link
+                    {
+                        element: '#wt-add-traffic-link',
+                        onHighlightStarted: () => {
+                            document.getElementById('wt-link-p1').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        },
+                        popover: {
+                            title: 'Add a Traffic Link',
+                            description: 'Each participant needs traffic sources mapped to their row. <strong>Click + LINK</strong> on Jordan Rivera\u2019s row to add a traffic source.',
+                            side: 'bottom',
+                            align: 'start',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const btn = document.getElementById('wt-add-traffic-link');
+                                btn.classList.add('do-pulse');
+                                const handler = () => {
+                                    btn.removeEventListener('click', handler);
+                                    btn.classList.remove('do-pulse');
+                                    // Simulate adding a traffic link chip
+                                    const chipContainer = document.querySelector('#wt-link-p1 .wt-link-participant div:last-child') || document.querySelector('#wt-link-p1 div div:nth-child(2)');
+                                    if (chipContainer) {
+                                        const newChip = document.createElement('span');
+                                        newChip.style.cssText = 'background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--green); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; animation: fadeIn 0.3s ease;';
+                                        newChip.innerHTML = '<span style="color: var(--green); font-size: 8px;">\u25CF</span> YouTube Channel';
+                                        chipContainer.insertBefore(newChip, chipContainer.firstChild);
+                                    }
+                                    // Update the sources text
+                                    const sourcesText = document.querySelector('#wt-link-p1 div div:first-child div:last-child');
+                                    if (sourcesText && sourcesText.textContent.includes('No sources')) {
+                                        sourcesText.innerHTML = '<span style="color: var(--green); font-size: 11px; font-weight: 600;">1 source</span>';
+                                    }
+                                    setTimeout(() => driverObj.moveNext(), 400);
+                                };
+                                btn.addEventListener('click', handler);
+                            }
+                        }
+                    },
+
+                    // Frame 24: OBSERVE — Participant rows in Links
                     {
                         element: '#wt-link-p1',
                         onHighlightStarted: () => {
@@ -2250,7 +2274,7 @@
                                         btn.classList.remove('do-pulse');
                                         setCompleteRail('links');
                                         setActiveRail('finance');
-                                        updateBreadcrumb(4, 11, 'District Finance', 'District Flow');
+                                        updateBreadcrumb(4, 10, 'District Finance', 'District Ecosystem');
                                         showPanel('panel-finance');
                                         setTimeout(() => driverObj.moveNext(), 300);
                                     };
@@ -2343,7 +2367,7 @@
                         }
                     },
 
-                    // Frame 28: DO — Continue to District Flow
+                    // Frame 28: DO — Continue to District Ecosystem
                     {
                         element: '#wt-finance-footer',
                         onHighlightStarted: () => {
@@ -2361,8 +2385,8 @@
                             flowRail.style.color = 'rgb(168,85,247)';
                         },
                         popover: {
-                            title: 'Continue to District Flow',
-                            description: 'Your angel investors and revenue snapshot are set. Next, see the automation engine that powers everything \u2014 triggers, workflows, and integrations running on autopilot. <strong>Click CONTINUE</strong> to view your District Flow.',
+                            title: 'Continue to District Ecosystem',
+                            description: 'Your angel investors and revenue snapshot are set. Next, see the traffic ecosystem that powers everything \u2014 organic flow, structured grids, and cross-pollination paths. <strong>Click CONTINUE</strong> to view your District Ecosystem.',
                             side: 'top',
                             align: 'center',
                             showButtons: ['previous'],
@@ -2374,7 +2398,7 @@
                                     btn.classList.remove('do-pulse');
                                     setCompleteRail('finance');
                                     setActiveRail('flow');
-                                    updateBreadcrumb(5, 11, 'District Flow', 'Preview');
+                                    updateBreadcrumb(5, 10, 'District Ecosystem', 'Tasks and Agents');
                                     showPanel('panel-flow');
                                     setTimeout(() => driverObj.moveNext(), 300);
                                 };
@@ -2412,9 +2436,24 @@
                                 const eco = document.getElementById('wt-view-ecosystem');
                                 eco.style.opacity = '1'; eco.style.transform = 'translateY(0)';
                             }, 500);
+                            // Collapse left rail for full ecosystem view
+                            document.getElementById('wt-rail').style.display = 'none';
+                            // Remove overlay for this step
+                            setTimeout(() => {
+                                const overlay = document.querySelector('.driver-overlay');
+                                if (overlay) overlay.style.opacity = '0';
+                            }, 100);
                         },
+                        onDeselected: () => {
+                            // Restore rail
+                            document.getElementById('wt-rail').style.display = 'flex';
+                            // Restore overlay
+                            const overlay = document.querySelector('.driver-overlay');
+                            if (overlay) overlay.style.opacity = '1';
+                        },
+                        disableActiveInteraction: false,
                         popover: {
-                            title: 'District Flow',
+                            title: 'District Ecosystem',
                             description: 'Your district\u2019s live traffic ecosystem. Three tabs \u2014 <strong>Ecosystem</strong>, <strong>Relational</strong>, and <strong>Cross-Pollination</strong> \u2014 show your network from different angles. The Ecosystem view is the default: a hub-and-spoke SVG with traffic sources flowing into four quadrants. <strong>Scroll to explore</strong> the full canvas.',
                             side: 'bottom',
                             align: 'start'
@@ -2553,7 +2592,7 @@
                         }
                     },
 
-                    // Frame 35: DO — Continue to Preview (STORYBOARD Frame 30)
+                    // Frame 35: DO — Continue to Tasks and Agents (STORYBOARD Frame 30)
                     {
                         element: '#wt-flow-footer',
                         onHighlightStarted: () => {
@@ -2561,8 +2600,8 @@
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-                            // Light up the Preview rail item
-                            const previewRail = document.getElementById('wt-rail-preview');
+                            // Light up the Tasks and Agents rail item
+                            const previewRail = document.getElementById('wt-rail-tasks');
                             if (previewRail) {
                                 previewRail.style.borderColor = 'rgba(124,140,255,0.6)';
                                 previewRail.style.boxShadow = '0 0 20px rgba(124,140,255,0.3)';
@@ -2571,8 +2610,8 @@
                             }
                         },
                         popover: {
-                            title: 'Continue to Preview',
-                            description: 'You\u2019ve seen your district from every angle \u2014 organic flow, structured grid, and cross-pollination paths. Now let\u2019s activate it. <strong>Click INVITE RESIDENTS</strong> to move forward.',
+                            title: 'Continue to Tasks and Agents',
+                            description: 'You\u2019ve seen your district from every angle \u2014 organic flow, structured grid, and cross-pollination paths. Now let\u2019s activate it. <strong>Click CONTINUE</strong> to move forward.',
                             side: 'top',
                             align: 'center',
                             showButtons: ['previous'],
@@ -2582,14 +2621,14 @@
                                 const advance = () => {
                                     btn.removeEventListener('click', advance);
                                     btn.classList.remove('do-pulse');
-                                    // Remove scroll forwarding when leaving District Flow
+                                    // Remove scroll forwarding when leaving District Ecosystem
                                     if (window._flowScrollHandler) {
                                         document.removeEventListener('wheel', window._flowScrollHandler);
                                         delete window._flowScrollHandler;
                                     }
                                     setCompleteRail('flow');
-                                    setActiveRail('preview');
-                                    updateBreadcrumb(6, 11, 'Preview', '');
+                                    setActiveRail('tasks');
+                                    updateBreadcrumb(6, 10, 'Tasks and Agents', '');
                                     showPanel('panel-preview');
                                     setTimeout(() => driverObj.moveNext(), 300);
                                 };
@@ -2598,9 +2637,9 @@
                         }
                     },
 
-                    // ═══ PREVIEW SECTION ═══
+                    // ═══ TASKS AND AGENTS SECTION ═══
 
-                    // Frame 31: OBSERVE — Preview Header (landing)
+                    // Frame 31: OBSERVE — Tasks and Agents Header (landing)
                     {
                         element: '#pv-header',
                         onHighlightStarted: () => {
@@ -2608,8 +2647,8 @@
                             panel.scrollTo({ top: 0, behavior: 'smooth' });
                         },
                         popover: {
-                            title: 'Welcome to Preview',
-                            description: 'This is where you see everything come together. Your automation pipeline, live workflows, and integrations \u2014 all wired up and ready to power your district.',
+                            title: 'Welcome to Tasks and Agents',
+                            description: 'This is where you see everything come together. Your tasks, agents, and automations \u2014 all wired up and ready to power your district.',
                             side: 'bottom',
                             align: 'start'
                         }
@@ -2677,8 +2716,8 @@
                             setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
                         },
                         popover: {
-                            title: 'Preview Complete',
-                            description: 'You\u2019ve built a complete district from a single YouTube video \u2014 market story, residents, links, angel investors, and automation flows. Your district is ready to launch.',
+                            title: 'Tour Complete',
+                            description: 'You\u2019ve built a complete district from a single YouTube video \u2014 market story, residents, links, angel investors, ecosystem maps, and automation flows. Your district is ready to launch.',
                             side: 'top',
                             align: 'center',
                             doneBtnText: 'Finish Tour',
