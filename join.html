@@ -1,89 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Join District — ReadyStack</title>
-
-  <!-- ── Open Graph Meta Tags (link preview cards for DM, iMessage, Slack, LinkedIn) ── -->
-  <!-- v1: Static values. Same image and generic text for all invites. -->
-  <!-- v2 (future): Server-side rendered dynamic OG tags per invite. -->
-  <meta property="og:title" content="You're Invited to a District" />
-  <meta property="og:description" content="You've been invited to explore this district. See where you fit in the ecosystem." />
-  <meta property="og:image" content="https://readystackai-rgb.github.io/readystack-eu/assets/og-invite-card.png" />
-  <meta property="og:url" content="https://readystackai-rgb.github.io/readystack-eu/join.html" />
-  <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="You're Invited to a District" />
-  <meta name="twitter:description" content="You've been invited to explore this district." />
-  <meta name="twitter:image" content="https://readystackai-rgb.github.io/readystack-eu/assets/og-invite-card.png" />
-
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@400;600;700&display=swap');
-    body {
-      background-color: #0a0f1e;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-      color: #cbd5e1;
-    }
-    .animate-fade-in {
-      animation: fadeIn 0.6s ease-out forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes logoGlow {
-      0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.2); }
-      50% { box-shadow: 0 0 35px rgba(255,255,255,0.4); }
-    }
-    .logo-glow {
-      animation: logoGlow 2s ease-in-out infinite;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .fade-in { animation: fadeIn 0.6s ease-out both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .google-btn:hover { box-shadow: 0 2px 12px rgba(255,255,255,0.15); }
   </style>
 </head>
-<body>
-  <div id="root"></div>
+<body class="bg-[#0a0f1e] min-h-screen flex items-center justify-center">
 
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Loading state -->
+  <div id="loading" class="text-center">
+    <div class="w-8 h-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
+    <p class="text-slate-500 text-xs mt-4 uppercase tracking-widest font-bold">Loading invitation...</p>
+  </div>
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+  <!-- Error state -->
+  <div id="error" class="text-center max-w-md px-6 hidden fade-in">
+    <div class="mb-8">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-slate-600"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    </div>
+    <p id="error-message" class="text-slate-400 text-sm leading-relaxed"></p>
+  </div>
 
-    // ── REDIRECT TARGET ──
-    // join.html is a lightweight router. Valid tokens redirect to the Storyteller
-    // in invite mode. Expired/invalid tokens are handled here — no redirect.
-    const STORYTELLER_URL = 'index.html';
+  <!-- Invite landing page -->
+  <div id="invite-page" class="text-center max-w-[480px] px-6 hidden fade-in">
+
+    <!-- ReadyStack logo + text -->
+    <div class="flex items-center justify-center gap-3 mb-10">
+      <svg viewBox="0 0 32 32" class="w-8 h-8">
+        <defs>
+          <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#818cf8" />
+            <stop offset="100%" style="stop-color:#6366f1" />
+          </linearGradient>
+        </defs>
+        <rect x="4" y="6" width="24" height="4" rx="2" fill="url(#logo-grad)" opacity="0.9"/>
+        <rect x="4" y="14" width="18" height="4" rx="2" fill="url(#logo-grad)" opacity="0.6"/>
+        <rect x="4" y="22" width="12" height="4" rx="2" fill="url(#logo-grad)" opacity="0.35"/>
+      </svg>
+      <span class="text-white font-black text-lg tracking-tight">ReadyStack</span>
+    </div>
+
+    <!-- District name -->
+    <h1 id="district-name" class="text-2xl md:text-3xl font-black text-white italic uppercase tracking-tighter leading-none"></h1>
+
+    <div class="h-6"></div>
+
+    <!-- Greeting -->
+    <p class="text-slate-400 text-sm">You've been invited to join as a</p>
+
+    <div class="h-2"></div>
+
+    <!-- Role -->
+    <h2 id="invite-role" class="text-white text-xl font-bold"></h2>
+
+    <div class="h-8"></div>
+
+    <!-- Brief context -->
+    <p id="invite-brief" class="text-slate-400 text-sm leading-relaxed max-w-sm mx-auto"></p>
+
+    <div class="h-10"></div>
+
+    <!-- Sign in with Google button -->
+    <button
+      id="google-signin-btn"
+      onclick="handleGoogleSignIn()"
+      class="google-btn inline-flex items-center gap-3 bg-white text-gray-800 font-bold rounded-full px-8 py-3.5 text-sm transition-all hover:bg-gray-50 mx-auto"
+    >
+      <!-- Google G icon -->
+      <svg viewBox="0 0 24 24" width="20" height="20">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Sign in with Google
+    </button>
+
+    <div class="h-4"></div>
+
+    <!-- Help text -->
+    <p class="text-slate-500 text-xs">Sign in to view the district and connect with other residents.</p>
+  </div>
+
+  <script>
+    // ── Configuration ──
     const CLOUD_FUNCTION_URL = "https://us-central1-gen-lang-client-0769430147.cloudfunctions.net/advisor";
+    const STORYTELLER_BASE   = "https://readystackai-rgb.github.io/readystack-eu";
 
-    // ── Decode JWT payload (client-side, no verification — just for display + routing) ──
-    const decodeJwtPayload = (token) => {
+    // ── Token decoding (HMAC-signed, matching backend) ──
+    // We only decode the payload here — validation happens server-side on acceptInvite.
+    // The landing page is a preview; real validation is at acceptance time.
+    function decodeTokenPayload(token) {
       try {
         const parts = token.split('.');
-        if (parts.length !== 3) return null;
-        const payload = parts[1];
-        const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-        const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
-        const decoded = atob(padded);
-        return JSON.parse(decoded);
+        if (parts.length !== 2) throw new Error('Invalid token format');
+        const payload = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+        // Client-side expiry check for UX (server rechecks)
+        if (payload.exp && Date.now() > payload.exp) {
+          return { error: 'expired' };
+        }
+        return { data: payload };
       } catch (e) {
-        return null;
+        return { error: 'invalid' };
       }
-    };
+    }
 
-    // ── Check if JWT is expired (client-side) ──
-    const isTokenExpired = (payload) => {
-      if (!payload || !payload.exp) return false;
-      return Date.now() >= payload.exp * 1000;
-    };
-
-    // ── Generic POST to Cloud Function ──
-    const callAdvisor = async (task, data = {}) => {
-      const body = { task, ...data };
+    // ── callAdvisor helper ──
+    async function callAdvisor(task, data = {}, sessionId = null) {
+      const body = { task, ...data, ...(sessionId ? { sessionId } : {}) };
       const res = await fetch(CLOUD_FUNCTION_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -92,245 +124,153 @@
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Request failed');
       return json;
-    };
+    }
 
-    // ── ReadyStack Logo ──
-    const ReadyStackLogo = ({ glow }) => (
-      <div className="flex items-center gap-3 justify-center">
-        <div className={`bg-white p-1.5 rounded-full flex items-center justify-center border-2 border-white overflow-hidden ${glow ? 'logo-glow' : 'shadow-[0_0_30px_rgba(255,255,255,0.3)]'}`}>
-          <img
-            src="https://lh3.googleusercontent.com/d/1-cfFYPbbR6LgEbtV7J9__PNewwAnIZim"
-            alt="ReadyStack"
-            style={{ width: 28, height: 28, objectFit: 'contain' }}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = 'https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png';
-              e.target.style.filter = 'brightness(0)';
-            }}
-          />
-        </div>
-        <span className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          ReadyStack
-        </span>
-      </div>
-    );
+    // ── Initialize on page load ──
+    function init() {
+      const params = new URLSearchParams(window.location.search);
+      const token  = params.get('t');
 
-    // ── Main Join Page — Lightweight Router ──
-    // States: loading → (valid → redirect) | expired | expired_requested | invalid
-    // No OAuth here. Just decode + route + expired handling.
-    const JoinPage = () => {
-      const [state, setState] = useState('loading'); // loading | valid | expired | expired_requested | invalid
-      const [inviteData, setInviteData] = useState(null);
-      const [isRequesting, setIsRequesting] = useState(false);
+      // Check if we're returning from OAuth
+      const rsSession = params.get('rs_session');
+      const rsEmail   = params.get('rs_email');
 
-      useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('t');
+      if (rsSession && rsEmail) {
+        // Returning from Google OAuth — store session
+        localStorage.setItem('rs_session', rsSession);
+        localStorage.setItem('rs_email', rsEmail);
 
-        // ── Missing token ──
-        if (!token) {
-          setState('invalid');
+        // Clean URL
+        window.history.replaceState({}, '', window.location.pathname + '?t=' + (localStorage.getItem('rs_pending_invite') || token || ''));
+
+        // Process pending invite
+        const pendingToken = localStorage.getItem('rs_pending_invite');
+        if (pendingToken) {
+          processInviteAcceptance(pendingToken, rsSession, rsEmail);
           return;
         }
-
-        // ── Decode JWT ──
-        const payload = decodeJwtPayload(token);
-        if (!payload) {
-          setState('invalid');
-          return;
-        }
-
-        // Compute expiry window from JWT iat/exp (dynamic — creator sets 7d/14d/30d/60d/90d)
-        let expiryDays = 7; // fallback default
-        if (payload.iat && payload.exp) {
-          expiryDays = Math.round((payload.exp - payload.iat) / 86400);
-        }
-
-        // Store parsed data for all states (valid + expired need it)
-        const data = {
-          token,
-          districtName: payload.districtName || 'District',
-          participantName: payload.participantName || 'Resident',
-          role: payload.role || 'Participant',
-          company: payload.company || '',
-          sheetId: payload.sheetId,
-          participantRow: payload.participantRow,
-          creatorName: payload.creatorName || 'the district creator',
-          expiryDays
-        };
-        setInviteData(data);
-
-        // ── Expired token (15-day window) ──
-        if (isTokenExpired(payload)) {
-          setState('expired');
-          return;
-        }
-
-        // ── Valid token — show loading state, then redirect ──
-        setState('valid');
-
-        // Build redirect URL and navigate after brief loading state (1-2s)
-        const redirectUrl = `${STORYTELLER_URL}?sheet=${encodeURIComponent(data.sheetId)}&invite=${encodeURIComponent(token)}&node=${encodeURIComponent(data.participantRow)}`;
-
-        setTimeout(() => {
-          window.location.href = redirectUrl;
-        }, 1500);
-
-      }, []);
-
-      // ── Handle "Request New Invite" click ──
-      const handleRequestNewInvite = async () => {
-        if (!inviteData || isRequesting) return;
-        setIsRequesting(true);
-        try {
-          await callAdvisor('requestNewInvite', {
-            data: {
-              token: inviteData.token,
-              participantName: inviteData.participantName,
-              districtName: inviteData.districtName,
-              sheetId: inviteData.sheetId,
-              participantRow: inviteData.participantRow
-            }
-          });
-          setState('expired_requested');
-        } catch (err) {
-          // Even if the request fails, show a friendly message
-          setState('expired_requested');
-        } finally {
-          setIsRequesting(false);
-        }
-      };
-
-      // ── Loading State (initial, before JWT decode) ──
-      if (state === 'loading') {
-        return (
-          <div className="min-h-screen flex flex-col items-center pt-[20vh]">
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest animate-pulse">
-              Loading invitation...
-            </div>
-          </div>
-        );
       }
 
-      // ── Expired Token — with "Request New Invite" ──
-      if (state === 'expired') {
-        return (
-          <div className="min-h-screen flex flex-col items-center pt-[20vh] px-6">
-            <div className="text-center max-w-[420px] animate-fade-in space-y-8">
-              <ReadyStackLogo glow={true} />
-
-              <div className="space-y-4 mt-8">
-                <h2 className="text-lg font-black text-white uppercase" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                  This invitation has expired.
-                </h2>
-                <div className="space-y-1">
-                  <p className="text-sm text-slate-400">
-                    It was valid for {inviteData?.expiryDays || 7} days.
-                  </p>
-                  <p className="text-sm text-slate-400">
-                    Ask {inviteData?.creatorName} to send a new invite.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={handleRequestNewInvite}
-                disabled={isRequesting}
-                className="px-6 py-3 bg-indigo-500 text-white text-xs font-black uppercase tracking-wider rounded-xl hover:bg-indigo-400 transition-colors disabled:opacity-50"
-                style={{ fontFamily: 'Poppins, sans-serif' }}
-              >
-                {isRequesting ? 'Sending...' : 'Request New Invite'}
-              </button>
-            </div>
-          </div>
-        );
+      // Check for existing session + pending invite (e.g., page reload)
+      const storedSession = localStorage.getItem('rs_session');
+      const storedEmail   = localStorage.getItem('rs_email');
+      const pendingInvite = localStorage.getItem('rs_pending_invite');
+      if (storedSession && storedEmail && pendingInvite) {
+        processInviteAcceptance(pendingInvite, storedSession, storedEmail);
+        return;
       }
 
-      // ── Expired — Request Sent Confirmation ──
-      if (state === 'expired_requested') {
-        return (
-          <div className="min-h-screen flex flex-col items-center pt-[20vh] px-6">
-            <div className="text-center max-w-[420px] animate-fade-in space-y-6">
-              <ReadyStackLogo glow={true} />
-
-              <div className="space-y-3 mt-8">
-                <h2 className="text-lg font-black text-emerald-400" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                  Request sent.
-                </h2>
-                <p className="text-sm text-slate-400">
-                  {inviteData?.creatorName} will send you a new link.
-                </p>
-              </div>
-            </div>
-          </div>
-        );
+      if (!token) {
+        showError('This invitation link isn\'t valid. Check with the person who invited you.');
+        return;
       }
 
-      // ── Invalid / Missing Token ──
-      if (state === 'invalid') {
-        return (
-          <div className="min-h-screen flex flex-col items-center pt-[20vh] px-6">
-            <div className="text-center max-w-[420px] animate-fade-in space-y-6">
-              <ReadyStackLogo />
-              <div className="mt-8">
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  This link isn't valid. If you were expecting a district invitation, ask the person who sent it.
-                </p>
-              </div>
-            </div>
-          </div>
-        );
+      const result = decodeTokenPayload(token);
+
+      if (result.error === 'expired') {
+        showError('This invitation has expired. Ask the district creator to send a new invite link.');
+        return;
       }
 
-      // ── Valid Token — Brief Loading State Before Redirect ──
-      // Per INVITE_UX_SPEC.md v2 Section 5: Logo (white glow) + "Loading {districtName}..."
-      // + participant name + role. Shows for ~1.5 seconds.
-      return (
-        <div className="min-h-screen flex flex-col items-center pt-[20vh] px-6">
-          <div className="text-center max-w-[420px] animate-fade-in space-y-6">
+      if (result.error) {
+        showError('This invitation link isn\'t valid. Check with the person who invited you.');
+        return;
+      }
 
-            {/* Logo with glow ring */}
-            <ReadyStackLogo glow={true} />
+      // Render the landing page
+      const payload = result.data;
+      document.getElementById('district-name').textContent = (payload.districtName || 'District').toUpperCase();
+      document.getElementById('invite-role').textContent = payload.role || payload.participantName || 'Resident';
 
-            {/* Loading district text */}
-            <div className="mt-8">
-              <p className="text-sm text-slate-400 animate-pulse">
-                Loading {inviteData?.districtName}...
-              </p>
-            </div>
+      const briefEl = document.getElementById('invite-brief');
+      if (payload.brief) {
+        briefEl.textContent = payload.brief;
+        briefEl.classList.remove('hidden');
+      } else {
+        briefEl.classList.add('hidden');
+      }
 
-            {/* Participant info */}
-            <div className="space-y-1">
-              <p className="text-xs text-slate-500">
-                {inviteData?.participantName}
-              </p>
-              <p className="text-xs text-slate-500">
-                {inviteData?.role}
-              </p>
-            </div>
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('invite-page').classList.remove('hidden');
 
-          </div>
-        </div>
-      );
-    };
+      // Store token for use after OAuth
+      window._inviteToken = token;
+    }
 
-    // ── Dynamic OG tag update (best-effort for JS-enabled crawlers) ──
-    // Most crawlers don't execute JS, so the static <meta> tags in <head> are the primary.
-    // But for crawlers that DO execute JS, we update the title dynamically.
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('t');
-    if (token) {
-      const payload = decodeJwtPayload(token);
-      if (payload?.creatorName) {
-        const ogTitle = document.querySelector('meta[property="og:title"]');
-        const twTitle = document.querySelector('meta[name="twitter:title"]');
-        if (ogTitle) ogTitle.content = `${payload.creatorName}'s District`;
-        if (twTitle) twTitle.content = `${payload.creatorName}'s District`;
+    // ── Handle Google Sign In ──
+    async function handleGoogleSignIn() {
+      const token = window._inviteToken;
+      if (!token) return;
+
+      // Store invite token in localStorage (same pattern as rs_pending_action)
+      localStorage.setItem('rs_pending_invite', token);
+
+      // Check if already logged in
+      const storedSession = localStorage.getItem('rs_session');
+      const storedEmail   = localStorage.getItem('rs_email');
+      if (storedSession && storedEmail) {
+        // Already authenticated — accept invite directly
+        processInviteAcceptance(token, storedSession, storedEmail);
+        return;
+      }
+
+      // Initiate Google OAuth
+      try {
+        const btn = document.getElementById('google-signin-btn');
+        btn.textContent = 'Connecting...';
+        btn.disabled = true;
+
+        const returnUrl = window.location.href;
+        const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
+        window.location.href = authUrl;
+      } catch (e) {
+        console.error('OAuth initiation failed:', e);
+        showError('Unable to connect to Google. Please try again.');
       }
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<JoinPage />);
+    // ── Process invite acceptance ──
+    async function processInviteAcceptance(token, sessionId, email) {
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('invite-page').classList.add('hidden');
+      document.getElementById('error').classList.add('hidden');
+
+      try {
+        const result = await callAdvisor('acceptInvite', {
+          data: { inviteToken: token, email: email }
+        }, sessionId);
+
+        if (result.success) {
+          localStorage.removeItem('rs_pending_invite');
+          // Store the sheet ID for the Storyteller to use
+          if (result.sheetId) {
+            localStorage.setItem('rs_sheet_id', result.sheetId);
+          }
+          // Redirect to the district
+          const districtUrl = result.districtUrl
+            ? `${STORYTELLER_BASE}${result.districtUrl}`
+            : `${STORYTELLER_BASE}/storyteller?sheet=${result.sheetId}&role=resident`;
+          window.location.href = districtUrl;
+        } else {
+          showError('Something went wrong accepting the invitation. Please try again.');
+        }
+      } catch (e) {
+        console.error('Accept invite failed:', e);
+        localStorage.removeItem('rs_pending_invite');
+        showError(e.message || 'Unable to accept invitation. The link may have expired.');
+      }
+    }
+
+    // ── Show error state ──
+    function showError(message) {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('invite-page').classList.add('hidden');
+      document.getElementById('error').classList.remove('hidden');
+      document.getElementById('error-message').textContent = message;
+    }
+
+    // ── Run on load ──
+    init();
   </script>
 </body>
 </html>
