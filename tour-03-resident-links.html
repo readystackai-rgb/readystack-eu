@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadyStack Tour — Resident Links</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Driver.js v1.3.1 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.3.1/driver.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.3.1/driver.min.css">
+
+    <!-- Shared tour styles -->
+    <link rel="stylesheet" href="../shared/tour-styles.css">
+
+    <style>
+        /* ═══ Module-specific overrides & additions ═══ */
+
+        body {
+            display: flex;
+            background-color: var(--base);
+        }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .left-rail {
+            width: 280px;
+            background: linear-gradient(180deg, rgba(2,6,23,0.8) 0%, rgba(15,23,42,0.5) 100%);
+            border-right: 1px solid var(--border-subtle);
+            overflow-y: auto;
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .rail-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .phase-label {
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            padding: 4px 0 8px 14px;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .breadcrumb-row {
+            padding: 20px 40px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-subtle);
+            white-space: nowrap;
+        }
+
+        .content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            color: white;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .rs-identity-card {
+            background: var(--surface);
+            border: 1px solid var(--green-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .rs-identity-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .rs-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rs-field-label {
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .rs-field-value {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .district-map-section {
+            background: var(--surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .district-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            color: var(--green);
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        .district-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .journey-header {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .journey-stage {
+            background: rgba(100,116,139,0.15);
+            border: 1px solid rgba(100,116,139,0.25);
+            border-radius: 10px;
+            padding: 10px 8px;
+            text-align: center;
+        }
+
+        .journey-stage.traffic {
+            background: rgba(100,116,139,0.15);
+            border-color: rgba(100,116,139,0.25);
+        }
+
+        .journey-stage.learning {
+            background: rgba(16,185,129,0.1);
+            border-color: rgba(16,185,129,0.25);
+        }
+
+        .journey-stage.selecting {
+            background: rgba(245,158,11,0.1);
+            border-color: rgba(245,158,11,0.25);
+        }
+
+        .journey-stage.executing {
+            background: rgba(99,102,241,0.1);
+            border-color: rgba(99,102,241,0.25);
+        }
+
+        .journey-stage.expanding {
+            background: rgba(168,85,247,0.1);
+            border-color: rgba(168,85,247,0.25);
+        }
+
+        .journey-stage-label {
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+        }
+
+        .journey-stage-sublabel {
+            font-size: 9px;
+            color: var(--text-ghost);
+            margin-top: 2px;
+        }
+
+        .journey-stage.learning .journey-stage-label {
+            color: var(--green);
+        }
+
+        .journey-stage.selecting .journey-stage-label {
+            color: var(--amber);
+        }
+
+        .journey-stage.executing .journey-stage-label {
+            color: var(--accent-indigo);
+        }
+
+        .journey-stage.expanding .journey-stage-label {
+            color: #a855f7;
+        }
+
+        .participant-row {
+            background: var(--surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .participant-row.host {
+            background: rgba(16,185,129,0.04);
+            border-color: var(--green-border);
+        }
+
+        .row-layout {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .row-label {
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .host-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .host-emoji {
+            font-size: 16px;
+        }
+
+        .host-name {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--green);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .host-role {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .host-funding {
+            font-size: 12px;
+            color: white;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .participant-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .participant-sources {
+            font-size: 11px;
+            color: var(--text-ghost);
+            font-style: italic;
+        }
+
+        .add-link-button {
+            background: rgba(124,140,255,0.15);
+            border: 1px solid rgba(124,140,255,0.3);
+            color: var(--accent);
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .add-link-button:hover {
+            background: rgba(124,140,255,0.25);
+            border-color: rgba(124,140,255,0.5);
+        }
+
+        .links-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .link-pill {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .link-pill:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: var(--border-mid);
+        }
+
+        .link-pill.needs-url {
+            background: rgba(220,38,38,0.08);
+            border-color: rgba(220,38,38,0.2);
+        }
+
+        .link-pill.needs-url:hover {
+            background: rgba(220,38,38,0.12);
+            border-color: rgba(220,38,38,0.4);
+        }
+
+        .link-pill.configured {
+            background: rgba(16,185,129,0.08);
+            border-color: rgba(16,185,129,0.2);
+        }
+
+        .link-pill.configured:hover {
+            background: rgba(16,185,129,0.12);
+            border-color: rgba(16,185,129,0.4);
+        }
+
+        .link-dot {
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        .link-dot.red {
+            color: #dc2626;
+        }
+
+        .link-dot.green {
+            color: var(--green);
+        }
+
+        .link-dot.amber {
+            color: var(--amber);
+        }
+
+        .link-dot.purple {
+            color: #a855f7;
+        }
+
+        .continue-button {
+            background: rgba(124,140,255,0.15);
+            border: 1px solid rgba(124,140,255,0.3);
+            color: var(--accent);
+            padding: 14px 48px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .continue-button:hover {
+            background: rgba(124,140,255,0.25);
+            border-color: rgba(124,140,255,0.5);
+        }
+
+        .button-container {
+            text-align: center;
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+
+        /* Start overlay */
+        .start-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2,6,23,0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(8px);
+        }
+
+        .start-overlay.hidden {
+            display: none;
+        }
+
+        .start-content {
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .readystack-logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 24px;
+            letter-spacing: 0.05em;
+        }
+
+        .start-headline {
+            font-family: 'Poppins', sans-serif;
+            font-size: 36px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .start-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .start-button {
+            background: var(--accent);
+            color: var(--base);
+            border: none;
+            border-radius: 16px;
+            padding: 16px 48px;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .start-button:hover {
+            background: #6578cc;
+        }
+
+        /* Completion overlay */
+        .completion-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2,6,23,0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            backdrop-filter: blur(8px);
+        }
+
+        .completion-overlay.visible {
+            display: flex;
+        }
+
+        .completion-content {
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .completion-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .completion-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .completion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16,185,129,0.15);
+            border: 1px solid rgba(16,185,129,0.4);
+            border-radius: 12px;
+            padding: 10px 20px;
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 24px;
+        }
+
+        .completion-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .completion-button {
+            background: var(--accent);
+            color: var(--base);
+            border: none;
+            border-radius: 16px;
+            padding: 16px 48px;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .completion-button:hover {
+            background: #6578cc;
+        }
+
+        /* Scrollbar styling */
+        .left-rail::-webkit-scrollbar,
+        .content-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .left-rail::-webkit-scrollbar-track,
+        .content-scroll::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+        }
+
+        .left-rail::-webkit-scrollbar-thumb,
+        .content-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .left-rail::-webkit-scrollbar-thumb:hover,
+        .content-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Start overlay -->
+    <div id="startOverlay" class="start-overlay">
+        <div class="start-content">
+            <div class="readystack-logo">ReadyStack</div>
+            <h1 class="start-headline">Module 3: Resident Links</h1>
+            <p class="start-subtitle">Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey.</p>
+            <button class="start-button" onclick="startTour()">Take the Tour</button>
+        </div>
+    </div>
+
+    <!-- Completion overlay -->
+    <div id="completionOverlay" class="completion-overlay">
+        <div class="completion-content">
+            <div class="completion-icon">✓</div>
+            <h1 class="completion-title">Resident Links</h1>
+            <div class="completion-badge">✓ Complete</div>
+            <p class="completion-message">Your district map is set — every participant mapped across the five journey stages. Ready to assign the tasks and agents.</p>
+            <a href="tour-04-tasks-and-agents.html" class="completion-button">Continue to Module 4: Tasks and Agents →</a>
+        </div>
+    </div>
+
+    <!-- Main container -->
+    <div class="main-container">
+        <!-- Left rail -->
+        <div class="left-rail">
+            <!-- Compose section -->
+            <div class="rail-section">
+                <div class="phase-label" style="color: var(--compose-green);">Compose</div>
+                <div class="rail-item complete">
+                    <span class="rail-icon">⚙️</span>
+                    <span>Define Market Story</span>
+                </div>
+                <div class="rail-item complete">
+                    <span class="rail-icon">👥</span>
+                    <span>Residents</span>
+                </div>
+                <div id="wt-rail-resident-links" class="rail-item active">
+                    <span class="rail-icon">🔗</span>
+                    <span>Resident Links</span>
+                </div>
+                <div class="rail-item locked">
+                    <span class="rail-icon">⚡</span>
+                    <span>Tasks and Agents</span>
+                </div>
+            </div>
+
+            <!-- Operations section -->
+            <div class="rail-section">
+                <div class="phase-label" style="color: var(--ops-accent);">Operations</div>
+                <div class="rail-item locked">
+                    <span class="rail-icon">💰</span>
+                    <span>District Finance</span>
+                </div>
+                <div class="rail-item locked">
+                    <span class="rail-icon">🌐</span>
+                    <span>District Ecosystem</span>
+                </div>
+                <div class="rail-item locked">
+                    <span class="rail-icon">📍</span>
+                    <span>My Residents</span>
+                </div>
+                <div class="rail-item locked">
+                    <span class="rail-icon">📊</span>
+                    <span>Looker</span>
+                </div>
+                <div class="rail-item locked">
+                    <span class="rail-icon">📈</span>
+                    <span>GA4</span>
+                </div>
+                <div class="rail-item locked">
+                    <span class="rail-icon">📉</span>
+                    <span>Analytics</span>
+                </div>
+                <div class="rail-item locked">
+                    <span class="rail-icon">🤖</span>
+                    <span>Automation</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content area -->
+        <div class="content-area">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb-row">< RESIDENTS &nbsp;&nbsp;&nbsp;&nbsp; 3 / 11 · RESIDENT LINKS &nbsp;&nbsp;&nbsp;&nbsp; TASKS AND AGENTS ></div>
+
+            <!-- Scrollable content -->
+            <div class="content-scroll">
+                <!-- Section: Welcome Header -->
+                <div class="section">
+                    <h1 class="section-title" id="wt-header">Resident Links</h1>
+                </div>
+
+                <!-- Section: ReadyStack Identity Card -->
+                <div class="section">
+                    <div class="rs-identity-card" id="wt-identity-card" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease;">
+                        <div class="rs-identity-grid">
+                            <div class="rs-field">
+                                <span class="rs-field-label">ReadyStack Name</span>
+                                <div class="rs-field-value">ReadyStack Campaign</div>
+                            </div>
+                            <div class="rs-field">
+                                <span class="rs-field-label">Landing Page URL</span>
+                                <div class="rs-field-value">readystack.io/preview</div>
+                            </div>
+                            <div class="rs-field">
+                                <span class="rs-field-label">GA4 Master ID</span>
+                                <div class="rs-field-value">G-LUNAIR77</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: District Map -->
+                <div class="section">
+                    <div class="district-map-section" id="wt-district-map" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease;">
+                        <h2 class="district-title">District Map</h2>
+                        <p class="district-subtitle">Each participant gets a row. Add links to map their role across the journey.</p>
+
+                        <!-- Journey Stage Headers -->
+                        <div class="journey-header">
+                            <div class="journey-stage traffic">
+                                <div class="journey-stage-label">Traffic</div>
+                                <div class="journey-stage-sublabel">Sources</div>
+                            </div>
+                            <div class="journey-stage learning">
+                                <div class="journey-stage-label">Learning</div>
+                                <div class="journey-stage-sublabel">Watch / Read</div>
+                            </div>
+                            <div class="journey-stage selecting">
+                                <div class="journey-stage-label">Selecting</div>
+                                <div class="journey-stage-sublabel">Tour / Demo</div>
+                            </div>
+                            <div class="journey-stage executing">
+                                <div class="journey-stage-label">Executing</div>
+                                <div class="journey-stage-sublabel">Buy / Build</div>
+                            </div>
+                            <div class="journey-stage expanding">
+                                <div class="journey-stage-label">Expanding</div>
+                                <div class="journey-stage-sublabel">Share / Earn</div>
+                            </div>
+                        </div>
+
+                        <!-- ReadyStack HOST Row -->
+                        <div id="wt-host-row" class="participant-row host">
+                            <div class="row-layout">
+                                <div class="row-label">
+                                    <div class="host-label">
+                                        <span class="host-emoji">🛡️</span>
+                                        <span class="host-name">ReadyStack</span>
+                                        <span class="host-role">- HOST</span>
+                                    </div>
+                                    <p class="host-funding">Pays 40% of<br>Hosting Automation Fees<br>to drive WOM</p>
+                                </div>
+                                <div class="links-container">
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Process Walkthrough</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Interactive Tour</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Copy ReadyStack</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Shares ReadyStack</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Upload Data</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Check ReadyStack</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> ReadyStack Activation</span>
+                                    <span class="link-pill configured"><span class="link-dot purple">●</span> Schedules ReadyStack</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> ReadyStack Checkout</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Participant 1: Jordan Rivera -->
+                        <div id="wt-p1-row" class="participant-row">
+                            <div class="row-layout">
+                                <div class="row-label">
+                                    <div class="participant-name">
+                                        <span>Jordan Rivera</span>
+                                        <button class="add-link-button">+ Link</button>
+                                    </div>
+                                    <div class="participant-sources">No sources</div>
+                                </div>
+                                <div class="links-container">
+                                    <span class="link-pill needs-url" data-pill="p1-1"><span class="link-dot red">●</span> Tutorial Video</span>
+                                    <span class="link-pill needs-url" data-pill="p1-2"><span class="link-dot red">●</span> Product Tour</span>
+                                    <span class="link-pill needs-url" data-pill="p1-3"><span class="link-dot red">●</span> Watch Tutorial</span>
+                                    <span class="link-pill needs-url" data-pill="p1-4"><span class="link-dot red">●</span> Affiliate Sign Up</span>
+                                    <span class="link-pill needs-url" data-pill="p1-5"><span class="link-dot red">●</span> Logic Map</span>
+                                    <span class="link-pill needs-url" data-pill="p1-6"><span class="link-dot red">●</span> Live Demo</span>
+                                    <span class="link-pill needs-url" data-pill="p1-7"><span class="link-dot red">●</span> Partner Checkout</span>
+                                    <span class="link-pill needs-url" data-pill="p1-8"><span class="link-dot red">●</span> Success Case Study</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Participant 2: Mika Chen -->
+                        <div id="wt-p2-row" class="participant-row">
+                            <div class="row-layout">
+                                <div class="row-label">
+                                    <div class="participant-name">
+                                        <span>Mika Chen</span>
+                                        <button class="add-link-button">+ Link</button>
+                                    </div>
+                                    <div class="participant-sources">No sources</div>
+                                </div>
+                                <div class="links-container">
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Tutorial Video</span>
+                                    <span class="link-pill needs-url" data-pill="p2-2"><span class="link-dot red">●</span> Product Tour</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Watch Tutorial</span>
+                                    <span class="link-pill needs-url" data-pill="p2-4"><span class="link-dot red">●</span> Affiliate Sign Up</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Logic Map</span>
+                                    <span class="link-pill needs-url" data-pill="p2-6"><span class="link-dot red">●</span> Live Demo</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Partner Checkout</span>
+                                    <span class="link-pill needs-url" data-pill="p2-8"><span class="link-dot red">●</span> Success Case Study</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Participant 3: Sam Okafor -->
+                        <div id="wt-p3-row" class="participant-row">
+                            <div class="row-layout">
+                                <div class="row-label">
+                                    <div class="participant-name">
+                                        <span>Sam Okafor</span>
+                                        <button class="add-link-button">+ Link</button>
+                                    </div>
+                                    <div class="participant-sources">No sources</div>
+                                </div>
+                                <div class="links-container">
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Tutorial Video</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Product Tour</span>
+                                    <span class="link-pill needs-url" data-pill="p3-3"><span class="link-dot red">●</span> Watch Tutorial</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Affiliate Sign Up</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Logic Map</span>
+                                    <span class="link-pill needs-url" data-pill="p3-6"><span class="link-dot red">●</span> Live Demo</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Partner Checkout</span>
+                                    <span class="link-pill configured"><span class="link-dot green">●</span> Success Case Study</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Continue Button -->
+                <div class="section">
+                    <div class="button-container" id="wt-button-container" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease;">
+                        <button id="wt-continue-button" class="continue-button">Continue to Tasks and Agents</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let tourStarted = false;
+        let driverInstance = null;
+        let redPillClicked = false;
+
+        function startTour() {
+            document.getElementById('startOverlay').classList.add('hidden');
+            tourStarted = true;
+            initializeDriver();
+        }
+
+        function completeModule() {
+            // Mark rail item as complete
+            document.getElementById('wt-rail-resident-links').classList.remove('active');
+            document.getElementById('wt-rail-resident-links').classList.add('complete');
+
+            // Show completion overlay
+            document.getElementById('completionOverlay').classList.add('visible');
+        }
+
+        function initializeDriver() {
+            // Helper to detect caret direction
+            function getCaretClass(position) {
+                if (position.side === 'left') return 'caret-left';
+                if (position.side === 'right') return 'caret-right';
+                if (position.side === 'top') return 'caret-top';
+                if (position.side === 'bottom') return 'caret-bottom';
+                return 'caret-bottom';
+            }
+
+            // Reveal elements on tour start
+            document.getElementById('wt-identity-card').style.opacity = '1';
+            document.getElementById('wt-identity-card').style.transform = 'translateY(0)';
+            document.getElementById('wt-district-map').style.opacity = '1';
+            document.getElementById('wt-district-map').style.transform = 'translateY(0)';
+            document.getElementById('wt-button-container').style.opacity = '1';
+            document.getElementById('wt-button-container').style.transform = 'translateY(0)';
+
+            driverInstance = new window.driver.driver({
+                allowClose: false,
+                overlayOpacity: 0.4,
+                smoothScroll: true,
+                steps: [
+                    {
+                        element: '#wt-header',
+                        popover: {
+                            title: 'Welcome to Resident Links',
+                            description: 'Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience\'s journey.',
+                            side: 'bottom',
+                            align: 'start',
+                        },
+                        onHighlightStarted: () => {
+                            const el = document.querySelector('#wt-header');
+                            if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        },
+                        onHighlighted: (element, step, options) => {
+                            const popover = document.querySelector('.driver-popover');
+                            if (popover) {
+                                popover.classList.remove('caret-left', 'caret-right', 'caret-top', 'caret-bottom');
+                                popover.classList.add(getCaretClass(options));
+                            }
+                        },
+                    },
+                    {
+                        element: '#wt-identity-card',
+                        popover: {
+                            title: 'ReadyStack Identity',
+                            description: 'Your ReadyStack name, landing page URL, and GA4 Master ID establish the core identity for this district.',
+                            side: 'left',
+                            align: 'start',
+                        },
+                        onHighlightStarted: () => {
+                            const el = document.querySelector('#wt-identity-card');
+                            if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        },
+                        onHighlighted: (element, step, options) => {
+                            const popover = document.querySelector('.driver-popover');
+                            if (popover) {
+                                popover.classList.remove('caret-left', 'caret-right', 'caret-top', 'caret-bottom');
+                                popover.classList.add(getCaretClass(options));
+                            }
+                        },
+                    },
+                    {
+                        element: '#wt-district-map',
+                        popover: {
+                            title: 'The District Map',
+                            description: 'This is the journey grid showing five stages: Traffic, Learning, Selecting, Executing, and Expanding. Each participant is a row, each stage is a column.',
+                            side: 'left',
+                            align: 'start',
+                        },
+                        onHighlightStarted: () => {
+                            const el = document.querySelector('#wt-district-map');
+                            if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        },
+                        onHighlighted: (element, step, options) => {
+                            const popover = document.querySelector('.driver-popover');
+                            if (popover) {
+                                popover.classList.remove('caret-left', 'caret-right', 'caret-top', 'caret-bottom');
+                                popover.classList.add(getCaretClass(options));
+                            }
+                        },
+                    },
+                    {
+                        element: '#wt-host-row',
+                        popover: {
+                            title: 'ReadyStack Funds Your District',
+                            description: 'ReadyStack pays 40% of hosting automation fees as lifetime income to drive word-of-mouth. This row maps every engagement item in the ReadyStack journey.',
+                            side: 'left',
+                            align: 'start',
+                        },
+                        onHighlightStarted: () => {
+                            const el = document.querySelector('#wt-host-row');
+                            if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        },
+                        onHighlighted: (element, step, options) => {
+                            const popover = document.querySelector('.driver-popover');
+                            if (popover) {
+                                popover.classList.remove('caret-left', 'caret-right', 'caret-top', 'caret-bottom');
+                                popover.classList.add(getCaretClass(options));
+                            }
+                        },
+                    },
+                    {
+                        element: '[data-pill="p1-1"]',
+                        popover: {
+                            title: 'Participant Link Maps',
+                            description: 'Red indicators mean a link needs a URL. Click a link pill to configure it — this is how you map every interaction in your district.',
+                            side: 'left',
+                            align: 'start',
+                        },
+                        onHighlightStarted: () => {
+                            document.querySelector('[data-pill="p1-1"]').classList.add('do-pulse');
+                            const el = document.querySelector('[data-pill="p1-1"]');
+                            if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        },
+                        onHighlighted: (element, step, options) => {
+                            const popover = document.querySelector('.driver-popover');
+                            if (popover) {
+                                popover.classList.remove('caret-left', 'caret-right', 'caret-top', 'caret-bottom');
+                                popover.classList.add(getCaretClass(options));
+                            }
+                        },
+                        onDeselected: () => {
+                            document.querySelector('[data-pill="p1-1"]').classList.remove('do-pulse');
+                        },
+                        showButtons: ['previous'],
+                    },
+                    {
+                        element: '#wt-continue-button',
+                        popover: {
+                            title: 'Continue to Tasks and Agents',
+                            description: 'Your district map is set — every participant mapped across the five journey stages. Click CONTINUE.',
+                            side: 'left',
+                            align: 'start',
+                        },
+                        onHighlightStarted: () => {
+                            document.getElementById('wt-continue-button').classList.add('do-pulse');
+                            const el = document.querySelector('#wt-continue-button');
+                            if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        },
+                        onHighlighted: (element, step, options) => {
+                            const popover = document.querySelector('.driver-popover');
+                            if (popover) {
+                                popover.classList.remove('caret-left', 'caret-right', 'caret-top', 'caret-bottom');
+                                popover.classList.add(getCaretClass(options));
+                            }
+                        },
+                        onDeselected: () => {
+                            document.getElementById('wt-continue-button').classList.remove('do-pulse');
+                        },
+                        showButtons: ['previous'],
+                    },
+                ],
+                onNextClick: (element, step, options) => {
+                    const currentStepIndex = driverInstance.currentStep;
+
+                    // Step 4: Red pill click (DO step)
+                    if (currentStepIndex === 4) {
+                        const pill = document.querySelector('[data-pill="p1-1"]');
+                        pill.click();
+                        driverInstance.moveNext();
+                        return false;
+                    }
+
+                    // Step 5: Continue button click (DO step)
+                    if (currentStepIndex === 5) {
+                        document.getElementById('wt-continue-button').click();
+                        return false;
+                    }
+
+                    return true;
+                },
+            });
+
+            driverInstance.start();
+
+            // Event listeners for DO steps
+            document.querySelector('[data-pill="p1-1"]').addEventListener('click', function() {
+                if (driverInstance && driverInstance.currentStep === 4) {
+                    // Convert red to green
+                    this.classList.remove('needs-url');
+                    this.classList.add('configured');
+                    this.querySelector('.link-dot').textContent = '●';
+                    this.querySelector('.link-dot').className = 'link-dot green';
+                    redPillClicked = true;
+
+                    // Move to next step
+                    setTimeout(() => {
+                        driverInstance.moveNext();
+                    }, 400);
+                }
+            });
+
+            document.getElementById('wt-continue-button').addEventListener('click', function() {
+                if (driverInstance && driverInstance.currentStep === 5) {
+                    completeModule();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

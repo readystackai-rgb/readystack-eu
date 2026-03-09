@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadyStack Tour — Module 02: Residents</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Driver.js v1.3.1 -->
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
+
+    <!-- Shared Tour Styles -->
+    <link rel="stylesheet" href="../shared/tour-styles.css">
+
+    <style>
+        /* Additional module-specific styles */
+        .role-chip {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .role-chip:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .role-chip.selected {
+            background: var(--green);
+            border-color: var(--green);
+            color: white;
+        }
+
+        .task-col {
+            display: grid;
+            gap: 12px;
+        }
+
+        .task-item {
+            padding: 14px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .automation-pair {
+            display: grid;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .automation-trigger {
+            color: var(--text-secondary);
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .automation-action {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .participants-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .participants-table thead {
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .participants-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        .participants-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .participants-table input {
+            width: 100%;
+            background: rgba(2, 6, 23, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .participants-table input:focus {
+            border-color: rgba(124, 140, 255, 0.4);
+            background: rgba(2, 6, 23, 0.95);
+        }
+
+        .participants-table input::placeholder {
+            color: var(--text-ghost);
+        }
+
+        .participant-row {
+            transition: all 0.2s ease;
+        }
+
+        .participant-row.highlighted {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid rgba(99, 102, 241, 0.5);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            overflow-x: auto;
+        }
+
+        .filter-tab {
+            padding: 8px 14px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .filter-tab:hover {
+            border-color: rgba(124, 140, 255, 0.3);
+        }
+
+        .filter-tab.active {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+            color: white;
+        }
+
+        .add-participant-btn {
+            padding: 10px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-participant-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .next-btn {
+            padding: 12px 24px;
+            background: var(--accent);
+            color: var(--base);
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .next-btn:hover {
+            background: #6578cc;
+        }
+
+        .next-btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .breadcrumb-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .breadcrumb-step {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .breadcrumb-sep {
+            color: var(--text-ghost);
+        }
+
+        .completion-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            backdrop-filter: blur(8px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .completion-card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 20px;
+            padding: 48px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .completion-card h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .completion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 12px;
+            padding: 10px 20px;
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 24px;
+        }
+
+        .completion-continue-btn {
+            padding: 12px 28px;
+            background: var(--accent);
+            color: var(--base);
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .completion-continue-btn:hover {
+            background: #6578cc;
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            margin: 28px 0 16px 0;
+        }
+
+        .module-header {
+            margin-bottom: 32px;
+        }
+
+        .module-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .module-header p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .hidden-section {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: all 0.6s ease;
+        }
+
+        .hidden-section.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Overlay -->
+    <div id="startOverlay" class="start-overlay">
+        <div style="text-align: center;">
+            <h1 style="font-family: 'Poppins', sans-serif; font-size: 40px; font-weight: 800; color: white; margin-bottom: 12px;">Module 2: Residents</h1>
+            <p style="font-size: 16px; color: var(--text-secondary); margin-bottom: 32px; max-width: 400px;">Learn how to assemble the district that brings your market story to life.</p>
+            <button id="continueBtn" style="padding: 12px 36px; background: var(--accent); color: var(--base); border: none; border-radius: 10px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer;">Continue Tour</button>
+        </div>
+    </div>
+
+    <div style="display: flex; height: 100vh; background-color: var(--base);">
+        <!-- Left Rail -->
+        <div style="width: 280px; background: rgba(2, 6, 23, 0.5); border-right: 1px solid rgba(255, 255, 255, 0.08); overflow-y: auto; padding: 24px 0;">
+            <div style="padding: 0 16px;">
+                <div class="phase-label" style="color: var(--text-ghost);">COMPOSE</div>
+            </div>
+
+            <!-- Rail Items -->
+            <div id="rail" style="display: flex; flex-direction: column; gap: 8px; padding: 8px 12px;">
+                <!-- 1. Define Market Story (COMPLETE) -->
+                <div class="rail-item complete" data-step="0">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span>Define Market Story</span>
+                </div>
+
+                <!-- 2. Residents (ACTIVE) -->
+                <div class="rail-item active" data-step="1">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                    <span>Residents</span>
+                </div>
+
+                <!-- 3. Resident Links (LOCKED) -->
+                <div class="rail-item locked" data-step="2">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5s-5 2.24-5 5v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+                    </svg>
+                    <span>Resident Links</span>
+                </div>
+
+                <!-- 4. Tasks and Agents (LOCKED) -->
+                <div class="rail-item locked" data-step="3">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                    </svg>
+                    <span>Tasks and Agents</span>
+                </div>
+
+                <div style="padding: 12px 0; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="phase-label" style="color: var(--text-ghost);">OPERATIONS</div>
+                </div>
+
+                <!-- 5. District Finance (LOCKED) -->
+                <div class="rail-item locked" data-step="4">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                    </svg>
+                    <span>District Finance</span>
+                </div>
+
+                <!-- 6. District Ecosystem (LOCKED) -->
+                <div class="rail-item locked" data-step="5">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <span>District Ecosystem</span>
+                </div>
+
+                <!-- 7. My Residents (LOCKED) -->
+                <div class="rail-item locked" data-step="6">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.64 2.47 1.78 2.47 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    <span>My Residents</span>
+                </div>
+
+                <!-- 8. Looker (LOCKED) -->
+                <div class="rail-item locked" data-step="7">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"/>
+                    </svg>
+                    <span>Looker</span>
+                </div>
+
+                <!-- 9. GA4 (LOCKED) -->
+                <div class="rail-item locked" data-step="8">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2V17zm4 0h-2V7h2V17zm4 0h-2v-4h2V17z"/>
+                    </svg>
+                    <span>GA4</span>
+                </div>
+
+                <!-- 10. Analytics (LOCKED) -->
+                <div class="rail-item locked" data-step="9">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4 4h2v14h-2zm4-2h2v16h-2z"/>
+                    </svg>
+                    <span>Analytics</span>
+                </div>
+
+                <!-- 11. Automation (LOCKED) -->
+                <div class="rail-item locked" data-step="10">
+                    <svg class="rail-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                    <span>Automation</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div style="flex: 1; overflow-y: auto; padding: 32px 40px;">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb-container">
+                <span class="breadcrumb-item" style="color: var(--text-secondary);">< Define Market Story</span>
+                <span class="breadcrumb-sep">|</span>
+                <span class="breadcrumb-step">2 / 11 · RESIDENTS</span>
+                <span class="breadcrumb-sep">|</span>
+                <span class="breadcrumb-item">Resident Links ></span>
+            </div>
+
+            <!-- Module Header -->
+            <div class="module-header" id="moduleHeader">
+                <h1>Who's in Your District?</h1>
+                <p>Review the tasks from the video and assemble a district to deepen the learning and help audiences execute the lesson.</p>
+            </div>
+
+            <!-- Tasks Section (hidden initially) -->
+            <div id="tasksSection" class="hidden-section">
+                <div class="section-title">Tasks: Actions + Automations</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px;">
+                    <!-- Actions Column -->
+                    <div>
+                        <h3 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">Actions</h3>
+                        <div class="task-col">
+                            <div class="task-item">1. Identify your "smallest viable audience" by meticulously defining who you seek to serve</div>
+                            <div class="task-item">2. Develop a "Purple Cow" offering that is truly remarkable and differentiates you</div>
+                            <div class="task-item">3. Craft compelling stories that resonate deeply with your smallest viable audience</div>
+                            <div class="task-item">4. Prioritize consistency in your brand's message and delivery</div>
+                            <div class="task-item">5. Shift focus from chasing broad attention to cultivating deep influence</div>
+                            <div class="task-item">6. Implement mechanisms to measure genuine engagement and action</div>
+                        </div>
+                    </div>
+
+                    <!-- Automations Column -->
+                    <div>
+                        <h3 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">Automations</h3>
+                        <div class="task-col">
+                            <div class="automation-pair">
+                                <div class="automation-trigger">New subscriber joins niche email list</div>
+                                <div class="automation-action">→ Initiate automated email sequence sharing core brand story</div>
+                            </div>
+                            <div class="automation-pair">
+                                <div class="automation-trigger">Existing customer provides positive review</div>
+                                <div class="automation-action">→ Send automated thank you with shareable link</div>
+                            </div>
+                            <div class="automation-pair">
+                                <div class="automation-trigger">"Remarkable" content gets high engagement</div>
+                                <div class="automation-action">→ Create lookalike audience and launch targeted ad</div>
+                            </div>
+                            <div class="automation-pair">
+                                <div class="automation-trigger">Visitor spends 3+ minutes on About page</div>
+                                <div class="automation-action">→ Trigger personalized pop-up or exit-intent offer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggested Roles Section (hidden initially) -->
+            <div id="rolesSection" class="hidden-section">
+                <div class="section-title">Suggested Roles</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px;">
+                    <div class="role-chip" data-role="branding">Branding & Identity Designers</div>
+                    <div class="role-chip" data-role="marketing">Niche Marketing Consultants</div>
+                    <div class="role-chip" data-role="community">Community Building Platforms</div>
+                    <div class="role-chip" data-role="storytelling">Storytelling Coaches</div>
+                    <div class="role-chip" data-role="creators">Independent Creators</div>
+                    <div class="role-chip" data-role="saas">SaaS Founders</div>
+                    <div class="role-chip" data-role="boutique">Boutique Service Providers</div>
+                    <div class="role-chip" data-role="education">Online Educators</div>
+                    <div class="role-chip" data-role="authors">Aspiring Authors</div>
+                    <div class="role-chip" data-role="nonprofit">Non-profit Organizers</div>
+                    <div class="role-chip" data-role="product">Product Developers</div>
+                    <div class="role-chip" data-role="speakers">Public Speakers</div>
+                </div>
+            </div>
+
+            <!-- Participants Table Section (hidden initially) -->
+            <div id="participantsSection" class="hidden-section">
+                <div class="section-title">Participants</div>
+
+                <!-- Filter Tabs -->
+                <div class="filter-tabs">
+                    <div class="filter-tab active">ALL 3</div>
+                    <div class="filter-tab">CONTENT 0</div>
+                    <div class="filter-tab">MARKETING 0</div>
+                    <div class="filter-tab">SALES 0</div>
+                    <div class="filter-tab">PRODUCT 0</div>
+                    <div class="filter-tab">SECURITY 0</div>
+                    <div class="filter-tab">FINANCE 0</div>
+                    <div class="filter-tab">STRATEGY 0</div>
+                    <div class="filter-tab">COMMUNITY 0</div>
+                    <div class="filter-tab">CUSTOMER SUCCESS 0</div>
+                    <div class="filter-tab">BUSINESS OPERATIONS 0</div>
+                </div>
+
+                <!-- Participants Table -->
+                <div style="overflow-x: auto; margin-bottom: 20px;">
+                    <table class="participants-table">
+                        <thead>
+                            <tr>
+                                <th>NAME</th>
+                                <th>COMPANY</th>
+                                <th>SPECIALTY</th>
+                                <th>EMAIL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="participant-row" id="participant-1">
+                                <td><input type="text" placeholder="Participant name" value="" /></td>
+                                <td><input type="text" placeholder="Company" value="" /></td>
+                                <td><input type="text" placeholder="Specialty" value="" /></td>
+                                <td><input type="email" placeholder="Email" value="" /></td>
+                            </tr>
+                            <tr class="participant-row" id="participant-2">
+                                <td><input type="text" placeholder="Participant name" value="" /></td>
+                                <td><input type="text" placeholder="Company" value="" /></td>
+                                <td><input type="text" placeholder="Specialty" value="" /></td>
+                                <td><input type="email" placeholder="Email" value="" /></td>
+                            </tr>
+                            <tr class="participant-row" id="participant-3">
+                                <td><input type="text" placeholder="Participant name" value="" /></td>
+                                <td><input type="text" placeholder="Company" value="" /></td>
+                                <td><input type="text" placeholder="Specialty" value="" /></td>
+                                <td><input type="email" placeholder="Email" value="" /></td>
+                            </tr>
+                            <tr class="participant-row" id="participant-4">
+                                <td><input type="text" placeholder="Participant name" value="" /></td>
+                                <td><input type="text" placeholder="Company" value="" /></td>
+                                <td><input type="text" placeholder="Specialty" value="" /></td>
+                                <td><input type="email" placeholder="Email" value="" /></td>
+                            </tr>
+                            <tr class="participant-row" id="participant-5">
+                                <td><input type="text" placeholder="Participant name" value="" /></td>
+                                <td><input type="text" placeholder="Company" value="" /></td>
+                                <td><input type="text" placeholder="Specialty" value="" /></td>
+                                <td><input type="email" placeholder="Email" value="" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add Participant Button -->
+                <button class="add-participant-btn" style="margin-bottom: 24px;">+ Participant</button>
+
+                <!-- NEXT Button -->
+                <button id="nextBtn" class="next-btn">
+                    <span style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        NEXT
+                        <span style="font-size: 11px;">Confirming your residents unlocks the District Map.</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { driver } = window;
+
+        // State
+        let tourStarted = false;
+        let currentStep = 0;
+        let driverInstance = null;
+
+        // Start button
+        document.getElementById('continueBtn').addEventListener('click', () => {
+            document.getElementById('startOverlay').style.display = 'none';
+            tourStarted = true;
+            initializeTour();
+        });
+
+        function initializeTour() {
+            const steps = [
+                {
+                    element: '#moduleHeader',
+                    popover: {
+                        title: 'WELCOME TO RESIDENTS',
+                        description: 'Assemble the people and platforms that bring your market story to life. These become the nodes in your district network.',
+                        side: 'right',
+                        align: 'start',
+                    },
+                    onHighlighted: () => {
+                        document.querySelector('.driver-popover').classList.add('caret-left');
+                    }
+                },
+                {
+                    element: '#tasksSection',
+                    popover: {
+                        title: 'TASKS: ACTIONS + AUTOMATIONS',
+                        description: 'These are the key actions and automation workflows derived from your market story. They guide district member engagement.',
+                        side: 'right',
+                        align: 'start',
+                    },
+                    onHighlighted: () => {
+                        revealSection('#tasksSection');
+                        document.querySelector('.driver-popover').classList.add('caret-left');
+                    }
+                },
+                {
+                    element: '#rolesSection',
+                    popover: {
+                        title: 'SUGGESTED ROLES',
+                        description: 'Click a role chip to assign it as a specialty for the first participant. This determines who belongs in your district.',
+                        side: 'right',
+                        align: 'start',
+                    },
+                    onHighlighted: () => {
+                        revealSection('#rolesSection');
+                        document.querySelector('.driver-popover').classList.add('caret-left');
+                    }
+                },
+                {
+                    element: '[data-role="branding"]',
+                    popover: {
+                        title: 'ASSIGN A ROLE',
+                        description: 'Click on "Branding & Identity Designers" to assign this specialty to Participant 1.',
+                        side: 'bottom',
+                        align: 'center',
+                    },
+                    onHighlighted: () => {
+                        const chip = document.querySelector('[data-role="branding"]');
+                        chip.classList.add('do-pulse');
+                        document.querySelector('.driver-popover').classList.add('caret-top');
+                    }
+                },
+                {
+                    element: '#participant-1 input[type="text"]',
+                    popover: {
+                        title: 'ADD A PARTICIPANT',
+                        description: 'Click on the NAME field to auto-populate a sample participant. This becomes your first district member.',
+                        side: 'right',
+                        align: 'start',
+                    },
+                    onHighlighted: () => {
+                        revealSection('#participantsSection');
+                        const input = document.querySelector('#participant-1 input[type="text"]');
+                        input.classList.add('do-pulse');
+                        document.querySelector('.driver-popover').classList.add('caret-left');
+                    }
+                },
+                {
+                    element: '#participantsSection',
+                    popover: {
+                        title: 'PARTICIPANT TABLE',
+                        description: 'This is your resident network. Filter by specialty, add more participants, and define who belongs in your district.',
+                        side: 'left',
+                        align: 'start',
+                    },
+                    onHighlighted: () => {
+                        document.querySelector('.driver-popover').classList.add('caret-right');
+                    }
+                },
+                {
+                    element: '#nextBtn',
+                    popover: {
+                        title: 'CONTINUE TO RESIDENT LINKS',
+                        description: 'Click NEXT to lock in your participants and unlock the next module where you\'ll define the relationships between residents.',
+                        side: 'top',
+                        align: 'center',
+                    },
+                    onHighlighted: () => {
+                        const btn = document.getElementById('nextBtn');
+                        btn.classList.add('do-pulse');
+                        document.querySelector('.driver-popover').classList.add('caret-bottom');
+                    }
+                }
+            ];
+
+            driverInstance = driver({
+                popoverClass: 'driver-popover',
+                steps: steps,
+                showButtons: ['previous', 'next'],
+                allowClose: false,
+                allowKeyboardControl: true,
+                onDestroyed: () => {
+                    console.log('Tour destroyed');
+                }
+            });
+
+            // Attach step listeners
+            steps.forEach((step, index) => {
+                step.onAfterHighlighted = () => {
+                    // Remove all pulse classes except for current step
+                    document.querySelectorAll('.do-pulse').forEach((el, idx) => {
+                        if (idx !== index) el.classList.remove('do-pulse');
+                    });
+
+                    if (index === 3) {
+                        // DO step: Assign role
+                        const chip = document.querySelector('[data-role="branding"]');
+                        chip.addEventListener('click', handleRoleSelection, { once: true });
+                    } else if (index === 4) {
+                        // DO step: Add participant
+                        const input = document.querySelector('#participant-1 input[type="text"]');
+                        input.addEventListener('click', handleParticipantClick, { once: true });
+                    } else if (index === 6) {
+                        // DO step: Click NEXT
+                        const btn = document.getElementById('nextBtn');
+                        btn.addEventListener('click', handleNextClick, { once: true });
+                    }
+                };
+            });
+
+            driverInstance.drive(0);
+        }
+
+        function revealSection(selector) {
+            const section = document.querySelector(selector);
+            if (section) {
+                section.classList.add('revealed');
+            }
+        }
+
+        function handleRoleSelection(event) {
+            const chip = event.target.closest('.role-chip');
+            if (!chip) return;
+
+            // Mark as selected
+            document.querySelectorAll('.role-chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+
+            // Populate Participant 1 specialty
+            const specialtyField = document.querySelector('#participant-1 input[type="text"]:nth-of-type(3)');
+            specialtyField.value = chip.textContent;
+
+            // Highlight participant row
+            document.getElementById('participant-1').classList.add('highlighted');
+
+            // Advance to next step
+            if (driverInstance) driverInstance.moveNext();
+        }
+
+        function handleParticipantClick(event) {
+            const input = event.target;
+
+            // Auto-populate with sample name
+            input.value = 'Jordan Rivera';
+            input.style.fontWeight = 'bold';
+            input.style.color = 'white';
+
+            // Advance to next step
+            if (driverInstance) driverInstance.moveNext();
+        }
+
+        function handleNextClick(event) {
+            event.preventDefault();
+
+            // Mark Residents rail as complete
+            const residentsRailItem = document.querySelector('.rail-item.active');
+            residentsRailItem.classList.remove('active');
+            residentsRailItem.classList.add('complete');
+
+            // Show completion overlay
+            showCompletionOverlay();
+        }
+
+        function showCompletionOverlay() {
+            const overlay = document.createElement('div');
+            overlay.className = 'completion-overlay';
+            overlay.innerHTML = `
+                <div class="completion-card">
+                    <h2>Residents — Complete</h2>
+                    <div class="completion-badge">
+                        <svg style="width: 16px; height: 16px;" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                        COMPLETED
+                    </div>
+                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.6;">You've assembled your district of residents. Next, define the relationships and connections between them.</p>
+                    <a href="tour-03-resident-links.html" style="display: inline-block;">
+                        <button class="completion-continue-btn">
+                            Continue to Module 3: Resident Links →
+                        </button>
+                    </a>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+    </script>
+</body>
+</html>
