@@ -1622,6 +1622,10 @@
         function beginWalkthrough() {
             document.getElementById('startScreen').style.display = 'none';
 
+            // Navigation lock — prevents rapid-click race conditions that lock the popover at 0,0
+            let navLocked = false;
+            const NAV_LOCK_MS = 600; // ignore clicks within this window after any navigation
+
             driverObj = window.driver.js.driver({
                 showProgress: true,
                 animate: true,
@@ -1635,6 +1639,29 @@
                     document.querySelectorAll('.do-pulse').forEach(el => el.classList.remove('do-pulse'));
                 },
                 onHighlighted: () => {
+                    // Release nav lock once the new step has fully rendered
+                    setTimeout(() => { navLocked = false; }, 100);
+
+                    // Throttle the Previous (and Next) buttons to prevent double-click lock-ups
+                    const prevBtn = document.querySelector('.driver-popover-prev-btn');
+                    const nextBtn = document.querySelector('.driver-popover-next-btn');
+                    [prevBtn, nextBtn].forEach(btn => {
+                        if (!btn) return;
+                        // Replace button with clone to strip any old listeners, then add guarded one
+                        const guard = (e) => {
+                            if (navLocked) {
+                                e.stopImmediatePropagation();
+                                e.preventDefault();
+                                return;
+                            }
+                            navLocked = true;
+                            // Fallback unlock in case onHighlighted never fires (edge case)
+                            setTimeout(() => { navLocked = false; }, NAV_LOCK_MS);
+                        };
+                        // Use capture phase so our guard runs BEFORE Driver.js's handler
+                        btn.addEventListener('click', guard, true);
+                    });
+
                     // Detect arrow side from Driver.js arrow classes → set caret class on popover
                     const arrow = document.querySelector('.driver-popover-arrow');
                     const popover = document.querySelector('.driver-popover');
@@ -1865,13 +1892,13 @@
                         }
                     },
 
-                    // Frame 11: DO — Click OK to advance (scroll back up to video analysis)
+                    // Frame 11: DO — Click OK to advance (scroll OK button into view)
                     {
                         element: '#wt-ok-btn',
                         onHighlightStarted: () => {
-                            // Scroll back up to the video analysis section
-                            const va = document.getElementById('wt-video-analysis');
-                            va.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Scroll the OK button itself into view, centered vertically
+                            const okBtnEl = document.getElementById('wt-ok-btn');
+                            okBtnEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             // Light up the Residents rail item — vivid green glow
                             const residentsRail = document.getElementById('wt-rail-residents');
                             residentsRail.style.borderColor = 'rgba(16,185,129,0.9)';
@@ -1898,8 +1925,8 @@
                         popover: {
                             title: 'Continue to Residents',
                             description: 'Your market story is set — the problem, the audience, the strategy, and the automations are all defined from one video. <strong>Click OK</strong> to accept this analysis and move on to assembling the people who\'ll populate your district.',
-                            side: 'left',
-                            align: 'center',
+                            side: 'top',
+                            align: 'end',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const okBtn = document.getElementById('wt-ok-btn');
@@ -2415,7 +2442,7 @@
                         },
                         popover: {
                             title: 'Angel Investors',
-                            description: 'Angel investors back your district with capital pledges. Here, <strong>Alex Mendez</strong> from Meridian Ventures has pledged <strong>$5,000</strong> (confirmed), and <strong>Priya Kapoor</strong> from Kapoor Capital has pledged <strong>$10,000</strong> (pending). Use the <strong>+ Add Angel Investor</strong> button to bring more backers on board.',
+                            description: 'Angel investors back your district with capital pledges. Here, <strong>Alex Mendez</strong> from Meridian Ventures has pledged <strong>$5,000</strong> (confirmed). Use the <strong>+ Add Angel Investor</strong> button to bring more backers on board.',
                             side: 'bottom',
                             align: 'start',
                             onPopoverRender: () => {
