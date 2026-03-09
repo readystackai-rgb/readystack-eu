@@ -686,8 +686,8 @@
                                 <!-- Left: Label + funding text -->
                                 <div style="min-width: 140px; flex-shrink: 0;">
                                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-                                        <span style="font-size: 16px;">🛡️</span>
-                                        <span style="font-size: 14px; font-weight: 900; color: var(--green); font-family: 'Poppins', sans-serif;">ReadyStack</span>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#6366f1" stroke="none"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+                                        <span style="font-size: 14px; font-weight: 900; color: var(--accent-indigo); font-family: 'Poppins', sans-serif;">ReadyStack</span>
                                         <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">- HOST</span>
                                     </div>
                                     <p style="font-size: 12px; color: white; font-weight: 700; line-height: 1.4;">Pays 40% of<br>Hosting Automation Fees<br>to drive WOM</p>
@@ -1898,26 +1898,10 @@
                         popover: {
                             title: 'Continue to Residents',
                             description: 'Your market story is set — the problem, the audience, the strategy, and the automations are all defined from one video. <strong>Click OK</strong> to accept this analysis and move on to assembling the people who\'ll populate your district.',
-                            side: 'top',
-                            align: 'end',
+                            side: 'left',
+                            align: 'center',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
-                                // Move caret to right side so it points down at the OK button
-                                const popover = document.querySelector('.driver-popover');
-                                if (popover) {
-                                    popover.classList.remove('caret-bottom');
-                                    popover.classList.add('caret-bottom-right');
-                                }
-                                setTimeout(() => {
-                                    const p = document.querySelector('.driver-popover');
-                                    if (p) {
-                                        p.style.position = 'fixed';
-                                        p.style.bottom = 'auto';
-                                        p.style.right = '40px';
-                                        p.style.left = 'auto';
-                                        p.style.top = '30%';
-                                    }
-                                }, 50);
                                 const okBtn = document.getElementById('wt-ok-btn');
                                 okBtn.classList.add('do-pulse');
                                 const contBtn = document.getElementById('wt-continue-residents');
@@ -2228,71 +2212,67 @@
                         }
                     },
 
-                    // Frame 23: DO — Click + Link to add a traffic source
+                    // Frame 23: DO — Click + Link, pick YouTube source
                     {
-                        element: '#wt-add-traffic-link',
+                        element: '#wt-link-p1',
                         onHighlightStarted: () => {
                             document.getElementById('wt-link-p1').scrollIntoView({ behavior: 'smooth', block: 'center' });
                         },
+                        disableActiveInteraction: false,
                         popover: {
                             title: 'Add a Traffic Source',
-                            description: 'Each participant needs traffic sources to drive visitors into the district. <strong>Click + LINK</strong> to add Jordan Rivera\u2019s first traffic source.',
+                            description: 'Each participant needs traffic sources. <strong>Click + LINK</strong> on Jordan Rivera\u2019s row, then pick <strong>YouTube</strong> from the dropdown.',
                             side: 'bottom',
-                            align: 'start',
+                            align: 'end',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const btn = document.getElementById('wt-add-traffic-link');
                                 btn.classList.add('do-pulse');
-                                const handler = () => {
-                                    btn.removeEventListener('click', handler);
+                                // Phase 1: Click + Link to show picker
+                                const linkHandler = () => {
+                                    btn.removeEventListener('click', linkHandler);
                                     btn.classList.remove('do-pulse');
-                                    // Show the traffic source picker
                                     const picker = document.getElementById('wt-traffic-picker');
                                     picker.style.display = 'block';
-                                    setTimeout(() => driverObj.moveNext(), 300);
+                                    // Update popover text
+                                    const desc = document.querySelector('.driver-popover-description');
+                                    if (desc) desc.innerHTML = 'Pick the type of traffic source. Jordan Rivera has a YouTube channel — <strong>click YouTube</strong> to select it.';
+                                    const title = document.querySelector('.driver-popover-title');
+                                    if (title) title.textContent = 'CHOOSE TRAFFIC SOURCE';
+                                    // Phase 2: Click YouTube
+                                    const ytOption = document.getElementById('wt-source-youtube');
+                                    ytOption.classList.add('do-pulse');
+                                    ytOption.style.background = 'rgba(124,140,255,0.15)';
+                                    ytOption.style.cursor = 'pointer';
+                                    const ytHandler = () => {
+                                        ytOption.removeEventListener('click', ytHandler);
+                                        ytOption.classList.remove('do-pulse');
+                                        picker.style.display = 'none';
+                                        // Show URL input
+                                        document.getElementById('wt-traffic-url-input').style.display = 'block';
+                                        setTimeout(() => driverObj.moveNext(), 300);
+                                    };
+                                    ytOption.addEventListener('click', ytHandler);
                                 };
-                                btn.addEventListener('click', handler);
+                                btn.addEventListener('click', linkHandler);
                             }
                         }
                     },
 
-                    // Frame 23b: DO — Select YouTube as traffic source
+                    // Frame 23b: DO — Enter traffic URL
                     {
-                        element: '#wt-traffic-picker',
-                        popover: {
-                            title: 'Choose Traffic Source',
-                            description: 'Pick the type of traffic source. Jordan Rivera has a YouTube channel — <strong>click YouTube</strong> to select it.',
-                            side: 'right',
-                            align: 'start',
-                            showButtons: ['previous'],
-                            onPopoverRender: () => {
-                                const ytOption = document.getElementById('wt-source-youtube');
-                                ytOption.classList.add('do-pulse');
-                                ytOption.style.background = 'rgba(124,140,255,0.1)';
-                                const handler = () => {
-                                    ytOption.removeEventListener('click', handler);
-                                    ytOption.classList.remove('do-pulse');
-                                    // Hide picker, show URL input
-                                    document.getElementById('wt-traffic-picker').style.display = 'none';
-                                    document.getElementById('wt-traffic-url-input').style.display = 'block';
-                                    setTimeout(() => driverObj.moveNext(), 300);
-                                };
-                                ytOption.addEventListener('click', handler);
-                            }
-                        }
-                    },
-
-                    // Frame 23c: DO — Enter traffic URL
-                    {
-                        element: '#wt-traffic-url-field',
+                        element: '#wt-link-p1',
                         onHighlightStarted: () => {
                             document.getElementById('wt-link-p1').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Make sure URL input is visible
+                            document.getElementById('wt-traffic-url-input').style.display = 'block';
                         },
+                        disableActiveInteraction: false,
                         popover: {
                             title: 'Enter Source URL',
                             description: 'Type the URL for this traffic source. <strong>Click in the field</strong> — we\u2019ll auto-fill Jordan\u2019s YouTube channel.',
                             side: 'bottom',
-                            align: 'start',
+                            align: 'end',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const field = document.getElementById('wt-traffic-url-field');
@@ -2300,7 +2280,6 @@
                                 const handler = () => {
                                     field.removeEventListener('click', handler);
                                     field.classList.remove('do-pulse');
-                                    // Type URL character by character
                                     const url = 'youtube.com/@jordanrivera';
                                     let i = 0;
                                     const typeChar = () => {
@@ -2309,7 +2288,6 @@
                                             i++;
                                             setTimeout(typeChar, 40);
                                         } else {
-                                            // Done typing — hide input, add green chip
                                             setTimeout(() => {
                                                 document.getElementById('wt-traffic-url-input').style.display = 'none';
                                                 const chipContainer = document.querySelector('#wt-link-p1 div > div:nth-child(2)');
@@ -2319,7 +2297,6 @@
                                                     newChip.innerHTML = '<span style="color: var(--green); font-size: 8px;">●</span> YouTube Channel';
                                                     chipContainer.insertBefore(newChip, chipContainer.firstChild);
                                                 }
-                                                // Update sources text
                                                 const sourcesText = document.querySelector('#wt-link-p1 div div:first-child div:last-child');
                                                 if (sourcesText && sourcesText.textContent.includes('No sources')) {
                                                     sourcesText.innerHTML = '<span style="color: var(--green); font-size: 11px; font-weight: 600;">1 source</span>';
