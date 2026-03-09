@@ -28,9 +28,16 @@
       50% { box-shadow: 0 0 20px 8px rgba(124, 140, 255, 0.35), 0 0 40px 16px rgba(124, 140, 255, 0.12); }
     }
     .logo-glow { animation: logoGlow 3s ease-in-out infinite; border-radius: 50%; }
+    /* When inside an iframe (Wix embed), pin content to top instead of centering */
+    body.in-iframe { align-items: flex-start; padding-top: 40px; }
   </style>
+  <script>
+    // Detect iframe and add class before first paint
+    if (window.parent !== window) document.documentElement.classList.add('in-iframe-host');
+  </script>
 </head>
 <body class="bg-[#0a0f1e] min-h-screen flex items-center justify-center">
+  <script>if (window.parent !== window) document.body.classList.add('in-iframe');</script>
 
   <!-- Loading state -->
   <div id="loading" class="text-center">
