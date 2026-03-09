@@ -1279,7 +1279,12 @@
         persistAppState();
         const returnUrl   = window.location.href;
         const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
-        window.location.href = authUrl;
+        // Google blocks OAuth inside iframes — open in new tab when embedded
+        if (window.parent !== window) {
+          window.open(authUrl, '_blank');
+        } else {
+          window.location.href = authUrl;
+        }
       };
 
       // Handle LOGIN button click always triggers Google OAuth
