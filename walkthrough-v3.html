@@ -46,7 +46,7 @@
         .driver-popover-prev-btn:hover { background: rgba(255,255,255,0.05) !important; color: white !important; }
         .driver-popover-next-btn, .driver-popover-close-btn { background: var(--accent) !important; color: var(--base) !important; border: none !important; border-radius: 10px !important; font-size: 11px !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; padding: 8px 20px !important; text-shadow: none !important; }
         .driver-popover-next-btn:hover, .driver-popover-close-btn:hover { background: #6578cc !important; }
-        .driver-popover-progress-text { color: var(--text-dim) !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: 0.15em !important; text-transform: uppercase !important; }
+        .driver-popover-progress-text { color: white !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: 0.15em !important; text-transform: uppercase !important; }
         /* ── Rail ── */
         .phase-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; padding: 4px 0 8px 14px; }
         .rail-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; white-space: nowrap; position: relative; border: 1px solid transparent; color: var(--text-muted); transition: all 0.2s ease; }
@@ -637,7 +637,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
                             <div>
                                 <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); display: block; margin-bottom: 6px;">ReadyStack Name</span>
-                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--accent-indigo);"><span style="color: var(--accent-indigo);">ReadyStack</span> Campaign</div>
+                                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--accent-indigo);"><span style="color: var(--accent-indigo); font-family: 'Poppins', sans-serif; font-weight: 700;">ReadyStack</span> Campaign</div>
                             </div>
                             <div>
                                 <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); display: block; margin-bottom: 6px;">Landing Page URL</span>
@@ -711,12 +711,24 @@
                         <div id="wt-link-p1" class="wt-link-participant" style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
                             <div style="display: flex; align-items: flex-start; gap: 16px;">
                                 <!-- Left: Name + sources -->
-                                <div style="min-width: 120px; flex-shrink: 0;">
+                                <div style="min-width: 120px; flex-shrink: 0; position: relative;">
                                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                                         <span style="font-size: 14px; font-weight: 700; color: white;">Jordan Rivera</span>
                                         <button id="wt-add-traffic-link" style="background: rgba(124,140,255,0.15); border: 1px solid rgba(124,140,255,0.3); color: var(--accent); padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit;">+ Link</button>
                                     </div>
                                     <div style="font-size: 11px; color: var(--text-ghost); font-style: italic;">No sources</div>
+                                    <!-- Traffic source picker (hidden by default) -->
+                                    <div id="wt-traffic-picker" style="display: none; position: absolute; z-index: 100; background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; padding: 12px; min-width: 200px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+                                        <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px;">Choose Source Type</div>
+                                        <div id="wt-source-youtube" style="padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; color: white; display: flex; align-items: center; gap: 8px; transition: background 0.2s;"><span style="color: #ef4444;">▶</span> YouTube</div>
+                                        <div style="padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">📝 Blog</div>
+                                        <div style="padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">📱 Social Media</div>
+                                        <div style="padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">🎙️ Podcast</div>
+                                    </div>
+                                    <!-- Traffic URL input (hidden by default) -->
+                                    <div id="wt-traffic-url-input" style="display: none; margin-top: 8px;">
+                                        <input id="wt-traffic-url-field" type="text" placeholder="Enter source URL..." style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--accent); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: white; font-family: inherit; outline: none;">
+                                    </div>
                                 </div>
                                 <!-- Right: Link chips -->
                                 <div style="display: flex; flex-wrap: wrap; gap: 6px; flex: 1;">
@@ -810,10 +822,25 @@
                                 <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--amber);">Pledge</span>
                                 <span style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);">Status</span>
                             </div>
+                            <!-- Initial investor row -->
+                            <div style="display: grid; grid-template-columns: 2fr 2fr 1.5fr 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.05); align-items: center;">
+                                <span style="font-size: 13px; color: white; font-weight: 600;">Alex Mendez</span>
+                                <span style="font-size: 13px; color: var(--text-secondary);">Meridian Ventures</span>
+                                <span style="font-size: 13px; color: var(--green); font-weight: 700;">$5,000</span>
+                                <span style="font-size: 11px; color: var(--green); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">Confirmed</span>
+                            </div>
                         </div>
 
                         <!-- Add Angel Investor button -->
                         <button id="wt-add-angel-btn" style="background: transparent; border: 1px solid rgba(245,158,11,0.3); color: var(--amber); padding: 10px 20px; border-radius: 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; transition: all 0.2s ease;">+ Add Angel Investor</button>
+
+                        <!-- Angel investor type picker (hidden by default) -->
+                        <div id="wt-angel-picker" style="display: none; margin-top: 12px; background: var(--surface); border: 1px solid var(--green-border); border-radius: 12px; padding: 12px; min-width: 240px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+                            <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px;">Angel Type</div>
+                            <div id="wt-angel-awareness" style="padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--green); font-weight: 600; display: flex; align-items: center; gap: 8px; border: 1px solid transparent; transition: all 0.2s;">💰 Awareness Angel</div>
+                            <div style="padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">📊 Observation Angel</div>
+                            <div style="padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">🌱 Seed Angel</div>
+                        </div>
                     </div>
 
                     <!-- District Revenue Snapshot -->
@@ -970,7 +997,7 @@
             <div style="position: absolute; left: 380px; top: 220px; transform: translate(-50%, -50%); z-index: 20;">
                 <div style="display: flex; align-items: center; justify-content: center; background: #01040d; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 12px; border: 2.5px solid #ffffff; width: 68px; height: 68px; transform: rotate(45deg);">
                     <div style="transform: rotate(-45deg);">
-                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7c8cff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="#6366f1" stroke="none"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
                     </div>
                 </div>
             </div>
@@ -1881,6 +1908,16 @@
                                     popover.classList.remove('caret-bottom');
                                     popover.classList.add('caret-bottom-right');
                                 }
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.bottom = 'auto';
+                                        p.style.right = '40px';
+                                        p.style.left = 'auto';
+                                        p.style.top = '30%';
+                                    }
+                                }, 50);
                                 const okBtn = document.getElementById('wt-ok-btn');
                                 okBtn.classList.add('do-pulse');
                                 const contBtn = document.getElementById('wt-continue-residents');
@@ -2191,15 +2228,15 @@
                         }
                     },
 
-                    // Frame 23: DO — Add a Traffic Link
+                    // Frame 23: DO — Click + Link to add a traffic source
                     {
                         element: '#wt-add-traffic-link',
                         onHighlightStarted: () => {
                             document.getElementById('wt-link-p1').scrollIntoView({ behavior: 'smooth', block: 'center' });
                         },
                         popover: {
-                            title: 'Add a Traffic Link',
-                            description: 'Each participant needs traffic sources mapped to their row. <strong>Click + LINK</strong> on Jordan Rivera\u2019s row to add a traffic source.',
+                            title: 'Add a Traffic Source',
+                            description: 'Each participant needs traffic sources to drive visitors into the district. <strong>Click + LINK</strong> to add Jordan Rivera\u2019s first traffic source.',
                             side: 'bottom',
                             align: 'start',
                             showButtons: ['previous'],
@@ -2209,22 +2246,92 @@
                                 const handler = () => {
                                     btn.removeEventListener('click', handler);
                                     btn.classList.remove('do-pulse');
-                                    // Simulate adding a traffic link chip
-                                    const chipContainer = document.querySelector('#wt-link-p1 .wt-link-participant div:last-child') || document.querySelector('#wt-link-p1 div div:nth-child(2)');
-                                    if (chipContainer) {
-                                        const newChip = document.createElement('span');
-                                        newChip.style.cssText = 'background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--green); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; animation: fadeIn 0.3s ease;';
-                                        newChip.innerHTML = '<span style="color: var(--green); font-size: 8px;">\u25CF</span> YouTube Channel';
-                                        chipContainer.insertBefore(newChip, chipContainer.firstChild);
-                                    }
-                                    // Update the sources text
-                                    const sourcesText = document.querySelector('#wt-link-p1 div div:first-child div:last-child');
-                                    if (sourcesText && sourcesText.textContent.includes('No sources')) {
-                                        sourcesText.innerHTML = '<span style="color: var(--green); font-size: 11px; font-weight: 600;">1 source</span>';
-                                    }
-                                    setTimeout(() => driverObj.moveNext(), 400);
+                                    // Show the traffic source picker
+                                    const picker = document.getElementById('wt-traffic-picker');
+                                    picker.style.display = 'block';
+                                    setTimeout(() => driverObj.moveNext(), 300);
                                 };
                                 btn.addEventListener('click', handler);
+                            }
+                        }
+                    },
+
+                    // Frame 23b: DO — Select YouTube as traffic source
+                    {
+                        element: '#wt-traffic-picker',
+                        popover: {
+                            title: 'Choose Traffic Source',
+                            description: 'Pick the type of traffic source. Jordan Rivera has a YouTube channel — <strong>click YouTube</strong> to select it.',
+                            side: 'right',
+                            align: 'start',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const ytOption = document.getElementById('wt-source-youtube');
+                                ytOption.classList.add('do-pulse');
+                                ytOption.style.background = 'rgba(124,140,255,0.1)';
+                                const handler = () => {
+                                    ytOption.removeEventListener('click', handler);
+                                    ytOption.classList.remove('do-pulse');
+                                    // Hide picker, show URL input
+                                    document.getElementById('wt-traffic-picker').style.display = 'none';
+                                    document.getElementById('wt-traffic-url-input').style.display = 'block';
+                                    setTimeout(() => driverObj.moveNext(), 300);
+                                };
+                                ytOption.addEventListener('click', handler);
+                            }
+                        }
+                    },
+
+                    // Frame 23c: DO — Enter traffic URL
+                    {
+                        element: '#wt-traffic-url-field',
+                        onHighlightStarted: () => {
+                            document.getElementById('wt-link-p1').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        },
+                        popover: {
+                            title: 'Enter Source URL',
+                            description: 'Type the URL for this traffic source. <strong>Click in the field</strong> — we\u2019ll auto-fill Jordan\u2019s YouTube channel.',
+                            side: 'bottom',
+                            align: 'start',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const field = document.getElementById('wt-traffic-url-field');
+                                field.classList.add('do-pulse');
+                                const handler = () => {
+                                    field.removeEventListener('click', handler);
+                                    field.classList.remove('do-pulse');
+                                    // Type URL character by character
+                                    const url = 'youtube.com/@jordanrivera';
+                                    let i = 0;
+                                    const typeChar = () => {
+                                        if (i < url.length) {
+                                            field.value += url[i];
+                                            i++;
+                                            setTimeout(typeChar, 40);
+                                        } else {
+                                            // Done typing — hide input, add green chip
+                                            setTimeout(() => {
+                                                document.getElementById('wt-traffic-url-input').style.display = 'none';
+                                                const chipContainer = document.querySelector('#wt-link-p1 div > div:nth-child(2)');
+                                                if (chipContainer) {
+                                                    const newChip = document.createElement('span');
+                                                    newChip.style.cssText = 'background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--green); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
+                                                    newChip.innerHTML = '<span style="color: var(--green); font-size: 8px;">●</span> YouTube Channel';
+                                                    chipContainer.insertBefore(newChip, chipContainer.firstChild);
+                                                }
+                                                // Update sources text
+                                                const sourcesText = document.querySelector('#wt-link-p1 div div:first-child div:last-child');
+                                                if (sourcesText && sourcesText.textContent.includes('No sources')) {
+                                                    sourcesText.innerHTML = '<span style="color: var(--green); font-size: 11px; font-weight: 600;">1 source</span>';
+                                                }
+                                                setTimeout(() => driverObj.moveNext(), 400);
+                                            }, 300);
+                                        }
+                                    };
+                                    field.value = '';
+                                    typeChar();
+                                };
+                                field.addEventListener('click', handler);
                             }
                         }
                     },
@@ -2350,6 +2457,67 @@
                         }
                     },
 
+                    // Frame 26b: DO — Click + Add Angel Investor
+                    {
+                        element: '#wt-add-angel-btn',
+                        onHighlightStarted: () => {
+                            document.getElementById('wt-add-angel-btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        },
+                        popover: {
+                            title: 'Add an Angel Investor',
+                            description: 'Angel investors fund awareness for your district. <strong>Click + ADD ANGEL INVESTOR</strong> to bring a new backer on board.',
+                            side: 'top',
+                            align: 'start',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const btn = document.getElementById('wt-add-angel-btn');
+                                btn.classList.add('do-pulse');
+                                const handler = () => {
+                                    btn.removeEventListener('click', handler);
+                                    btn.classList.remove('do-pulse');
+                                    // Reveal the angel type picker
+                                    const picker = document.getElementById('wt-angel-picker');
+                                    if (picker) picker.style.display = 'block';
+                                    setTimeout(() => driverObj.moveNext(), 300);
+                                };
+                                btn.addEventListener('click', handler);
+                            }
+                        }
+                    },
+
+                    // Frame 26c: DO — Choose Awareness Angel
+                    {
+                        element: '#wt-angel-picker',
+                        popover: {
+                            title: 'Choose Angel Type',
+                            description: 'Select the type of angel investor. An <strong>Awareness Angel</strong> funds traffic generation campaigns to drive new visitors into your district. <strong>Click Awareness Angel</strong>.',
+                            side: 'right',
+                            align: 'start',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                const awareness = document.getElementById('wt-angel-awareness');
+                                awareness.classList.add('do-pulse');
+                                awareness.style.background = 'rgba(16,185,129,0.15)';
+                                const handler = () => {
+                                    awareness.removeEventListener('click', handler);
+                                    awareness.classList.remove('do-pulse');
+                                    // Hide picker
+                                    document.getElementById('wt-angel-picker').style.display = 'none';
+                                    // Add the new angel investor row to the table
+                                    const table = document.getElementById('wt-angel-table');
+                                    if (table) {
+                                        const row = document.createElement('div');
+                                        row.style.cssText = 'display: grid; grid-template-columns: 2fr 2fr 1.5fr 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.05); align-items: center; animation: fadeIn 0.3s ease;';
+                                        row.innerHTML = '<span style="font-size: 13px; color: white; font-weight: 600;">New Awareness Angel</span><span style="font-size: 13px; color: var(--text-secondary);">Awareness Fund</span><span style="font-size: 13px; color: var(--green); font-weight: 700;">$2,500</span><span style="font-size: 11px; color: var(--amber); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">Pending</span>';
+                                        table.appendChild(row);
+                                    }
+                                    setTimeout(() => driverObj.moveNext(), 400);
+                                };
+                                awareness.addEventListener('click', handler);
+                            }
+                        }
+                    },
+
                     // Frame 27: OBSERVE — District Revenue Snapshot
                     {
                         element: '#wt-revenue-snapshot',
@@ -2391,6 +2559,14 @@
                             align: 'center',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
+                                // Fix caret position
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.classList.remove('caret-bottom','caret-top','caret-left','caret-right');
+                                        p.classList.add('caret-bottom');
+                                    }
+                                }, 50);
                                 const btn = document.getElementById('wt-continue-flow-btn');
                                 btn.classList.add('do-pulse');
                                 const advance = () => {
@@ -2455,41 +2631,191 @@
                         popover: {
                             title: 'District Ecosystem',
                             description: 'Your district\u2019s live traffic ecosystem. Three tabs \u2014 <strong>Ecosystem</strong>, <strong>Relational</strong>, and <strong>Cross-Pollination</strong> \u2014 show your network from different angles. The Ecosystem view is the default: a hub-and-spoke SVG with traffic sources flowing into four quadrants. <strong>Scroll to explore</strong> the full canvas.',
-                            side: 'bottom',
-                            align: 'start'
+                            side: 'left',
+                            align: 'start',
+                            onPopoverRender: () => {
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.top = '120px';
+                                        p.style.right = '30px';
+                                        p.style.left = 'auto';
+                                        p.style.bottom = 'auto';
+                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right','caret-bottom-right');
+                                    }
+                                }, 50);
+                            }
                         }
                     },
 
-                    // Frame 30: OBSERVE — Quadrant stats (STORYBOARD Frame 25)
+                    // Frame 30: DO — Hover over pulsing nodes for stats
+                    {
+                        element: '#wt-ecosystem-canvas',
+                        onHighlightStarted: () => {
+                            // Keep rail hidden for ecosystem section
+                            document.getElementById('wt-rail').style.display = 'none';
+                            // Remove overlay
+                            setTimeout(() => {
+                                const overlay = document.querySelector('.driver-overlay');
+                                if (overlay) overlay.style.opacity = '0';
+                            }, 100);
+                            // Add pulse to 3 specific nodes (first DISCOVER, first ENGAGE, an angel)
+                            const nodePositions = [
+                                { left: '180px', top: '310px' },  // DISCOVER 1
+                                { left: '580px', top: '310px' },  // ENGAGE 1
+                                { left: '620px', top: '100px' }   // Angel Seed
+                            ];
+                            // Find nodes by position and add glow
+                            const canvas = document.getElementById('wt-ecosystem-canvas');
+                            const nodes = canvas.querySelectorAll('div[style*="position: absolute"]');
+                            let glowCount = 0;
+                            nodes.forEach(node => {
+                                const style = node.getAttribute('style') || '';
+                                nodePositions.forEach(pos => {
+                                    if (style.includes('left: ' + pos.left) && style.includes('top: ' + pos.top)) {
+                                        node.classList.add('do-pulse');
+                                        node.style.cursor = 'pointer';
+                                        node.id = 'wt-glow-node-' + glowCount;
+                                        // Add tooltip on hover
+                                        node.addEventListener('mouseenter', () => {
+                                            let tooltip = document.getElementById('wt-node-tooltip');
+                                            if (!tooltip) {
+                                                tooltip = document.createElement('div');
+                                                tooltip.id = 'wt-node-tooltip';
+                                                tooltip.style.cssText = 'position: absolute; z-index: 1000; background: var(--surface); border: 1px solid var(--accent); border-radius: 10px; padding: 12px 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); pointer-events: none; min-width: 160px;';
+                                                canvas.appendChild(tooltip);
+                                            }
+                                            const rect = node.getBoundingClientRect();
+                                            const canvasRect = canvas.getBoundingClientRect();
+                                            tooltip.style.left = (rect.left - canvasRect.left + rect.width + 10) + 'px';
+                                            tooltip.style.top = (rect.top - canvasRect.top) + 'px';
+                                            tooltip.style.display = 'block';
+                                            if (style.includes('310px') && style.includes('180px')) {
+                                                tooltip.innerHTML = '<div style="font-size: 11px; font-weight: 900; color: #ff2a1a; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">DISCOVER</div><div style="font-size: 12px; color: white; font-weight: 600;">Video Content</div><div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">1,247 impressions</div><div style="font-size: 11px; color: var(--green);">+23% this week</div>';
+                                            } else if (style.includes('310px') && style.includes('580px')) {
+                                                tooltip.innerHTML = '<div style="font-size: 11px; font-weight: 900; color: #ffd666; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">ENGAGE</div><div style="font-size: 12px; color: white; font-weight: 600;">Interactive Tour</div><div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">342 engagements</div><div style="font-size: 11px; color: var(--green);">+15% this week</div>';
+                                            } else {
+                                                tooltip.innerHTML = '<div style="font-size: 11px; font-weight: 900; color: #10b981; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">ANGEL INVESTOR</div><div style="font-size: 12px; color: white; font-weight: 600;">Seed Fund</div><div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">$5,000 pledged</div><div style="font-size: 11px; color: var(--green);">Confirmed</div>';
+                                            }
+                                        });
+                                        node.addEventListener('mouseleave', () => {
+                                            const tooltip = document.getElementById('wt-node-tooltip');
+                                            if (tooltip) tooltip.style.display = 'none';
+                                        });
+                                        // Count hovers to auto-advance after user has explored
+                                        node.addEventListener('click', () => {
+                                            window._hoverCount = (window._hoverCount || 0) + 1;
+                                            if (window._hoverCount >= 2) {
+                                                // Clean up pulse
+                                                canvas.querySelectorAll('.do-pulse').forEach(n => n.classList.remove('do-pulse'));
+                                                const tooltip = document.getElementById('wt-node-tooltip');
+                                                if (tooltip) tooltip.remove();
+                                                setTimeout(() => driverObj.moveNext(), 300);
+                                            }
+                                        });
+                                        glowCount++;
+                                    }
+                                });
+                            });
+                        },
+                        onDeselected: () => {
+                            // Restore rail
+                            document.getElementById('wt-rail').style.display = 'flex';
+                            const overlay = document.querySelector('.driver-overlay');
+                            if (overlay) overlay.style.opacity = '1';
+                            // Clean up
+                            const canvas = document.getElementById('wt-ecosystem-canvas');
+                            canvas.querySelectorAll('.do-pulse').forEach(n => n.classList.remove('do-pulse'));
+                            const tooltip = document.getElementById('wt-node-tooltip');
+                            if (tooltip) tooltip.remove();
+                            window._hoverCount = 0;
+                        },
+                        disableActiveInteraction: false,
+                        popover: {
+                            title: 'Explore the Network',
+                            description: 'Nodes are pulsing — <strong>hover over</strong> the glowing nodes to see real-time stats for each touchpoint. <strong>Click any two nodes</strong> to continue.',
+                            side: 'left',
+                            align: 'start',
+                            showButtons: ['previous'],
+                            onPopoverRender: () => {
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.top = '200px';
+                                        p.style.right = '30px';
+                                        p.style.left = 'auto';
+                                        p.style.bottom = 'auto';
+                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right','caret-bottom-right');
+                                    }
+                                }, 50);
+                            }
+                        }
+                    },
+
+                    // Frame 31: OBSERVE — Quadrant stats (STORYBOARD Frame 25)
                     {
                         element: '#wt-quadrant-stats',
                         onHighlightStarted: () => {
+                            document.getElementById('wt-rail').style.display = 'none';
                             // Scroll stats into view within the content area
                             const stats = document.getElementById('wt-quadrant-stats');
                             const content = document.getElementById('wt-content');
                             content.scrollTo({ top: stats.offsetTop - 100, behavior: 'smooth' });
                         },
+                        onDeselected: () => {
+                            document.getElementById('wt-rail').style.display = 'flex';
+                        },
                         popover: {
                             title: 'Quadrant Stats',
                             description: 'Four summary cards \u2014 <strong>Discover</strong>, <strong>Engage</strong>, <strong>Connect</strong>, and <strong>Support</strong> \u2014 show node counts and interaction totals per stage. These update in real time as your district grows.',
-                            side: 'top',
-                            align: 'center'
+                            side: 'left',
+                            align: 'start',
+                            onPopoverRender: () => {
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.top = '120px';
+                                        p.style.right = '30px';
+                                        p.style.left = 'auto';
+                                        p.style.bottom = 'auto';
+                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right','caret-bottom-right');
+                                    }
+                                }, 50);
+                            }
                         }
                     },
 
-                    // Frame 31: DO — User switches to Relational tab (STORYBOARD Frame 26)
+                    // Frame 32: DO — User switches to Relational tab (STORYBOARD Frame 26)
                     {
                         element: '#wt-tab-relational',
                         onHighlightStarted: () => {
+                            document.getElementById('wt-rail').style.display = 'none';
                             document.getElementById('wt-flow-tabs').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        },
+                        onDeselected: () => {
+                            document.getElementById('wt-rail').style.display = 'flex';
                         },
                         popover: {
                             title: 'Switch to Relational View',
                             description: 'The Ecosystem view shows your district as a living network. Now switch to the Relational view to see cause and effect \u2014 every participant mapped across every journey stage in a structured grid. <strong>Click RELATIONAL</strong>.',
-                            side: 'bottom',
+                            side: 'left',
                             align: 'start',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.top = '120px';
+                                        p.style.right = '30px';
+                                        p.style.left = 'auto';
+                                        p.style.bottom = 'auto';
+                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right','caret-bottom-right');
+                                    }
+                                }, 50);
                                 const btn = document.getElementById('wt-tab-relational');
                                 btn.classList.add('do-pulse');
                                 const handler = () => {
@@ -2519,34 +2845,66 @@
                         }
                     },
 
-                    // Frame 32: OBSERVE — Relational view (STORYBOARD Frame 27)
+                    // Frame 33: OBSERVE — Relational view (STORYBOARD Frame 27)
                     {
                         element: '#wt-view-relational',
                         onHighlightStarted: () => {
+                            document.getElementById('wt-rail').style.display = 'none';
                             const content = document.getElementById('wt-content');
                             content.scrollTo({ top: 0, behavior: 'smooth' });
+                        },
+                        onDeselected: () => {
+                            document.getElementById('wt-rail').style.display = 'flex';
                         },
                         popover: {
                             title: 'Relational View',
                             description: 'A structured grid: participant columns (YouTube, Participant 1, Participant 2, Participant 3, ReadyStack) \u00d7 journey stages (Learning, Selecting, Executing, Expanding). Each node shows a 2-letter abbreviation. <strong>Scroll</strong> to explore the full grid.',
                             side: 'left',
-                            align: 'start'
+                            align: 'start',
+                            onPopoverRender: () => {
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.top = '120px';
+                                        p.style.right = '30px';
+                                        p.style.left = 'auto';
+                                        p.style.bottom = 'auto';
+                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right','caret-bottom-right');
+                                    }
+                                }, 50);
+                            }
                         }
                     },
 
-                    // Frame 33: DO — User switches to Cross-Pollination tab (STORYBOARD Frame 28)
+                    // Frame 34: DO — User switches to Cross-Pollination tab (STORYBOARD Frame 28)
                     {
                         element: '#wt-tab-cross',
                         onHighlightStarted: () => {
+                            document.getElementById('wt-rail').style.display = 'none';
                             document.getElementById('wt-flow-tabs').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        },
+                        onDeselected: () => {
+                            document.getElementById('wt-rail').style.display = 'flex';
                         },
                         popover: {
                             title: 'Switch to Cross-Pollination',
                             description: 'The Relational view shows each participant\u2019s journey. Now switch to Cross-Pollination to see where participants\u2019 content pulls traffic into each other\u2019s ecosystems \u2014 the network effect in action. <strong>Click CROSS-POLLINATION</strong>.',
-                            side: 'bottom',
+                            side: 'left',
                             align: 'start',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.top = '120px';
+                                        p.style.right = '30px';
+                                        p.style.left = 'auto';
+                                        p.style.bottom = 'auto';
+                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right','caret-bottom-right');
+                                    }
+                                }, 50);
                                 const btn = document.getElementById('wt-tab-cross');
                                 btn.classList.add('do-pulse');
                                 const handler = () => {
@@ -2577,18 +2935,35 @@
                         }
                     },
 
-                    // Frame 34: OBSERVE — Cross-Pollination view (STORYBOARD Frame 29)
+                    // Frame 35: OBSERVE — Cross-Pollination view (STORYBOARD Frame 29)
                     {
                         element: '#wt-view-cross',
                         onHighlightStarted: () => {
+                            document.getElementById('wt-rail').style.display = 'none';
                             const content = document.getElementById('wt-content');
                             content.scrollTo({ top: 0, behavior: 'smooth' });
+                        },
+                        onDeselected: () => {
+                            document.getElementById('wt-rail').style.display = 'flex';
                         },
                         popover: {
                             title: 'Cross-Pollination View',
                             description: 'Green dashed lines highlight cross-participant paths \u2014 where one participant\u2019s content pulls traffic into another\u2019s ecosystem. Use the <strong>Focus</strong> pills to isolate a single participant. <strong>Scroll</strong> to see the full map.',
                             side: 'left',
-                            align: 'start'
+                            align: 'start',
+                            onPopoverRender: () => {
+                                setTimeout(() => {
+                                    const p = document.querySelector('.driver-popover');
+                                    if (p) {
+                                        p.style.position = 'fixed';
+                                        p.style.top = '120px';
+                                        p.style.right = '30px';
+                                        p.style.left = 'auto';
+                                        p.style.bottom = 'auto';
+                                        p.classList.remove('caret-top','caret-bottom','caret-left','caret-right','caret-bottom-right');
+                                    }
+                                }, 50);
+                            }
                         }
                     },
 
