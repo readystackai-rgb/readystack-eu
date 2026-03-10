@@ -407,6 +407,11 @@
       const [isGeneratingStory, setIsGeneratingStory] = useState(false);
 
       const [videoStory, setVideoStory] = useState(null);
+      // District Assembly (Step 4) state
+      const [expandedAgent, setExpandedAgent] = useState(0);
+      const [heroFields, setHeroFields] = useState({ headline: '', youtubeUrl: '', ctaLabel: '', ctaUrl: '', mindMapLink: '' });
+      const [assemblyStatus, setAssemblyStatus] = useState(null);
+      const [assembledReadyStack, setAssembledReadyStack] = useState(null);
       const [playbackProgress, setPlaybackProgress] = useState(0);
       const [isNarrativePlaying, setIsNarrativePlaying] = useState(false);
       const narrativeInterval = useRef(null);
@@ -906,6 +911,19 @@
 
       useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [activeTab]);
 
+      // District Assembly: pre-populate hero fields from upstream data on first tab visit
+      useEffect(() => {
+        if (activeTab === 'preview' && heroFields.headline === '') {
+          setHeroFields({
+            headline: videoStory?.title || '',
+            youtubeUrl: youtubeEmbedUrl || '',
+            ctaLabel: storyParticipants.residents[0]?.name ? `Follow ${storyParticipants.residents[0].name}` : '',
+            ctaUrl: '',
+            mindMapLink: ''
+          });
+        }
+      }, [activeTab]);
+
       useEffect(() => {
         if (stackLabel && stackLabel !== 'ReadyStack Campaign') {
           setNameFlash(true);
@@ -1279,7 +1297,12 @@
         persistAppState();
         const returnUrl   = window.location.href;
         const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
-        window.location.href = authUrl;
+        // Google blocks OAuth inside iframes — open in new tab when embedded
+        if (window.parent !== window) {
+          window.open(authUrl, '_blank');
+        } else {
+          window.location.href = authUrl;
+        }
       };
 
       // Handle LOGIN button click always triggers Google OAuth
@@ -2350,7 +2373,7 @@
                   { id: 'youtube', label: 'Define Market Story', icon: 'play-circle' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
-                  ...(isResident ? [] : [{ id: 'preview', label: 'Tasks and Agents', icon: 'list' }])
+                  ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }])
                 ].map(step => {
                   const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
@@ -2571,7 +2594,7 @@
                 { id: 'youtube', label: 'Define Market Story', phase: 'compose' },
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
-                { id: 'preview', label: 'Tasks and Agents', phase: 'compose' }
+                { id: 'preview', label: 'District Assembly', phase: 'compose' }
               ];
               const opsSteps = [
                 { id: 'finance', label: 'District Finance', phase: 'operations' },
@@ -2999,7 +3022,7 @@
                     {videoStory && (videoStory.checklist || videoStory.automations) && (
                       <div className="space-y-6">
                         <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
-                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your market story. These will populate the Tasks and Agents assembly and JSON export.</p>
+                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your market story. These will populate the District Assembly and JSON export.</p>
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
@@ -3559,7 +3582,7 @@
                 </div>
 
                 <div className="py-12 text-center">
-                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Assembly'}</button>
                 </div>
               </div>
             )}
@@ -3758,7 +3781,7 @@
                   })()}
 
                   <div className="text-center py-12">
-                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Assembly'}</button>
                   </div>
                 </div>
               </div>
@@ -3769,83 +3792,183 @@
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
                 <div className="space-y-12">
                   <div className="space-y-4">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>TASKS AND AGENTS</h3>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY</h3>
                     <p className="text-slate-300 text-base font-medium">Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack.</p>
                   </div>
 
-                  {/* ── Market Story Summary ── */}
-                  <div className="bg-[#020617]/50 p-10 rounded-[32px] border border-white/5 shadow-inner space-y-6">
-                    <h4 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Market Story</h4>
+                  {/* ══════════════════════════════════════════════════════════
+                       DISTRICT ASSEMBLY — WHITE THEME CONTENT AREA
+                       Sections A–G per TASKS_AND_AGENTS_UX_SPEC.md v3
+                       White theme scoped to this block only
+                     ══════════════════════════════════════════════════════════ */}
+
+                  {/* ── SECTION A: Hero Editing Fields ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                    <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">ReadyStack Settings</p>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">Headline</label>
+                        <input type="text" value={heroFields.headline} onChange={e => setHeroFields({...heroFields, headline: e.target.value})} placeholder="Enter your ReadyStack headline" className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-lg font-medium py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">YouTube URL</label>
+                          <input type="text" value={heroFields.youtubeUrl} onChange={e => setHeroFields({...heroFields, youtubeUrl: e.target.value})} placeholder="https://youtube.com/..." className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">CTA Label</label>
+                          <input type="text" value={heroFields.ctaLabel} onChange={e => setHeroFields({...heroFields, ctaLabel: e.target.value})} placeholder="Follow..." className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">CTA URL</label>
+                          <input type="text" value={heroFields.ctaUrl} onChange={e => setHeroFields({...heroFields, ctaUrl: e.target.value})} placeholder="https://..." className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">Mind Map Link</label>
+                        <input type="text" value={heroFields.mindMapLink} onChange={e => setHeroFields({...heroFields, mindMapLink: e.target.value})} placeholder="https://miro.com/... or any diagram URL" className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── SECTION B: ReadyStack Card ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
                     {videoStory ? (
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-6">
-                          {youtubeEmbedUrl && (
-                            <div className="w-48 h-28 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                              <iframe src={youtubeEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen></iframe>
-                            </div>
-                          )}
-                          <div className="space-y-2 flex-grow">
-                            <p className="text-white font-bold text-lg">{videoStory.title || 'Untitled'}</p>
-                            <p className="text-slate-300 text-sm leading-relaxed">{videoStory.summary || 'No summary generated.'}</p>
+                      <div className="space-y-6">
+                        <p className="text-xl font-medium text-gray-900">{heroFields.headline || videoStory.title || 'Untitled'}</p>
+                        {/* Action buttons */}
+                        <div className="flex gap-3">
+                          <button className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">Copy</button>
+                          {heroFields.mindMapLink && <button onClick={() => window.open(heroFields.mindMapLink, '_blank')} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">Mind Map</button>}
+                          <button className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors">Share for 40% Lifetime Income</button>
+                        </div>
+                        {/* Two-column: video left + checklist right */}
+                        <div className="flex gap-6">
+                          <div className="w-7/12 space-y-4">
+                            {(heroFields.youtubeUrl || youtubeEmbedUrl) && (
+                              <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
+                                <iframe src={heroFields.youtubeUrl || youtubeEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen title="Market Story Video"></iframe>
+                              </div>
+                            )}
+                            {heroFields.ctaLabel && (
+                              <button onClick={() => heroFields.ctaUrl && window.open(heroFields.ctaUrl, '_blank')} className="bg-purple-600 text-white font-bold uppercase tracking-wider text-xs py-3 rounded-lg w-full hover:bg-purple-700 transition-colors">{heroFields.ctaLabel}</button>
+                            )}
+                          </div>
+                          <div className="w-5/12">
+                            <p className="text-lg font-medium text-gray-900 mb-3">In this ReadyStack</p>
+                            {videoStory.checklist && videoStory.checklist.length > 0 ? (
+                              <div className="space-y-1">
+                                {videoStory.checklist.map((item, i) => (
+                                  <p key={i} className="text-sm text-purple-600 leading-relaxed py-1">• {item}</p>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-400 italic">No checklist items generated yet.</p>
+                            )}
                           </div>
                         </div>
-                        {videoStory.themes && videoStory.themes.length > 0 && (
-                          <div className="flex flex-wrap gap-2 pt-2">
-                            {videoStory.themes.map((t, i) => (
-                              <span key={i} className="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-300 text-xs font-semibold border border-indigo-500/20">{t}</span>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     ) : (
-                      <p className="text-slate-300 text-sm italic">No market story defined yet. Go back to Define Market Story to get started.</p>
+                      <p className="text-sm text-gray-400 italic text-center py-8">No market story defined yet. Go back to Define Market Story to get started.</p>
                     )}
                   </div>
 
-                  {/* ── Residents Summary ── */}
-                  <div className="bg-[#020617]/50 p-10 rounded-[32px] border border-white/5 shadow-inner space-y-6">
-                    <h4 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Residents</h4>
+                  {/* ── SECTION C: Tasks and Agents Accordion ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    {videoStory && videoStory.automations && videoStory.automations.length > 0 ? (
+                      <div>
+                        {videoStory.automations.map((auto, i) => (
+                          <div key={i} className={`border-b border-gray-100 ${expandedAgent === i ? 'bg-white' : 'hover:bg-gray-50'} transition-colors`}>
+                            <button onClick={() => setExpandedAgent(expandedAgent === i ? -1 : i)} className="w-full px-6 py-4 flex items-center justify-between cursor-pointer">
+                              <span className="text-sm font-medium text-purple-600 text-left">{auto.trigger || `Automation ${i + 1}`}</span>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-4 h-4 text-gray-400 transition-transform ${expandedAgent === i ? 'rotate-180' : ''}`}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            {expandedAgent === i && (
+                              <div className="px-6 pb-4">
+                                <div className="bg-gray-50 p-3 rounded-lg">
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Action</p>
+                                  <p className="text-xs text-gray-600">{auto.action || 'No action defined'}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {/* Zapier placeholder */}
+                        <div className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                          <div className="px-6 py-4 flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-400">Add or Remove contacts through Zapier</span>
+                            <span className="text-[10px] text-gray-300 uppercase tracking-wider">Configure in Studio</span>
+                          </div>
+                        </div>
+                        {/* HAF placeholder */}
+                        <div className="hover:bg-gray-50 transition-colors">
+                          <div className="px-6 py-4 flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-400">Hosted Automation Flow</span>
+                            <span className="text-[10px] text-gray-300 uppercase tracking-wider">Configure in Studio</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400 italic py-8 text-center">No automations generated from your market story. These will appear after your video is analyzed.</p>
+                    )}
+                  </div>
+
+                  {/* ── SECTION D: Residents ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                     {(() => {
                       const filled = storyParticipants.residents.filter(r => (r.name || '').trim());
-                      if (filled.length === 0) return <p className="text-slate-300 text-sm italic">No residents added yet.</p>;
                       return (
-                        <div className="space-y-3">
-                          {filled.map((r, i) => (
-                            <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                              <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 text-xs font-black">{(r.name || '?')[0].toUpperCase()}</div>
-                              <div className="flex-grow">
-                                <p className="text-white text-sm font-bold">{r.name}</p>
-                                {r.jobContext && <p className="text-slate-300 text-xs">{r.jobType}: {r.jobContext}</p>}
-                              </div>
-                              <div className="text-slate-300 text-xs">{r.company || ''}</div>
-                              <div className="text-slate-300 text-xs">{r.specialty || ''}</div>
+                        <div>
+                          <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">Residents <span className="text-gray-400">({filled.length})</span></p>
+                          {filled.length === 0 ? (
+                            <p className="text-sm text-gray-400 italic text-center py-4">No residents added yet.</p>
+                          ) : (
+                            <div className="grid grid-cols-3 gap-3">
+                              {filled.map((r, i) => (
+                                <div key={i} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 font-bold text-sm flex items-center justify-center">{(r.name || '?')[0].toUpperCase()}</div>
+                                    <p className="text-sm font-medium text-gray-900">{r.name}</p>
+                                  </div>
+                                  {(r.company || r.specialty) && <p className="text-xs text-gray-500">{[r.company, r.specialty].filter(Boolean).join(' / ')}</p>}
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                          )}
                         </div>
                       );
                     })()}
                   </div>
 
-                  {/* ── Links Summary ── */}
-                  <div className="bg-[#020617]/50 p-10 rounded-[32px] border border-white/5 shadow-inner space-y-6">
-                    <h4 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Links</h4>
+                  {/* ── SECTION E: Links by Journey Stage ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                    <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">Journey Map</p>
                     {(() => {
-                      const totalLinks = Object.values(mapping.learning || {}).flat().length + Object.values(mapping.buying || {}).flat().length + Object.values(mapping.sharing || {}).flat().length;
-                      if (totalLinks === 0) return <p className="text-slate-300 text-sm italic">No links mapped yet.</p>;
+                      const stages = [
+                        { key: 'learning', label: 'Learning', color: '#ff2a1a' },
+                        { key: 'selecting', label: 'Selecting', color: '#ffd666' },
+                        { key: 'executing', label: 'Executing', color: '#48c9b0' },
+                        { key: 'expanding', label: 'Expanding', color: '#7c8cff' }
+                      ];
+                      const hasAny = stages.some(s => (mapping[s.key] || []).length > 0);
+                      if (!hasAny) return <p className="text-sm text-gray-400 italic text-center py-4">No links mapped yet.</p>;
                       return (
-                        <div className="grid grid-cols-3 gap-6">
-                          {[
-                            { key: 'learning', label: 'Learning', color: 'indigo' },
-                            { key: 'buying', label: 'Buying', color: 'emerald' },
-                            { key: 'sharing', label: 'Sharing', color: 'amber' }
-                          ].map(cat => {
-                            const items = Object.entries(mapping[cat.key] || {});
-                            const count = items.reduce((sum, [, urls]) => sum + urls.length, 0);
+                        <div className="grid grid-cols-4 gap-4">
+                          {stages.map(stage => {
+                            const links = mapping[stage.key] || [];
+                            const labels = links.slice(0, 3).map(l => l.lab || l.ven || 'Link');
+                            const extra = links.length > 3 ? links.length - 3 : 0;
                             return (
-                              <div key={cat.key} className="space-y-2">
-                                <p className={`text-xs font-black uppercase tracking-wider text-${cat.color}-400`}>{cat.label}</p>
-                                <p className="text-white text-2xl font-black">{count}</p>
-                                <p className="text-slate-300 text-xs">{count === 1 ? 'link' : 'links'} mapped</p>
+                              <div key={stage.key} className="bg-white border border-gray-100 rounded-lg p-4" style={{borderTop: `2px solid ${stage.color}`}}>
+                                <p className="text-3xl font-bold text-gray-900">{links.length}</p>
+                                <p className="text-xs text-gray-500 mb-3">{links.length === 1 ? 'link' : 'links'}</p>
+                                <p className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">{stage.label}</p>
+                                <div className="space-y-1">
+                                  {labels.map((lab, i) => (
+                                    <span key={i} className="inline-block text-xs text-gray-600 bg-gray-50 rounded px-2 py-1 mr-1 mb-1">{lab}</span>
+                                  ))}
+                                  {extra > 0 && <span className="text-xs text-purple-500">+{extra} more</span>}
+                                </div>
                               </div>
                             );
                           })}
@@ -3854,16 +3977,61 @@
                     })()}
                   </div>
 
-                  {/* ── Ship to Operations ── */}
+                  {/* ── SECTION F: AI Assembly Pipeline ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                    <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">AI Assembly</p>
+                    {/* Status bar */}
+                    <div className="flex flex-wrap gap-4 mb-6">
+                      <span className="text-xs text-gray-500">{videoStory ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>}Video analyzed</span>
+                      <span className="text-xs text-gray-500">{storyParticipants.residents.filter(r => (r.name||'').trim()).length > 0 ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>}{storyParticipants.residents.filter(r => (r.name||'').trim()).length} residents</span>
+                      <span className="text-xs text-gray-500">{(() => { const c = ['learning','selecting','executing','expanding'].reduce((s,k) => s + (mapping[k]||[]).length, 0); return c > 0 ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>; })()}{['learning','selecting','executing','expanding'].reduce((s,k) => s + (mapping[k]||[]).length, 0)} links</span>
+                      <span className="text-xs text-gray-500">{videoStory?.automations?.length > 0 ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>}{videoStory?.automations?.length || 0} triggers</span>
+                    </div>
+                    {/* Assembly action */}
+                    {assemblyStatus === 'complete' && assembledReadyStack ? (
+                      <div className="space-y-3">
+                        <p className="text-sm text-green-600 font-medium">✓ ReadyStack assembled — {assembledReadyStack.taskCount || 0} tasks, {assembledReadyStack.automationCount || 0} automations, {assembledReadyStack.linkCount || 0} links</p>
+                        <div className="flex gap-3">
+                          <button onClick={() => { alert(JSON.stringify(assembledReadyStack, null, 2)); }} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">View JSON Preview</button>
+                          <button onClick={() => { setAssemblyStatus(null); setAssembledReadyStack(null); }} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors">Re-assemble</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setAssemblyStatus('processing');
+                          // Stub: simulate AI assembly (replace with real API call when provider confirmed)
+                          setTimeout(() => {
+                            const linkCount = ['learning','selecting','executing','expanding'].reduce((s,k) => s + (mapping[k]||[]).length, 0);
+                            setAssembledReadyStack({
+                              taskCount: videoStory?.checklist?.length || 0,
+                              automationCount: videoStory?.automations?.length || 0,
+                              linkCount,
+                              residents: storyParticipants.residents.filter(r => (r.name||'').trim()).map(r => r.name),
+                              headline: heroFields.headline,
+                              assembled: true
+                            });
+                            setAssemblyStatus('complete');
+                          }, 1500);
+                        }}
+                        disabled={assemblyStatus === 'processing'}
+                        className={`font-bold uppercase tracking-wider text-xs px-8 py-3 rounded-lg transition-colors ${assemblyStatus === 'processing' ? 'bg-purple-300 text-white cursor-wait' : 'bg-purple-600 text-white hover:bg-purple-700'}`}
+                      >
+                        {assemblyStatus === 'processing' ? 'Assembling...' : 'Assemble ReadyStack'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* ── SECTION G: Compose Phase Gate (white theme) ── */}
                   <div className="text-center py-8 space-y-6">
-                    <div className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-emerald-400"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
-                      <span className="text-emerald-300 text-sm font-bold uppercase tracking-wider">Compose phase complete</span>
+                    <div className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-green-50 border border-green-200">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-green-600"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                      <span className="text-green-600 text-sm font-bold uppercase tracking-wider">Compose phase complete</span>
                     </div>
                     <div>
-                      <button onClick={() => setActiveTab('finance')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Operations</button>
+                      <button onClick={() => setActiveTab('finance')} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-xs">Continue to Operations</button>
                     </div>
-                    <p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic">Your composed district will ship as JSON to ReadyStack when you're ready.</p>
+                    <p className="text-xs text-gray-400 font-medium">Your composed district will ship as JSON to ReadyStack when you're ready.</p>
                   </div>
                 </div>
               </div>
