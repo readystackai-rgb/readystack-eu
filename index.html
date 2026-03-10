@@ -1044,15 +1044,30 @@
           setRsSession({ sessionId, email });
           window.history.replaceState({}, '', window.location.pathname);
 
-          // ── If this is the OAuth popup tab (not inside Wix iframe), redirect to readystack.ai ──
-          // The storage event already notified the original Wix iframe tab.
+          // ── If this is the OAuth popup tab, send session to the opener iframe via postMessage ──
+          // Chrome's third-party storage partitioning means the Wix iframe has a SEPARATE
+          // localStorage partition from this top-level tab. The storage event won't bridge
+          // the gap, so we use window.opener.postMessage() to send credentials directly.
           if (window.parent === window && window.opener) {
-            // This tab was opened by window.open() from the Wix iframe
-            window.close(); // Try to close; some browsers block this
-          } else if (window.parent === window && document.referrer.includes('accounts.google.com')) {
-            // Fallback: if we can't close, redirect to readystack.ai so user doesn't stay on GitHub URL
-            window.location.href = 'https://www.readystack.ai/storyteller';
+            try {
+              window.opener.postMessage({
+                type: 'oauthComplete',
+                sessionId: sessionId,
+                email: email
+              }, '*');
+            } catch (e) { console.warn('postMessage to opener failed:', e); }
+            // Give the message a moment to deliver, then close this tab
+            setTimeout(() => {
+              try { window.close(); } catch(e) {}
+              // If close was blocked, redirect to readystack.ai
+              setTimeout(() => {
+                window.location.href = 'https://www.readystack.ai/storyteller';
+              }, 300);
+            }, 200);
             return;
+          } else if (window.parent === window) {
+            // Top-level tab but no opener (e.g. user navigated directly with params)
+            // Just continue normal initialization
           }
 
           // ── Check for pending invite from /join page ──
@@ -1117,10 +1132,21 @@
           }
         }
 
-        // ── Cross-tab auth detection ──
-        // When OAuth completes in a new tab, it saves rs_session to localStorage.
-        // The storage event fires in OTHER tabs on the same origin, so the original
-        // Wix iframe tab auto-picks up the auth without needing a page reload.
+        // ── Cross-tab auth detection via postMessage ──
+        // Chrome's third-party storage partitioning gives the Wix iframe a separate
+        // localStorage from top-level GitHub Pages tabs. So the OAuth popup tab sends
+        // the session directly via window.opener.postMessage() instead.
+        const handleAuthMessage = (e) => {
+          if (e.data && e.data.type === 'oauthComplete' && e.data.sessionId && e.data.email) {
+            // Save to the iframe's partitioned localStorage so it persists across reloads
+            localStorage.setItem('rs_session', e.data.sessionId);
+            localStorage.setItem('rs_email',   e.data.email);
+            setRsSession({ sessionId: e.data.sessionId, email: e.data.email });
+          }
+        };
+        window.addEventListener('message', handleAuthMessage);
+
+        // Keep storage event as fallback for direct GitHub Pages access (non-iframe)
         const handleStorageAuth = (e) => {
           if (e.key === 'rs_session' && e.newValue && !rsSession) {
             const storedEmail = localStorage.getItem('rs_email');
@@ -1133,6 +1159,7 @@
 
         return () => {
           window.removeEventListener('wixParamsReady', handleWixParams);
+          window.removeEventListener('message', handleAuthMessage);
           window.removeEventListener('storage', handleStorageAuth);
         };
       }, []);
