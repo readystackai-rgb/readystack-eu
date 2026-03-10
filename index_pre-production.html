@@ -479,6 +479,14 @@
       const [rosterFilter, setRosterFilter] = useState('All');
       // showRosterPanel removed — pills now populate directly
 
+      // Accordion toggles for Residents tab sections
+      const [showTasks, setShowTasks] = useState(false);
+      const [showRoles, setShowRoles] = useState(false);
+      const [showResidents, setShowResidents] = useState(true);
+      // Accordion toggles for Resident Links tab sections
+      const [showDistrictIdentity, setShowDistrictIdentity] = useState(false);
+      const [showDistrictMap, setShowDistrictMap] = useState(true);
+
       // === INVITATION SYSTEM STATE ===
       const [districtRole, setDistrictRole] = useState(null); // 'creator' | 'resident' | null
       const [residentEmail, setResidentEmail] = useState(null); // authenticated resident's email
@@ -2440,7 +2448,7 @@
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
                   ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }]),
-                  ...(isResident ? [] : [{ id: 'landing', label: 'ReadyStack Landing Page', icon: 'layout' }])
+                  ...(isResident ? [] : [{ id: 'landing', label: 'Front Door', icon: 'layout' }])
                 ].map(step => {
                   const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
@@ -2662,7 +2670,7 @@
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
                 { id: 'preview', label: 'District Assembly', phase: 'compose' },
-                { id: 'landing', label: 'ReadyStack Landing Page', phase: 'compose' }
+                { id: 'landing', label: 'Front Door', phase: 'compose' }
               ];
               const opsSteps = [
                 { id: 'finance', label: 'District Finance', phase: 'operations' },
@@ -3086,11 +3094,17 @@
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
 
-                    {/* ── TASKS: Actions + Automations from AI analysis ── */}
+                    {/* ── TASKS: Actions + Automations from AI analysis (accordion) ── */}
                     {videoStory && (videoStory.checklist || videoStory.automations) && (
-                      <div className="space-y-6">
-                        <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
-                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your Anchor Video. These will populate the District Assembly and JSON export.</p>
+                      <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                        <button onClick={() => setShowTasks(!showTasks)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                          <div>
+                            <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
+                            <p className="text-slate-500 text-xs mt-1">Actions and automations from the Anchor Video</p>
+                          </div>
+                          <svg className={`w-4 h-4 text-slate-400 transition-transform ${showTasks ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        {showTasks && <div className="px-8 py-6 space-y-4">
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
@@ -3115,14 +3129,21 @@
                             </div>
                           </div>
                         </div>
+                      </div>}
                       </div>
                     )}
 
-                    {/* ── SUGGESTED ROLES: Click to assign to a participant (creator only) ── */}
+                    {/* ── SUGGESTED ROLES: accordion (creator only) ── */}
                     {!isInviteMode && videoStory && videoStory.network && (
-                      <div className="space-y-4">
-                        <h5 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Suggested Roles</h5>
-                        <p className="text-slate-500 text-xs">Click a role to assign it to a participant slot.</p>
+                      <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                        <button onClick={() => setShowRoles(!showRoles)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                          <div>
+                            <h5 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Suggested Roles</h5>
+                            <p className="text-slate-500 text-xs mt-1">Click a role to assign it to a resident slot</p>
+                          </div>
+                          <svg className={`w-4 h-4 text-slate-400 transition-transform ${showRoles ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        {showRoles && <div className="px-8 py-6">
                         {(() => {
                           const allRoles = [
                             ...(videoStory.network.partners || []).map(p => ({ name: p })),
@@ -3154,16 +3175,21 @@
                             </div>
                           );
                         })()}
+                      </div>}
                       </div>
                     )}
 
-                    {/* ── CURRENT RESIDENTS (this district) ── */}
-                    <div>
-                        <div className="bg-slate-900/30 p-12 rounded-2xl border border-white/[0.04] text-left">
-                            <div className="flex items-center justify-between mb-10">
-                              <h5 className="text-sm font-bold text-white uppercase tracking-widest" style={{fontFamily:'Poppins,sans-serif'}}>Participants</h5>
-                              <span className="text-xs text-slate-300">{storyParticipants.residents.filter(r => (r.name || '').trim()).length} added</span>
-                            </div>
+                    {/* ── CURRENT RESIDENTS (accordion — open by default) ── */}
+                    <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                        <button onClick={() => setShowResidents(!showResidents)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                          <div className="flex items-center gap-4">
+                            <h5 className="text-sm font-bold text-white uppercase tracking-widest" style={{fontFamily:'Poppins,sans-serif'}}>Residents</h5>
+                            <span className="text-xs text-slate-400">{storyParticipants.residents.filter(r => (r.name || '').trim()).length} added</span>
+                          </div>
+                          <svg className={`w-4 h-4 text-slate-400 transition-transform ${showResidents ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        {showResidents && <div>
+                        <div className="bg-slate-900/30 p-12 rounded-2xl border-0 text-left">
 
                             {/* Specialty filter pills with headcount */}
                             <div className="flex flex-wrap gap-3 mb-10">
@@ -3394,6 +3420,7 @@
                             })()}
 
                         </div>
+                    </div>}
                     </div>
 
                     <div className="text-center py-10"><button onClick={() => (isResident || isInviteMode) ? setActiveTab('mapper') : buildStoryDistrict('mapper')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">{isInviteMode ? 'View the District Map.' : 'Confirming your residents unlocks the District Map.'}</p></div>
@@ -3407,9 +3434,18 @@
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENT LINKS</h3>
                     <p className="text-slate-300 text-base font-medium">Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey.</p>
                 </div>
-                {/* ── District Identity Card — hidden for residents & invitees ── */}
+                {/* ── District Identity Card — accordion, hidden for residents & invitees ── */}
                 {!isResident && !isInviteMode && (
-                <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner">
+                <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                  <button onClick={() => setShowDistrictIdentity(!showDistrictIdentity)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                    <div>
+                      <h5 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">District Identity</h5>
+                      <p className="text-slate-500 text-xs mt-1">ReadyStack name, landing page URL, and GA4 ID</p>
+                    </div>
+                    <svg className={`w-4 h-4 text-slate-400 transition-transform ${showDistrictIdentity ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  {showDistrictIdentity && <div className="px-8 py-6">
+                  <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner">
                     <div className="grid md:grid-cols-3 gap-6">
                         <div className="space-y-4">
                             <label className="text-xs font-black text-slate-300 uppercase tracking-widest">READYSTACK NAME</label>
@@ -3424,15 +3460,22 @@
                             <input type="text" value={ga4Id} onChange={(e) => setGa4Id(e.target.value)} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-4 text-xs text-white focus:border-indigo-500 outline-none transition-colors" />
                         </div>
                     </div>
+                  </div>
+                  </div>}
                 </div>
                 )}
 
-                {/* ── LINKS: Resident rows × 4 journey columns ── */}
-                <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner space-y-8">
-                    <div className="border-b border-white/5 pb-6">
-                        <h4 className="text-[14px] font-black text-indigo-400 uppercase tracking-[0.2em] italic">DISTRICT MAP</h4>
-                        <p className="text-slate-300 text-sm mt-2">Each participant gets a row. Add links to map their role across the journey.</p>
+                {/* ── LINKS: Resident rows × 4 journey columns (accordion) ── */}
+                <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                  <button onClick={() => setShowDistrictMap(!showDistrictMap)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                    <div>
+                      <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>District Map</h5>
+                      <p className="text-slate-500 text-xs mt-1">Each resident gets a row. Add links to map their role across the journey.</p>
                     </div>
+                    <svg className={`w-4 h-4 text-slate-400 transition-transform ${showDistrictMap ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  {showDistrictMap && <div>
+                <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner space-y-8">
 
                     {/* 5-Column Headers: Traffic + 4 Journey Stages */}
                     <div className="grid grid-cols-5 gap-2">
@@ -3647,6 +3690,8 @@
                       });
                     })()}
 
+                </div>
+                </div>}
                 </div>
 
                 <div className="py-12 text-center">
@@ -4093,7 +4138,7 @@
                   {/* ── SECTION G: Continue to Landing Page ── */}
                   <div className="text-center py-8 space-y-6">
                     <div>
-                      <button onClick={() => setActiveTab('landing')} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-xs">Continue to ReadyStack Landing Page</button>
+                      <button onClick={() => setActiveTab('landing')} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-xs">Continue to Front Door</button>
                     </div>
                     <p className="text-xs text-gray-400 font-medium">Preview what your published ReadyStack will look like.</p>
                   </div>
@@ -4102,7 +4147,7 @@
             )}
 
             {/* ══════════════════════════════════════════════════════════
-                 STEP 5: READYSTACK LANDING PAGE
+                 STEP 5: FRONT DOOR
                  Mirrors the live ReadyStack Preview at content.bridgemailsystem.com
                  White theme scoped to this block only
                  Data: heroFields, videoStory, storyParticipants, youtubeEmbedUrl, mapping
@@ -4111,7 +4156,7 @@
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
                 <div className="space-y-12">
                   <div className="space-y-4">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>READYSTACK LANDING PAGE</h3>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>FRONT DOOR</h3>
                     <p className="text-slate-300 text-base font-medium">This is what your audience will see when you publish. Review it, then send to Studio.</p>
                   </div>
 
@@ -4404,28 +4449,28 @@
                 <div className="space-y-12">
                   <div className="space-y-6">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT FINANCE</h3>
-                    <p className="text-slate-300 text-base font-medium">Your district is infrastructure. This is what it generates.</p>
+                    <p className="text-slate-300 text-base font-medium">A district is an economy container — media, finance, and operations.</p>
                   </div>
 
                   {/* The Revenue Engine — 20/40/40 split display */}
                   <div className="p-10 rounded-[32px] bg-[#0f172a]/60 border border-white/5 shadow-2xl">
                     <h4 className="text-xs font-black text-white/70 uppercase tracking-widest mb-2">THE REVENUE ENGINE</h4>
-                    <p className="text-slate-400 text-sm mb-8">Every hosted automation fee your district generates is split three ways.</p>
+                    <p className="text-slate-400 text-sm mb-8">Every hosted automation fee a district generates is split three ways.</p>
                     <div className="grid grid-cols-3 gap-6">
                       <div className="bg-[#020617] rounded-xl p-6 border border-amber-500/20 text-center">
                         <p className="text-xs font-black text-amber-400 uppercase tracking-widest mb-3">Founder's Share</p>
                         <p className="text-4xl font-black text-white mb-3">20%</p>
-                        <p className="text-xs text-slate-400 leading-relaxed">You built it. You own 20% of every hosted automation fee — recurring, as long as participants stay active.</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">The founder owns 20% of every hosted automation fee — recurring, as long as participants stay active.</p>
                       </div>
                       <div className="bg-[#020617] rounded-xl p-6 border border-indigo-500/20 text-center">
                         <p className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-3">Resident's Share</p>
                         <p className="text-4xl font-black text-white mb-3">40%</p>
-                        <p className="text-xs text-slate-400 leading-relaxed">Your network grows it. They own 40% of fees generated through their referral links — your revenue scales with their success.</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">The network grows it. Residents own 40% of fees generated through sharing — revenue scales with the district's reach.</p>
                       </div>
                       <div className="bg-[#020617] rounded-xl p-6 border border-slate-700/30 text-center">
                         <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">ReadyStack</p>
                         <p className="text-4xl font-black text-white mb-3">40%</p>
-                        <p className="text-xs text-slate-400 leading-relaxed">Infrastructure, automation, payroll, and platform operations.</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">Scaled infrastructure, operations, onboarding, payments, and the sharing incentives that grow the district.</p>
                       </div>
                     </div>
                   </div>
