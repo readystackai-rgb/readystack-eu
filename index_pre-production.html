@@ -2370,7 +2370,7 @@
                 </div>
                 <div className="space-y-3 mb-6">
                 {[
-                  { id: 'youtube', label: 'Define Market Story', icon: 'play-circle' },
+                  { id: 'youtube', label: 'Anchor Video', icon: 'play-circle' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
                   ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }])
@@ -2591,7 +2591,7 @@
             {/* ── TOP STEP NAVIGATION BAR (above everything) ── */}
             {(() => {
               const composeSteps = [
-                { id: 'youtube', label: 'Define Market Story', phase: 'compose' },
+                { id: 'youtube', label: 'Anchor Video', phase: 'compose' },
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
                 { id: 'preview', label: 'District Assembly', phase: 'compose' }
@@ -2644,7 +2644,7 @@
             {activeTab === 'youtube' && (
               <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
                   <div className="space-y-3 mb-6">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">DEFINE MARKET STORY</h3>
+                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">ANCHOR VIDEO</h3>
                       <p className="text-slate-300 text-base font-medium">Search YouTube for a video of the problem your audience faces. Your district exists to solve it.</p>
                   </div>
 
@@ -3618,7 +3618,7 @@
                           <div className="bg-[#0f172a]/60 p-10 rounded-[32px] border border-white/5 shadow-inner inline-block">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-slate-300 mx-auto mb-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
                             <p className="text-slate-300 text-base font-medium">Add participants to your district first, then invite them here.</p>
-                            <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Define Market Story</button>
+                            <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Anchor Video</button>
                           </div>
                         </div>
                       );
@@ -3869,7 +3869,7 @@
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-400 italic text-center py-8">No market story defined yet. Go back to Define Market Story to get started.</p>
+                      <p className="text-sm text-gray-400 italic text-center py-8">No anchor video defined yet. Go back to Anchor Video to get started.</p>
                     )}
                   </div>
 
