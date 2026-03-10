@@ -123,6 +123,37 @@
       70%  { box-shadow: 0 0 0 10px rgba(124, 140, 255, 0); }
       100% { box-shadow: 0 0 0 0 rgba(124, 140, 255, 0); }
     }
+
+    /* === DISTRICT INVITATION — NODE GLOW SYSTEM === */
+    @keyframes nodeGlow {
+      0%, 100% {
+        box-shadow: 0 0 8px 2px rgba(124, 140, 255, 0.4),
+                    0 0 20px 6px rgba(124, 140, 255, 0.15);
+      }
+      50% {
+        box-shadow: 0 0 12px 4px rgba(124, 140, 255, 0.6),
+                    0 0 30px 10px rgba(124, 140, 255, 0.25);
+      }
+    }
+    .node-glow {
+      animation: nodeGlow 2.5s ease-in-out infinite;
+      border: 1px solid rgba(124, 140, 255, 0.5);
+      z-index: 10;
+    }
+    .node-dimmed {
+      opacity: 0.45;
+      transition: opacity 0.3s ease;
+    }
+    .node-dimmed:hover {
+      opacity: 1;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .node-glow {
+        animation: none;
+        box-shadow: 0 0 12px 4px rgba(124, 140, 255, 0.5),
+                    0 0 24px 8px rgba(124, 140, 255, 0.2);
+      }
+    }
   </style>
 </head>
 <body>
@@ -131,6 +162,39 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Wix postMessage param passthrough — must run BEFORE React mounts -->
+  <script>
+    (function () {
+      // When embedded in a Wix iframe, URL params don't reach this page.
+      // The Wix Velo code sends them via postMessage.
+      // This block updates the URL with those params so the React app reads them normally.
+
+      var _wixReady = false;
+
+      window.addEventListener('message', function (event) {
+        if (event.data && event.data.type === 'wixParams' && !_wixReady) {
+          _wixReady = true;
+          var p = event.data.params || {};
+          var search = '?' + Object.keys(p).map(function (k) {
+            return encodeURIComponent(k) + '=' + encodeURIComponent(p[k]);
+          }).join('&');
+
+          // Update the URL so React useEffect reads params via window.location.search
+          window.history.replaceState({}, '', window.location.pathname + search);
+
+          // If React already mounted, force a re-render by dispatching a custom event
+          window.dispatchEvent(new CustomEvent('wixParamsReady'));
+        }
+      });
+
+      // Tell Wix parent we're ready to receive params
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'ready' }, '*');
+      }
+    })();
+  </script>
+
   <script type="text/babel">
     const { useState, useRef, useMemo, useEffect } = React;
     const ReadyStackLogo = ({ size = 24, variant = 'light' }) => (
@@ -343,6 +407,11 @@
       const [isGeneratingStory, setIsGeneratingStory] = useState(false);
 
       const [videoStory, setVideoStory] = useState(null);
+      // District Assembly (Step 4) state
+      const [expandedAgent, setExpandedAgent] = useState(0);
+      const [heroFields, setHeroFields] = useState({ headline: '', youtubeUrl: '', ctaLabel: '', ctaUrl: '', mindMapLink: '' });
+      const [assemblyStatus, setAssemblyStatus] = useState(null);
+      const [assembledReadyStack, setAssembledReadyStack] = useState(null);
       const [playbackProgress, setPlaybackProgress] = useState(0);
       const [isNarrativePlaying, setIsNarrativePlaying] = useState(false);
       const narrativeInterval = useRef(null);
@@ -406,6 +475,26 @@
       const [rosterMode, setRosterMode] = useState('edit'); // 'edit' | 'roster' | 'invite'
       const [rosterFilter, setRosterFilter] = useState('All');
       // showRosterPanel removed — pills now populate directly
+
+      // === INVITATION SYSTEM STATE ===
+      const [districtRole, setDistrictRole] = useState(null); // 'creator' | 'resident' | null
+      const [residentEmail, setResidentEmail] = useState(null); // authenticated resident's email
+      const [inviteModalData, setInviteModalData] = useState(null); // { url, participantName, role } when modal is open
+      const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
+      const [inviteError, setInviteError] = useState(null); // participant index that failed, or null
+      const [highlightVendor, setHighlightVendor] = useState(null); // participant name to glow in District Ecosystem
+      const [residentSortBy, setResidentSortBy] = useState('recent'); // 'recent' | 'name' | 'status' | 'specialty' | 'company'
+      const [inviteExpiryDays, setInviteExpiryDays] = useState(7); // configurable invite link validity (default 7d per Jay)
+      const [isInviteMode, setIsInviteMode] = useState(false); // true when arrived via invite URL (pre-auth)
+      const isResident = districtRole === 'resident';
+      const isCreator = districtRole === 'creator' || !districtRole; // default to creator for backward compat
+
+      // === UNIVERSAL USER PROFILES STATE ===
+      const [profilesData, setProfilesData] = useState([]); // array of { userId, name, email, photoUrl, bio, websiteUrl }
+      const [creatorProfile, setCreatorProfile] = useState(null); // { name, email, photoUrl, bio, websiteUrl } for header pill
+      const [showProfilePopover, setShowProfilePopover] = useState(false); // toggle profile edit popover
+      const [editingBio, setEditingBio] = useState('');
+      const [editingWebsiteUrl, setEditingWebsiteUrl] = useState('');
 
       // Persist masterRoster to localStorage whenever it changes
       useEffect(() => {
@@ -822,6 +911,19 @@
 
       useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [activeTab]);
 
+      // District Assembly: pre-populate hero fields from upstream data on first tab visit
+      useEffect(() => {
+        if (activeTab === 'preview' && heroFields.headline === '') {
+          setHeroFields({
+            headline: videoStory?.title || '',
+            youtubeUrl: youtubeEmbedUrl || '',
+            ctaLabel: storyParticipants.residents[0]?.name ? `Follow ${storyParticipants.residents[0].name}` : '',
+            ctaUrl: '',
+            mindMapLink: ''
+          });
+        }
+      }, [activeTab]);
+
       useEffect(() => {
         if (stackLabel && stackLabel !== 'ReadyStack Campaign') {
           setNameFlash(true);
@@ -859,9 +961,78 @@
       }, [rsSession]);
 
       useEffect(() => {
+        // ── Wix postMessage fallback: if params arrive after mount, re-run ──
+        const handleWixParams = () => {
+          // Re-read params (URL was updated by the postMessage handler)
+          const freshParams = new URLSearchParams(window.location.search);
+          if (freshParams.get('invite') || freshParams.get('rs_session')) {
+            window.location.reload();  // Cleanest way to re-initialize with new params
+          }
+        };
+        window.addEventListener('wixParamsReady', handleWixParams);
+
         const params    = new URLSearchParams(window.location.search);
         const sessionId = params.get('rs_session');
         const email     = params.get('rs_email');
+
+        // ── Invite mode URL params (from join.html redirect) ──
+        const urlSheet = params.get('sheet');
+        const urlInviteToken = params.get('invite');
+        const urlNodeIdx = params.get('node');
+        const isInviteModeUrl = !!urlInviteToken;
+
+        // ── INVITE MODE (pre-auth): Load district + show District Ecosystem ──
+        if (isInviteModeUrl && urlSheet) {
+          const decodeJwtPayload = (token) => {
+            try {
+              const parts = token.split('.');
+              if (parts.length < 2) return null;
+              // 2-part HMAC token: parts[0] is payload; 3-part JWT: parts[1] is payload
+              const payload = parts.length === 2 ? parts[0] : parts[1];
+              const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+              const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+              return JSON.parse(atob(padded));
+            } catch (e) { return null; }
+          };
+
+          const invitePayload = decodeJwtPayload(urlInviteToken);
+          if (invitePayload) {
+            // Store invite token for OAuth flow resume
+            localStorage.setItem('rs_pending_invite', urlInviteToken);
+            localStorage.setItem('rs_invite_sheet', urlSheet);
+
+            // Set state for invite mode rendering
+            setIsInviteMode(true);
+            setRsSheetId(urlSheet);
+            setActiveTab('observatory');
+
+            // Set highlight vendor from JWT payload
+            if (invitePayload.participantName) {
+              setHighlightVendor(invitePayload.participantName);
+            }
+
+            // Load district data without auth (uses loadDistrictByInvite CF task)
+            callAdvisor('loadDistrictByInvite', {
+              data: { inviteToken: urlInviteToken }
+            }).then(districtData => {
+              if (districtData) {
+                if (districtData.districtName) setStackLabel(districtData.districtName);
+                if (districtData.mapping) setMapping(districtData.mapping);
+                if (districtData.storyParticipants) setStoryParticipants(districtData.storyParticipants);
+                if (districtData.videoData) setVideoData(districtData.videoData);
+                if (districtData.videoStory) setVideoStory(districtData.videoStory);
+              }
+            }).catch(err => {
+              console.warn('Could not load district for invite mode:', err);
+            });
+
+            // Clean URL (keep sheet + invite for bookmarking)
+            window.history.replaceState({}, '', window.location.pathname + '?sheet=' + urlSheet + '&invite=' + urlInviteToken + '&node=' + (urlNodeIdx || ''));
+          }
+
+          // Don't fall through to normal auth flow — invite mode is pre-auth
+          if (!sessionId) return;
+        }
 
         if (sessionId && email) {
           // Returning from Google OAuth persist and clean URL
@@ -869,6 +1040,23 @@
           localStorage.setItem('rs_email',   email);
           setRsSession({ sessionId, email });
           window.history.replaceState({}, '', window.location.pathname);
+
+          // ── Check for pending invite from /join page ──
+          const pendingInvite = localStorage.getItem('rs_pending_invite');
+          if (pendingInvite) {
+            localStorage.removeItem('rs_pending_invite');
+            // Accept the invite — this will set role, load district, etc.
+            acceptPendingInvite(pendingInvite, email, sessionId);
+            return; // Skip normal state restoration — invite flow handles everything
+          }
+
+          // ── If returning from OAuth with invite params still in URL ──
+          if (isInviteModeUrl && urlSheet) {
+            setRsSheetId(urlSheet);
+            localStorage.setItem('rs_sheet_id', urlSheet);
+            handleLoadDistrict(urlSheet);
+            return; // Skip normal restore — invite accept flow will set role
+          }
 
           // Restore app state that was persisted before OAuth redirect
           const savedState = localStorage.getItem('rs_app_state');
@@ -907,7 +1095,15 @@
           }
           const storedSheetId = localStorage.getItem('rs_sheet_id');
           if (storedSheetId) setRsSheetId(storedSheetId);
+
+          // Detect role if we have both session and sheet
+          if (storedSession && storedEmail && storedSheetId) {
+            // Defer to avoid calling before callAdvisor is ready
+            setTimeout(() => detectDistrictRole(storedSheetId, storedEmail), 500);
+          }
         }
+
+        return () => window.removeEventListener('wixParamsReady', handleWixParams);
       }, []);
 
       const closeTimeoutRef = useRef(null);
@@ -941,6 +1137,143 @@
         return json;
       };
 
+      // ── Generate invite link for a participant ──
+      const generateInviteLink = async (participantIndex) => {
+        if (!rsSession?.sessionId || !rsSheetId) return;
+        setIsGeneratingInvite(true);
+        try {
+          const participant = storyParticipants.residents[participantIndex];
+          if (!participant || !(participant.name || '').trim()) return;
+
+          const result = await callAdvisor('generateInviteLink', {
+            data: {
+              sheetId: rsSheetId,
+              participantRow: participantIndex,
+              districtName: stackLabel || 'My District',
+              participantName: participant.name.trim(),
+              role: participant.specialty || 'Participant',
+              company: participant.company || '',
+              expiryDays: inviteExpiryDays
+            }
+          });
+
+          if (result.inviteUrl) {
+            // Update participant status to Invited with timestamp + increment invite count
+            setStoryParticipants(prev => {
+              const next = [...prev.residents];
+              const current = next[participantIndex];
+              next[participantIndex] = {
+                ...current,
+                status: 'Invited',
+                invitedAt: new Date().toISOString(),
+                inviteCount: (current.inviteCount || 0) + 1
+              };
+              return { ...prev, residents: next };
+            });
+
+            // Show copy modal
+            setInviteModalData({
+              url: result.inviteUrl,
+              participantName: participant.name.trim(),
+              role: participant.specialty || 'Participant'
+            });
+          }
+        } catch (err) {
+          console.error('Failed to generate invite:', err);
+          setInviteError(participantIndex);
+          setTimeout(() => setInviteError(null), 4000);
+        } finally {
+          setIsGeneratingInvite(false);
+        }
+      };
+
+      // ── Detect district role (creator vs resident) ──
+      const detectDistrictRole = async (sheetId, sessionEmail) => {
+        if (!sheetId || !sessionEmail) {
+          setDistrictRole(null);
+          return;
+        }
+        try {
+          const result = await callAdvisor('getDistrictRole', {
+            data: { sheetId, email: sessionEmail }
+          });
+          setDistrictRole(result.role || null); // 'creator' | 'resident' | 'none'
+          if (result.role === 'resident') {
+            setResidentEmail(sessionEmail);
+          }
+        } catch (err) {
+          console.error('Role detection failed:', err);
+          setDistrictRole(null); // default to no-role (will show creator for owner)
+        }
+      };
+
+      // ── Fetch profiles for the current district ──
+      const fetchProfiles = async (sheetId) => {
+        if (!sheetId) return;
+        try {
+          const result = await callAdvisor('getProfiles', { data: { sheetId } });
+          if (result.profiles) {
+            setProfilesData(result.profiles);
+            // Find creator profile (the one whose email matches the session email)
+            if (rsSession?.email) {
+              const cp = result.profiles.find(p => p.email === rsSession.email);
+              if (cp) setCreatorProfile(cp);
+            }
+          }
+        } catch (err) {
+          console.error('Profile fetch failed (non-fatal):', err);
+        }
+      };
+
+      // ── Ensure Profiles tab exists and creator profile is written ──
+      const ensureProfiles = async (sheetId) => {
+        if (!sheetId || !rsSession) return;
+        try {
+          const result = await callAdvisor('ensureProfilesTab', { data: { sheetId } });
+          if (result.success) {
+            // Refresh profiles after ensuring tab exists
+            await fetchProfiles(sheetId);
+          }
+        } catch (err) {
+          console.error('Ensure profiles failed (non-fatal):', err);
+        }
+      };
+
+      // ── Save profile edits (bio, websiteUrl) ──
+      const saveProfileEdit = async () => {
+        if (!rsSheetId || !rsSession?.email) return;
+        try {
+          await callAdvisor('updateProfile', {
+            data: { sheetId: rsSheetId, email: rsSession.email, bio: editingBio, websiteUrl: editingWebsiteUrl }
+          });
+          // Update local state
+          setCreatorProfile(prev => prev ? { ...prev, bio: editingBio, websiteUrl: editingWebsiteUrl } : prev);
+          setProfilesData(prev => prev.map(p => p.email === rsSession.email ? { ...p, bio: editingBio, websiteUrl: editingWebsiteUrl } : p));
+          setShowProfilePopover(false);
+        } catch (err) {
+          console.error('Profile save failed:', err);
+        }
+      };
+
+      // ── Accept invite (called after OAuth return with pending invite) ──
+      const acceptPendingInvite = async (inviteToken, email, sessionId) => {
+        try {
+          const result = await callAdvisor('acceptInvite', {
+            data: { inviteToken, email }
+          }, sessionId);
+
+          if (result.success && result.sheetId) {
+            setRsSheetId(result.sheetId);
+            localStorage.setItem('rs_sheet_id', result.sheetId);
+            setDistrictRole('resident');
+            setResidentEmail(email);
+            await handleLoadDistrict(result.sheetId);
+          }
+        } catch (err) {
+          console.error('Accept invite failed:', err);
+        }
+      };
+
       const persistAppState = () => {
         const snapshot = {};
         if (selectedVideoData) snapshot.selectedVideoData = selectedVideoData;
@@ -964,7 +1297,12 @@
         persistAppState();
         const returnUrl   = window.location.href;
         const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
-        window.top.location.href = authUrl;
+        // Google blocks OAuth inside iframes — open in new tab when embedded
+        if (window.parent !== window) {
+          window.open(authUrl, '_blank');
+        } else {
+          window.location.href = authUrl;
+        }
       };
 
       // Handle LOGIN button click always triggers Google OAuth
@@ -982,12 +1320,12 @@
             const subStatus = await callAdvisor('checkSubscription', {}, overrideSessionId);
             if (subStatus.limit && subStatus.districtCount >= subStatus.limit && !subStatus.subscribed) {
               // Free tier limit reached - redirect to Stripe checkout
-              const returnUrl = window.top.location.href.split('?')[0];
+              const returnUrl = window.location.href.split('?')[0];
               const { url } = await callAdvisor('createCheckoutSession', {
                 data: { returnUrl }
               }, overrideSessionId);
               if (url) {
-                window.top.location.href = url;
+                window.location.href = url;
                 return;
               }
             }
@@ -1101,6 +1439,18 @@
 
           setRsSheetId(sheetId);
           localStorage.setItem('rs_sheet_id', sheetId);
+
+          // Detect creator vs resident role for this district
+          const currentEmail = localStorage.getItem('rs_email');
+          if (currentEmail) {
+            detectDistrictRole(sheetId, currentEmail);
+            // Fetch profiles + ensure creator profile exists
+            ensureProfiles(sheetId);
+          } else {
+            setDistrictRole(null); // not authenticated = creator by default
+            // Still fetch profiles for display (read-only for unauthenticated)
+            fetchProfiles(sheetId);
+          }
         } catch (e) {
           console.error('Load failed:', e);
         }
@@ -1778,6 +2128,75 @@
               <div className="flex items-center space-x-3">
                 <a href="https://www.readystack.ai/pricing" target="_top" className="text-xs font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors" style={{ fontFamily: 'Poppins, sans-serif', textDecoration: 'none' }}>Pricing</a>
 
+                {/* ── Creator Pill (28px avatar + name) ── */}
+                {creatorProfile && rsSession && (
+                  <div className="relative">
+                    <button
+                      onClick={() => { setShowProfilePopover(!showProfilePopover); setEditingBio(creatorProfile.bio || ''); setEditingWebsiteUrl(creatorProfile.websiteUrl || ''); }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] transition-all cursor-pointer"
+                    >
+                      {creatorProfile.photoUrl ? (
+                        <img src={creatorProfile.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover" referrerPolicy="no-referrer" />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-slate-600 flex items-center justify-center text-xs font-bold text-white uppercase">
+                          {(creatorProfile.name || '?')[0]}
+                        </div>
+                      )}
+                      <span className="text-xs font-medium text-slate-300 truncate max-w-[100px]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {creatorProfile.name || 'Profile'}
+                      </span>
+                    </button>
+
+                    {/* ── Profile Edit Popover ── */}
+                    {showProfilePopover && (
+                      <div className="absolute right-0 top-full mt-2 w-72 bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[200]" onMouseLeave={() => setShowProfilePopover(false)}>
+                        <div className="px-4 py-3 border-b border-white/10 flex items-center gap-3">
+                          {creatorProfile.photoUrl ? (
+                            <img src={creatorProfile.photoUrl} alt="" className="w-12 h-12 rounded-full object-cover" referrerPolicy="no-referrer" />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-slate-600 flex items-center justify-center text-lg font-bold text-white uppercase">
+                              {(creatorProfile.name || '?')[0]}
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-sm font-bold text-white">{creatorProfile.name}</p>
+                            <p className="text-xs text-slate-400 truncate">{creatorProfile.email}</p>
+                          </div>
+                        </div>
+                        <div className="px-4 py-3 space-y-3">
+                          <div>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bio</label>
+                            <textarea
+                              value={editingBio}
+                              onChange={e => setEditingBio(e.target.value.substring(0, 150))}
+                              placeholder="Tell people about yourself (150 chars)"
+                              className="mt-1 w-full bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 resize-none focus:outline-none focus:border-indigo-500/50"
+                              rows={2}
+                              maxLength={150}
+                            />
+                            <p className="text-[10px] text-slate-500 text-right">{editingBio.length}/150</p>
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Website</label>
+                            <input
+                              value={editingWebsiteUrl}
+                              onChange={e => setEditingWebsiteUrl(e.target.value)}
+                              placeholder="https://yoursite.com"
+                              className="mt-1 w-full bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50"
+                            />
+                          </div>
+                          <button
+                            onClick={saveProfileEdit}
+                            className="w-full py-2 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-xs font-bold text-indigo-200 hover:bg-indigo-600/50 transition-all uppercase tracking-wider"
+                          >
+                            Save Profile
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {isSaving && (
                   <div className="text-xs font-black text-emerald-400 uppercase tracking-widest animate-pulse">Saving...</div>
                 )}
@@ -1858,8 +2277,8 @@
             {/* LEFT ONBOARDING RAIL */}
             <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
 
-              {/* NEW MY DISTRICTS SECTION */}
-              <div className="mb-6 border-b border-white/10 pb-6">
+              {/* NEW MY DISTRICTS SECTION — hidden in invite mode */}
+              {!isInviteMode && <div className="mb-6 border-b border-white/10 pb-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">My Districts</h3>
                   {rsSession && (
@@ -1938,7 +2357,7 @@
                     Log in to see your districts
                   </button>
                 )}
-              </div>
+              </div>}
 
               {/* progress bar removed */}
 
@@ -1951,10 +2370,10 @@
                 </div>
                 <div className="space-y-3 mb-6">
                 {[
-                  { id: 'youtube', label: 'Define Market Story', icon: 'play-circle' },
+                  { id: 'youtube', label: 'Anchor Video', icon: 'play-circle' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
-                  { id: 'mapper', label: 'Links', icon: 'link' },
-                  { id: 'preview', label: 'Tasks and Agents', icon: 'list' }
+                  { id: 'mapper', label: 'Resident Links', icon: 'link' },
+                  ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }])
                 ].map(step => {
                   const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
@@ -2008,19 +2427,23 @@
                   <div className="flex-grow h-px bg-white/10"></div>
                 </div>
 
-                {/* ── OPERATIONS section ── */}
+                {/* ── OPERATIONS section — residents & invitees see only District Ecosystem ── */}
+                {!isResident && !isInviteMode && (
                 <div className="mb-2">
                   <h4 className="text-[10px] font-black text-amber-400/70 uppercase tracking-[0.25em] mb-3 pl-1" style={{fontFamily:'Poppins,sans-serif'}}>Operations</h4>
                 </div>
+                )}
                 <div className="space-y-3">
-                {[
+                {((isResident || isInviteMode) ? [
+                  { id: 'observatory', label: 'District Ecosystem', icon: 'git-branch' }
+                ] : [
                   { id: 'finance', label: 'District Finance', icon: 'dollar-sign' },
-                  { id: 'observatory', label: 'District Flow', icon: 'git-branch' },
+                  { id: 'observatory', label: 'District Ecosystem', icon: 'git-branch' },
                   { id: 'connect', label: 'My Residents', icon: 'send' },
                   { id: 'looker', label: 'Looker', icon: 'bar-chart-2' },
                   { id: 'g4', label: 'GA4', icon: 'activity' },
                   { id: 'analytics', label: 'Analytics', icon: 'trending-up' },
-                ].map(step => {
+                ]).map(step => {
                   const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
@@ -2120,7 +2543,8 @@
 
               {/* ── Work-area action buttons ── */}
               <div className="absolute top-20 right-6 z-[90] flex items-center gap-2">
-                {/* Save District */}
+                {/* Save District — hidden for residents and invitees */}
+                {!isResident && !isInviteMode && (
                 <button
                   onClick={() => {
                     if (!rsSession) { initiateGoogleAuth(); return; }
@@ -2136,6 +2560,7 @@
                     <polyline points="7 3 7 8 15 8"/>
                   </svg>
                 </button>
+                )}
                 {/* Studio */}
                 <a
                   href="https://mks.bridgemailsystem.com/pms/loginS.jsp"
@@ -2166,14 +2591,14 @@
             {/* ── TOP STEP NAVIGATION BAR (above everything) ── */}
             {(() => {
               const composeSteps = [
-                { id: 'youtube', label: 'Define Market Story', phase: 'compose' },
+                { id: 'youtube', label: 'Anchor Video', phase: 'compose' },
                 { id: 'intro', label: 'Residents', phase: 'compose' },
-                { id: 'mapper', label: 'Links', phase: 'compose' },
-                { id: 'preview', label: 'Tasks and Agents', phase: 'compose' }
+                { id: 'mapper', label: 'Resident Links', phase: 'compose' },
+                { id: 'preview', label: 'District Assembly', phase: 'compose' }
               ];
               const opsSteps = [
                 { id: 'finance', label: 'District Finance', phase: 'operations' },
-                { id: 'observatory', label: 'District Flow', phase: 'operations' },
+                { id: 'observatory', label: 'District Ecosystem', phase: 'operations' },
                 { id: 'connect', label: 'My Residents', phase: 'operations' },
                 { id: 'looker', label: 'Looker', phase: 'operations' },
                 { id: 'g4', label: 'GA4', phase: 'operations' },
@@ -2219,7 +2644,7 @@
             {activeTab === 'youtube' && (
               <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
                   <div className="space-y-3 mb-6">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">DEFINE MARKET STORY</h3>
+                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">ANCHOR VIDEO</h3>
                       <p className="text-slate-300 text-base font-medium">Search YouTube for a video of the problem your audience faces. Your district exists to solve it.</p>
                   </div>
 
@@ -2237,7 +2662,7 @@
                     {(searchPlatform || 'youtube') === 'youtube' && (
                       <div className="space-y-6">
                         {/* YouTube: selected video view */}
-                        {youtubeEmbedUrl && !isSearchPanelOpen ? (
+                        {youtubeEmbedUrl && (!isSearchPanelOpen || isResident) ? (
                           <div className="space-y-8 animate-fade-in">
                             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 bg-[#0f172a]/50 p-10 rounded-2xl border border-white/5">
                               <div className="lg:col-span-3">
@@ -2258,7 +2683,7 @@
                                       ))}
                                     </ul>
                                     <div className="flex gap-2">
-                                      <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
+                                      {!isResident && !isInviteMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
                                       <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
@@ -2266,11 +2691,11 @@
                                   <div className="space-y-4">
                                     {isGeneratingStory ? (
                                       <div className="w-full py-4 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-black text-sm uppercase tracking-widest text-center animate-pulse">Drafting Market Story...</div>
-                                    ) : (
+                                    ) : !isResident && !isInviteMode ? (
                                       <button onClick={generateStoryFromVideo} className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg">Re-Draft Market Story</button>
-                                    )}
+                                    ) : null}
                                     <div className="flex gap-2">
-                                      <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>
+                                      {!isResident && !isInviteMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
                                       <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
@@ -2588,7 +3013,7 @@
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-20">
                     <div className="space-y-6">
-                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>WHO'S IN YOUR DISTRICT?</h3>
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS</h3>
                         <p className="text-slate-300 text-base font-medium">Review the tasks from the video and assemble a district to deepen the learning and help audiences execute lesson.</p>
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
@@ -2597,7 +3022,7 @@
                     {videoStory && (videoStory.checklist || videoStory.automations) && (
                       <div className="space-y-6">
                         <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
-                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your market story. These will populate the Tasks and Agents assembly and JSON export.</p>
+                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your market story. These will populate the District Assembly and JSON export.</p>
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
@@ -2625,8 +3050,8 @@
                       </div>
                     )}
 
-                    {/* ── SUGGESTED ROLES: Click to assign to a participant ── */}
-                    {videoStory && videoStory.network && (
+                    {/* ── SUGGESTED ROLES: Click to assign to a participant (creator only) ── */}
+                    {!isInviteMode && videoStory && videoStory.network && (
                       <div className="space-y-4">
                         <h5 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Suggested Roles</h5>
                         <p className="text-slate-500 text-xs">Click a role to assign it to a participant slot.</p>
@@ -2704,7 +3129,7 @@
                                   return (
                                     <div className="flex flex-col items-center justify-center py-8">
                                       <p className="text-slate-300 text-xs mb-3">No suggestions for {rosterFilter.split(' / ')[0]} yet.</p>
-                                      <button onClick={() => setActiveTab('connect')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors underline underline-offset-2">Invite someone</button>
+                                      {!isInviteMode && <button onClick={() => setActiveTab('connect')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors underline underline-offset-2">Invite someone</button>}
                                     </div>
                                   );
                                 }
@@ -2722,19 +3147,19 @@
 
                                 return (
                                   <div className="space-y-3">
-                                    <p className="text-xs text-slate-300 tracking-wide">Click a name to add</p>
+                                    <p className="text-xs text-slate-300 tracking-wide">{isInviteMode ? 'Residents by specialty' : 'Click a name to add'}</p>
                                     <div className="flex flex-wrap gap-2">
                                       {candidates.map((c, ci) => {
                                         const isSelected = activeNames.includes(c.name.toLowerCase());
                                         return (
-                                          <button key={ci} onClick={() => addCandidate(c)} disabled={isSelected}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isSelected ? 'bg-white/5 text-slate-300 cursor-default' : 'bg-white/[0.06] text-slate-300 hover:bg-white/10 hover:text-white border border-white/[0.06] hover:border-white/15'}`}>
+                                          <button key={ci} onClick={() => !isInviteMode && addCandidate(c)} disabled={isSelected || isInviteMode}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isSelected ? 'bg-white/5 text-slate-300 cursor-default' : isInviteMode ? 'bg-white/[0.06] text-slate-300 border border-white/[0.06] cursor-default' : 'bg-white/[0.06] text-slate-300 hover:bg-white/10 hover:text-white border border-white/[0.06] hover:border-white/15'}`}>
                                             {c.name}{isSelected ? ' ✓' : ''}
                                           </button>
                                         );
                                       })}
                                     </div>
-                                    <button onClick={() => setActiveTab('connect')} className="text-xs text-slate-300 hover:text-slate-300 transition-colors">Don't see someone? Invite them →</button>
+                                    {!isInviteMode && <button onClick={() => setActiveTab('connect')} className="text-xs text-slate-300 hover:text-slate-300 transition-colors">Don't see someone? Invite them →</button>}
                                   </div>
                                 );
                               }
@@ -2742,11 +3167,18 @@
                               // ALL MODE — editable rows
                               return (<>
                               <div className="flex gap-2 mb-6 px-1">
-                                <span className="w-[25%] text-xs font-medium text-slate-300 uppercase tracking-wider">Name</span>
-                                <span className="w-[20%] text-xs font-medium text-slate-300 uppercase tracking-wider">Company</span>
-                                <span className="w-[30%] text-xs font-medium text-slate-300 uppercase tracking-wider">Specialty</span>
-                                <span className="w-[20%] text-xs font-medium text-slate-300 uppercase tracking-wider">Email</span>
-                                <span className="w-[5%]"></span>
+                                <span className={`${(isResident || isInviteMode) ? 'w-[30%]' : 'w-[22%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Name</span>
+                                <span className="w-[18%] text-xs font-medium text-slate-300 uppercase tracking-wider">Company</span>
+                                <span className={`${(isResident || isInviteMode) ? 'w-[30%]' : 'w-[25%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Specialty</span>
+                                {!isResident && !isInviteMode && (
+                                  <span className="w-[17%] text-xs font-medium text-slate-300 uppercase tracking-wider">Email</span>
+                                )}
+                                {!isResident && !isInviteMode && rsSession && rsSheetId && (
+                                  <span className="w-[13%] text-xs font-medium text-slate-300 uppercase tracking-wider text-center">Invite</span>
+                                )}
+                                {!isResident && !isInviteMode && (
+                                  <span className="w-[5%]"></span>
+                                )}
                               </div>
                               <div className="space-y-6">
                               {(() => {
@@ -2757,22 +3189,116 @@
                                 const hasName = (r.name || '').trim();
                                 const rosterMatch = masterRoster.find(m => m.name.toLowerCase() === (r.name || '').toLowerCase().trim());
                                 return (
-                                <div key={i} className="space-y-1.5">
+                                <div key={i} className={`space-y-1.5 ${isResident && residentEmail && (r.email || '').toLowerCase() === residentEmail.toLowerCase() ? 'ring-1 ring-indigo-500/30 rounded-xl p-2 bg-indigo-500/5' : ''}`}>
                                   <div className="flex gap-2 items-center group">
-                                    <input placeholder={`Participant ${i+1}`} value={r.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], name: v}; return {...prev, residents: next}; }); }} className={`w-[25%] min-w-0 bg-[#020617]/80 border rounded-lg px-4 py-3 text-sm text-white focus:border-slate-600 outline-none ${r.jobContext && !hasName ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-slate-800/60'}`} />
-                                    <input placeholder="company" value={r.company} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], company: v}; return {...prev, residents: next}; }); }} className="w-[20%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
-                                    <select value={r.specialty} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], specialty: v}; return {...prev, residents: next}; }); }} className={`w-[30%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm outline-none cursor-pointer focus:border-slate-600 ${r.specialty ? 'text-white' : 'text-slate-300'}`}>
-                                      <option value="">Select specialty...</option>
-                                      {SPECIALTY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                                    </select>
-                                    <input placeholder="email" value={r.email || ''} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], email: v}; return {...prev, residents: next}; }); }} className="w-[20%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
-                                    <div className="w-[5%] flex items-center justify-center">
-                                      {(hasName || r.jobContext) && (
-                                        <button onClick={() => { setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = { name: '', company: '', specialty: '', email: '', source: '', status: '', jobContext: '', jobType: '' }; return {...prev, residents: next}; }); }} className="text-slate-300 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                                        </button>
-                                      )}
-                                    </div>
+                                    {(isResident || isInviteMode) ? (
+                                      <>
+                                        <div className="w-[30%] min-w-0 px-4 py-3 text-sm text-white truncate flex items-center gap-2">
+                                          {(() => {
+                                            const profile = profilesData.find(p => p.email && r.email && p.email.toLowerCase() === r.email.toLowerCase());
+                                            return profile?.photoUrl ? (
+                                              <img src={profile.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" style={{border:'2px solid rgba(124,140,255,0.15)'}} referrerPolicy="no-referrer" />
+                                            ) : profile ? (
+                                              <div className="w-7 h-7 rounded-full bg-[#334155] flex items-center justify-center text-[10px] font-bold text-white uppercase flex-shrink-0">
+                                                {(r.name || '?')[0]}
+                                              </div>
+                                            ) : (
+                                              <div className="w-7 h-7 rounded-full bg-[#64748b]/30 flex items-center justify-center flex-shrink-0">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-slate-500"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                              </div>
+                                            );
+                                          })()}
+                                          <span className="truncate">
+                                            {r.name || `Participant ${i+1}`}
+                                            {residentEmail && (r.email || '').toLowerCase() === residentEmail.toLowerCase() && (
+                                              <span className="ml-2 text-[9px] font-black text-indigo-400 uppercase tracking-widest">You</span>
+                                            )}
+                                          </span>
+                                        </div>
+                                        <div className="w-[18%] min-w-0 px-4 py-3 text-sm text-slate-300 truncate">{r.company || ''}</div>
+                                        <div className="w-[30%] min-w-0 px-4 py-3 text-sm text-slate-300 truncate">{r.specialty || ''}</div>
+                                      </>
+                                    ) : (
+                                      <>
+                                        {(() => {
+                                          const profile = profilesData.find(p => p.email && r.email && p.email.toLowerCase() === r.email.toLowerCase());
+                                          return profile?.photoUrl ? (
+                                            <img src={profile.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" referrerPolicy="no-referrer" />
+                                          ) : hasName ? (
+                                            <div className="w-7 h-7 rounded-full bg-slate-600 flex items-center justify-center text-[10px] font-bold text-white uppercase flex-shrink-0">
+                                              {(r.name || '?')[0]}
+                                            </div>
+                                          ) : null;
+                                        })()}
+                                        <input placeholder={`Participant ${i+1}`} value={r.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], name: v}; return {...prev, residents: next}; }); }} className={`w-[22%] min-w-0 bg-[#020617]/80 border rounded-lg px-4 py-3 text-sm text-white focus:border-slate-600 outline-none ${r.jobContext && !hasName ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-slate-800/60'}`} />
+                                        <input placeholder="company" value={r.company} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], company: v}; return {...prev, residents: next}; }); }} className="w-[18%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
+                                        <select value={r.specialty} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], specialty: v}; return {...prev, residents: next}; }); }} className={`w-[25%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm outline-none cursor-pointer focus:border-slate-600 ${r.specialty ? 'text-white' : 'text-slate-300'}`}>
+                                          <option value="">Select specialty...</option>
+                                          {SPECIALTY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                        <input placeholder="email" value={r.email || ''} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], email: v}; return {...prev, residents: next}; }); }} className="w-[17%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
+
+                                        {rsSession && rsSheetId ? (
+                                          <div className="w-[13%] flex flex-col items-center justify-center gap-0.5">
+                                            {hasName && (() => {
+                                              // Compute effective status for this row
+                                              const isExpired = r.status === 'Invited' && r.invitedAt && (Date.now() - new Date(r.invitedAt).getTime()) > (inviteExpiryDays * 86400000);
+                                              const es = r.status === 'Active' ? 'Active' : isExpired ? 'Expired' : r.status === 'Invited' ? 'Invited' : '';
+                                              const daysLeft = es === 'Invited' && r.invitedAt ? Math.ceil((new Date(r.invitedAt).getTime() + inviteExpiryDays * 86400000 - Date.now()) / 86400000) : 0;
+                                              const count = r.inviteCount || 0;
+
+                                              if (es === 'Active') return (
+                                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                  Active
+                                                </span>
+                                              );
+                                              if (es === 'Expired') return (
+                                                <div className="flex flex-col items-center gap-0.5">
+                                                  <button
+                                                    onClick={() => generateInviteLink(i)}
+                                                    disabled={isGeneratingInvite || inviteError === i}
+                                                    className={`text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer disabled:opacity-50 ${inviteError === i ? 'text-red-400' : 'text-red-400 hover:text-red-300'}`}
+                                                  >
+                                                    {isGeneratingInvite ? '...' : inviteError === i ? 'Failed' : 'Expired'}
+                                                  </button>
+                                                  {count > 0 && <span className="text-[8px] text-slate-500 font-bold">{count}x sent</span>}
+                                                </div>
+                                              );
+                                              if (es === 'Invited') return (
+                                                <div className="flex flex-col items-center gap-0.5">
+                                                  <button
+                                                    onClick={() => generateInviteLink(i)}
+                                                    disabled={isGeneratingInvite || inviteError === i}
+                                                    className={`text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer disabled:opacity-50 ${inviteError === i ? 'text-red-400' : 'text-amber-400 hover:text-amber-300'}`}
+                                                  >
+                                                    {isGeneratingInvite ? '...' : inviteError === i ? 'Failed' : 'Invited'}
+                                                  </button>
+                                                  <span className="text-[8px] text-slate-500 font-bold">{daysLeft}d left{count > 1 ? ` · ${count}x` : ''}</span>
+                                                </div>
+                                              );
+                                              return (
+                                                <button
+                                                  onClick={() => generateInviteLink(i)}
+                                                  disabled={isGeneratingInvite || inviteError === i}
+                                                  className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50 ${inviteError === i ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20'}`}
+                                                >
+                                                  {isGeneratingInvite ? '...' : inviteError === i ? 'Failed' : 'Invite'}
+                                                </button>
+                                              );
+                                            })()}
+                                          </div>
+                                        ) : null}
+
+                                        <div className="w-[5%] flex items-center justify-center">
+                                          {(hasName || r.jobContext) && (
+                                            <button onClick={() => { setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = { name: '', company: '', specialty: '', email: '', source: '', status: '', jobContext: '', jobType: '' }; return {...prev, residents: next}; }); }} className="text-slate-300 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
+                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                            </button>
+                                          )}
+                                        </div>
+                                      </>
+                                    )}
                                   </div>
                                   {r.jobContext && (
                                     <div className="pl-1">
@@ -2783,6 +3309,7 @@
                                 );
                               })}
                               </div>
+                              {!isResident && !isInviteMode && (
                               <div className="pt-4">
                                 <button onClick={() => {
                                   setStoryParticipants(prev => ({
@@ -2794,13 +3321,14 @@
                                   Participant
                                 </button>
                               </div>
+                              )}
                               </>);
                             })()}
 
                         </div>
                     </div>
 
-                    <div className="text-center py-10"><button onClick={() => buildStoryDistrict('mapper')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">Confirming your residents unlocks the District Map.</p></div>
+                    <div className="text-center py-10"><button onClick={() => (isResident || isInviteMode) ? setActiveTab('mapper') : buildStoryDistrict('mapper')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">{isInviteMode ? 'View the District Map.' : 'Confirming your residents unlocks the District Map.'}</p></div>
                 </div>
               </div>
             )}
@@ -2808,10 +3336,11 @@
             {activeTab === 'mapper' && (
               <div className="space-y-12 animate-fade-in text-left pt-28">
                 <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>LINKS</h3>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENT LINKS</h3>
                     <p className="text-slate-300 text-base font-medium">Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey.</p>
                 </div>
-                {/* ── District Identity Card ── */}
+                {/* ── District Identity Card — hidden for residents & invitees ── */}
+                {!isResident && !isInviteMode && (
                 <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner">
                     <div className="grid md:grid-cols-3 gap-6">
                         <div className="space-y-4">
@@ -2828,6 +3357,7 @@
                         </div>
                     </div>
                 </div>
+                )}
 
                 {/* ── LINKS: Resident rows × 4 journey columns ── */}
                 <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner space-y-8">
@@ -2920,7 +3450,7 @@
                             <div className="flex items-center gap-3 mb-4">
                               <p className="text-sm font-bold text-white">{displayName}</p>
                               {resident.jobContext && (resident.name || '').trim() && <span className="text-xs font-semibold text-indigo-400 italic">{resident.jobContext}</span>}
-                              <div className="relative">
+                              {!isResident && !isInviteMode && (<div className="relative">
                                 <button
                                   onClick={() => setMapEditingItem(mapEditingItem === 'dropdown-'+origIdx ? null : 'dropdown-'+origIdx)}
                                   className="bg-[#020617] border border-indigo-500/40 rounded-lg px-3 py-1.5 text-[10px] text-indigo-300 outline-none cursor-pointer hover:border-indigo-400 hover:text-indigo-200 transition-colors flex items-center gap-1"
@@ -2986,7 +3516,7 @@
                                     ))}
                                   </div>
                                 )}
-                              </div>
+                              </div>)}
                             </div>
 
                             {/* 5-Column Pill Grid */}
@@ -3000,10 +3530,10 @@
                                       onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-t-'+ti ? null : origIdx+'-t-'+ti)}>
                                       <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-white"></span>
                                       <span className="text-[10px] text-white font-medium flex-1 truncate">{item.label}</span>
-                                      <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
-                                        className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                      {!isResident && !isInviteMode && <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
+                                        className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                     </div>
-                                    {mapEditingItem === origIdx+'-t-'+ti && (
+                                    {mapEditingItem === origIdx+'-t-'+ti && !isResident && !isInviteMode && (
                                       <input autoFocus placeholder="https://..." value={item.url || ''} onChange={(e) => { const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources[item.srcIdx] = { ...sources[item.srcIdx], url: e.target.value }; updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
                                         onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                         className="mt-1 w-full bg-[#020617] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none focus:border-indigo-500" />
@@ -3030,10 +3560,10 @@
                                           onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-'+q.key+'-'+ii ? null : origIdx+'-'+q.key+'-'+ii)}>
                                           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.pat ? q.color : q.color + '60' }}></span>
                                           <span className="text-[10px] font-medium flex-1 truncate" style={{ color: item.pat ? '#e2e8f0' : '#cbd5e1' }}>{item.label}{!item.pat && <span className="text-[8px] text-amber-400/70 ml-1">needs link</span>}</span>
-                                          <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
-                                            className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                          {!isResident && !isInviteMode && <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
+                                            className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                         </div>
-                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && (
+                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && !isResident && !isInviteMode && (
                                           <input autoFocus placeholder="https://..." value={item.pat || ''} onChange={(e) => { handlePatternUpdate(q.key, item.stageIdx, 'pat', e.target.value); }}
                                             onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                             className="mt-1 w-full bg-[#020617] border rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none" style={{ borderColor: q.color + '40' }} />
@@ -3052,70 +3582,206 @@
                 </div>
 
                 <div className="py-12 text-center">
-                    <button onClick={() => setActiveTab('preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Tasks and Agents</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Assembly'}</button>
                 </div>
               </div>
             )}
 
-            {/* ── INVITE RESIDENTS TAB ── */}
-            {activeTab === 'connect' && (
+            {/* ── MY RESIDENTS TAB ── */}
+            {activeTab === 'connect' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-12">
                   <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">INVITE RESIDENTS</h3>
-                    <p className="text-slate-300 text-base font-medium">Let your featured sources know you're spreading the word.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">MY RESIDENTS</h3>
+                    <p className="text-slate-300 text-base font-medium">Track who you've invited and their onboarding status.</p>
                   </div>
 
                   {(() => {
-                    const citedAuthors = (mapping.sources || []).filter(s => s.type !== 'linkedin').map(s => ({ name: s.author || s.lab || s.ven, platform: s.type || 'youtube', url: s.url || '' }));
-                    if (citedAuthors.length === 0) {
+                    // Build resident list from storyParticipants (named rows only)
+                    const now = Date.now();
+                    const expiryMs = inviteExpiryDays * 24 * 60 * 60 * 1000;
+                    const residents = (storyParticipants.residents || [])
+                      .map((r, i) => {
+                        // Derive effective status: check for expired invites
+                        let effectiveStatus = r.status || '';
+                        if (r.status === 'Invited' && r.invitedAt) {
+                          const elapsed = now - new Date(r.invitedAt).getTime();
+                          if (elapsed > expiryMs) effectiveStatus = 'Expired';
+                        }
+                        return { ...r, _idx: i, effectiveStatus };
+                      })
+                      .filter(r => (r.name || '').trim());
+
+                    if (residents.length === 0) {
                       return (
                         <div className="text-center py-16">
                           <div className="bg-[#0f172a]/60 p-10 rounded-[32px] border border-white/5 shadow-inner inline-block">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-slate-300 mx-auto mb-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                            <p className="text-slate-300 text-base font-medium">Feature voices first, then connect with them here.</p>
-                            <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Define Market Story</button>
+                            <p className="text-slate-300 text-base font-medium">Add participants to your district first, then invite them here.</p>
+                            <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Anchor Video</button>
                           </div>
                         </div>
                       );
                     }
+
+                    // Sort residents (default: most recent activity first)
+                    const statusOrder = { 'Active': 0, 'Invited': 1, 'Expired': 2, '': 3 };
+                    const getActivityTime = (r) => r.invitedAt ? new Date(r.invitedAt).getTime() : 0;
+                    const sorted = [...residents].sort((a, b) => {
+                      if (residentSortBy === 'recent') {
+                        const ta = getActivityTime(a), tb = getActivityTime(b);
+                        if (ta || tb) return tb - ta; // most recent activity first
+                        return b._idx - a._idx; // fallback: most recently added
+                      }
+                      if (residentSortBy === 'status') {
+                        return (statusOrder[a.effectiveStatus] ?? 3) - (statusOrder[b.effectiveStatus] ?? 3) || (a.name || '').localeCompare(b.name || '');
+                      }
+                      if (residentSortBy === 'specialty') {
+                        return (a.specialty || '').localeCompare(b.specialty || '') || (a.name || '').localeCompare(b.name || '');
+                      }
+                      if (residentSortBy === 'company') {
+                        return (a.company || '').localeCompare(b.company || '') || (a.name || '').localeCompare(b.name || '');
+                      }
+                      return (a.name || '').localeCompare(b.name || '');
+                    });
+
+                    // Stats
+                    const activeCount = residents.filter(r => r.effectiveStatus === 'Active').length;
+                    const invitedCount = residents.filter(r => r.effectiveStatus === 'Invited').length;
+                    const expiredCount = residents.filter(r => r.effectiveStatus === 'Expired').length;
+                    const pendingCount = residents.length - activeCount - invitedCount - expiredCount;
+
                     return (
                       <div className="space-y-6">
-                        {citedAuthors.map((a, i) => (
-                          <div key={i} className="bg-[#0f172a]/60 p-8 rounded-[32px] border border-white/5 shadow-inner flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white">
-                                {a.platform === 'youtube' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-red-400"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
-                                {a.platform === 'substack' && <SubstackIcon size={18} className="text-orange-400" />}
-                                {a.platform === 'reddit' && <RedditIcon size={18} className="text-orange-500" />}
-                                {!['youtube','substack','reddit'].includes(a.platform) && <span className="font-black text-sm">{a.name.charAt(0).toUpperCase()}</span>}
-                              </div>
-                              <div className="text-left">
-                                <p className="text-sm font-bold text-white">{a.name}</p>
-                                <p className="text-xs text-slate-300 uppercase tracking-wider">{a.platform}{a.url ? ` \u2022 ` : ''}{a.url && <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors">View source</a>}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              {a.url && (
-                                <a href={a.url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all">
-                                  Visit
-                                </a>
-                              )}
-                              <button className="px-4 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs font-black text-indigo-400 uppercase tracking-widest hover:bg-indigo-500/20 transition-all">
-                                Notify
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                        <div className="text-center pt-8">
-                          <p className="text-xs text-slate-300 italic">Notify sends an invitation to participate in your district. Mechanism coming soon.</p>
+                        {/* Invite link expiry setting */}
+                        <div className="flex items-center gap-3 bg-[#0f172a]/40 px-5 py-3 rounded-xl border border-white/5">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-400 flex-shrink-0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invite link valid for</span>
+                          {[7, 14, 30, 60, 90].map(d => (
+                            <button key={d} onClick={() => setInviteExpiryDays(d)} className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${inviteExpiryDays === d ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-500 hover:text-slate-300'}`}>
+                              {d}d
+                            </button>
+                          ))}
                         </div>
+
+                        {/* Status summary bar */}
+                        <div className="flex items-center gap-5 flex-wrap bg-[#0f172a]/60 p-5 rounded-2xl border border-white/5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Active <span className="text-white">{activeCount}</span></span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Invite Pending <span className="text-white">{invitedCount}</span></span>
+                          </div>
+                          {expiredCount > 0 && (
+                            <div className="flex items-center gap-2">
+                              <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Expired <span className="text-white">{expiredCount}</span></span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-slate-500"></div>
+                            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Not Invited <span className="text-white">{pendingCount}</span></span>
+                          </div>
+                          <div className="ml-auto flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sort:</span>
+                            {['recent','name','status','specialty','company'].map(key => (
+                              <button key={key} onClick={() => setResidentSortBy(key)} className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${residentSortBy === key ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:text-slate-200'}`}>
+                                {key}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Resident cards */}
+                        {sorted.map((r) => {
+                          const es = r.effectiveStatus;
+                          const statusLabel = es === 'Active' ? 'Active' : es === 'Invited' ? 'Invite Pending' : es === 'Expired' ? 'Expired' : 'Not Invited';
+                          const statusTextClass = es === 'Active' ? 'text-emerald-400' : es === 'Invited' ? 'text-amber-400' : es === 'Expired' ? 'text-red-400' : 'text-slate-400';
+                          const dotColor = es === 'Active' ? 'bg-emerald-400' : es === 'Invited' ? 'bg-amber-400' : es === 'Expired' ? 'bg-red-400' : 'bg-slate-500';
+                          const borderColor = es === 'Active' ? 'border-emerald-500/20' : es === 'Invited' ? 'border-amber-500/20' : es === 'Expired' ? 'border-red-500/20' : 'border-white/5';
+
+                          // Days remaining for active invites + invite count
+                          const count = r.inviteCount || 0;
+                          let daysInfo = '';
+                          if (es === 'Invited' && r.invitedAt) {
+                            const daysLeft = Math.ceil((new Date(r.invitedAt).getTime() + expiryMs - now) / (24*60*60*1000));
+                            daysInfo = daysLeft + 'd left';
+                          }
+                          const countInfo = count > 1 ? count + 'x sent' : count === 1 ? '1x sent' : '';
+
+                          return (
+                            <div key={r._idx} className={`bg-[#0f172a]/60 p-6 rounded-[24px] border ${borderColor} shadow-inner flex items-center justify-between transition-all`}>
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center">
+                                  <span className="font-black text-sm text-white">{(r.name || '?').charAt(0).toUpperCase()}</span>
+                                </div>
+                                <div className="text-left">
+                                  <p className="text-sm font-bold text-white">{r.name}</p>
+                                  <p className="text-xs text-slate-400">
+                                    {r.company && <span>{r.company}</span>}
+                                    {r.company && r.specialty && <span> &bull; </span>}
+                                    {r.specialty && <span className="text-slate-300">{r.specialty}</span>}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                {/* Status badge */}
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${dotColor}`}></div>
+                                  <span className={`text-[10px] font-black uppercase tracking-widest ${statusTextClass}`}>{statusLabel}</span>
+                                  {daysInfo && <span className="text-[9px] text-slate-500 font-bold">{daysInfo}</span>}
+                                  {countInfo && <span className="text-[9px] text-slate-500 font-bold">{countInfo}</span>}
+                                </div>
+                                {/* Action button */}
+                                {es === 'Active' ? (
+                                  <div className="px-3 py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                                    Joined
+                                  </div>
+                                ) : es === 'Expired' ? (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => { setStoryParticipants(prev => { const next = [...prev.residents]; next[r._idx] = { ...next[r._idx], status: '', invitedAt: '' }; return { ...prev, residents: next }; }); }}
+                                      className="px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-white/10 transition-all cursor-pointer"
+                                    >
+                                      Dismiss
+                                    </button>
+                                    <button
+                                      onClick={() => generateInviteLink(r._idx)}
+                                      disabled={isGeneratingInvite || inviteError === r._idx}
+                                      className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50 ${inviteError === r._idx ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20'}`}
+                                    >
+                                      {isGeneratingInvite ? '...' : inviteError === r._idx ? 'Failed' : 'Re-invite'}
+                                    </button>
+                                  </div>
+                                ) : es === 'Invited' ? (
+                                  <button
+                                    onClick={() => generateInviteLink(r._idx)}
+                                    disabled={isGeneratingInvite || inviteError === r._idx}
+                                    className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50 ${inviteError === r._idx ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'}`}
+                                  >
+                                    {isGeneratingInvite ? '...' : inviteError === r._idx ? 'Failed' : 'Re-invite'}
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => generateInviteLink(r._idx)}
+                                    disabled={isGeneratingInvite || inviteError === r._idx}
+                                    className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer disabled:opacity-50 ${inviteError === r._idx ? 'border-red-500/30 bg-red-500/10 text-red-400' : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20'}`}
+                                  >
+                                    {isGeneratingInvite ? '...' : inviteError === r._idx ? 'Failed' : 'Invite'}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     );
                   })()}
 
                   <div className="text-center py-12">
-                    <button onClick={() => setActiveTab('preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Tasks and Agents</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Assembly'}</button>
                   </div>
                 </div>
               </div>
@@ -3126,83 +3792,183 @@
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
                 <div className="space-y-12">
                   <div className="space-y-4">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>TASKS AND AGENTS</h3>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY</h3>
                     <p className="text-slate-300 text-base font-medium">Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack.</p>
                   </div>
 
-                  {/* ── Market Story Summary ── */}
-                  <div className="bg-[#020617]/50 p-10 rounded-[32px] border border-white/5 shadow-inner space-y-6">
-                    <h4 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Market Story</h4>
+                  {/* ══════════════════════════════════════════════════════════
+                       DISTRICT ASSEMBLY — WHITE THEME CONTENT AREA
+                       Sections A–G per TASKS_AND_AGENTS_UX_SPEC.md v3
+                       White theme scoped to this block only
+                     ══════════════════════════════════════════════════════════ */}
+
+                  {/* ── SECTION A: Hero Editing Fields ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                    <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">ReadyStack Settings</p>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">Headline</label>
+                        <input type="text" value={heroFields.headline} onChange={e => setHeroFields({...heroFields, headline: e.target.value})} placeholder="Enter your ReadyStack headline" className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-lg font-medium py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">YouTube URL</label>
+                          <input type="text" value={heroFields.youtubeUrl} onChange={e => setHeroFields({...heroFields, youtubeUrl: e.target.value})} placeholder="https://youtube.com/..." className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">CTA Label</label>
+                          <input type="text" value={heroFields.ctaLabel} onChange={e => setHeroFields({...heroFields, ctaLabel: e.target.value})} placeholder="Follow..." className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">CTA URL</label>
+                          <input type="text" value={heroFields.ctaUrl} onChange={e => setHeroFields({...heroFields, ctaUrl: e.target.value})} placeholder="https://..." className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">Mind Map Link</label>
+                        <input type="text" value={heroFields.mindMapLink} onChange={e => setHeroFields({...heroFields, mindMapLink: e.target.value})} placeholder="https://miro.com/... or any diagram URL" className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── SECTION B: ReadyStack Card ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
                     {videoStory ? (
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-6">
-                          {youtubeEmbedUrl && (
-                            <div className="w-48 h-28 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                              <iframe src={youtubeEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen></iframe>
-                            </div>
-                          )}
-                          <div className="space-y-2 flex-grow">
-                            <p className="text-white font-bold text-lg">{videoStory.title || 'Untitled'}</p>
-                            <p className="text-slate-300 text-sm leading-relaxed">{videoStory.summary || 'No summary generated.'}</p>
+                      <div className="space-y-6">
+                        <p className="text-xl font-medium text-gray-900">{heroFields.headline || videoStory.title || 'Untitled'}</p>
+                        {/* Action buttons */}
+                        <div className="flex gap-3">
+                          <button className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">Copy</button>
+                          {heroFields.mindMapLink && <button onClick={() => window.open(heroFields.mindMapLink, '_blank')} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">Mind Map</button>}
+                          <button className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors">Share for 40% Lifetime Income</button>
+                        </div>
+                        {/* Two-column: video left + checklist right */}
+                        <div className="flex gap-6">
+                          <div className="w-7/12 space-y-4">
+                            {(heroFields.youtubeUrl || youtubeEmbedUrl) && (
+                              <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
+                                <iframe src={heroFields.youtubeUrl || youtubeEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen title="Market Story Video"></iframe>
+                              </div>
+                            )}
+                            {heroFields.ctaLabel && (
+                              <button onClick={() => heroFields.ctaUrl && window.open(heroFields.ctaUrl, '_blank')} className="bg-purple-600 text-white font-bold uppercase tracking-wider text-xs py-3 rounded-lg w-full hover:bg-purple-700 transition-colors">{heroFields.ctaLabel}</button>
+                            )}
+                          </div>
+                          <div className="w-5/12">
+                            <p className="text-lg font-medium text-gray-900 mb-3">In this ReadyStack</p>
+                            {videoStory.checklist && videoStory.checklist.length > 0 ? (
+                              <div className="space-y-1">
+                                {videoStory.checklist.map((item, i) => (
+                                  <p key={i} className="text-sm text-purple-600 leading-relaxed py-1">• {item}</p>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-400 italic">No checklist items generated yet.</p>
+                            )}
                           </div>
                         </div>
-                        {videoStory.themes && videoStory.themes.length > 0 && (
-                          <div className="flex flex-wrap gap-2 pt-2">
-                            {videoStory.themes.map((t, i) => (
-                              <span key={i} className="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-300 text-xs font-semibold border border-indigo-500/20">{t}</span>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     ) : (
-                      <p className="text-slate-300 text-sm italic">No market story defined yet. Go back to Define Market Story to get started.</p>
+                      <p className="text-sm text-gray-400 italic text-center py-8">No anchor video defined yet. Go back to Anchor Video to get started.</p>
                     )}
                   </div>
 
-                  {/* ── Residents Summary ── */}
-                  <div className="bg-[#020617]/50 p-10 rounded-[32px] border border-white/5 shadow-inner space-y-6">
-                    <h4 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Residents</h4>
+                  {/* ── SECTION C: Tasks and Agents Accordion ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    {videoStory && videoStory.automations && videoStory.automations.length > 0 ? (
+                      <div>
+                        {videoStory.automations.map((auto, i) => (
+                          <div key={i} className={`border-b border-gray-100 ${expandedAgent === i ? 'bg-white' : 'hover:bg-gray-50'} transition-colors`}>
+                            <button onClick={() => setExpandedAgent(expandedAgent === i ? -1 : i)} className="w-full px-6 py-4 flex items-center justify-between cursor-pointer">
+                              <span className="text-sm font-medium text-purple-600 text-left">{auto.trigger || `Automation ${i + 1}`}</span>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-4 h-4 text-gray-400 transition-transform ${expandedAgent === i ? 'rotate-180' : ''}`}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            {expandedAgent === i && (
+                              <div className="px-6 pb-4">
+                                <div className="bg-gray-50 p-3 rounded-lg">
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Action</p>
+                                  <p className="text-xs text-gray-600">{auto.action || 'No action defined'}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {/* Zapier placeholder */}
+                        <div className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                          <div className="px-6 py-4 flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-400">Add or Remove contacts through Zapier</span>
+                            <span className="text-[10px] text-gray-300 uppercase tracking-wider">Configure in Studio</span>
+                          </div>
+                        </div>
+                        {/* HAF placeholder */}
+                        <div className="hover:bg-gray-50 transition-colors">
+                          <div className="px-6 py-4 flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-400">Hosted Automation Flow</span>
+                            <span className="text-[10px] text-gray-300 uppercase tracking-wider">Configure in Studio</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400 italic py-8 text-center">No automations generated from your market story. These will appear after your video is analyzed.</p>
+                    )}
+                  </div>
+
+                  {/* ── SECTION D: Residents ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                     {(() => {
                       const filled = storyParticipants.residents.filter(r => (r.name || '').trim());
-                      if (filled.length === 0) return <p className="text-slate-300 text-sm italic">No residents added yet.</p>;
                       return (
-                        <div className="space-y-3">
-                          {filled.map((r, i) => (
-                            <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                              <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 text-xs font-black">{(r.name || '?')[0].toUpperCase()}</div>
-                              <div className="flex-grow">
-                                <p className="text-white text-sm font-bold">{r.name}</p>
-                                {r.jobContext && <p className="text-slate-300 text-xs">{r.jobType}: {r.jobContext}</p>}
-                              </div>
-                              <div className="text-slate-300 text-xs">{r.company || ''}</div>
-                              <div className="text-slate-300 text-xs">{r.specialty || ''}</div>
+                        <div>
+                          <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">Residents <span className="text-gray-400">({filled.length})</span></p>
+                          {filled.length === 0 ? (
+                            <p className="text-sm text-gray-400 italic text-center py-4">No residents added yet.</p>
+                          ) : (
+                            <div className="grid grid-cols-3 gap-3">
+                              {filled.map((r, i) => (
+                                <div key={i} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 font-bold text-sm flex items-center justify-center">{(r.name || '?')[0].toUpperCase()}</div>
+                                    <p className="text-sm font-medium text-gray-900">{r.name}</p>
+                                  </div>
+                                  {(r.company || r.specialty) && <p className="text-xs text-gray-500">{[r.company, r.specialty].filter(Boolean).join(' / ')}</p>}
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                          )}
                         </div>
                       );
                     })()}
                   </div>
 
-                  {/* ── Links Summary ── */}
-                  <div className="bg-[#020617]/50 p-10 rounded-[32px] border border-white/5 shadow-inner space-y-6">
-                    <h4 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Links</h4>
+                  {/* ── SECTION E: Links by Journey Stage ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                    <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">Journey Map</p>
                     {(() => {
-                      const totalLinks = Object.values(mapping.learning || {}).flat().length + Object.values(mapping.buying || {}).flat().length + Object.values(mapping.sharing || {}).flat().length;
-                      if (totalLinks === 0) return <p className="text-slate-300 text-sm italic">No links mapped yet.</p>;
+                      const stages = [
+                        { key: 'learning', label: 'Learning', color: '#ff2a1a' },
+                        { key: 'selecting', label: 'Selecting', color: '#ffd666' },
+                        { key: 'executing', label: 'Executing', color: '#48c9b0' },
+                        { key: 'expanding', label: 'Expanding', color: '#7c8cff' }
+                      ];
+                      const hasAny = stages.some(s => (mapping[s.key] || []).length > 0);
+                      if (!hasAny) return <p className="text-sm text-gray-400 italic text-center py-4">No links mapped yet.</p>;
                       return (
-                        <div className="grid grid-cols-3 gap-6">
-                          {[
-                            { key: 'learning', label: 'Learning', color: 'indigo' },
-                            { key: 'buying', label: 'Buying', color: 'emerald' },
-                            { key: 'sharing', label: 'Sharing', color: 'amber' }
-                          ].map(cat => {
-                            const items = Object.entries(mapping[cat.key] || {});
-                            const count = items.reduce((sum, [, urls]) => sum + urls.length, 0);
+                        <div className="grid grid-cols-4 gap-4">
+                          {stages.map(stage => {
+                            const links = mapping[stage.key] || [];
+                            const labels = links.slice(0, 3).map(l => l.lab || l.ven || 'Link');
+                            const extra = links.length > 3 ? links.length - 3 : 0;
                             return (
-                              <div key={cat.key} className="space-y-2">
-                                <p className={`text-xs font-black uppercase tracking-wider text-${cat.color}-400`}>{cat.label}</p>
-                                <p className="text-white text-2xl font-black">{count}</p>
-                                <p className="text-slate-300 text-xs">{count === 1 ? 'link' : 'links'} mapped</p>
+                              <div key={stage.key} className="bg-white border border-gray-100 rounded-lg p-4" style={{borderTop: `2px solid ${stage.color}`}}>
+                                <p className="text-3xl font-bold text-gray-900">{links.length}</p>
+                                <p className="text-xs text-gray-500 mb-3">{links.length === 1 ? 'link' : 'links'}</p>
+                                <p className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">{stage.label}</p>
+                                <div className="space-y-1">
+                                  {labels.map((lab, i) => (
+                                    <span key={i} className="inline-block text-xs text-gray-600 bg-gray-50 rounded px-2 py-1 mr-1 mb-1">{lab}</span>
+                                  ))}
+                                  {extra > 0 && <span className="text-xs text-purple-500">+{extra} more</span>}
+                                </div>
                               </div>
                             );
                           })}
@@ -3211,22 +3977,67 @@
                     })()}
                   </div>
 
-                  {/* ── Ship to Operations ── */}
+                  {/* ── SECTION F: AI Assembly Pipeline ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                    <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">AI Assembly</p>
+                    {/* Status bar */}
+                    <div className="flex flex-wrap gap-4 mb-6">
+                      <span className="text-xs text-gray-500">{videoStory ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>}Video analyzed</span>
+                      <span className="text-xs text-gray-500">{storyParticipants.residents.filter(r => (r.name||'').trim()).length > 0 ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>}{storyParticipants.residents.filter(r => (r.name||'').trim()).length} residents</span>
+                      <span className="text-xs text-gray-500">{(() => { const c = ['learning','selecting','executing','expanding'].reduce((s,k) => s + (mapping[k]||[]).length, 0); return c > 0 ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>; })()}{['learning','selecting','executing','expanding'].reduce((s,k) => s + (mapping[k]||[]).length, 0)} links</span>
+                      <span className="text-xs text-gray-500">{videoStory?.automations?.length > 0 ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>}{videoStory?.automations?.length || 0} triggers</span>
+                    </div>
+                    {/* Assembly action */}
+                    {assemblyStatus === 'complete' && assembledReadyStack ? (
+                      <div className="space-y-3">
+                        <p className="text-sm text-green-600 font-medium">✓ ReadyStack assembled — {assembledReadyStack.taskCount || 0} tasks, {assembledReadyStack.automationCount || 0} automations, {assembledReadyStack.linkCount || 0} links</p>
+                        <div className="flex gap-3">
+                          <button onClick={() => { alert(JSON.stringify(assembledReadyStack, null, 2)); }} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">View JSON Preview</button>
+                          <button onClick={() => { setAssemblyStatus(null); setAssembledReadyStack(null); }} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors">Re-assemble</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setAssemblyStatus('processing');
+                          // Stub: simulate AI assembly (replace with real API call when provider confirmed)
+                          setTimeout(() => {
+                            const linkCount = ['learning','selecting','executing','expanding'].reduce((s,k) => s + (mapping[k]||[]).length, 0);
+                            setAssembledReadyStack({
+                              taskCount: videoStory?.checklist?.length || 0,
+                              automationCount: videoStory?.automations?.length || 0,
+                              linkCount,
+                              residents: storyParticipants.residents.filter(r => (r.name||'').trim()).map(r => r.name),
+                              headline: heroFields.headline,
+                              assembled: true
+                            });
+                            setAssemblyStatus('complete');
+                          }, 1500);
+                        }}
+                        disabled={assemblyStatus === 'processing'}
+                        className={`font-bold uppercase tracking-wider text-xs px-8 py-3 rounded-lg transition-colors ${assemblyStatus === 'processing' ? 'bg-purple-300 text-white cursor-wait' : 'bg-purple-600 text-white hover:bg-purple-700'}`}
+                      >
+                        {assemblyStatus === 'processing' ? 'Assembling...' : 'Assemble ReadyStack'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* ── SECTION G: Compose Phase Gate (white theme) ── */}
                   <div className="text-center py-8 space-y-6">
-                    <div className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-emerald-400"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
-                      <span className="text-emerald-300 text-sm font-bold uppercase tracking-wider">Compose phase complete</span>
+                    <div className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-green-50 border border-green-200">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-green-600"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                      <span className="text-green-600 text-sm font-bold uppercase tracking-wider">Compose phase complete</span>
                     </div>
                     <div>
-                      <button onClick={() => setActiveTab('finance')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">Continue to Operations</button>
+                      <button onClick={() => setActiveTab('finance')} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-xs">Continue to Operations</button>
                     </div>
-                    <p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic">Your composed district will ship as JSON to ReadyStack when you're ready.</p>
+                    <p className="text-xs text-gray-400 font-medium">Your composed district will ship as JSON to ReadyStack when you're ready.</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {activeTab === 'finance' && (
+            {activeTab === 'finance' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-12">
                   <div className="space-y-6">
@@ -3287,7 +4098,7 @@
                     </div>
                   </div>
 
-                  <div className="text-center py-12"><button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-6">Continue to District Flow.</p></div>
+                  <div className="text-center py-12"><button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-6">Continue to District Ecosystem.</p></div>
                 </div>
               </div>
             )}
@@ -3296,8 +4107,8 @@
               <div className="space-y-8 animate-fade-in font-sans text-left relative pt-28">
                 {/* Title */}
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold text-white" style={{fontFamily:'Poppins,sans-serif'}}>District Flow</h1>
-                  <p className="text-slate-400">Visualize your district ecosystem in motion</p>
+                  <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ECOSYSTEM</h3>
+                  <p className="text-slate-300 text-base font-medium">Visualize your district ecosystem in motion.</p>
                 </div>
 
                 {/* Row 1: Tab Switcher */}
@@ -3363,7 +4174,7 @@
                     {nodes.items.map(n => {
                       const iconColor = n.type === 'youtube' ? '#f87171' : n.type === 'substack' ? '#fb923c' : n.type === 'reddit' ? '#f97316' : '#ffffff';
                       return (
-                      <div key={n.id} className="absolute node-container" style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20, pointerEvents: 'none' }}><div className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' : n.isSystem ? 'rounded-xl border-[2.5px] rotate-45' : 'rounded-full border-[2px]'}`} style={{ borderColor: n.color, width: `${n.radius * 2}px`, height: `${n.radius * 2}px`, color: iconColor, pointerEvents: 'auto' }} onMouseEnter={() => handleNodeHover(n)} onMouseLeave={handleNodeLeave}><div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}><MediumIcon type={n.type} size={n.radius * 0.9} /></div></div></div>
+                      <div key={n.id} className="absolute node-container" data-vendor={n.vendor} data-node-id={n.id} style={{ left: n.x, top: n.y, transform: 'translate(-50%, -50%)', zIndex: 20, pointerEvents: 'none' }}><div className={`flex items-center justify-center bg-[#01040d] shadow-2xl transition-all cursor-pointer ${n.isAngel ? 'rounded-full border-[4px] border-double animate-pulse' : n.isSystem ? 'rounded-xl border-[2.5px] rotate-45' : 'rounded-full border-[2px]'} ${highlightVendor && n.vendor === highlightVendor ? 'node-glow' : ''} ${highlightVendor && n.vendor !== highlightVendor ? 'node-dimmed' : ''}`} style={{ borderColor: n.color, width: `${n.radius * 2}px`, height: `${n.radius * 2}px`, color: iconColor, pointerEvents: 'auto' }} onMouseEnter={() => handleNodeHover(n)} onMouseLeave={handleNodeLeave}><div className={n.isSystem && !n.isAngel ? '-rotate-45' : ''}><MediumIcon type={n.type} size={n.radius * 0.9} /></div></div></div>
                       );
                     })}
                   </div>
@@ -3506,11 +4317,46 @@
                   ))}
                 </div>
                 </>)}
+
+                {/* ── INVITE MODE: CTA Panel (District Tour + Enter Our District) ── */}
+                {isInviteMode && !rsSession && (
+                  <div className="mt-8 mx-auto max-w-lg">
+                    <div className="bg-[#0f172a] border border-white/10 rounded-3xl p-8 text-center space-y-6">
+                      <div>
+                        <h3 className="text-lg font-black text-white uppercase tracking-tight" style={{fontFamily:'Poppins,sans-serif'}}>
+                          {highlightVendor || 'You'}
+                        </h3>
+                        <p className="text-sm text-slate-400 mt-1">{(() => { const p = (storyParticipants.residents || []).find(r => (r.name || '').trim() === highlightVendor); return p?.specialty || 'Participant'; })()}</p>
+                        <p className="text-xs text-slate-500 uppercase tracking-widest mt-2">{stackLabel || 'This District'}</p>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-4">
+                        <button
+                          onClick={() => { /* Tour stub — will wire to guided tour system */ alert('District Tour coming soon — explore the tabs in the sidebar to learn more.'); }}
+                          className="px-6 py-3 rounded-xl border border-white/20 bg-transparent text-white text-xs font-black uppercase tracking-wider transition-all hover:border-white/40 hover:bg-white/5"
+                        >
+                          District Tour
+                        </button>
+                        <button
+                          onClick={() => initiateGoogleAuth()}
+                          className="px-6 py-3 rounded-xl bg-indigo-500 text-white text-xs font-black uppercase tracking-wider transition-all hover:bg-indigo-400 shadow-lg"
+                        >
+                          Enter Our District
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-slate-500">
+                        Explore the district, or become a resident.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
 
 
-            {activeTab === 'looker' && (
+            {activeTab === 'looker' && !isResident && (
               <div className="space-y-12 animate-fade-in text-left font-sans pt-20">
                 <div className="flex justify-between items-center border-b border-white/5 pb-10">
                     <div className="flex bg-white/5 px-6 py-3 rounded-2xl border border-white/10 shadow-inner"><span className="text-xs font-black text-slate-300 uppercase tracking-widest mr-3 opacity-60">Reporting Period:</span><span className="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Jan 01, 2026 - Jan 31, 2026</span></div>
@@ -3543,7 +4389,7 @@
               </div>
             )}
 
-            {activeTab === 'g4' && (
+            {activeTab === 'g4' && !isResident && (
               <div className="bg-white rounded-[40px] shadow-2xl overflow-hidden animate-fade-in text-left font-sans pt-20">
                 <div className="bg-[#f8f9fa] border-b border-slate-200 px-10 py-6 flex justify-between items-center">
                   <div className="flex items-center gap-4"><i data-lucide="table" className="w-6 h-6 text-indigo-600"></i><h4 className="text-[#3c4043] font-bold text-lg tracking-tight leading-none uppercase italic">GA4 Registry Log</h4></div>
@@ -3561,7 +4407,7 @@
             )}
 
             {/* ── ANALYTICS TAB ── */}
-            {activeTab === 'analytics' && (
+            {activeTab === 'analytics' && !isResident && (
               <div className="space-y-10 animate-fade-in text-left font-sans pt-20">
                 {/* Period selector */}
                 <div className="flex justify-between items-center border-b border-white/5 pb-8">
@@ -3704,6 +4550,58 @@
 
             </div>
 
+
+          {/* ── INVITE LINK MODAL ── */}
+          {inviteModalData && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setInviteModalData(null)}>
+              <div className="bg-[#0f172a] border border-white/10 rounded-3xl p-8 max-w-lg w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="text-center space-y-6">
+                  <div>
+                    <h3 className="text-lg font-black text-white uppercase tracking-tight" style={{fontFamily:'Poppins,sans-serif'}}>Invite Link Ready</h3>
+                    <p className="text-sm text-slate-300 mt-2">
+                      Send this link to <span className="text-white font-bold">{inviteModalData.participantName}</span> via your preferred channel.
+                    </p>
+                  </div>
+
+                  <div className="bg-[#020617] border border-slate-700 rounded-xl p-4 flex items-center gap-3">
+                    <input
+                      readOnly
+                      value={inviteModalData.url}
+                      className="flex-1 bg-transparent text-xs text-slate-300 font-mono outline-none truncate"
+                      onClick={(e) => e.target.select()}
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(inviteModalData.url);
+                        const btn = document.getElementById('copy-invite-btn');
+                        if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+                      }}
+                      id="copy-invite-btn"
+                      className="px-4 py-2 bg-indigo-500 text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-indigo-400 transition-colors shrink-0"
+                    >
+                      Copy
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+                      Role: {inviteModalData.role}
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      Link expires in {inviteExpiryDays} days. The first person to sign in claims this invite.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setInviteModalData(null)}
+                    className="text-xs text-slate-300 hover:text-white transition-colors font-bold uppercase tracking-widest"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           </main>
         </div>
