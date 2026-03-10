@@ -1353,7 +1353,13 @@
       // Start Google OAuth flow
       const initiateGoogleAuth = async () => {
         persistAppState();
-        const returnUrl   = window.location.href;
+        // When embedded in a Wix iframe, window.location.href returns the Wix file-hosting
+        // URL (filesusr.com) which blocks direct browser navigation. So we always redirect
+        // the OAuth tab back to the GitHub Pages URL, where the app can save the session
+        // and relay it to this iframe via window.opener.postMessage().
+        const returnUrl = (window.parent !== window)
+          ? 'https://readystackai-rgb.github.io/readystack-eu/'
+          : window.location.href;
         const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
         // Google blocks OAuth inside iframes — open in new tab when embedded
         if (window.parent !== window) {
@@ -1378,7 +1384,9 @@
             const subStatus = await callAdvisor('checkSubscription', {}, overrideSessionId);
             if (subStatus.limit && subStatus.districtCount >= subStatus.limit && !subStatus.subscribed) {
               // Free tier limit reached - redirect to Stripe checkout
-              const returnUrl = window.location.href.split('?')[0];
+              const returnUrl = (window.parent !== window)
+                ? 'https://readystackai-rgb.github.io/readystack-eu/'
+                : window.location.href.split('?')[0];
               const { url } = await callAdvisor('createCheckoutSession', {
                 data: { returnUrl }
               }, overrideSessionId);
