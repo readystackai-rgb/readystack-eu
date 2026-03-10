@@ -3121,6 +3121,14 @@
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
 
+                    {/* ── Empty state: no video processed yet ── */}
+                    {!videoStory && (
+                      <div className="border border-white/[0.06] rounded-2xl bg-[#0f172a]/30 px-8 py-8 text-center">
+                        <p className="text-slate-400 text-sm font-medium">Process an Anchor Video to unlock Tasks, Suggested Roles, and AI-generated district structure.</p>
+                        <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Anchor Video →</button>
+                      </div>
+                    )}
+
                     {/* ── TASKS: Actions + Automations from AI analysis (accordion) ── */}
                     {videoStory && (videoStory.checklist || videoStory.automations) && (
                       <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
