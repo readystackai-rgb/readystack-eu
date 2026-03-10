@@ -218,7 +218,7 @@
             </svg>
           </button>
           {show && (
-            <span ref={tipRef} className="absolute left-8 top-1/2 -translate-y-1/2 z-50 bg-[#1e293b] border border-white/10 text-slate-300 text-xs font-medium px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap max-w-xs" style={{whiteSpace:'normal', minWidth:'200px'}}>
+            <span ref={tipRef} className="absolute left-8 top-1/2 -translate-y-1/2 z-50 bg-[#1e293b] border border-white/10 text-slate-300 text-xs font-medium px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap max-w-xs normal-case" style={{whiteSpace:'normal', minWidth:'200px', letterSpacing:'normal', fontFamily:'Inter, system-ui, sans-serif', fontWeight:500}}>
               {text}
             </span>
           )}
@@ -3531,9 +3531,8 @@
                       </div>
                       <div className="grid grid-cols-5 gap-2 items-start">
                         <div className="text-center py-2">
-                          <p className="text-[10px] font-bold text-white leading-snug">Pays 40% of</p>
-                          <p className="text-[10px] font-bold text-white leading-snug">Hosting Automation Fees</p>
-                          <p className="text-[10px] font-bold text-white leading-snug">to drive WOM</p>
+                          <p className="text-[10px] font-bold text-white leading-snug">Finances</p>
+                          <p className="text-[10px] font-bold text-white leading-snug">word-of-mouth</p>
                         </div>
                         {[
                           { key: 'learning', color: '#ff2a1a' },

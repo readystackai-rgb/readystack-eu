@@ -197,6 +197,35 @@
 
   <script type="text/babel">
     const { useState, useRef, useMemo, useEffect } = React;
+
+    /* ── InfoTooltip: ℹ info icon that reveals subtitle text on hover ── */
+    const InfoTooltip = ({ text }) => {
+      const [show, setShow] = useState(false);
+      const tipRef = useRef(null);
+      return (
+        <span className="relative inline-flex items-center ml-3 align-middle">
+          <button
+            onMouseEnter={() => setShow(true)}
+            onMouseLeave={() => setShow(false)}
+            onClick={() => setShow(!show)}
+            className="text-slate-500 hover:text-slate-300 transition-colors focus:outline-none"
+            aria-label="More info"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+          </button>
+          {show && (
+            <span ref={tipRef} className="absolute left-8 top-1/2 -translate-y-1/2 z-50 bg-[#1e293b] border border-white/10 text-slate-300 text-xs font-medium px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap max-w-xs normal-case" style={{whiteSpace:'normal', minWidth:'200px', letterSpacing:'normal', fontFamily:'Inter, system-ui, sans-serif', fontWeight:500}}>
+              {text}
+            </span>
+          )}
+        </span>
+      );
+    };
+
     const ReadyStackLogo = ({ size = 24, variant = 'light' }) => (
       <div className="flex items-center justify-center overflow-hidden transition-all duration-300">
         <img
@@ -2720,8 +2749,7 @@
             {activeTab === 'youtube' && (
               <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
                   <div className="space-y-3 mb-6">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">ANCHOR VIDEO</h3>
-                      <p className="text-slate-300 text-base font-medium">Search YouTube for a video of the problem your audience faces. Your district exists to solve it.</p>
+                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">ANCHOR VIDEO<InfoTooltip text="Search YouTube for a video of the problem your audience faces. Your district exists to solve it." /></h3>
                   </div>
 
                   {/* ── Platform Selector ── */}
@@ -3089,8 +3117,7 @@
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-20">
                     <div className="space-y-6">
-                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS</h3>
-                        <p className="text-slate-300 text-base font-medium">Review the tasks from the video and assemble a district to deepen the learning and help audiences execute lesson.</p>
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS<InfoTooltip text="Review district workload, choose roles, and add residents to your district." /></h3>
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
 
@@ -3431,8 +3458,7 @@
             {activeTab === 'mapper' && (
               <div className="space-y-12 animate-fade-in text-left pt-28">
                 <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENT LINKS</h3>
-                    <p className="text-slate-300 text-base font-medium">Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENT LINKS<InfoTooltip text="Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey." /></h3>
                 </div>
                 {/* ── District Identity Card — accordion, hidden for residents & invitees ── */}
                 {!isResident && !isInviteMode && (
@@ -3505,9 +3531,8 @@
                       </div>
                       <div className="grid grid-cols-5 gap-2 items-start">
                         <div className="text-center py-2">
-                          <p className="text-[10px] font-bold text-white leading-snug">Pays 40% of</p>
-                          <p className="text-[10px] font-bold text-white leading-snug">Hosting Automation Fees</p>
-                          <p className="text-[10px] font-bold text-white leading-snug">to drive WOM</p>
+                          <p className="text-[10px] font-bold text-white leading-snug">Finances</p>
+                          <p className="text-[10px] font-bold text-white leading-snug">word-of-mouth</p>
                         </div>
                         {[
                           { key: 'learning', color: '#ff2a1a' },
@@ -3705,8 +3730,7 @@
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-12">
                   <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">MY RESIDENTS</h3>
-                    <p className="text-slate-300 text-base font-medium">Track who you've invited and their onboarding status.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">MY RESIDENTS<InfoTooltip text="Track who you've invited and their onboarding status." /></h3>
                   </div>
 
                   {(() => {
@@ -3905,8 +3929,7 @@
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
                 <div className="space-y-12">
                   <div className="space-y-4">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY</h3>
-                    <p className="text-slate-300 text-base font-medium">Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY<InfoTooltip text="Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack." /></h3>
                   </div>
 
                   {/* ══════════════════════════════════════════════════════════
@@ -4156,8 +4179,7 @@
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
                 <div className="space-y-12">
                   <div className="space-y-4">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>FRONT DOOR</h3>
-                    <p className="text-slate-300 text-base font-medium">This is what your audience will see when you publish. Review it, then send to Studio.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>FRONT DOOR<InfoTooltip text="This is what your audience will see when you publish. Review it, then send to Studio." /></h3>
                   </div>
 
                   {/* ── Landing Page Preview Container (white theme) ── */}
@@ -4448,8 +4470,7 @@
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-12">
                   <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT FINANCE</h3>
-                    <p className="text-slate-300 text-base font-medium">A district is an economy container — media, finance, and operations.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT FINANCE<InfoTooltip text="A district is an economy container — media, finance, and operations." /></h3>
                   </div>
 
                   {/* The Revenue Engine — 20/40/40 split display */}
@@ -4598,8 +4619,7 @@
               <div className="space-y-8 animate-fade-in font-sans text-left relative pt-28">
                 {/* Title */}
                 <div className="space-y-2">
-                  <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ECOSYSTEM</h3>
-                  <p className="text-slate-300 text-base font-medium">Visualize your district ecosystem in motion.</p>
+                  <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ECOSYSTEM<InfoTooltip text="Visualize your district ecosystem in motion." /></h3>
                 </div>
 
                 {/* Row 1: Tab Switcher */}
