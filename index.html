@@ -1044,6 +1044,17 @@
           setRsSession({ sessionId, email });
           window.history.replaceState({}, '', window.location.pathname);
 
+          // ── If this is the OAuth popup tab (not inside Wix iframe), redirect to readystack.ai ──
+          // The storage event already notified the original Wix iframe tab.
+          if (window.parent === window && window.opener) {
+            // This tab was opened by window.open() from the Wix iframe
+            window.close(); // Try to close; some browsers block this
+          } else if (window.parent === window && document.referrer.includes('accounts.google.com')) {
+            // Fallback: if we can't close, redirect to readystack.ai so user doesn't stay on GitHub URL
+            window.location.href = 'https://www.readystack.ai/storyteller';
+            return;
+          }
+
           // ── Check for pending invite from /join page ──
           const pendingInvite = localStorage.getItem('rs_pending_invite');
           if (pendingInvite) {
@@ -1106,7 +1117,24 @@
           }
         }
 
-        return () => window.removeEventListener('wixParamsReady', handleWixParams);
+        // ── Cross-tab auth detection ──
+        // When OAuth completes in a new tab, it saves rs_session to localStorage.
+        // The storage event fires in OTHER tabs on the same origin, so the original
+        // Wix iframe tab auto-picks up the auth without needing a page reload.
+        const handleStorageAuth = (e) => {
+          if (e.key === 'rs_session' && e.newValue && !rsSession) {
+            const storedEmail = localStorage.getItem('rs_email');
+            if (storedEmail) {
+              setRsSession({ sessionId: e.newValue, email: storedEmail });
+            }
+          }
+        };
+        window.addEventListener('storage', handleStorageAuth);
+
+        return () => {
+          window.removeEventListener('wixParamsReady', handleWixParams);
+          window.removeEventListener('storage', handleStorageAuth);
+        };
       }, []);
 
       const closeTimeoutRef = useRef(null);
@@ -3027,7 +3055,7 @@
                     {videoStory && (videoStory.checklist || videoStory.automations) && (
                       <div className="space-y-6">
                         <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
-                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your market story. These will populate the District Assembly and JSON export.</p>
+                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your Anchor Video. These will populate the District Assembly and JSON export.</p>
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
