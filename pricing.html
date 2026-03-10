@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pricing — ReadyStack</title>
+  <title>Partnership — ReadyStack</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;900&display=swap');
 
     :root {
-      --purple-header: linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%);
+      --nav-header: linear-gradient(135deg, #0f172a 0%, #020617 100%);
       --accent: #7c8cff;
     }
 
@@ -27,9 +27,9 @@
     ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
     .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
-    .animate-delay-1 { animation-delay: 0.1s; }
-    .animate-delay-2 { animation-delay: 0.2s; }
-    .animate-delay-3 { animation-delay: 0.3s; }
+    .animate-delay-1 { animation-delay: 0.15s; }
+    .animate-delay-2 { animation-delay: 0.3s; }
+    .animate-delay-3 { animation-delay: 0.45s; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(12px); }
@@ -38,346 +38,138 @@
 
     a { color: #7c8cff; text-decoration: none; transition: color 0.2s; }
     a:hover { color: #a5b4fc; }
-
-    .brand-glow-btn {
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    .brand-glow-btn::before {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: inherit;
-      padding: 1px;
-      background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 50%, #7c8cff 100%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      opacity: 0.6;
-      transition: opacity 0.3s;
-    }
-    .brand-glow-btn:hover::before { opacity: 1; }
-    .brand-glow-btn:hover {
-      box-shadow: 0 0 30px rgba(124,140,255,0.15), 0 0 60px rgba(124,140,255,0.05);
-      transform: translateY(-2px);
-    }
-
-    .card-glow { transition: all 0.3s ease; }
-    .card-glow:hover {
-      border-color: rgba(124,140,255,0.2) !important;
-      box-shadow: 0 0 40px rgba(124,140,255,0.06);
-    }
-
-    .card-featured-glow { transition: all 0.3s ease; }
-    .card-featured-glow:hover {
-      border-color: rgba(167,139,250,0.3) !important;
-      box-shadow: 0 0 50px rgba(167,139,250,0.08);
-    }
   </style>
 </head>
 <body>
 
   <!-- HEADER -->
-  <header style="background: var(--purple-header);" class="border-b border-white/10 w-full sticky top-0 z-50 backdrop-blur-md">
+  <header style="background: var(--nav-header);" class="border-b border-white/10 w-full sticky top-0 z-50 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-2">
+      <a href="https://www.readystack.ai" target="_top" class="flex items-center space-x-2 no-underline">
         <div class="w-12 h-10 flex-shrink-0 flex items-center justify-center">
           <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width:24px;height:24px;object-fit:contain;" />
         </div>
         <span class="text-xl font-bold text-white tracking-tight leading-none" style="font-family: 'Poppins', sans-serif;">ReadyStack</span>
-      </div>
-      <nav class="flex items-center gap-6">
-        <a href="landing.html" class="text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors hidden md:inline" style="font-family:'Poppins',sans-serif;">Home</a>
-        <a href="index.html" class="text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors hidden md:inline" style="font-family:'Poppins',sans-serif;">Case Mode</a>
-        <a href="https://readystack.ai/storyteller" class="text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors hidden md:inline" style="font-family:'Poppins',sans-serif;">Storyteller</a>
-        <a href="landing.html" class="text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors md:hidden" style="font-family:'Poppins',sans-serif;">&larr; Home</a>
-      </nav>
+      </a>
+      <a href="https://www.readystack.ai" target="_top" class="text-[11px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">&larr; Back to Home</a>
     </div>
   </header>
 
-  <!-- HERO -->
-  <section class="max-w-3xl mx-auto px-8 pt-24 pb-16 text-center animate-fade-in">
-    <h1 class="text-white font-black text-[48px] md:text-[64px] uppercase italic tracking-tighter leading-[0.95] mb-6" style="font-family:'Poppins',sans-serif;">
-      <span class="text-indigo-400">Society Media</span><br/>Residents Get a<br/>Lifetime Dividend.
+  <!-- HERO — Straight to pricing -->
+  <section class="max-w-3xl mx-auto px-8 pt-24 pb-6 text-center animate-fade-in">
+    <p class="text-[15px] font-black uppercase tracking-[0.3em] text-white mb-6" style="font-family:'Poppins',sans-serif;">Market Relationship Management</p>
+    <h1 class="text-white font-black text-[40px] md:text-[54px] uppercase italic tracking-tighter leading-[0.92] mb-6" style="font-family:'Poppins',sans-serif;">
+      Two Ways In.
     </h1>
-    <p class="text-[15px] text-slate-400 leading-relaxed max-w-xl mx-auto mb-4">
-      Build your Market Relationship infrastructure. Or reside in the dark where decisions are made — with your partners, your customers, and your future customers — before they ever raise their hand.
+    <h3 class="text-white font-black text-[26px] uppercase italic tracking-tight leading-tight mb-4" style="font-family:'Poppins',sans-serif;">Explore Free. Partner When Ready.</h3>
+    <p class="text-[14px] text-slate-500 leading-relaxed max-w-md mx-auto mb-3">
+      This isn't a tool you subscribe to. It's an economy you participate in and earn from.
     </p>
-    <p class="text-[11px] text-slate-600 italic font-medium">Month to month. No commitment. Cancel anytime.</p>
+    <p class="text-[14px] text-slate-400 max-w-md mx-auto mb-8">Build your first district at no cost. When you're ready to own your income, become a Resident.</p>
   </section>
 
-  <!-- DIVIDER -->
-  <div class="w-px h-16 bg-gradient-to-b from-transparent via-white/10 to-transparent mx-auto"></div>
+  <section class="max-w-4xl mx-auto px-6 pb-20">
+    <div class="grid md:grid-cols-2 gap-6 items-start">
 
-  <!-- SOCIETY MEDIA DEFINITION -->
-  <p class="text-[13px] text-slate-500 text-center max-w-2xl mx-auto px-6 pb-12 leading-relaxed">
-    <strong class="text-slate-300 font-medium">Society Media</strong> is Market Relationship Management — where districts, creators, vendors, and residents build, collaborate, and earn together.
-  </p>
-
-  <!-- PRICING GRID -->
-  <section class="max-w-6xl mx-auto px-6 pb-24">
-
-    <!-- FOUNDERS PLANS BRACKET -->
-    <div class="max-w-6xl mx-auto mb-6 hidden md:block">
-      <div class="grid grid-cols-3 gap-5">
-        <!-- empty space over Explorer -->
-        <div></div>
-        <!-- bracket spanning Resident + Automator -->
-        <div class="col-span-2 text-center">
-          <p class="text-[11px] font-black uppercase tracking-[0.25em] text-amber-400 mb-3" style="font-family:'Poppins',sans-serif;">Founding Resident Plans</p>
-          <div class="relative h-4 mx-8">
-            <!-- horizontal bar -->
-            <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-amber-400/60 via-amber-400/40 to-amber-400/60"></div>
-            <!-- left tick -->
-            <div class="absolute top-0 left-0 w-px h-3 bg-amber-400/50"></div>
-            <!-- center tick -->
-            <div class="absolute top-0 left-1/2 -translate-x-px w-px h-2 bg-amber-400/30"></div>
-            <!-- right tick -->
-            <div class="absolute top-0 right-0 w-px h-3 bg-amber-400/50"></div>
-          </div>
+      <!-- EXPLORER — Free -->
+      <div class="animate-fade-in animate-delay-1 bg-[#0f172a]/40 rounded-3xl border border-white/8 p-8 relative">
+        <div class="inline-block bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-5">
+          <span class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-300" style="font-family:'Poppins',sans-serif;">Free Forever</span>
         </div>
-      </div>
-    </div>
-    <!-- mobile: simple label -->
-    <div class="md:hidden text-center mb-6">
-      <p class="text-[11px] font-black uppercase tracking-[0.25em] text-amber-400" style="font-family:'Poppins',sans-serif;">Resident tiers are Founding Resident Plans</p>
-      <div class="w-16 h-px bg-amber-400/30 mx-auto mt-2"></div>
-    </div>
+        <h2 class="text-white font-black text-[28px] uppercase italic tracking-tight leading-none mb-2" style="font-family:'Poppins',sans-serif;">Explorer</h2>
+        <p class="text-[15px] text-slate-400 mb-8">See what ReadyStack is. Build a district. Invite residents and angels. Experience the ecosystem before you commit.</p>
 
-    <div class="grid md:grid-cols-3 gap-5 items-start">
-
-      <!-- FREE -->
-      <div class="animate-fade-in animate-delay-1 bg-[#0f172a]/30 rounded-[32px] border border-white/5 p-8 relative overflow-hidden card-glow" style="box-shadow: 0 0 40px rgba(0,0,0,0.3);">
-        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-500/30 to-transparent"></div>
-
-        <div class="inline-block bg-slate-500/10 border border-slate-500/20 rounded-full px-4 py-1.5 mb-5">
-          <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400" style="font-family:'Poppins',sans-serif;">Free</span>
-        </div>
-        <h2 class="text-white font-black text-[22px] uppercase italic tracking-tight leading-none mb-2" style="font-family:'Poppins',sans-serif;">Explorer</h2>
-        <p class="text-[12px] text-slate-500 italic mb-8">Build your District. Show the world what you know.</p>
-
-        <div class="flex items-baseline gap-1 mb-1">
+        <div class="flex items-baseline gap-1 mb-8">
           <span class="text-white font-black text-[48px] leading-none tracking-tighter" style="font-family:'Poppins',sans-serif;">$0</span>
         </div>
-        <p class="text-[11px] text-slate-600 italic mb-10">No account required. Up to 5 districts, 10 participants each.</p>
 
-        <div class="mb-8">
-          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Build</div>
-          <div class="space-y-3.5">
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-slate-500/10 border border-slate-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">District Composer</strong> — blend content, experts, JTBD, and workflows into an actionable, authoritative market narrative with partners and allies</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-slate-500/10 border border-slate-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Tourist Flows</strong> — animated visualization of relationships and cause-and-effect across district content, solutions, and joint promotion</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-slate-500/10 border border-slate-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Exhibition</strong> — publish your district and share your market narrative on traditional channels</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-slate-500/10 border border-slate-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Execution Studio</strong> — publish your district as a product: run workflows, automate, and share</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-slate-500/10 border border-slate-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Case Builder</strong> — model and present the business case for your district</span></div>
+        <div class="space-y-4 mb-10">
+          <div class="flex items-start gap-3">
+            <svg viewBox="0 0 20 20" fill="none" class="w-5 h-5 flex-shrink-0 mt-0.5"><circle cx="10" cy="10" r="9" stroke="#64748b" stroke-width="1.5"/><polyline points="6,10 9,13 14,7" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="text-[15px] text-slate-300 leading-relaxed"><strong class="text-white">District Composer</strong> — build up to 5 districts with 10 residents each</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <svg viewBox="0 0 20 20" fill="none" class="w-5 h-5 flex-shrink-0 mt-0.5"><circle cx="10" cy="10" r="9" stroke="#64748b" stroke-width="1.5"/><polyline points="6,10 9,13 14,7" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="text-[15px] text-slate-300 leading-relaxed"><strong class="text-white">District Flows</strong> — map relationships, cause-and-effect, and district structure</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <svg viewBox="0 0 20 20" fill="none" class="w-5 h-5 flex-shrink-0 mt-0.5"><circle cx="10" cy="10" r="9" stroke="#64748b" stroke-width="1.5"/><polyline points="6,10 9,13 14,7" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="text-[15px] text-slate-300 leading-relaxed"><strong class="text-white">District Finance + Angels</strong> — model economics and invite investors</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <svg viewBox="0 0 20 20" fill="none" class="w-5 h-5 flex-shrink-0 mt-0.5"><circle cx="10" cy="10" r="9" stroke="#64748b" stroke-width="1.5"/><polyline points="6,10 9,13 14,7" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="text-[15px] text-slate-300 leading-relaxed"><strong class="text-white">Exhibition + Case Builder</strong> — publish and present your district story</span>
           </div>
         </div>
 
-        <div class="mb-10">
-          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Not included</div>
-          <div class="space-y-3.5">
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-slate-800/50 border border-slate-700/30 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><line x1="3" y1="3" x2="9" y2="9" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="3" x2="3" y2="9" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/></svg></div><span class="text-[12px] text-slate-600 leading-relaxed">No earnings or dividends</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-slate-800/50 border border-slate-700/30 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><line x1="3" y1="3" x2="9" y2="9" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="3" x2="3" y2="9" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/></svg></div><span class="text-[12px] text-slate-600 leading-relaxed">No angel/investor invitations</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-slate-800/50 border border-slate-700/30 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><line x1="3" y1="3" x2="9" y2="9" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="3" x2="3" y2="9" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/></svg></div><span class="text-[12px] text-slate-600 leading-relaxed">No expert identification</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-slate-800/50 border border-slate-700/30 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><line x1="3" y1="3" x2="9" y2="9" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="3" x2="3" y2="9" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/></svg></div><span class="text-[12px] text-slate-600 leading-relaxed">No automation or mass outreach</span></div>
-          </div>
-        </div>
-
-        <button class="brand-glow-btn w-full bg-[#020617] py-4 rounded-xl text-slate-400 uppercase font-black tracking-[0.15em] text-[12px]" style="font-family:'Poppins',sans-serif;" onclick="window.open('https://readystackai-rgb.github.io/readystack-eu/', '_blank')">
-          Build a District Free &rarr;
-        </button>
-        <p class="text-[10px] text-slate-600 italic text-center mt-4">No signup. Just build.</p>
+        <a href="https://www.readystack.ai/storyteller" target="_top" class="block w-full bg-white/5 border border-white/10 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[13px] hover:bg-white/10 transition-all text-center no-underline" style="font-family:'Poppins',sans-serif;">
+          Start Building Free
+        </a>
+        <p class="text-[14px] text-slate-500 italic text-center mt-4">No signup. No credit card.</p>
       </div>
 
-      <!-- RESIDENT -->
-      <div class="animate-fade-in animate-delay-2 bg-[#0f172a]/50 rounded-[32px] border border-white/5 p-8 relative overflow-hidden card-glow" style="box-shadow: 0 0 60px rgba(0,0,0,0.4);">
+      <!-- RESIDENT — $50/mo -->
+      <div class="animate-fade-in animate-delay-2 bg-[#0f172a]/60 rounded-3xl border border-indigo-500/20 p-8 relative">
         <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
 
-        <a href="#the-dividend" class="inline-block bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 mb-5 hover:bg-indigo-500/20 transition-colors cursor-pointer">
-          <span class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-400" style="font-family:'Poppins',sans-serif;">Collect Dividends &darr;</span>
-        </a>
-        <h2 class="text-white font-black text-[22px] uppercase italic tracking-tight leading-none mb-2" style="font-family:'Poppins',sans-serif;">Resident</h2>
-        <p class="text-[12px] text-slate-500 italic mb-8">Share Society Media. Earn for life.</p>
+        <div class="flex items-center gap-3 mb-5">
+          <div class="inline-block bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5">
+            <span class="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400" style="font-family:'Poppins',sans-serif;">Founding Partner</span>
+          </div>
+        </div>
+        <h2 class="text-white font-black text-[28px] uppercase italic tracking-tight leading-none mb-2" style="font-family:'Poppins',sans-serif;">Resident</h2>
+        <p class="text-[15px] text-slate-400 mb-8">Join the ecosystem as a partner. Own recurring income from every district you build and every person you bring in.</p>
 
-        <div class="flex items-baseline gap-1 mb-1">
+        <div class="flex items-baseline gap-2 mb-8">
           <span class="text-white font-black text-[48px] leading-none tracking-tighter" style="font-family:'Poppins',sans-serif;">$50</span>
-          <span class="text-[13px] text-slate-500 font-medium">/mo</span>
+          <span class="text-[15px] text-slate-400 font-medium">/mo</span>
         </div>
-        <p class="text-[11px] text-slate-600 italic mb-10">Everything in Explorer, plus income.</p>
 
-        <!-- Earnings — lead with the money -->
-        <div class="mb-8">
-          <a href="#haf-schedule" class="block text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5 hover:text-indigo-400 transition-colors" style="font-family:'Poppins',sans-serif;">Lifetime Earnings: Automation Revenue &darr;</a>
-          <div class="space-y-3">
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">40%</strong> — share a district, earn when others run automation on it</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">20%</strong> — design a district that others use to run automation</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Earnings dashboard + Stripe payouts</span></div>
+        <!-- What partnership unlocks -->
+        <div class="bg-[#020617]/60 rounded-2xl border border-indigo-500/10 p-5 mb-6">
+          <p class="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-3" style="font-family:'Poppins',sans-serif;">Your Income Streams</p>
+          <div class="space-y-2">
+            <p class="text-[15px] text-slate-200 leading-relaxed"><strong class="text-white">20% Founder's Share</strong> — earn on every district you design, from the automation fees it generates</p>
+            <p class="text-[15px] text-slate-200 leading-relaxed"><strong class="text-white">40% Resident's Share</strong> — earn when you spread the word and bring people into any district</p>
+          </div>
+          <p class="text-[12px] text-slate-500 mt-3 italic">Earnings dashboard + Stripe payouts. Recurring stake, not a referral bonus.</p>
+          <p class="text-[12px] text-slate-400 mt-2">Your share fuels the word of mouth. Every resident who spreads a district is invested in its growth — not just clicking a referral link.</p>
+        </div>
+
+        <!-- Ecosystem access -->
+        <div class="space-y-4 mb-6">
+          <div class="flex items-start gap-3">
+            <svg viewBox="0 0 20 20" fill="none" class="w-5 h-5 flex-shrink-0 mt-0.5"><circle cx="10" cy="10" r="9" stroke="#7c8cff" stroke-width="1.5"/><polyline points="6,10 9,13 14,7" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="text-[15px] text-slate-300 leading-relaxed"><strong class="text-white">Unlimited districts</strong> — build as many as you want, no caps</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <svg viewBox="0 0 20 20" fill="none" class="w-5 h-5 flex-shrink-0 mt-0.5"><circle cx="10" cy="10" r="9" stroke="#7c8cff" stroke-width="1.5"/><polyline points="6,10 9,13 14,7" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="text-[15px] text-slate-300 leading-relaxed"><strong class="text-white">Persistent districts</strong> — your work is saved and always accessible</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <svg viewBox="0 0 20 20" fill="none" class="w-5 h-5 flex-shrink-0 mt-0.5"><circle cx="10" cy="10" r="9" stroke="#7c8cff" stroke-width="1.5"/><polyline points="6,10 9,13 14,7" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="text-[15px] text-slate-300 leading-relaxed"><strong class="text-white">Automated operations</strong> — workflows, campaigns, and engagement systems powered by Makesbridge</span>
           </div>
         </div>
 
-        <!-- Your District -->
-        <div class="mb-8">
-          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Your District</div>
-          <div class="space-y-3">
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Persistent District</strong> — your data saved and accessible anytime</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Unlimited districts</strong> and participants</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Angel Observer</strong> — invite investors to watch your District</span></div>
-          </div>
-        </div>
-
-        <!-- Expert Identification -->
-        <div class="mb-10">
-          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Expert Identification</div>
-          <div class="space-y-3">
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">20 Niche Expert IDs /mo</strong></span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#7c8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Email discovery + invitation templates</span></div>
-          </div>
-        </div>
-
-        <button class="brand-glow-btn w-full bg-[#020617] py-4 rounded-xl text-indigo-400 uppercase font-black tracking-[0.15em] text-[12px]" style="font-family:'Poppins',sans-serif;" onclick="console.log('Resident signup')">
-          Start Earning &rarr;
+        <button class="w-full py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[13px] transition-all duration-300 hover:opacity-90" style="font-family:'Poppins',sans-serif; background: linear-gradient(135deg, #7c8cff 0%, #6366f1 100%);" onclick="console.log('Resident signup')">
+          Become a Partner
         </button>
-        <p class="text-[10px] text-slate-600 italic text-center mt-4">No buyer. No seller. Just a common pursuit.</p>
-      </div>
-
-      <!-- RESIDENT AUTOMATOR -->
-      <div class="animate-fade-in animate-delay-3 bg-[#0f172a]/50 rounded-[32px] border border-purple-500/15 p-8 relative overflow-hidden card-featured-glow" style="box-shadow: 0 0 60px rgba(0,0,0,0.4); background: linear-gradient(160deg, rgba(167,139,250,0.04) 0%, rgba(15,23,42,0.5) 40%);">
-        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
-
-        <div class="inline-block bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-1.5 mb-5">
-          <span class="text-[9px] font-black uppercase tracking-[0.2em] text-purple-400" style="font-family:'Poppins',sans-serif;">Full Access</span>
-        </div>
-        <h2 class="text-white font-black text-[22px] uppercase italic tracking-tight leading-none mb-2" style="font-family:'Poppins',sans-serif;">Resident Automator</h2>
-        <p class="text-[12px] text-slate-500 italic mb-8">Scale your District without scaling effort.</p>
-
-        <div class="flex items-baseline gap-1 mb-1">
-          <span class="text-white font-black text-[48px] leading-none tracking-tighter" style="font-family:'Poppins',sans-serif;">$50</span>
-          <span class="text-[13px] text-slate-500 font-medium">/mo</span>
-        </div>
-        <p class="text-[11px] text-slate-600 italic mb-10"><strong class="text-purple-400 not-italic font-bold">+ Pay As You Go</strong></p>
-
-        <div class="mb-5">
-          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Everything in Resident, plus</div>
-        </div>
-
-        <!-- Automation -->
-        <div class="mb-8">
-          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Automation</div>
-          <div class="space-y-3">
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Unlimited Expert IDs</strong></span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Hosted Automation Flows</strong> — Tasks and Agents across all phases</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Mass Email &amp; Newsletters</strong> via Makesbridge</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Data Hosting</strong> — stored, managed, queryable</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Zapier + Webhook integrations</span></div>
-          </div>
-        </div>
-
-        <!-- Intelligence -->
-        <div class="mb-8">
-          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Intelligence</div>
-          <div class="space-y-3">
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Projection vs Actual</strong> — C-Suite projections against live GA4</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Dark GTM signal tracking</span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Angel Observer dashboard</span></div>
-          </div>
-        </div>
-
-        <!-- Support -->
-        <div class="mb-10">
-          <div class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 pb-3 mb-5 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Support</div>
-          <div class="space-y-3">
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed"><strong class="text-white">Priority onboarding</strong></span></div>
-            <div class="flex items-start gap-3"><div class="w-[18px] h-[18px] rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5"><svg viewBox="0 0 12 12" fill="none" class="w-[10px] h-[10px]"><polyline points="2,6 5,9 10,3" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="text-[13px] text-slate-300 leading-relaxed">Dedicated team support</span></div>
-          </div>
-        </div>
-
-        <button class="w-full py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-[12px] transition-all duration-300" style="font-family:'Poppins',sans-serif; background: linear-gradient(135deg, #7c8cff 0%, #a78bfa 100%); box-shadow: 0 8px 32px -8px rgba(124,140,255,0.4);" onmouseover="this.style.boxShadow='0 12px 40px -8px rgba(124,140,255,0.6)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 8px 32px -8px rgba(124,140,255,0.4)'; this.style.transform='translateY(0)';" onclick="console.log('Automator signup')">
-          Get Full Access &rarr;
-        </button>
-        <p class="text-[10px] text-slate-600 italic text-center mt-4">Pay only for what you run. Stop anytime.</p>
+        <p class="text-[14px] text-slate-500 italic text-center mt-4">Month to month. No lock-in.</p>
       </div>
 
     </div>
   </section>
 
-  <!-- DIVIDEND CALLOUT -->
-  <div id="the-dividend" class="pt-16"></div>
-  <div class="max-w-3xl mx-auto px-6 pb-20 animate-fade-in animate-delay-3">
-    <div class="bg-[#0f172a]/50 rounded-[32px] border border-white/5 p-10 text-center relative overflow-hidden" style="box-shadow: 0 0 60px rgba(0,0,0,0.4);">
-      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent"></div>
-      <p class="text-[9px] font-black uppercase tracking-[0.3em] text-amber-400 mb-4" style="font-family:'Poppins',sans-serif;">Society Media Dividend</p>
-      <h3 class="text-white font-black text-[22px] uppercase italic tracking-tight leading-tight mb-8" style="font-family:'Poppins',sans-serif;">Share Any District.<br/>Earn Automation Revenue for Life.</h3>
-
-      <div class="flex flex-col md:flex-row gap-6 max-w-xl mx-auto mb-8">
-        <!-- District Founders -->
-        <div class="flex-1 bg-[#020617]/60 rounded-2xl border border-amber-400/15 p-6 text-center">
-          <p class="text-amber-400 font-black text-[36px] leading-none tracking-tighter mb-1" style="font-family:'Poppins',sans-serif;">20%</p>
-          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-400/80 mb-3" style="font-family:'Poppins',sans-serif;">District Founders</p>
-          <p class="text-[12px] text-slate-500 leading-relaxed">Lifetime income on every district you design and bring to life</p>
-        </div>
-        <!-- Residents -->
-        <div class="flex-1 bg-[#020617]/60 rounded-2xl border border-amber-400/15 p-6 text-center">
-          <p class="text-amber-400 font-black text-[36px] leading-none tracking-tighter mb-1" style="font-family:'Poppins',sans-serif;">40%</p>
-          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-400/80 mb-3" style="font-family:'Poppins',sans-serif;">Residents</p>
-          <p class="text-[12px] text-slate-500 leading-relaxed">Lifetime income on every Citizen you bring into the commons</p>
-        </div>
-      </div>
-
-      <!-- Dollar math example -->
-      <div class="bg-[#020617]/40 rounded-xl border border-white/5 p-5 max-w-sm mx-auto mb-6">
-        <p class="text-[11px] text-slate-400 leading-relaxed text-center">
-          <strong class="text-white font-semibold">Example:</strong> A district generates $1,000/mo in automation revenue.<br/>
-          <span class="text-amber-400 font-bold">Your dividend: $400/mo. For life.</span><br/>
-          <span class="text-slate-600 text-[10px]">That's $57,600 over 12 years from one district.</span>
-        </p>
-      </div>
-
-      <p class="text-[13px] text-slate-500 leading-relaxed max-w-lg mx-auto">
-        Not a referral bonus. A permanent financial stake in something that grows.
-      </p>
-    </div>
-  </div>
-
-  <!-- PAYG SCHEDULE -->
-  <div id="haf-schedule" class="max-w-3xl mx-auto px-6 pb-20 animate-fade-in animate-delay-3">
-    <div class="bg-[#0f172a]/50 rounded-[32px] border border-white/5 p-10 relative overflow-hidden" style="box-shadow: 0 0 60px rgba(0,0,0,0.4);">
-      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
-      <p class="text-[9px] font-black uppercase tracking-[0.3em] text-purple-400 mb-4 text-center" style="font-family:'Poppins',sans-serif;">Pay As You Go</p>
-      <h3 class="text-white font-black text-[22px] uppercase italic tracking-tight leading-tight mb-2 text-center" style="font-family:'Poppins',sans-serif;">Automation Revenue Schedule</h3>
-      <p class="text-[12px] text-slate-500 text-center mb-8">Volume-based pricing. First 2,500 automation triggers free every month.</p>
-
-      <table class="w-full max-w-md mx-auto text-left" style="border-collapse: separate; border-spacing: 0;">
-        <thead>
-          <tr>
-            <th class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 pb-3 border-b border-white/5" style="font-family:'Poppins',sans-serif;">Triggers / mo</th>
-            <th class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 pb-3 border-b border-white/5 text-right" style="font-family:'Poppins',sans-serif;">Price</th>
-          </tr>
-        </thead>
-        <tbody class="text-[13px]">
-          <tr><td class="py-2.5 text-slate-300 border-b border-white/[0.03]">1 — 2,500</td><td class="py-2.5 text-right border-b border-white/[0.03]"><span class="text-emerald-400 font-semibold">Free</span></td></tr>
-          <tr><td class="py-2.5 text-slate-300 border-b border-white/[0.03]">2,501 — 5,000</td><td class="py-2.5 text-slate-400 text-right border-b border-white/[0.03]">$89</td></tr>
-          <tr><td class="py-2.5 text-slate-300 border-b border-white/[0.03]">5,001 — 10,000</td><td class="py-2.5 text-slate-400 text-right border-b border-white/[0.03]">$129</td></tr>
-          <tr><td class="py-2.5 text-slate-300 border-b border-white/[0.03]">10,001 — 20,000</td><td class="py-2.5 text-slate-400 text-right border-b border-white/[0.03]">$189</td></tr>
-          <tr><td class="py-2.5 text-slate-300 border-b border-white/[0.03]">20,001 — 50,000</td><td class="py-2.5 text-slate-400 text-right border-b border-white/[0.03]">$289</td></tr>
-          <tr><td class="py-2.5 text-slate-300 border-b border-white/[0.03]">50,001 — 100,000</td><td class="py-2.5 text-slate-400 text-right border-b border-white/[0.03]">$489</td></tr>
-          <tr><td class="py-2.5 text-slate-300 border-b border-white/[0.03]">100,001 — 200,000</td><td class="py-2.5 text-slate-400 text-right border-b border-white/[0.03]">$769</td></tr>
-          <tr><td class="py-2.5 text-slate-300">200,001+</td><td class="py-2.5 text-slate-400 text-right">$0.004 / trigger</td></tr>
-        </tbody>
-      </table>
-
-      <p class="text-[11px] text-slate-600 text-center mt-6 italic">
-        <a href="https://readystackai-rgb.github.io/readystack-eu/pricing-details.html" class="text-indigo-400 hover:text-white transition-colors">Full pricing details &rarr;</a>
-      </p>
-    </div>
-  </div>
-
-  <!-- TRUST STRIP -->
-  <div class="border-t border-white/5 py-12 px-8 text-center max-w-2xl mx-auto">
-    <p class="text-[13px] text-slate-500 leading-relaxed">
-      <strong class="text-slate-300 font-medium">Month to month. No contracts. No lock-in.</strong><br/>
-      ReadyStack is a Market Relationship Management (MRM) environment — where you reside in the dark
-      where decisions are made, with your partners, your customers, and your future customers,
-      before they ever raise their hand.
+  <!-- THE NEW MODEL — closing statement -->
+  <div class="border-t border-white/5 py-14 px-8 text-center max-w-2xl mx-auto">
+    <p class="text-[13px] font-black uppercase tracking-[0.2em] text-white/40 mb-4" style="font-family:'Poppins',sans-serif;">A New Model</p>
+    <p class="text-[17px] text-slate-300 leading-relaxed mb-3">
+      ReadyStack sits at the convergence of SaaS and media. A district isn't just a place to reside and grow with quality residents &mdash; it's an automated business that generates income and grows in its own right to establish base prosperity and sustainability.
+    </p>
+    <p class="text-[15px] text-slate-400 leading-relaxed">
+      <strong class="text-slate-200 font-medium">No contracts. No lock-in. Month to month.</strong><br/>
+      This is where you reside in the dark where decisions are made &mdash; with your partners, your customers, and your future customers &mdash; before they ever raise their hand.
     </p>
   </div>
 
@@ -385,16 +177,16 @@
   <footer class="border-t border-white/5 mt-8">
     <div class="max-w-6xl mx-auto px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="flex items-center space-x-2">
-        <div class="bg-white p-1 rounded-full flex items-center justify-center border border-white/20 overflow-hidden">
+        <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center">
           <img src="https://static.wixstatic.com/media/5625d7_e043dfc9c6884a5d82484146f08c5b74~mv2.png" alt="ReadyStack" style="width:16px;height:16px;object-fit:contain;" />
         </div>
-        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500" style="font-family:'Poppins',sans-serif;">ReadyStack — A Makesbridge Technology Product</span>
+        <span class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500" style="font-family:'Poppins',sans-serif;">ReadyStack — Makesbridge Technology, Inc.</span>
       </div>
       <div class="flex items-center gap-6">
-        <a href="landing.html" class="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Home</a>
-        <a href="privacy-policy.html" class="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Privacy Policy</a>
-        <a href="terms-of-service.html" class="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Terms of Service</a>
-        <span class="text-[9px] font-black uppercase tracking-widest text-slate-600" style="font-family:'Poppins',sans-serif;">&copy; 2026 Makesbridge Technology, Inc.</span>
+        <a href="https://www.readystack.ai/privacy-policy" target="_top" class="text-[11px] font-black uppercase tracking-widest text-indigo-400 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Privacy Policy</a>
+        <a href="https://www.readystack.ai/terms-of-service" target="_top" class="text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Terms of Service</a>
+        <a href="https://www.readystack.ai/society-media" target="_top" class="text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors" style="font-family:'Poppins',sans-serif;">Becoming Society Media</a>
+        <span class="text-[11px] font-black uppercase tracking-widest text-slate-600" style="font-family:'Poppins',sans-serif;">&copy; 2026 Makesbridge Technology, Inc.</span>
       </div>
     </div>
   </footer>
