@@ -124,6 +124,42 @@
       100% { box-shadow: 0 0 0 0 rgba(124, 140, 255, 0); }
     }
 
+    /* === LEARNING MODE — GUIDED GLOW SYSTEM === */
+    @keyframes guidedGlow {
+      0%, 100% {
+        box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.3),
+                    0 0 24px 8px rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 14px 4px rgba(245, 158, 11, 0.5),
+                    0 0 36px 14px rgba(245, 158, 11, 0.2);
+        border-color: rgba(245, 158, 11, 0.7);
+      }
+    }
+    @keyframes guidedGlowIntense {
+      0%, 100% {
+        box-shadow: 0 0 12px 4px rgba(245, 158, 11, 0.5),
+                    0 0 36px 14px rgba(245, 158, 11, 0.25);
+        border-color: rgba(245, 158, 11, 0.7);
+      }
+      50% {
+        box-shadow: 0 0 20px 8px rgba(245, 158, 11, 0.7),
+                    0 0 50px 20px rgba(245, 158, 11, 0.35);
+        border-color: rgba(245, 158, 11, 0.9);
+      }
+    }
+    .learning-glow {
+      animation: guidedGlow 2s ease-in-out infinite;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 12px;
+    }
+    .learning-glow-intense {
+      animation: guidedGlowIntense 1.4s ease-in-out infinite;
+      border: 1px solid rgba(245, 158, 11, 0.7);
+      border-radius: 12px;
+    }
+
     /* === DISTRICT INVITATION — NODE GLOW SYSTEM === */
     @keyframes nodeGlow {
       0%, 100% {
@@ -224,6 +260,61 @@
           )}
         </span>
       );
+    };
+
+    /* ── Learning Mode: Guided step definitions (placeholder text — final copy pending team review) ── */
+    const LEARNING_STEPS = [
+      { key: 'youtube',  title: 'Anchor Video',      description: 'This is where a district begins. Search for a video that frames the market problem.', nextLabel: 'Residents' },
+      { key: 'intro',    title: 'Residents',          description: 'These are the people who will execute the district workload. Review who was identified from the video.', nextLabel: 'Resident Links' },
+      { key: 'mapper',   title: 'Resident Links',     description: 'Each resident brings engagement items to the district. This map shows every touchpoint in the audience journey.', nextLabel: 'District Assembly' },
+      { key: 'preview',  title: 'District Assembly',   description: 'The district assembles here. Review the hero section, headline, and call-to-action before publishing.', nextLabel: 'Front Door' },
+      { key: 'landing',  title: 'Front Door',          description: 'This is what the audience sees. The published district landing page with the hero, video, and call-to-action.', nextLabel: null },
+    ];
+
+    /* ── GuidedPromptCard: inline card shown during learning mode guided sequence ── */
+    const GuidedPromptCard = ({ step, isIntense, onDismiss }) => {
+      if (!step) return null;
+      return (
+        <div className="animate-fade-in mb-6">
+          <div className="relative bg-[#0f172a]/90 border border-amber-500/30 rounded-2xl px-6 py-5 max-w-md shadow-[0_0_30px_rgba(245,158,11,0.08)]" style={{fontFamily:'Inter, system-ui, sans-serif'}}>
+            <button onClick={onDismiss} className="absolute top-3 right-3 text-slate-500 hover:text-slate-300 transition-colors text-xs">&times;</button>
+            <p className="text-[10px] font-black text-amber-400/70 uppercase tracking-[0.25em] mb-1.5">Learning Mode</p>
+            <h4 className="text-sm font-bold text-white mb-1.5">{step.title}</h4>
+            <p className="text-xs text-slate-300 leading-relaxed">{step.description}</p>
+            {isIntense && <p className="text-xs text-amber-400 font-semibold mt-2 animate-pulse">Explore this section, then click Next to continue →</p>}
+            {step.nextLabel && <p className="text-[10px] text-slate-500 mt-3 uppercase tracking-widest">Next: {step.nextLabel}</p>}
+          </div>
+        </div>
+      );
+    };
+
+    /* ── SectionInfoCard: contextual info card shown in Operations sections during learning mode ── */
+    const SectionInfoCard = ({ title, description, onDismiss }) => {
+      const [visible, setVisible] = useState(true);
+      useEffect(() => {
+        const timer = setTimeout(() => { setVisible(false); if (onDismiss) onDismiss(); }, 5000);
+        return () => clearTimeout(timer);
+      }, []);
+      if (!visible) return null;
+      return (
+        <div className="animate-fade-in mb-6 cursor-pointer" onClick={() => { setVisible(false); if (onDismiss) onDismiss(); }}>
+          <div className="bg-[#0f172a]/70 border border-white/[0.08] rounded-xl px-5 py-4 max-w-md" style={{fontFamily:'Inter, system-ui, sans-serif'}}>
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">About this section</p>
+            <h4 className="text-xs font-bold text-white mb-1">{title}</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">{description}</p>
+          </div>
+        </div>
+      );
+    };
+
+    /* ── Operations section info definitions (placeholder text — final copy pending team review) ── */
+    const OPERATIONS_INFO = {
+      finance:     { title: 'District Finance',     description: 'The economic model of the district. Revenue splits, hosted automation fees, and how value flows between founder, residents, and infrastructure.' },
+      observatory: { title: 'District Ecosystem',   description: 'Three network visualizations — relational, cross-pollination, and ecosystem — showing how residents, links, and audiences connect.' },
+      connect:     { title: 'My Residents',          description: 'Manage resident communications. Send invitations, track onboarding status, and coordinate with the district network.' },
+      looker:      { title: 'Looker',                description: 'Embedded Looker dashboard for district performance data and business intelligence.' },
+      g4:          { title: 'GA4',                   description: 'Google Analytics integration. Traffic, engagement, and conversion data for district properties.' },
+      analytics:   { title: 'Analytics',             description: 'Aggregated district analytics. Performance trends, audience insights, and growth metrics across all channels.' },
     };
 
     const ReadyStackLogo = ({ size = 24, variant = 'light' }) => (
@@ -526,6 +617,10 @@
       const [residentSortBy, setResidentSortBy] = useState('recent'); // 'recent' | 'name' | 'status' | 'specialty' | 'company'
       const [inviteExpiryDays, setInviteExpiryDays] = useState(7); // configurable invite link validity (default 7d per Jay)
       const [isInviteMode, setIsInviteMode] = useState(false); // true when arrived via invite URL (pre-auth)
+      const [isLearningMode, setIsLearningMode] = useState(false); // true when ?mode=learn (fixture-based demo tour)
+      const [learningStepIdx, setLearningStepIdx] = useState(0); // current guided step index in LEARNING_STEPS
+      const [learningIntense, setLearningIntense] = useState(false); // true after 15s fallback
+      const [dismissedInfoCards, setDismissedInfoCards] = useState({}); // { finance: true, ... } for ops sections
       const isResident = districtRole === 'resident';
       const isCreator = districtRole === 'creator' || !districtRole; // default to creator for backward compat
 
@@ -951,6 +1046,16 @@
 
       useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [activeTab]);
 
+      // ── Learning Mode: sync guided step with active tab + 15s intensity timer ──
+      useEffect(() => {
+        if (!isLearningMode) return;
+        const stepIdx = LEARNING_STEPS.findIndex(s => s.key === activeTab);
+        if (stepIdx >= 0) { setLearningStepIdx(stepIdx); setLearningIntense(false); }
+        // 15-second fallback: intensify prompt if user hasn't navigated
+        const timer = setTimeout(() => { if (isLearningMode) setLearningIntense(true); }, 15000);
+        return () => clearTimeout(timer);
+      }, [activeTab, isLearningMode]);
+
       // District Assembly: pre-populate hero fields from upstream data on first tab visit
       useEffect(() => {
         if (activeTab === 'preview' && heroFields.headline === '') {
@@ -1020,6 +1125,27 @@
         const urlInviteToken = params.get('invite');
         const urlNodeIdx = params.get('node');
         const isInviteModeUrl = !!urlInviteToken;
+
+        // ── LEARNING MODE: Load fixture data from local learning-district.json ──
+        const urlLearningMode = params.get('mode') === 'learn';
+        if (urlLearningMode) {
+          (async () => {
+            try {
+              const res = await fetch('./learning-district.json');
+              const d = await res.json();
+              if (d.districtName) setStackLabel(d.districtName);
+              if (d.selectedVideoData) setVideoData(d.selectedVideoData);
+              if (d.youtubeEmbedUrl) setYoutubeEmbedUrl(d.youtubeEmbedUrl);
+              if (d.videoStory) setVideoStory(d.videoStory);
+              if (d.storyParticipants) setStoryParticipants(d.storyParticipants);
+              if (d.mapping) setMapping(d.mapping);
+              if (d.heroFields) setHeroFields(d.heroFields);
+              if (d.activeTab) setActiveTab(d.activeTab);
+              setIsLearningMode(true);
+            } catch (e) { console.warn('Learning fixture load failed:', e); }
+          })();
+          return; // skip normal auth flow
+        }
 
         // ── INVITE MODE (pre-auth): Load district + show District Ecosystem ──
         if (isInviteModeUrl && urlSheet) {
@@ -2381,7 +2507,7 @@
             <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
 
               {/* NEW MY DISTRICTS SECTION — hidden in invite mode */}
-              {!isInviteMode && <div className="mb-6 border-b border-white/10 pb-6">
+              {!isInviteMode && !isLearningMode && <div className="mb-6 border-b border-white/10 pb-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">My Districts</h3>
                   {rsSession && (
@@ -2647,8 +2773,8 @@
 
               {/* ── Work-area action buttons ── */}
               <div className="absolute top-20 right-6 z-[90] flex items-center gap-2">
-                {/* Save District — hidden for residents and invitees */}
-                {!isResident && !isInviteMode && (
+                {/* Save District — hidden for residents, invitees, and learning mode */}
+                {!isResident && !isInviteMode && !isLearningMode && (
                 <button
                   onClick={() => {
                     if (!rsSession) { initiateGoogleAuth(); return; }
@@ -2748,6 +2874,9 @@
 
             {activeTab === 'youtube' && (
               <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
+                  {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'youtube' && (
+                    <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                  )}
                   <div className="space-y-3 mb-6">
                       <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">ANCHOR VIDEO<InfoTooltip text="Search YouTube for a video of the problem your audience faces. Your district exists to solve it." /></h3>
                   </div>
@@ -2787,7 +2916,7 @@
                                       ))}
                                     </ul>
                                     <div className="flex gap-2">
-                                      {!isResident && !isInviteMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
+                                      {!isResident && !isInviteMode && !isLearningMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
                                       <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
@@ -2795,11 +2924,11 @@
                                   <div className="space-y-4">
                                     {isGeneratingStory ? (
                                       <div className="w-full py-4 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-black text-sm uppercase tracking-widest text-center animate-pulse">Drafting Market Story...</div>
-                                    ) : !isResident && !isInviteMode ? (
+                                    ) : !isResident && !isInviteMode && !isLearningMode ? (
                                       <button onClick={generateStoryFromVideo} className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg">Re-Draft Market Story</button>
                                     ) : null}
                                     <div className="flex gap-2">
-                                      {!isResident && !isInviteMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
+                                      {!isResident && !isInviteMode && !isLearningMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
                                       <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
@@ -3115,6 +3244,9 @@
             )}
             {activeTab === 'intro' && (
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
+                {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'intro' && (
+                  <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                )}
                 <div className="space-y-20">
                     <div className="space-y-6">
                         <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS<InfoTooltip text="Review district workload, choose roles, and add residents to your district." /></h3>
@@ -3168,8 +3300,8 @@
                       </div>
                     )}
 
-                    {/* ── SUGGESTED ROLES: accordion (creator only) ── */}
-                    {!isInviteMode && videoStory && videoStory.network && (
+                    {/* ── SUGGESTED ROLES: accordion (creator only, hidden in learning mode) ── */}
+                    {!isInviteMode && !isLearningMode && videoStory && videoStory.network && (
                       <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
                         <button onClick={() => setShowRoles(!showRoles)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
                           <div>
@@ -3258,7 +3390,7 @@
                                   return (
                                     <div className="flex flex-col items-center justify-center py-8">
                                       <p className="text-slate-300 text-xs mb-3">No suggestions for {rosterFilter.split(' / ')[0]} yet.</p>
-                                      {!isInviteMode && <button onClick={() => setActiveTab('connect')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors underline underline-offset-2">Invite someone</button>}
+                                      {!isInviteMode && !isLearningMode && <button onClick={() => setActiveTab('connect')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors underline underline-offset-2">Invite someone</button>}
                                     </div>
                                   );
                                 }
@@ -3276,19 +3408,19 @@
 
                                 return (
                                   <div className="space-y-3">
-                                    <p className="text-xs text-slate-300 tracking-wide">{isInviteMode ? 'Residents by specialty' : 'Click a name to add'}</p>
+                                    <p className="text-xs text-slate-300 tracking-wide">{(isInviteMode || isLearningMode) ? 'Residents by specialty' : 'Click a name to add'}</p>
                                     <div className="flex flex-wrap gap-2">
                                       {candidates.map((c, ci) => {
                                         const isSelected = activeNames.includes(c.name.toLowerCase());
                                         return (
-                                          <button key={ci} onClick={() => !isInviteMode && addCandidate(c)} disabled={isSelected || isInviteMode}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isSelected ? 'bg-white/5 text-slate-300 cursor-default' : isInviteMode ? 'bg-white/[0.06] text-slate-300 border border-white/[0.06] cursor-default' : 'bg-white/[0.06] text-slate-300 hover:bg-white/10 hover:text-white border border-white/[0.06] hover:border-white/15'}`}>
+                                          <button key={ci} onClick={() => !isInviteMode && !isLearningMode && addCandidate(c)} disabled={isSelected || isInviteMode || isLearningMode}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isSelected ? 'bg-white/5 text-slate-300 cursor-default' : (isInviteMode || isLearningMode) ? 'bg-white/[0.06] text-slate-300 border border-white/[0.06] cursor-default' : 'bg-white/[0.06] text-slate-300 hover:bg-white/10 hover:text-white border border-white/[0.06] hover:border-white/15'}`}>
                                             {c.name}{isSelected ? ' ✓' : ''}
                                           </button>
                                         );
                                       })}
                                     </div>
-                                    {!isInviteMode && <button onClick={() => setActiveTab('connect')} className="text-xs text-slate-300 hover:text-slate-300 transition-colors">Don't see someone? Invite them →</button>}
+                                    {!isInviteMode && !isLearningMode && <button onClick={() => setActiveTab('connect')} className="text-xs text-slate-300 hover:text-slate-300 transition-colors">Don't see someone? Invite them →</button>}
                                   </div>
                                 );
                               }
@@ -3296,16 +3428,16 @@
                               // ALL MODE — editable rows
                               return (<>
                               <div className="flex gap-2 mb-6 px-1">
-                                <span className={`${(isResident || isInviteMode) ? 'w-[30%]' : 'w-[22%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Name</span>
+                                <span className={`${(isResident || isInviteMode || isLearningMode) ? 'w-[30%]' : 'w-[22%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Name</span>
                                 <span className="w-[18%] text-xs font-medium text-slate-300 uppercase tracking-wider">Company</span>
-                                <span className={`${(isResident || isInviteMode) ? 'w-[30%]' : 'w-[25%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Specialty</span>
-                                {!isResident && !isInviteMode && (
+                                <span className={`${(isResident || isInviteMode || isLearningMode) ? 'w-[30%]' : 'w-[25%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Specialty</span>
+                                {!isResident && !isInviteMode && !isLearningMode && (
                                   <span className="w-[17%] text-xs font-medium text-slate-300 uppercase tracking-wider">Email</span>
                                 )}
-                                {!isResident && !isInviteMode && rsSession && rsSheetId && (
+                                {!isResident && !isInviteMode && !isLearningMode && rsSession && rsSheetId && (
                                   <span className="w-[13%] text-xs font-medium text-slate-300 uppercase tracking-wider text-center">Invite</span>
                                 )}
-                                {!isResident && !isInviteMode && (
+                                {!isResident && !isInviteMode && !isLearningMode && (
                                   <span className="w-[5%]"></span>
                                 )}
                               </div>
@@ -3320,7 +3452,7 @@
                                 return (
                                 <div key={i} className={`space-y-1.5 ${isResident && residentEmail && (r.email || '').toLowerCase() === residentEmail.toLowerCase() ? 'ring-1 ring-indigo-500/30 rounded-xl p-2 bg-indigo-500/5' : ''}`}>
                                   <div className="flex gap-2 items-center group">
-                                    {(isResident || isInviteMode) ? (
+                                    {(isResident || isInviteMode || isLearningMode) ? (
                                       <>
                                         <div className="w-[30%] min-w-0 px-4 py-3 text-sm text-white truncate flex items-center gap-2">
                                           {(() => {
@@ -3438,7 +3570,7 @@
                                 );
                               })}
                               </div>
-                              {!isResident && !isInviteMode && (
+                              {!isResident && !isInviteMode && !isLearningMode && (
                               <div className="pt-4">
                                 <button onClick={() => {
                                   setStoryParticipants(prev => ({
@@ -3458,18 +3590,21 @@
                     </div>}
                     </div>
 
-                    <div className="text-center py-10"><button onClick={() => (isResident || isInviteMode) ? setActiveTab('mapper') : buildStoryDistrict('mapper')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">{isInviteMode ? 'View the District Map.' : 'Confirming your residents unlocks the District Map.'}</p></div>
+                    <div className="text-center py-10"><button onClick={() => (isResident || isInviteMode || isLearningMode) ? setActiveTab('mapper') : buildStoryDistrict('mapper')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">{(isInviteMode || isLearningMode) ? 'View the District Map.' : 'Confirming your residents unlocks the District Map.'}</p></div>
                 </div>
               </div>
             )}
 
             {activeTab === 'mapper' && (
               <div className="space-y-12 animate-fade-in text-left pt-28">
+                {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'mapper' && (
+                  <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                )}
                 <div className="space-y-6">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENT LINKS<InfoTooltip text="Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey." /></h3>
                 </div>
-                {/* ── District Identity Card — accordion, hidden for residents & invitees ── */}
-                {!isResident && !isInviteMode && (
+                {/* ── District Identity Card — accordion, hidden for residents, invitees & learning mode ── */}
+                {!isResident && !isInviteMode && !isLearningMode && (
                 <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
                   <button onClick={() => setShowDistrictIdentity(!showDistrictIdentity)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
                     <div>
@@ -3594,7 +3729,7 @@
                             <div className="flex items-center gap-3 mb-4">
                               <p className="text-sm font-bold text-white">{displayName}</p>
                               {resident.jobContext && (resident.name || '').trim() && <span className="text-xs font-semibold text-indigo-400 italic">{resident.jobContext}</span>}
-                              {!isResident && !isInviteMode && (<div className="relative">
+                              {!isResident && !isInviteMode && !isLearningMode && (<div className="relative">
                                 <button
                                   onClick={() => setMapEditingItem(mapEditingItem === 'dropdown-'+origIdx ? null : 'dropdown-'+origIdx)}
                                   className="bg-[#020617] border border-indigo-500/40 rounded-lg px-3 py-1.5 text-[10px] text-indigo-300 outline-none cursor-pointer hover:border-indigo-400 hover:text-indigo-200 transition-colors flex items-center gap-1"
@@ -3674,10 +3809,10 @@
                                       onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-t-'+ti ? null : origIdx+'-t-'+ti)}>
                                       <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-white"></span>
                                       <span className="text-[10px] text-white font-medium flex-1 truncate">{item.label}</span>
-                                      {!isResident && !isInviteMode && <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
+                                      {!isResident && !isInviteMode && !isLearningMode && <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
                                         className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                     </div>
-                                    {mapEditingItem === origIdx+'-t-'+ti && !isResident && !isInviteMode && (
+                                    {mapEditingItem === origIdx+'-t-'+ti && !isResident && !isInviteMode && !isLearningMode && (
                                       <input autoFocus placeholder="https://..." value={item.url || ''} onChange={(e) => { const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources[item.srcIdx] = { ...sources[item.srcIdx], url: e.target.value }; updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
                                         onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                         className="mt-1 w-full bg-[#020617] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none focus:border-indigo-500" />
@@ -3704,10 +3839,10 @@
                                           onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-'+q.key+'-'+ii ? null : origIdx+'-'+q.key+'-'+ii)}>
                                           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.pat ? q.color : q.color + '60' }}></span>
                                           <span className="text-[10px] font-medium flex-1 truncate" style={{ color: item.pat ? '#e2e8f0' : '#cbd5e1' }}>{item.label}{!item.pat && <span className="text-[8px] text-amber-400/70 ml-1">needs link</span>}</span>
-                                          {!isResident && !isInviteMode && <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
+                                          {!isResident && !isInviteMode && !isLearningMode && <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
                                             className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                         </div>
-                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && !isResident && !isInviteMode && (
+                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && !isResident && !isInviteMode && !isLearningMode && (
                                           <input autoFocus placeholder="https://..." value={item.pat || ''} onChange={(e) => { handlePatternUpdate(q.key, item.stageIdx, 'pat', e.target.value); }}
                                             onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                             className="mt-1 w-full bg-[#020617] border rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none" style={{ borderColor: q.color + '40' }} />
@@ -3736,6 +3871,9 @@
             {/* ── MY RESIDENTS TAB ── */}
             {activeTab === 'connect' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
+                {isLearningMode && !dismissedInfoCards.connect && (
+                  <SectionInfoCard title={OPERATIONS_INFO.connect.title} description={OPERATIONS_INFO.connect.description} onDismiss={() => setDismissedInfoCards(p => ({...p, connect: true}))} />
+                )}
                 <div className="space-y-12">
                   <div className="space-y-6">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter">MY RESIDENTS<InfoTooltip text="Track who you've invited and their onboarding status." /></h3>
@@ -3935,6 +4073,9 @@
 
             {activeTab === 'preview' && (
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
+                {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'preview' && (
+                  <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                )}
                 <div className="space-y-12">
                   <div className="space-y-4">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY<InfoTooltip text="Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack." /></h3>
@@ -4185,6 +4326,9 @@
                ══════════════════════════════════════════════════════════ */}
             {activeTab === 'landing' && (
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
+                {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'landing' && (
+                  <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                )}
                 <div className="space-y-12">
                   <div className="space-y-4">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>FRONT DOOR<InfoTooltip text="This is what your audience will see when you publish. Review it, then send to Studio." /></h3>
@@ -4476,6 +4620,9 @@
 
             {activeTab === 'finance' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
+                {isLearningMode && !dismissedInfoCards.finance && (
+                  <SectionInfoCard title={OPERATIONS_INFO.finance.title} description={OPERATIONS_INFO.finance.description} onDismiss={() => setDismissedInfoCards(p => ({...p, finance: true}))} />
+                )}
                 <div className="space-y-12">
                   <div className="space-y-6">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT FINANCE<InfoTooltip text="A district is an economy container — media, finance, and operations." /></h3>
@@ -4625,6 +4772,9 @@
 
             {activeTab === 'observatory' && (
               <div className="space-y-8 animate-fade-in font-sans text-left relative pt-28">
+                {isLearningMode && !dismissedInfoCards.observatory && (
+                  <SectionInfoCard title={OPERATIONS_INFO.observatory.title} description={OPERATIONS_INFO.observatory.description} onDismiss={() => setDismissedInfoCards(p => ({...p, observatory: true}))} />
+                )}
                 {/* Title */}
                 <div className="space-y-2">
                   <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ECOSYSTEM<InfoTooltip text="Visualize your district ecosystem in motion." /></h3>
@@ -4877,6 +5027,9 @@
 
             {activeTab === 'looker' && !isResident && (
               <div className="space-y-12 animate-fade-in text-left font-sans pt-20">
+                {isLearningMode && !dismissedInfoCards.looker && (
+                  <SectionInfoCard title={OPERATIONS_INFO.looker.title} description={OPERATIONS_INFO.looker.description} onDismiss={() => setDismissedInfoCards(p => ({...p, looker: true}))} />
+                )}
                 <div className="flex justify-between items-center border-b border-white/5 pb-10">
                     <div className="flex bg-white/5 px-6 py-3 rounded-2xl border border-white/10 shadow-inner"><span className="text-xs font-black text-slate-300 uppercase tracking-widest mr-3 opacity-60">Reporting Period:</span><span className="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Jan 01, 2026 - Jan 31, 2026</span></div>
                     <div className="flex items-center gap-6 text-left"><div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 shadow-inner">{[{ id: '30', label: '30 DAYS' }, { id: '90', label: '90 DAYS' }, { id: '365', label: 'ANNUAL' }].map(p => (<button key={p.id} onClick={() => setLookerPeriod(p.id)} className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${lookerPeriod === p.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-300 hover:text-slate-300'}`}>{p.label}</button>))}</div></div>
@@ -4910,6 +5063,9 @@
 
             {activeTab === 'g4' && !isResident && (
               <div className="bg-white rounded-[40px] shadow-2xl overflow-hidden animate-fade-in text-left font-sans pt-20">
+                {isLearningMode && !dismissedInfoCards.g4 && (
+                  <div className="px-10 pt-4"><SectionInfoCard title={OPERATIONS_INFO.g4.title} description={OPERATIONS_INFO.g4.description} onDismiss={() => setDismissedInfoCards(p => ({...p, g4: true}))} /></div>
+                )}
                 <div className="bg-[#f8f9fa] border-b border-slate-200 px-10 py-6 flex justify-between items-center">
                   <div className="flex items-center gap-4"><i data-lucide="table" className="w-6 h-6 text-indigo-600"></i><h4 className="text-[#3c4043] font-bold text-lg tracking-tight leading-none uppercase italic">GA4 Registry Log</h4></div>
                   <div className="bg-white/10 p-2 rounded-lg flex items-center justify-center border border-white/20"><DistrictSquareIcon size={20} /></div>
@@ -4928,6 +5084,9 @@
             {/* ── ANALYTICS TAB ── */}
             {activeTab === 'analytics' && !isResident && (
               <div className="space-y-10 animate-fade-in text-left font-sans pt-20">
+                {isLearningMode && !dismissedInfoCards.analytics && (
+                  <SectionInfoCard title={OPERATIONS_INFO.analytics.title} description={OPERATIONS_INFO.analytics.description} onDismiss={() => setDismissedInfoCards(p => ({...p, analytics: true}))} />
+                )}
                 {/* Period selector */}
                 <div className="flex justify-between items-center border-b border-white/5 pb-8">
                   <div className="flex items-center gap-4">
