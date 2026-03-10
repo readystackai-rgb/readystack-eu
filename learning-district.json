@@ -1,0 +1,153 @@
+{
+  "districtName": "Dark Market District",
+  "selectedVideoData": {
+    "title": "How to Build a Magnetic Brand that Sells Itself ft. Seth Godin",
+    "channel": "The 505 Podcast",
+    "views": "185,623",
+    "videoId": "SbHDPJNYHek",
+    "thumbnail": "https://img.youtube.com/vi/SbHDPJNYHek/mqdefault.jpg"
+  },
+  "youtubeEmbedUrl": "https://www.youtube.com/embed/SbHDPJNYHek",
+  "videoStory": {
+    "title": "Building Brands on Trust and Smallest Viable Audiences",
+    "districtName": "Dark Market District",
+    "problem": "Creators, marketers, and businesses often expend significant effort chasing broad attention and high view counts, mistakenly believing these metrics equate to influence, sales, or brand loyalty. This leads to ineffective marketing strategies focused on hype and generic content, failing to build trust or resonate deeply with any specific audience. The gap between understanding niche marketing principles and executing on them remains unaddressed by existing media formats.",
+    "resident": "Marketers, entrepreneurs, content creators, and small business owners struggling with brand differentiation and effective audience engagement, seeking to build a loyal customer base rather than chasing viral trends or broad reach.",
+    "network": {
+      "partners": ["Niche Branding Agencies", "Content Strategy Consultants", "Audience Research Platforms"],
+      "customers": ["Small Business Owners", "Individual Content Creators", "Startups Seeking Market Entry"],
+      "targets": ["Seth Godin", "Marketing Educators/Coaches", "Community Managers"]
+    },
+    "checklist": [
+      "Identify and define the smallest viable audience with clear demographics and psychographics.",
+      "Analyze current brand messaging to ensure it communicates meaning and not just features or hype.",
+      "Develop a consistent content and communication schedule, prioritizing sustained presence over sporadic viral attempts.",
+      "Craft stories that resonate deeply with the smallest viable audience, encouraging organic sharing and discussion.",
+      "Conduct a \"not good enough\" audit of current offerings or content, seeking genuine feedback for meaningful improvement.",
+      "Evaluate where marketing efforts are currently focused and redirect resources from mass attention to niche engagement."
+    ],
+    "automations": [
+      {
+        "trigger": "New follower on a key niche platform (e.g., specific LinkedIn group, specialized forum).",
+        "action": "Send a personalized welcome message inviting engagement on a specific topic.",
+        "outcome": "First-touch trust signal established with niche-aligned prospect."
+      },
+      {
+        "trigger": "Engagement with a meaning-driven piece of content (e.g., a blog post about solving a specific niche problem).",
+        "action": "Tag the user as Niche Engaged and add to a segment for relevant follow-up.",
+        "outcome": "Behavioral segmentation drives precision outreach."
+      },
+      {
+        "trigger": "A prospect engages with multiple pieces of consistent brand content over time (e.g., three blog posts or videos).",
+        "action": "Send a personalized invitation to join an exclusive community or become a brand representative.",
+        "outcome": "High-signal prospects convert to active community participants."
+      }
+    ],
+    "narrative": "This district provides a structured approach for creators, marketers, and businesses to transcend the pitfalls of chasing fleeting attention and instead cultivate a deeply loyal smallest viable audience. By guiding participants through the principles championed by Seth Godin — focusing on trust, meaning, and consistency — it offers a clear pathway to building a brand that truly resonates. The integrated checklist empowers immediate action, moving participants from theoretical understanding to practical application, such as defining a niche and crafting shareable, meaningful stories. Through embedded automations, every interaction is purposefully designed to build trust and deepen engagement. The consistent application of these strategies fosters remarkable products and services that naturally stand out, attracting the right customers who are eager to participate rather than needing to be sold to. The outcome is not just increased revenue, but a robust, resilient brand built on genuine connection and lasting influence."
+  },
+  "storyParticipants": {
+    "residents": [
+      {
+        "name": "Jordan Rivera",
+        "company": "BrandForge Studio",
+        "specialty": "Branding & Identity Designers",
+        "email": "jordan@brandforgstudio.co",
+        "department": "Content / Media"
+      },
+      {
+        "name": "Mika Chen",
+        "company": "NarrativePulse",
+        "specialty": "Content Strategy",
+        "email": "mika@narrativepulse.co",
+        "department": "Marketing / Growth"
+      },
+      {
+        "name": "Sam Okafor",
+        "company": "GrowthForge",
+        "specialty": "Audience Research",
+        "email": "sam@growthforge.co",
+        "department": "Marketing / Growth"
+      }
+    ]
+  },
+  "mapping": {
+    "learning": [
+      { "ven": "ReadyStack", "lab": "Process Walkthrough", "platform": "youtube", "dedicated": true, "internal": true, "ga4Count": 1200 },
+      { "ven": "Jordan Rivera", "lab": "Tutorial Video", "platform": "youtube", "ga4Count": 1000, "name": "Jordan Rivera" },
+      { "ven": "Jordan Rivera", "lab": "Logic Map", "platform": "miro", "ga4Count": 1000, "name": "Jordan Rivera" },
+      { "ven": "Mika Chen", "lab": "Tutorial Video", "platform": "youtube", "ga4Count": 1000, "name": "Mika Chen" },
+      { "ven": "Mika Chen", "lab": "Logic Map", "platform": "miro", "ga4Count": 1000, "name": "Mika Chen" },
+      { "ven": "Sam Okafor", "lab": "Tutorial Video", "platform": "youtube", "ga4Count": 1000, "name": "Sam Okafor" },
+      { "ven": "Sam Okafor", "lab": "Logic Map", "platform": "miro", "ga4Count": 1000, "name": "Sam Okafor" }
+    ],
+    "selecting": [
+      { "ven": "ReadyStack", "lab": "Interactive Tour", "platform": "tour", "dedicated": true, "internal": true, "ga4Count": 2300 },
+      { "ven": "Jordan Rivera", "lab": "Product Tour", "platform": "tour", "ga4Count": 1000, "name": "Jordan Rivera" },
+      { "ven": "Jordan Rivera", "lab": "Live Demo", "platform": "demo", "ga4Count": 1000, "name": "Jordan Rivera" },
+      { "ven": "Mika Chen", "lab": "Product Tour", "platform": "tour", "ga4Count": 1000, "name": "Mika Chen" },
+      { "ven": "Mika Chen", "lab": "Live Demo", "platform": "demo", "ga4Count": 1000, "name": "Mika Chen" },
+      { "ven": "Sam Okafor", "lab": "Product Tour", "platform": "tour", "ga4Count": 1000, "name": "Sam Okafor" },
+      { "ven": "Sam Okafor", "lab": "Live Demo", "platform": "demo", "ga4Count": 1000, "name": "Sam Okafor" }
+    ],
+    "executing": [
+      { "ven": "ReadyStack", "lab": "Copy ReadyStack", "platform": "starting", "dedicated": true, "internal": true, "ga4Count": 3400 },
+      { "ven": "ReadyStack", "lab": "Upload Data", "platform": "uploads", "dedicated": true, "internal": true, "ga4Count": 1200 },
+      { "id": "rs-api", "ven": "ReadyStack", "lab": "ReadyStack Activation", "platform": "api_config", "dedicated": true, "internal": true, "ga4Count": 4500 },
+      { "id": "rs-commerce", "ven": "ReadyStack", "lab": "ReadyStack Checkout", "platform": "commerce", "dedicated": true, "internal": true, "price": 1200, "ga4Count": 1200 },
+      { "ven": "Jordan Rivera", "lab": "Watch Tutorial", "platform": "webinar", "ga4Count": 1000, "name": "Jordan Rivera" },
+      { "ven": "Jordan Rivera", "lab": "Partner Checkout", "platform": "partner_checkout", "price": 1000, "ga4Count": 1000, "name": "Jordan Rivera" },
+      { "ven": "Mika Chen", "lab": "Watch Tutorial", "platform": "webinar", "ga4Count": 1000, "name": "Mika Chen" },
+      { "ven": "Mika Chen", "lab": "Partner Checkout", "platform": "partner_checkout", "price": 1000, "ga4Count": 1000, "name": "Mika Chen" },
+      { "ven": "Sam Okafor", "lab": "Watch Tutorial", "platform": "webinar", "ga4Count": 1000, "name": "Sam Okafor" },
+      { "ven": "Sam Okafor", "lab": "Partner Checkout", "platform": "partner_checkout", "price": 1000, "ga4Count": 1000, "name": "Sam Okafor" }
+    ],
+    "expanding": [
+      { "ven": "ReadyStack", "lab": "Shares ReadyStack", "platform": "network_invite", "dedicated": true, "internal": true, "ga4Count": 1200 },
+      { "ven": "ReadyStack", "lab": "Check ReadyStack Earnings", "platform": "deposits", "dedicated": true, "internal": true, "ga4Count": 2300 },
+      { "ven": "ReadyStack", "lab": "Schedules ReadyStack Onboarding", "platform": "success", "dedicated": true, "internal": true, "ga4Count": 3400 },
+      { "ven": "Jordan Rivera", "lab": "Affiliate Sign Up", "platform": "affiliate", "ga4Count": 1000, "name": "Jordan Rivera" },
+      { "ven": "Jordan Rivera", "lab": "Success Case Study", "platform": "case_study", "ga4Count": 1000, "name": "Jordan Rivera" },
+      { "ven": "Mika Chen", "lab": "Affiliate Sign Up", "platform": "affiliate", "ga4Count": 1000, "name": "Mika Chen" },
+      { "ven": "Mika Chen", "lab": "Success Case Study", "platform": "case_study", "ga4Count": 1000, "name": "Mika Chen" },
+      { "ven": "Sam Okafor", "lab": "Affiliate Sign Up", "platform": "affiliate", "ga4Count": 1000, "name": "Sam Okafor" },
+      { "ven": "Sam Okafor", "lab": "Success Case Study", "platform": "case_study", "ga4Count": 1000, "name": "Sam Okafor" }
+    ],
+    "angels": [
+      {
+        "name": "Alex Mendez",
+        "company": "Meridian Ventures",
+        "pledge": 5000,
+        "status": "confirmed",
+        "type": "awareness"
+      }
+    ],
+    "residents": [
+      { "name": "Jordan Rivera", "company": "BrandForge Studio", "specialty": "Branding & Identity Designers" },
+      { "name": "Mika Chen", "company": "NarrativePulse", "specialty": "Content Strategy" },
+      { "name": "Sam Okafor", "company": "GrowthForge", "specialty": "Audience Research" }
+    ]
+  },
+  "heroFields": {
+    "headline": "Building Brands on Trust and Smallest Viable Audiences",
+    "youtubeUrl": "https://www.youtube.com/embed/SbHDPJNYHek",
+    "ctaLabel": "Start District",
+    "ctaUrl": "",
+    "mindMapLink": ""
+  },
+  "stackLabel": "Dark Market District",
+  "activeTab": "youtube",
+  "suggestedRoles": [
+    "Branding & Identity Designers",
+    "Content Strategy Consultants",
+    "Audience Research Analysts",
+    "Community Managers",
+    "Social Media Specialists",
+    "Copywriters",
+    "Email Marketing Specialists",
+    "Public Speakers",
+    "Podcast Producers",
+    "SEO Strategists",
+    "Partnership Managers",
+    "Customer Success Leads"
+  ]
+}
