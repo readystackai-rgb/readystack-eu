@@ -115,21 +115,6 @@
       <span class="text-white font-black text-lg tracking-tight">ReadyStack</span>
     </div>
 
-    <!-- Creator Trust Card (12A — primary profile placement) -->
-    <div id="creator-card" class="hidden mb-8">
-      <div class="bg-white/[0.04] border border-white/10 rounded-2xl p-5 max-w-xs mx-auto flex items-center gap-4">
-        <div id="creator-avatar-wrap" class="flex-shrink-0">
-          <img id="creator-avatar-img" src="" alt="" class="w-12 h-12 rounded-full object-cover hidden" style="border: 2px solid rgba(124, 140, 255, 0.3);" referrerpolicy="no-referrer" />
-          <div id="creator-avatar-fallback" class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white uppercase hidden" style="background: #7c8cff; border: 2px solid rgba(124, 140, 255, 0.3);"></div>
-        </div>
-        <div class="text-left min-w-0">
-          <p id="creator-card-name" class="text-base font-semibold text-white truncate" style="font-family:'Inter',sans-serif;"></p>
-          <p id="creator-card-bio" class="text-xs text-slate-400 hidden" style="font-family:'Inter',sans-serif;"></p>
-          <a id="creator-card-website" href="#" target="_blank" rel="noopener" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors hidden" style="font-family:'Inter',sans-serif;"></a>
-        </div>
-      </div>
-    </div>
-
     <!-- District name -->
     <h1 id="district-name" class="text-2xl md:text-3xl font-black text-white italic uppercase tracking-tighter leading-none"></h1>
 
@@ -143,33 +128,48 @@
     <!-- Role -->
     <h2 id="invite-role" class="text-white text-xl font-bold"></h2>
 
-    <div class="h-8"></div>
-
-    <!-- Brief context -->
-    <p id="invite-brief" class="text-slate-400 text-sm leading-relaxed max-w-sm mx-auto"></p>
-
     <div class="h-10"></div>
 
-    <!-- Sign in with Google button -->
-    <button
-      id="google-signin-btn"
-      onclick="handleGoogleSignIn()"
-      class="google-btn inline-flex items-center gap-3 bg-white text-gray-800 font-bold rounded-full px-8 py-3.5 text-sm transition-all hover:bg-gray-50 mx-auto"
-    >
-      <!-- Google G icon -->
-      <svg viewBox="0 0 24 24" width="20" height="20">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-      </svg>
-      Sign in with Google
-    </button>
+    <!-- Two-path choice -->
+    <div class="flex flex-col gap-4 items-center w-full">
 
-    <div class="h-4"></div>
+      <!-- Primary: Join creator's District (Google sign-in) -->
+      <button
+        id="google-signin-btn"
+        onclick="handleGoogleSignIn()"
+        class="google-btn inline-flex items-center gap-3 bg-white text-gray-800 font-bold rounded-full px-8 py-3.5 text-sm transition-all hover:bg-gray-50"
+      >
+        <!-- Google G icon -->
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        <span id="join-btn-text">Join This District</span>
+      </button>
 
-    <!-- Help text -->
-    <p class="text-slate-500 text-xs">Sign in to view the district and connect with other residents.</p>
+      <p id="join-subtext" class="text-slate-400 text-xs">Sign in with Google — you'll be added as a resident. You can leave anytime.</p>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 w-full max-w-[280px] my-1">
+        <div class="flex-1 h-px bg-slate-700"></div>
+        <span class="text-slate-600 text-xs uppercase tracking-widest font-bold">or</span>
+        <div class="flex-1 h-px bg-slate-700"></div>
+      </div>
+
+      <!-- Secondary: Look Around First -->
+      <button
+        id="explore-btn"
+        onclick="handleExploreFirst()"
+        class="inline-flex items-center gap-2 border border-slate-600 text-slate-300 font-bold rounded-full px-8 py-3 text-sm transition-all hover:border-slate-400 hover:text-white"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        Look Around First
+      </button>
+
+      <p id="explore-subtext" class="text-slate-500 text-xs">See what this district is about. Join when you're ready.</p>
+    </div>
   </div>
 
   <script>
@@ -264,66 +264,28 @@
 
       // Render the landing page
       const payload = result.data;
+      const creatorName = payload.creatorName || '';
       document.getElementById('district-name').textContent = (payload.districtName || 'District').toUpperCase();
       document.getElementById('invite-role').textContent = payload.role || payload.participantName || 'Resident';
 
-      // Show Creator Trust Card (12A) if creator data available
-      if (payload.creatorName) {
-        const card = document.getElementById('creator-card');
-        card.classList.remove('hidden');
-        document.getElementById('creator-card-name').textContent = payload.creatorName;
-
-        // Avatar: photo URL or letter fallback
-        if (payload.creatorPhotoUrl) {
-          const avatarImg = document.getElementById('creator-avatar-img');
-          avatarImg.src = payload.creatorPhotoUrl;
-          avatarImg.classList.remove('hidden');
-        } else {
-          const avatarFb = document.getElementById('creator-avatar-fallback');
-          avatarFb.textContent = (payload.creatorName || '?')[0];
-          avatarFb.classList.remove('hidden');
-        }
-
-        // Bio (optional)
-        if (payload.creatorBio) {
-          const bioEl = document.getElementById('creator-card-bio');
-          bioEl.textContent = payload.creatorBio;
-          bioEl.classList.remove('hidden');
-        }
-
-        // Website (optional — show hostname only with arrow)
-        if (payload.creatorWebsiteUrl || payload.websiteUrl) {
-          const url = payload.creatorWebsiteUrl || payload.websiteUrl;
-          const websiteEl = document.getElementById('creator-card-website');
-          try {
-            websiteEl.textContent = new URL(url).hostname.replace('www.', '') + ' \u2197';
-          } catch (_) {
-            websiteEl.textContent = url + ' \u2197';
-          }
-          websiteEl.href = url;
-          websiteEl.classList.remove('hidden');
-        }
-      }
-
-      const briefEl = document.getElementById('invite-brief');
-      if (payload.brief) {
-        briefEl.textContent = payload.brief;
-        briefEl.classList.remove('hidden');
-      } else {
-        briefEl.classList.add('hidden');
+      // v5 copy: personalize buttons and subtexts with creatorName
+      if (creatorName) {
+        document.getElementById('join-btn-text').textContent = `Join ${creatorName}'s District`;
+        document.getElementById('explore-subtext').textContent = `See what ${creatorName} has built. Join when you're ready.`;
       }
 
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('invite-page').classList.remove('hidden');
 
-      // Store token for use after OAuth
+      // Store token + payload for use after OAuth and explore handler
       window._inviteToken = token;
+      window._invitePayload = payload;
     }
 
     // ── Show expired state (per INVITE_UX_SPEC v2/v3) ──
     function showExpired(payload, token) {
       _expiredPayload = { ...payload, _token: token };
-      const who = payload.creatorName || payload.creatorEmail || 'the district creator';
+      const who = payload.creatorEmail || 'the district creator';
 
       // Calculate how long the invite was valid
       let validityText = '';
@@ -372,7 +334,7 @@
       }
     }
 
-    // ── Handle Google Sign In ──
+    // ── Handle Google Sign In (Join This District) ──
     async function handleGoogleSignIn() {
       const token = window._inviteToken;
       if (!token) return;
@@ -397,10 +359,48 @@
 
         const returnUrl = window.location.href;
         const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
-        window.location.href = authUrl;
+
+        // Google blocks OAuth inside iframes — open in new tab when embedded
+        if (window.parent !== window) {
+          window.open(authUrl, '_blank');
+        } else {
+          window.location.href = authUrl;
+        }
       } catch (e) {
         console.error('OAuth initiation failed:', e);
         showError('Unable to connect to Google. Please try again.');
+      }
+    }
+
+    // ── Handle Look Around First ──
+    // Sends the invitee to the storyteller in view-only mode (no sign-in).
+    // The invite token is stored so they can come back and join later.
+    function handleExploreFirst() {
+      const token = window._inviteToken;
+      const payload = window._invitePayload;
+      if (!token || !payload) return;
+
+      if (!payload.sheetId) {
+        showError('Unable to load the district. Please try joining instead.');
+        return;
+      }
+
+      // Store the invite token so the storyteller can show a "Join" banner
+      localStorage.setItem('rs_pending_invite', token);
+
+      const sheetId = payload.sheetId;
+      const inviteParam = encodeURIComponent(token);
+      const nodeParam = payload.participantRow ? `&node=${encodeURIComponent(payload.participantRow)}` : '';
+
+      // Navigate to storyteller in explore/visitor mode
+      // The storyteller will detect mode=explore and show read-only + persistent join prompt
+      const exploreUrl = `${STORYTELLER_BASE}/index.html?sheet=${sheetId}&invite=${inviteParam}${nodeParam}&mode=explore`;
+
+      // If inside an iframe (Wix), open in new tab
+      if (window.parent !== window) {
+        window.open(exploreUrl, '_blank');
+      } else {
+        window.location.href = exploreUrl;
       }
     }
 

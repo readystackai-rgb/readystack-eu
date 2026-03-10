@@ -2355,7 +2355,7 @@
                   { id: 'youtube', label: 'Define Market Story', icon: 'play-circle' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
-                  ...(isResident ? [] : [{ id: 'preview', label: 'Tasks and Agents', icon: 'list' }])
+                  ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }])
                 ].map(step => {
                   const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
@@ -2576,7 +2576,7 @@
                 { id: 'youtube', label: 'Define Market Story', phase: 'compose' },
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
-                { id: 'preview', label: 'Tasks and Agents', phase: 'compose' }
+                { id: 'preview', label: 'District Assembly', phase: 'compose' }
               ];
               const opsSteps = [
                 { id: 'finance', label: 'District Finance', phase: 'operations' },
@@ -3004,7 +3004,7 @@
                     {videoStory && (videoStory.checklist || videoStory.automations) && (
                       <div className="space-y-6">
                         <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
-                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your market story. These will populate the Tasks and Agents assembly and JSON export.</p>
+                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your market story. These will populate the District Assembly and JSON export.</p>
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
@@ -3564,7 +3564,7 @@
                 </div>
 
                 <div className="py-12 text-center">
-                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Assembly'}</button>
                 </div>
               </div>
             )}
@@ -3763,7 +3763,7 @@
                   })()}
 
                   <div className="text-center py-12">
-                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to Tasks and Agents'}</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Assembly'}</button>
                   </div>
                 </div>
               </div>
@@ -3774,7 +3774,7 @@
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
                 <div className="space-y-12">
                   <div className="space-y-4">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>TASKS AND AGENTS</h3>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY</h3>
                     <p className="text-slate-300 text-base font-medium">Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack.</p>
                   </div>
 
