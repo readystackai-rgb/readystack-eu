@@ -1107,15 +1107,6 @@
 
       useEffect(() => {
         // ── Wix postMessage fallback: if params arrive after mount, re-run ──
-        const handleWixParams = () => {
-          // Re-read params (URL was updated by the postMessage handler)
-          const freshParams = new URLSearchParams(window.location.search);
-          if (freshParams.get('invite') || freshParams.get('rs_session') || freshParams.get('mode') === 'learn') {
-            window.location.reload();  // Cleanest way to re-initialize with new params
-          }
-        };
-        window.addEventListener('wixParamsReady', handleWixParams);
-
         const params    = new URLSearchParams(window.location.search);
         const sessionId = params.get('rs_session');
         const email     = params.get('rs_email');
@@ -1128,6 +1119,19 @@
 
         // ── LEARNING MODE: Load fixture data from local learning-district.json ──
         const urlLearningMode = params.get('mode') === 'learn';
+
+        const handleWixParams = () => {
+          // Re-read params (URL was updated by the postMessage handler)
+          const freshParams = new URLSearchParams(window.location.search);
+          // Only reload if params are NEW — prevents infinite loop after Wix re-sends on iframe reload
+          const hasNewInvite = freshParams.get('invite') && !urlInviteToken;
+          const hasNewSession = freshParams.get('rs_session') && !sessionId;
+          const hasNewLearnMode = freshParams.get('mode') === 'learn' && !urlLearningMode;
+          if (hasNewInvite || hasNewSession || hasNewLearnMode) {
+            window.location.reload();  // Cleanest way to re-initialize with new params
+          }
+        };
+        window.addEventListener('wixParamsReady', handleWixParams);
         if (urlLearningMode) {
           (async () => {
             try {
