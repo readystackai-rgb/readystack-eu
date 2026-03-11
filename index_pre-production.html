@@ -309,7 +309,7 @@
 
     /* ── Operations section info definitions (placeholder text — final copy pending team review) ── */
     const OPERATIONS_INFO = {
-      finance:     { title: 'District Finance',     description: 'The economic model of the district. Revenue splits, hosted automation fees, and how value flows between founder, residents, and infrastructure.' },
+      finance:     { title: 'District Capital',     description: 'The economic model of the district. Revenue splits, hosted automation fees, and how value flows between founder, residents, and infrastructure.' },
       observatory: { title: 'District Ecosystem',   description: 'Three network visualizations — relational, cross-pollination, and ecosystem — showing how residents, links, and audiences connect.' },
       connect:     { title: 'My Residents',          description: 'Manage resident communications. Send invitations, track onboarding status, and coordinate with the district network.' },
       looker:      { title: 'Looker',                description: 'Embedded Looker dashboard for district performance data and business intelligence.' },
@@ -1134,7 +1134,7 @@
               const res = await fetch('./learning-district.json');
               const d = await res.json();
               if (d.districtName) setStackLabel(d.districtName);
-              if (d.selectedVideoData) setVideoData(d.selectedVideoData);
+              if (d.selectedVideoData) setSelectedVideoData(d.selectedVideoData);
               if (d.youtubeEmbedUrl) setYoutubeEmbedUrl(d.youtubeEmbedUrl);
               if (d.videoStory) setVideoStory(d.videoStory);
               if (d.storyParticipants) setStoryParticipants(d.storyParticipants);
@@ -1185,7 +1185,7 @@
                 if (districtData.districtName) setStackLabel(districtData.districtName);
                 if (districtData.mapping) setMapping(districtData.mapping);
                 if (districtData.storyParticipants) setStoryParticipants(districtData.storyParticipants);
-                if (districtData.videoData) setVideoData(districtData.videoData);
+                if (districtData.videoData) setSelectedVideoData(districtData.videoData);
                 if (districtData.videoStory) setVideoStory(districtData.videoStory);
               }
             }).catch(err => {
@@ -2009,7 +2009,7 @@
         const rsExecuting = [ { ven: 'ReadyStack', lab: 'Copy ReadyStack', platform: 'starting', dedicated: true, internal: true, ga4Count: 3400 }, { ven: 'ReadyStack', lab: 'Upload Data', platform: 'uploads', dedicated: true, internal: true, ga4Count: 1200 }, { id: 'rs-api', ven: 'ReadyStack', lab: 'ReadyStack Activation', platform: 'api_config', dedicated: true, internal: true, ga4Count: 4500 }, { id: 'rs-commerce', ven: 'ReadyStack', lab: 'ReadyStack Checkout', platform: 'commerce', dedicated: true, internal: true, price: 1200, ga4Count: 1200 } ];
         const rsExpanding = [ { ven: 'ReadyStack', lab: 'Shares ReadyStack', platform: 'network_invite', dedicated: true, internal: true, ga4Count: 1200 }, { ven: 'ReadyStack', lab: 'Check ReadyStack Earnings', platform: 'deposits', dedicated: true, internal: true, ga4Count: 2300 }, { ven: 'ReadyStack', lab: 'Schedules ReadyStack Onboarding', platform: 'success', dedicated: true, internal: true, ga4Count: 3400 } ];
 
-        // Angels are managed directly in District Finance — preserve them as-is
+        // Angels are managed directly in District Capital — preserve them as-is
         setMapping(prev => {
             const manualLearning = prev.learning ? prev.learning.filter(p => p.isManual) : [];
             const manualSelecting = prev.selecting ? prev.selecting.filter(p => p.isManual) : [];
@@ -2667,7 +2667,7 @@
                 {((isResident || isInviteMode) ? [
                   { id: 'observatory', label: 'District Ecosystem', icon: 'git-branch' }
                 ] : [
-                  { id: 'finance', label: 'District Finance', icon: 'dollar-sign' },
+                  { id: 'finance', label: 'District Capital', icon: 'dollar-sign' },
                   { id: 'observatory', label: 'District Ecosystem', icon: 'git-branch' },
                   { id: 'connect', label: 'My Residents', icon: 'send' },
                   { id: 'looker', label: 'Looker', icon: 'bar-chart-2' },
@@ -2828,7 +2828,7 @@
                 { id: 'landing', label: 'Front Door', phase: 'compose' }
               ];
               const opsSteps = [
-                { id: 'finance', label: 'District Finance', phase: 'operations' },
+                { id: 'finance', label: 'District Capital', phase: 'operations' },
                 { id: 'observatory', label: 'District Ecosystem', phase: 'operations' },
                 { id: 'connect', label: 'My Residents', phase: 'operations' },
                 { id: 'looker', label: 'Looker', phase: 'operations' },
@@ -3674,7 +3674,7 @@
                       </div>
                       <div className="grid grid-cols-5 gap-2 items-start">
                         <div className="text-center py-2">
-                          <p className="text-[10px] font-bold text-white leading-snug">Finances</p>
+                          <p className="text-[10px] font-bold text-white leading-snug">Capital</p>
                           <p className="text-[10px] font-bold text-white leading-snug">word-of-mouth</p>
                         </div>
                         {[
@@ -4625,7 +4625,7 @@
                 )}
                 <div className="space-y-12">
                   <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT FINANCE<InfoTooltip text="A district is an economy container — media, finance, and operations." /></h3>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT CAPITAL<InfoTooltip text="A district is an economy container — media, capital, and execution." /></h3>
                   </div>
 
                   {/* The Revenue Engine — 20/40/40 split display */}

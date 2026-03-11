@@ -1134,7 +1134,7 @@
               const res = await fetch('./learning-district.json');
               const d = await res.json();
               if (d.districtName) setStackLabel(d.districtName);
-              if (d.selectedVideoData) setVideoData(d.selectedVideoData);
+              if (d.selectedVideoData) setSelectedVideoData(d.selectedVideoData);
               if (d.youtubeEmbedUrl) setYoutubeEmbedUrl(d.youtubeEmbedUrl);
               if (d.videoStory) setVideoStory(d.videoStory);
               if (d.storyParticipants) setStoryParticipants(d.storyParticipants);
@@ -1185,7 +1185,7 @@
                 if (districtData.districtName) setStackLabel(districtData.districtName);
                 if (districtData.mapping) setMapping(districtData.mapping);
                 if (districtData.storyParticipants) setStoryParticipants(districtData.storyParticipants);
-                if (districtData.videoData) setVideoData(districtData.videoData);
+                if (districtData.videoData) setSelectedVideoData(districtData.videoData);
                 if (districtData.videoStory) setVideoStory(districtData.videoStory);
               }
             }).catch(err => {
