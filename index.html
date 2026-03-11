@@ -3033,58 +3033,32 @@
                             {videoStory && (
                               <div className="bg-white/[0.02] border border-white/5 p-10 rounded-2xl animate-fade-in space-y-8 text-left">
                                 <div className="space-y-4 border-b border-white/5 pb-6">
-                                  <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">ReadyStack Brief</p>
+                                  <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">Executive Summary</p>
                                   <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter">{videoStory.title}</h4>
                                   <p className="text-xs text-slate-300 italic leading-relaxed">{videoStory.narrative}</p>
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                  <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
-                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-4">Core Problem</p>
-                                    <p className="text-xs text-slate-300 leading-relaxed">{videoStory.problem}</p>
-                                  </div>
-                                  <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
-                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-4">Ideal Resident</p>
-                                    <p className="text-xs text-slate-300 leading-relaxed">{videoStory.resident}</p>
-                                  </div>
+                                <div className="space-y-4">
+                                  <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Core Problem</p>
+                                  <p className="text-xs text-slate-300 leading-relaxed">{videoStory.problem}</p>
+                                </div>
+                                <div className="space-y-4">
+                                  <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Ideal Resident</p>
+                                  <p className="text-xs text-slate-300 leading-relaxed">{videoStory.resident}</p>
                                 </div>
                                 <div className="space-y-4">
                                   <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Network Map Seed</p>
                                   <div className="grid md:grid-cols-3 gap-4">
                                     <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
-                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Partners</p>
-                                      <ul className="space-y-2">{videoStory.network?.partners?.map((p, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{p}</span></li>)}</ul>
-                                    </div>
-                                    <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
-                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Customers</p>
+                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Consumed By</p>
                                       <ul className="space-y-2">{videoStory.network?.customers?.map((c, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{c}</span></li>)}</ul>
                                     </div>
                                     <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
-                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Guests</p>
-                                      <ul className="space-y-2">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{t}</span></li>)}</ul>
+                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Solutions</p>
+                                      <ul className="space-y-2">{videoStory.network?.partners?.map((p, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{p}</span></li>)}</ul>
                                     </div>
-                                  </div>
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                  <div className="space-y-4">
-                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
-                                    <ul className="space-y-3">
-                                      {videoStory.checklist?.map((c, i) => (
-                                        <li key={i} className="text-xs text-slate-300 flex items-start gap-2 bg-[#0f172a]/30 p-3 rounded-lg border border-white/5">
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 text-white/30 shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                          <span>{c}</span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                  <div className="space-y-4">
-                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Automations</p>
-                                    <div className="space-y-3">
-                                      {videoStory.automations?.map((a, i) => (
-                                        <div key={i} className="bg-[#0f172a]/50 p-3 rounded-lg border border-white/5 text-xs space-y-0.5">
-                                          <div className="flex gap-1.5"><span className="font-black text-white/30 w-12">TRIGGER</span> <span className="text-slate-300">{a.trigger}</span></div>
-                                          <div className="flex gap-1.5"><span className="font-black text-white/30 w-12">ACTION</span> <span className="text-slate-300">{a.action}</span></div>
-                                        </div>
-                                      ))}
+                                    <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
+                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Services</p>
+                                      <ul className="space-y-2">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{t}</span></li>)}</ul>
                                     </div>
                                   </div>
                                 </div>
