@@ -1880,7 +1880,7 @@
         A ReadyStack is a hosted, shareable asset that combines an instruction video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
         Produce the following based strictly on the transcript provided:
         1. Title: A compelling name for this ReadyStack — grounded and descriptive, no hyperbole or cheesy marketing language.
-        2. District Name: A short name (3-8 words) for this Dark Market District. This must be a plain-language description of the core problem the district addresses. Rules:
+        2. District Name: A short name (3-8 words) for this Market District. This must be a plain-language description of the core problem the district addresses. Rules:
            - Grounded and descriptive. Think file names, not headlines.
            - NO hyperbole: never use words like "greatest", "unstoppable", "revolutionary", "ultimate", "game-changing", "cutting-edge", "next-gen", or similar marketing language.
            - NO generic filler: never use "growth engine", "success blueprint", "opportunity", "transformation", or vague business jargon.
@@ -1959,7 +1959,7 @@
         A ReadyStack is a hosted, shareable asset that combines an instruction video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
         Produce the following based strictly on the transcript provided:
         1. Title: A compelling name for this ReadyStack — grounded and descriptive, no hyperbole or cheesy marketing language.
-        2. District Name: A short name (3-8 words) for this Dark Market District. This must be a plain-language description of the core problem the district addresses. Rules:
+        2. District Name: A short name (3-8 words) for this Market District. This must be a plain-language description of the core problem the district addresses. Rules:
            - Grounded and descriptive. Think file names, not headlines.
            - NO hyperbole: never use words like "greatest", "unstoppable", "revolutionary", "ultimate", "game-changing", "cutting-edge", "next-gen", or similar marketing language.
            - NO generic filler: never use "growth engine", "success blueprint", "opportunity", "transformation", or vague business jargon.
@@ -2495,7 +2495,7 @@
                       >
                         {/* Account info */}
                         <div className="px-4 py-3 border-b border-white/10">
-                          <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">Dark Market District</p>
+                          <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">Market District</p>
                           <p className="text-sm text-white font-medium mt-0.5 truncate">{rsSession.email}</p>
                         </div>
 
@@ -2542,7 +2542,7 @@
               </button>
               <div className="bg-white/10 p-2 rounded-lg flex items-center justify-center border border-white/20"><DistrictSquareIcon size={20} /></div>
               <div className="text-left">
-                <h2 className="text-2xl font-black text-white italic uppercase leading-none tracking-tighter">Dark Market District</h2>
+                <h2 className="text-2xl font-black text-white italic uppercase leading-none tracking-tighter">Market District</h2>
               </div>
             </div>
           </div>
@@ -3474,7 +3474,8 @@
 
                               // ALL MODE — editable rows
                               return (<>
-                              <div className="flex gap-2 mb-6 px-1">
+                              <div className="flex gap-2 mb-6 px-1 items-center">
+                                {!isResident && !isInviteMode && !isLearningMode && <span className="w-8 flex-shrink-0"></span>}
                                 <span className={`${(isResident || isInviteMode || isLearningMode) ? 'w-[30%]' : 'w-[22%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Name</span>
                                 <span className="w-[18%] text-xs font-medium text-slate-300 uppercase tracking-wider">Company</span>
                                 <span className={`${(isResident || isInviteMode || isLearningMode) ? 'w-[30%]' : 'w-[25%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Specialty</span>
@@ -3528,16 +3529,22 @@
                                       </>
                                     ) : (
                                       <>
-                                        {(() => {
-                                          const profile = profilesData.find(p => p.email && r.email && p.email.toLowerCase() === r.email.toLowerCase());
-                                          return profile?.photoUrl ? (
-                                            <img src={profile.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" referrerPolicy="no-referrer" />
-                                          ) : hasName ? (
-                                            <div className="w-7 h-7 rounded-full bg-slate-600 flex items-center justify-center text-[10px] font-bold text-white uppercase flex-shrink-0">
-                                              {(r.name || '?')[0]}
-                                            </div>
-                                          ) : null;
-                                        })()}
+                                        <div className="w-8 flex-shrink-0 flex items-center justify-center">
+                                          {(() => {
+                                            const profile = profilesData.find(p => p.email && r.email && p.email.toLowerCase() === r.email.toLowerCase());
+                                            return profile?.photoUrl ? (
+                                              <img src={profile.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover" referrerPolicy="no-referrer" />
+                                            ) : hasName ? (
+                                              <div className="w-7 h-7 rounded-full bg-slate-600 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                                                {(r.name || '?')[0]}
+                                              </div>
+                                            ) : (
+                                              <div className="w-7 h-7 rounded-full bg-[#64748b]/20 flex items-center justify-center">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-slate-600"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                              </div>
+                                            );
+                                          })()}
+                                        </div>
                                         <input placeholder={`Participant ${i+1}`} value={r.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], name: v}; return {...prev, residents: next}; }); }} className={`w-[22%] min-w-0 bg-[#020617]/80 border rounded-lg px-4 py-3 text-sm text-white focus:border-slate-600 outline-none ${r.jobContext && !hasName ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-slate-800/60'}`} />
                                         <input placeholder="company" value={r.company} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], company: v}; return {...prev, residents: next}; }); }} className="w-[18%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
                                         <select value={r.specialty} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], specialty: v}; return {...prev, residents: next}; }); }} className={`w-[25%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm outline-none cursor-pointer focus:border-slate-600 ${r.specialty ? 'text-white' : 'text-slate-300'}`}>
