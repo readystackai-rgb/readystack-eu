@@ -193,7 +193,14 @@
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Pre-mount loader — replaced automatically when React mounts -->
+    <div id="preloader" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:24px;opacity:1;transition:opacity 0.4s ease">
+      <div style="width:40px;height:40px;border:3px solid rgba(124,140,255,0.15);border-top-color:#7c8cff;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+      <p style="font-family:Poppins,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(148,163,184,0.6);margin:0">Loading Storyteller</p>
+    </div>
+    <style>#preloader{pointer-events:none}@keyframes spin{to{transform:rotate(360deg)}}</style>
+  </div>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -207,6 +214,22 @@
       if (sp.get('mode') === 'learn') {
         window.location.replace('walkthrough.html');
         return;
+      }
+
+      // ── OAuth popup fast-close: if this is the popup returning from Google, ──
+      // relay the session to the opener and close BEFORE loading React/Babel/etc.
+      var rsS = sp.get('rs_session');
+      var rsE = sp.get('rs_email');
+      if (rsS && rsE && window.opener) {
+        var payload = { type: 'oauthComplete', sessionId: rsS, email: rsE };
+        try { window.opener.postMessage(payload, '*'); } catch(e) {}
+        // Also try BroadcastChannel for cross-partition relay
+        try { var bc = new BroadcastChannel('readystack_auth'); bc.postMessage(payload); bc.close(); } catch(e) {}
+        // Close the popup — no need to load the full app
+        document.title = 'Login Complete';
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#94a3b8;font-size:13px"><p>Login complete — closing...</p></div>';
+        setTimeout(function() { try { window.close(); } catch(e) {} }, 400);
+        return; // stop execution — don't load React
       }
 
       // When embedded in a Wix iframe, URL params don't reach this page.
@@ -1259,21 +1282,23 @@
           // localStorage partition from this top-level tab. The storage event won't bridge
           // the gap, so we use window.opener.postMessage() to send credentials directly.
           if (window.parent === window && window.opener) {
+            const authPayload = { type: 'oauthComplete', sessionId, email };
             try {
-              window.opener.postMessage({
-                type: 'oauthComplete',
-                sessionId: sessionId,
-                email: email
-              }, '*');
-            } catch (e) { console.warn('postMessage to opener failed:', e); }
-            // Give the message a moment to deliver, then close this tab
+              // Send to the opener (Wix parent page)
+              window.opener.postMessage(authPayload, '*');
+              // Also try to reach the iframe inside the opener directly
+              const iframes = window.opener.document.querySelectorAll('iframe');
+              iframes.forEach(f => { try { f.contentWindow.postMessage(authPayload, '*'); } catch(e) {} });
+            } catch (e) {
+              // Cross-origin: can't access opener.document, fall back to opener only
+              try { window.opener.postMessage(authPayload, '*'); } catch(e2) {}
+            }
+            // Give the message a moment to deliver, then close this popup
             setTimeout(() => {
               try { window.close(); } catch(e) {}
-              // If close was blocked, redirect to readystack.ai
-              setTimeout(() => {
-                window.location.href = 'https://www.readystack.ai/storyteller';
-              }, 300);
-            }, 200);
+              // If close was blocked (browser policy), show a simple "you can close this" message
+              document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Poppins,sans-serif;color:#94a3b8;font-size:13px;text-align:center"><p>Login complete — you can close this window.</p></div>';
+            }, 300);
             return;
           } else if (window.parent === window) {
             // Top-level tab but no opener (e.g. user navigated directly with params)
@@ -1367,10 +1392,24 @@
         };
         window.addEventListener('storage', handleStorageAuth);
 
+        // ── BroadcastChannel auth relay (works across storage partitions) ──
+        let authChannel;
+        try {
+          authChannel = new BroadcastChannel('readystack_auth');
+          authChannel.onmessage = (e) => {
+            if (e.data && e.data.type === 'oauthComplete' && e.data.sessionId && e.data.email) {
+              localStorage.setItem('rs_session', e.data.sessionId);
+              localStorage.setItem('rs_email',   e.data.email);
+              setRsSession({ sessionId: e.data.sessionId, email: e.data.email });
+            }
+          };
+        } catch(e) { /* BroadcastChannel not supported — postMessage fallback covers it */ }
+
         return () => {
           window.removeEventListener('wixParamsReady', handleWixParams);
           window.removeEventListener('message', handleAuthMessage);
           window.removeEventListener('storage', handleStorageAuth);
+          if (authChannel) try { authChannel.close(); } catch(e) {}
         };
       }, []);
 
@@ -1565,16 +1604,20 @@
         persistAppState();
         // When embedded in a Wix iframe, window.location.href returns the Wix file-hosting
         // URL (filesusr.com) which blocks direct browser navigation. So we always redirect
-        // After OAuth, redirect back to the Wix-hosted Storyteller page so the
-        // session params (rs_session, rs_email) arrive as query params on the
-        // real URL.  The Velo code forwards them into the iframe.
+        // After OAuth, redirect popup back to GitHub Pages (not Wix) so the
+        // React app mounts at top-level, detects window.opener, relays the
+        // session to the parent iframe via postMessage, and self-closes.
+        // Going through Wix would load the full Wix page in the popup.
         const returnUrl = (window.parent !== window)
-          ? 'https://www.readystack.ai/storyteller'
+          ? 'https://readystackai-rgb.github.io/readystack-eu/'
           : window.location.href;
         const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
-        // Google blocks OAuth inside iframes — open in new tab when embedded
+        // Google blocks OAuth inside iframes — open sized popup when embedded
         if (window.parent !== window) {
-          window.open(authUrl, '_blank');
+          const w = 500, h = 650;
+          const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+          const top = Math.round(window.screenY + (window.outerHeight - h) / 2);
+          window.open(authUrl, 'google-auth', `width=${w},height=${h},left=${left},top=${top},menubar=no,toolbar=no,location=yes,status=no`);
         } else {
           window.location.href = authUrl;
         }
@@ -1596,7 +1639,7 @@
             if (subStatus.limit && subStatus.districtCount >= subStatus.limit && !subStatus.subscribed) {
               // Free tier limit reached - redirect to Stripe checkout
               const returnUrl = (window.parent !== window)
-                ? 'https://www.readystack.ai/storyteller'
+                ? 'https://readystackai-rgb.github.io/readystack-eu/'
                 : window.location.href.split('?')[0];
               const { url } = await callAdvisor('createCheckoutSession', {
                 data: { returnUrl }
@@ -2957,7 +3000,7 @@
                               <div className="lg:col-span-2 space-y-4 pt-1 text-left">
                                 {videoStory && videoStory.checklist ? (
                                   <div className="animate-fade-in space-y-4">
-                                    <h4 className="text-sm font-bold text-white italic">Highlights</h4>
+                                    <h4 className="text-sm font-bold text-white italic">Action Items</h4>
                                     <ul className="space-y-3 text-slate-300 text-xs italic">
                                       {videoStory.checklist.map((item, idx) => (
                                         <li key={idx} className="flex items-start gap-2">
@@ -4229,7 +4272,7 @@
                             )}
                           </div>
                           <div className="w-5/12">
-                            <p className="text-lg font-medium text-gray-900 mb-3">Highlights</p>
+                            <p className="text-lg font-medium text-gray-900 mb-3">Action Items</p>
                             {videoStory.checklist && videoStory.checklist.length > 0 ? (
                               <div className="space-y-1">
                                 {videoStory.checklist.map((item, i) => (
@@ -4486,9 +4529,9 @@
                           </button>
                         </div>
 
-                        {/* Right Column: "Highlights" checklist */}
+                        {/* Right Column: "Action Items" checklist */}
                         <div className="w-5/12">
-                          <h3 className="text-lg font-normal text-gray-800 mb-4" style={{fontFamily:'Inter,sans-serif'}}>Highlights</h3>
+                          <h3 className="text-lg font-normal text-gray-800 mb-4" style={{fontFamily:'Inter,sans-serif'}}>Action Items</h3>
                           <div className="space-y-3">
                             {videoStory?.checklist && videoStory.checklist.length > 0 ? (
                               videoStory.checklist.map((item, i) => (
