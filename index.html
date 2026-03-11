@@ -278,8 +278,9 @@
 
     /* ── Learning Mode: Guided step definitions (placeholder text — final copy pending team review) ── */
     const LEARNING_STEPS = [
-      { key: 'youtube',  title: 'Source Video',      description: 'This is where a district begins. Search for a video that frames the market problem.', nextLabel: 'Residents' },
-      { key: 'intro',    title: 'Residents',          description: 'These are the people who will execute the district workload. Review who was identified from the video.', nextLabel: 'Resident Links' },
+      { key: 'youtube',  title: 'Source Video',      description: 'This is where a district begins. Search for a video that frames the market problem.', nextLabel: 'Execution Plan' },
+      { key: 'execplan', title: 'Execution Plan',    description: 'Review the tasks and roles AI generated from your source video. This is the operational blueprint for your district.', nextLabel: 'Residents' },
+      { key: 'intro',    title: 'Residents',          description: 'These are the people who will execute the district workload. Add and manage your participants.', nextLabel: 'Resident Links' },
       { key: 'mapper',   title: 'Resident Links',     description: 'Each resident brings engagement items to the district. This map shows every touchpoint in the audience journey.', nextLabel: 'District Assembly' },
       { key: 'preview',  title: 'District Assembly',   description: 'The district assembles here. Review the hero section, headline, and call-to-action before publishing.', nextLabel: 'District Product' },
       { key: 'landing',  title: 'District Product',          description: 'This is what the audience sees. The published district landing page with the hero, video, and call-to-action.', nextLabel: null },
@@ -1564,10 +1565,11 @@
         persistAppState();
         // When embedded in a Wix iframe, window.location.href returns the Wix file-hosting
         // URL (filesusr.com) which blocks direct browser navigation. So we always redirect
-        // the OAuth tab back to the GitHub Pages URL, where the app can save the session
-        // and relay it to this iframe via window.opener.postMessage().
+        // After OAuth, redirect back to the Wix-hosted Storyteller page so the
+        // session params (rs_session, rs_email) arrive as query params on the
+        // real URL.  The Velo code forwards them into the iframe.
         const returnUrl = (window.parent !== window)
-          ? 'https://readystackai-rgb.github.io/readystack-eu/'
+          ? 'https://www.readystack.ai/storyteller'
           : window.location.href;
         const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
         // Google blocks OAuth inside iframes — open in new tab when embedded
@@ -1594,7 +1596,7 @@
             if (subStatus.limit && subStatus.districtCount >= subStatus.limit && !subStatus.subscribed) {
               // Free tier limit reached - redirect to Stripe checkout
               const returnUrl = (window.parent !== window)
-                ? 'https://readystackai-rgb.github.io/readystack-eu/'
+                ? 'https://www.readystack.ai/storyteller'
                 : window.location.href.split('?')[0];
               const { url } = await callAdvisor('createCheckoutSession', {
                 data: { returnUrl }
@@ -2646,12 +2648,13 @@
                 <div className="space-y-3 mb-6">
                 {[
                   { id: 'youtube', label: 'Source Video', icon: 'play-circle' },
+                  { id: 'execplan', label: 'Execution Plan', icon: 'clipboard' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
                   ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }]),
                   ...(isResident ? [] : [{ id: 'landing', label: 'District Product', icon: 'layout' }])
                 ].map(step => {
-                  const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
+                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'preview', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
@@ -2720,7 +2723,7 @@
                   { id: 'g4', label: 'GA4', icon: 'activity' },
                   { id: 'analytics', label: 'Analytics', icon: 'trending-up' },
                 ]).map(step => {
-                  const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
+                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
@@ -2868,6 +2871,7 @@
             {(() => {
               const composeSteps = [
                 { id: 'youtube', label: 'Source Video', phase: 'compose' },
+                { id: 'execplan', label: 'Execution Plan', phase: 'compose' },
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
                 { id: 'preview', label: 'District Assembly', phase: 'compose' },
@@ -2953,7 +2957,7 @@
                               <div className="lg:col-span-2 space-y-4 pt-1 text-left">
                                 {videoStory && videoStory.checklist ? (
                                   <div className="animate-fade-in space-y-4">
-                                    <h4 className="text-sm font-bold text-white italic">In this ReadyStack</h4>
+                                    <h4 className="text-sm font-bold text-white italic">Highlights</h4>
                                     <ul className="space-y-3 text-slate-300 text-xs italic">
                                       {videoStory.checklist.map((item, idx) => (
                                         <li key={idx} className="flex items-start gap-2">
@@ -2964,7 +2968,7 @@
                                     </ul>
                                     <div className="flex gap-2">
                                       {!isResident && !isInviteMode && !isLearningMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
-                                      <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
+                                      <button onClick={() => setActiveTab('execplan')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
                                 ) : (
@@ -2976,7 +2980,7 @@
                                     ) : null}
                                     <div className="flex gap-2">
                                       {!isResident && !isInviteMode && !isLearningMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
-                                      <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
+                                      <button onClick={() => setActiveTab('execplan')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
                                 )}
@@ -3284,17 +3288,20 @@
 
 
                     <div className="pt-12 text-center border-t border-white/5">
-                      <button onClick={() => setActiveTab('intro')} disabled={!youtubeEmbedUrl} className={`px-10 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-xs transition-all border ${!youtubeEmbedUrl ? 'opacity-30 cursor-not-allowed bg-[#020617] border-white/5' : 'bg-white/10 border-white/10 hover:bg-white/15'}`}>Continue to Residents</button>
+                      <button onClick={() => setActiveTab('execplan')} disabled={!youtubeEmbedUrl} className={`px-10 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-xs transition-all border ${!youtubeEmbedUrl ? 'opacity-30 cursor-not-allowed bg-[#020617] border-white/5' : 'bg-white/10 border-white/10 hover:bg-white/15'}`}>Continue to Execution Plan</button>
                     </div>
                   </div>
               </div>
             )}
-            {activeTab === 'intro' && (
+            {/* ══════════════════════════════════════════════════════════════════
+                 EXECUTION PLAN TAB — Tasks + Suggested Roles (AI-generated)
+                 ══════════════════════════════════════════════════════════════════ */}
+            {activeTab === 'execplan' && (
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-6">
                     <div className="space-y-4">
-                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS<InfoTooltip text="Review district workload, choose roles, and add residents to your district." /></h3>
-                        {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'intro' && (
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>EXECUTION PLAN<InfoTooltip text="Review the tasks and roles AI generated from your source video. This is the operational blueprint for your district." /></h3>
+                        {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'execplan' && (
                           <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
                         )}
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
@@ -3303,7 +3310,7 @@
                     {/* ── Empty state: no video processed yet ── */}
                     {!videoStory && (
                       <div className="border border-white/[0.06] rounded-2xl bg-[#0f172a]/30 px-8 py-8 text-center">
-                        <p className="text-slate-400 text-sm font-medium">Process an Source Video to unlock Tasks, Suggested Roles, and AI-generated district structure.</p>
+                        <p className="text-slate-400 text-sm font-medium">Process a Source Video to unlock Tasks, Suggested Roles, and AI-generated district structure.</p>
                         <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Source Video →</button>
                       </div>
                     )}
@@ -3390,6 +3397,34 @@
                           );
                         })()}
                       </div>}
+                      </div>
+                    )}
+
+                    {/* ── Next: go to Residents ── */}
+                    <div className="text-center py-10"><button onClick={() => setActiveTab('intro')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">Add and manage participants for your district.</p></div>
+                </div>
+              </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════════════
+                 RESIDENTS TAB — Participant table only
+                 ══════════════════════════════════════════════════════════════════ */}
+            {activeTab === 'intro' && (
+              <div className="max-w-7xl mx-auto animate-fade-in pt-28">
+                <div className="space-y-6">
+                    <div className="space-y-4">
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS<InfoTooltip text="Add and manage the participants who will execute your district." /></h3>
+                        {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'intro' && (
+                          <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                        )}
+                        {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
+                    </div>
+
+                    {/* ── Empty state: no participants yet ── */}
+                    {!videoStory && (
+                      <div className="border border-white/[0.06] rounded-2xl bg-[#0f172a]/30 px-8 py-8 text-center">
+                        <p className="text-slate-400 text-sm font-medium">Process a Source Video first, then review your Execution Plan to see suggested roles before adding participants.</p>
+                        <button onClick={() => setActiveTab('execplan')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Execution Plan →</button>
                       </div>
                     )}
 
@@ -4194,7 +4229,7 @@
                             )}
                           </div>
                           <div className="w-5/12">
-                            <p className="text-lg font-medium text-gray-900 mb-3">In this ReadyStack</p>
+                            <p className="text-lg font-medium text-gray-900 mb-3">Highlights</p>
                             {videoStory.checklist && videoStory.checklist.length > 0 ? (
                               <div className="space-y-1">
                                 {videoStory.checklist.map((item, i) => (
@@ -4451,9 +4486,9 @@
                           </button>
                         </div>
 
-                        {/* Right Column: "In this ReadyStack" checklist */}
+                        {/* Right Column: "Highlights" checklist */}
                         <div className="w-5/12">
-                          <h3 className="text-lg font-normal text-gray-800 mb-4" style={{fontFamily:'Inter,sans-serif'}}>In this ReadyStack</h3>
+                          <h3 className="text-lg font-normal text-gray-800 mb-4" style={{fontFamily:'Inter,sans-serif'}}>Highlights</h3>
                           <div className="space-y-3">
                             {videoStory?.checklist && videoStory.checklist.length > 0 ? (
                               videoStory.checklist.map((item, i) => (
