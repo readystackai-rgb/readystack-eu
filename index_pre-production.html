@@ -2691,7 +2691,7 @@
                 <div className="space-y-3 mb-6">
                 {[
                   { id: 'youtube', label: 'Source Video', icon: 'play-circle' },
-                  { id: 'execplan', label: 'Action Plan', icon: 'clipboard' },
+                  { id: 'execplan', label: 'Action Plan', icon: 'check-square' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
                   ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }]),
@@ -2820,7 +2820,7 @@
             <div className="flex-grow min-w-0 bg-[#0f172a]/30 border border-white/5 rounded-[40px] p-10 overflow-hidden shadow-inner relative min-h-[800px] transition-all duration-300">
 
               {/* ── District Name (Google Sheets style) ── */}
-              <div className="absolute top-20 left-20 z-[80] flex items-center gap-3">
+              <div className="absolute top-20 left-10 z-[80] flex items-center gap-3">
                 {isEditingName ? (
                   <input
                     autoFocus
@@ -3094,7 +3094,7 @@
                         ) : (
                           /* YouTube: search view */
                           <div className="space-y-6">
-                            <div className="space-y-2 max-w-2xl mx-auto">
+                            <div className="space-y-2 max-w-2xl">
                               <div className="flex gap-2">
                                 <input
                                   type="text"
