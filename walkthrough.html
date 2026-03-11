@@ -215,7 +215,7 @@
                 <div class="phase-label" style="color: var(--compose-accent);">Compose</div>
                 <div class="rail-item active" id="wt-rail-define" data-step="define">
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4m-10-10h4m12 0h4"/></svg>
-                    <span>Define Market Story</span>
+                    <span>Anchor Video</span>
                 </div>
                 <div class="rail-item" id="wt-rail-residents" data-step="residents" style="color: var(--green); border-color: var(--green-border); background: var(--green-bg);">
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -227,13 +227,13 @@
                 </div>
                 <div class="rail-item" id="wt-rail-tasks" data-step="tasks">
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                    <span>Tasks and Agents</span>
+                    <span>District Assembly</span>
                 </div>
 
                 <div class="phase-label" style="color: var(--ops-accent); margin-top: 12px;">Operations</div>
                 <div class="rail-item" id="wt-rail-finance" data-step="finance">
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    <span>District Finance</span>
+                    <span>District Capital</span>
                 </div>
                 <div class="rail-item" id="wt-rail-flow" data-step="flow">
                     <svg class="rail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
@@ -265,7 +265,7 @@
                     <div id="wt-breadcrumb" style="display: flex; align-items: center; gap: 8px;">
                         <span id="wt-bc-counter" style="font-size: 10px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em;">1 / 10</span>
                         <span style="font-size: 10px; color: var(--text-ghost);">&middot;</span>
-                        <span id="wt-bc-current" style="font-size: 10px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.1em;">Define Market Story</span>
+                        <span id="wt-bc-current" style="font-size: 10px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.1em;">Anchor Video</span>
                     </div>
                     <span id="wt-bc-next" style="font-size: 10px; font-weight: 600; color: var(--text-ghost); text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;">Residents &gt;</span>
                 </div>
@@ -286,7 +286,7 @@
                 <!-- ═══ PANEL: DEFINE MARKET STORY ═══ -->
                 <div id="panel-define" class="content-panel visible">
 
-                    <h3 style="font-size: 28px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: -0.03em; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Define Market Story</h3>
+                    <h3 style="font-size: 28px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: -0.03em; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Anchor Video</h3>
                     <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">Search YouTube for a video of the problem your audience faces. Your district exists to solve it.</p>
 
                     <!-- YouTube pill -->
@@ -466,7 +466,7 @@
                     <!-- Tasks Section (hidden initially, revealed by tour) -->
                     <div id="wt-residents-tasks" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; margin-bottom: 32px;">
                         <h2 style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 8px;">Tasks</h2>
-                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Setup tasks and automations derived from your market story. These will populate the Tasks and Agents card and JSON export.</p>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Setup tasks and automations derived from your market story. These will populate the District Assembly card and JSON export.</p>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <!-- Actions Column -->
@@ -791,9 +791,9 @@
                         </div>
                     </div>
 
-                    <!-- Continue to District Finance Button -->
+                    <!-- Continue to District Capital Button -->
                     <div id="wt-links-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
-                        <button id="wt-continue-preview" style="background: rgba(124,140,255,0.15); border: 1px solid rgba(124,140,255,0.3); color: var(--accent); padding: 14px 48px; border-radius: 12px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s ease;">Continue to District Finance</button>
+                        <button id="wt-continue-preview" style="background: rgba(124,140,255,0.15); border: 1px solid rgba(124,140,255,0.3); color: var(--accent); padding: 14px 48px; border-radius: 12px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s ease;">Continue to District Capital</button>
                     </div>
 
                 </div>
@@ -805,7 +805,7 @@
 
                     <!-- Finance Header -->
                     <div id="wt-finance-header" style="margin-bottom: 32px;">
-                        <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">District Finance</h1>
+                        <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">District Capital</h1>
                         <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">Manage angel participation and view your district revenue snapshot.</p>
                     </div>
 
@@ -1446,9 +1446,9 @@
                 <!-- ═══ TASKS AND AGENTS PANEL (automation content saved from District Ecosystem) ═══ -->
                 <div id="panel-preview" class="content-panel">
 
-                    <!-- Tasks and Agents Header -->
+                    <!-- District Assembly Header -->
                     <div id="pv-header" style="margin-bottom: 32px;">
-                        <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">Tasks and Agents</h1>
+                        <h1 style="font-size: 36px; font-weight: 900; font-style: italic; text-transform: uppercase; color: white; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Poppins', sans-serif;">District Assembly</h1>
                         <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack.</p>
                     </div>
 
@@ -1547,10 +1547,10 @@
                         </div>
                     </div>
 
-                    <!-- Tasks and Agents Footer -->
+                    <!-- District Assembly Footer -->
                     <div id="pv-footer" style="opacity: 0; transform: translateY(12px); transition: opacity 0.5s ease, transform 0.5s ease; text-align: center; padding-top: 20px; padding-bottom: 40px;">
                         <div style="background: var(--surface); border: 1px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 32px; margin-bottom: 20px;">
-                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--green); margin-bottom: 12px;">Tasks and Agents Complete</div>
+                            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: var(--green); margin-bottom: 12px;">District Assembly Complete</div>
                             <h2 style="font-size: 24px; font-weight: 900; color: white; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">Your Automations Are Ready</h2>
                             <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 500px; margin: 0 auto;">You've reviewed the automation pipeline, active workflows, and integration hub. Everything is wired up and ready to power your district.</p>
                         </div>
@@ -1679,12 +1679,12 @@
 
                     // ═══ DEFINE MARKET STORY ═══
 
-                    // Frame 1: DO — Click Define Market Story in the rail
+                    // Frame 1: DO — Click Anchor Video in the rail
                     {
                         element: '#wt-rail-define',
                         popover: {
                             title: 'Start Here',
-                            description: 'This is the Storyteller — your session starts with the left rail. <strong>Compose</strong> builds your district, <strong>Operations</strong> runs it. <strong>Click Define Market Story</strong> to begin.',
+                            description: 'This is the Storyteller — your session starts with the left rail. <strong>Compose</strong> builds your district, <strong>Operations</strong> runs it. <strong>Click Anchor Video</strong> to begin.',
                             side: 'right',
                             align: 'start',
                             showButtons: ['previous'],
@@ -1979,7 +1979,7 @@
                         },
                         popover: {
                             title: 'Tasks: Actions + Automations',
-                            description: 'These are the same tasks from Define Market Story — now carried forward as executable work. <strong>Actions</strong> become checklist items for residents. <strong>Automations</strong> fire when events happen. Together they form the operational backbone of the district.',
+                            description: 'These are the same tasks from Anchor Video — now carried forward as executable work. <strong>Actions</strong> become checklist items for residents. <strong>Automations</strong> fire when events happen. Together they form the operational backbone of the district.',
                             side: 'right',
                             align: 'start'
                         }
@@ -2151,7 +2151,7 @@
                                     btn.classList.remove('do-pulse');
                                     setCompleteRail('residents');
                                     setActiveRail('links');
-                                    updateBreadcrumb(3, 10, 'Resident Links', 'District Finance');
+                                    updateBreadcrumb(3, 10, 'Resident Links', 'District Capital');
                                     showPanel('panel-links');
                                     setTimeout(() => driverObj.moveNext(), 300);
                                 };
@@ -2354,7 +2354,7 @@
                         }
                     },
 
-                    // Frame 24: DO — Continue to District Finance
+                    // Frame 24: DO — Continue to District Capital
                     {
                         element: '#wt-links-footer',
                         onHighlightStarted: () => {
@@ -2370,22 +2370,22 @@
                             financeRail.style.color = 'var(--amber)';
                         },
                         popover: {
-                            title: 'Continue to District Finance',
-                            description: 'Your links are mapped across all five journey stages. Next, manage your angel investors and see your district\u2019s revenue snapshot. <strong>Click CONTINUE</strong> to view District Finance.',
+                            title: 'Continue to District Capital',
+                            description: 'Your links are mapped across all five journey stages. Next, manage your angel investors and see your district\u2019s revenue snapshot. <strong>Click CONTINUE</strong> to view District Capital.',
                             side: 'top',
                             align: 'center',
                             showButtons: ['previous'],
                             onPopoverRender: () => {
                                 const btn = document.getElementById('wt-continue-preview');
                                 if (btn) {
-                                    btn.textContent = 'Continue to District Finance';
+                                    btn.textContent = 'Continue to District Capital';
                                     btn.classList.add('do-pulse');
                                     const advance = () => {
                                         btn.removeEventListener('click', advance);
                                         btn.classList.remove('do-pulse');
                                         setCompleteRail('links');
                                         setActiveRail('finance');
-                                        updateBreadcrumb(4, 10, 'District Finance', 'District Ecosystem');
+                                        updateBreadcrumb(4, 10, 'District Capital', 'District Ecosystem');
                                         showPanel('panel-finance');
                                         setTimeout(() => driverObj.moveNext(), 300);
                                     };
@@ -2405,7 +2405,7 @@
                             panel.scrollTo({ top: 0, behavior: 'smooth' });
                         },
                         popover: {
-                            title: 'Welcome to District Finance',
+                            title: 'Welcome to District Capital',
                             description: 'This is where you manage angel participation and track your district\u2019s revenue. Angel investors fund early growth \u2014 let\u2019s see how the system works.',
                             side: 'bottom',
                             align: 'start'
@@ -2578,7 +2578,7 @@
                                     btn.classList.remove('do-pulse');
                                     setCompleteRail('finance');
                                     setActiveRail('flow');
-                                    updateBreadcrumb(5, 10, 'District Ecosystem', 'Tasks and Agents');
+                                    updateBreadcrumb(5, 10, 'District Ecosystem', 'District Assembly');
                                     showPanel('panel-flow');
                                     setTimeout(() => driverObj.moveNext(), 300);
                                 };
@@ -2971,7 +2971,7 @@
                         }
                     },
 
-                    // Frame 35: DO — Continue to Tasks and Agents (STORYBOARD Frame 30)
+                    // Frame 35: DO — Continue to District Assembly (STORYBOARD Frame 30)
                     {
                         element: '#wt-flow-footer',
                         onHighlightStarted: () => {
@@ -2979,7 +2979,7 @@
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
                             setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-                            // Light up the Tasks and Agents rail item
+                            // Light up the District Assembly rail item
                             const previewRail = document.getElementById('wt-rail-tasks');
                             if (previewRail) {
                                 previewRail.style.borderColor = 'rgba(124,140,255,0.6)';
@@ -2989,7 +2989,7 @@
                             }
                         },
                         popover: {
-                            title: 'Continue to Tasks and Agents',
+                            title: 'Continue to District Assembly',
                             description: 'You\u2019ve seen your district from every angle \u2014 organic flow, structured grid, and cross-pollination paths. Now let\u2019s activate it. <strong>Click CONTINUE</strong> to move forward.',
                             side: 'top',
                             align: 'center',
@@ -3007,7 +3007,7 @@
                                     }
                                     setCompleteRail('flow');
                                     setActiveRail('tasks');
-                                    updateBreadcrumb(6, 10, 'Tasks and Agents', '');
+                                    updateBreadcrumb(6, 10, 'District Assembly', '');
                                     showPanel('panel-preview');
                                     setTimeout(() => driverObj.moveNext(), 300);
                                 };
@@ -3018,7 +3018,7 @@
 
                     // ═══ TASKS AND AGENTS SECTION ═══
 
-                    // Frame 31: OBSERVE — Tasks and Agents Header (landing)
+                    // Frame 31: OBSERVE — District Assembly Header (landing)
                     {
                         element: '#pv-header',
                         onHighlightStarted: () => {
@@ -3026,7 +3026,7 @@
                             panel.scrollTo({ top: 0, behavior: 'smooth' });
                         },
                         popover: {
-                            title: 'Welcome to Tasks and Agents',
+                            title: 'Welcome to District Assembly',
                             description: 'This is where you see everything come together. Your tasks, agents, and automations \u2014 all wired up and ready to power your district.',
                             side: 'bottom',
                             align: 'start'

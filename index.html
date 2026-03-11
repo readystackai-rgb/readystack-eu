@@ -202,6 +202,13 @@
   <!-- Wix postMessage param passthrough — must run BEFORE React mounts -->
   <script>
     (function () {
+      // ── Learning Mode redirect: serve walkthrough.html instead of React app ──
+      var sp = new URLSearchParams(window.location.search);
+      if (sp.get('mode') === 'learn') {
+        window.location.replace('walkthrough.html');
+        return;
+      }
+
       // When embedded in a Wix iframe, URL params don't reach this page.
       // The Wix Velo code sends them via postMessage.
       // This block updates the URL with those params so the React app reads them normally.
@@ -212,6 +219,13 @@
         if (event.data && event.data.type === 'wixParams' && !_wixReady) {
           _wixReady = true;
           var p = event.data.params || {};
+
+          // If Wix sends mode=learn, redirect to walkthrough
+          if (p.mode === 'learn') {
+            window.location.replace('walkthrough.html');
+            return;
+          }
+
           var search = '?' + Object.keys(p).map(function (k) {
             return encodeURIComponent(k) + '=' + encodeURIComponent(p[k]);
           }).join('&');
