@@ -2066,7 +2066,7 @@
         const narrativeScale = obsMode === 'narrative' ? (1 + (playbackProgress * 0.05)) : 1;
         const driftFactor = obsMode === 'narrative' ? (playbackProgress * 2.5) : 0;
         const getStableJitter = (id, amount = 35) => { const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0); return ((hash % 100) / 100 - 0.5) * amount; };
-        const totalMonthlyTraffic = mapping.sources.reduce((acc, s) => acc + (s.ga4Count || 18420), 0);
+        const totalMonthlyTraffic = (mapping.sources || []).reduce((acc, s) => acc + (s.ga4Count || 18420), 0);
         const timeMultiplier = lookerPeriod === '30' ? 1 : (lookerPeriod === '90' ? 3 : 12);
         const scaledTraffic = totalMonthlyTraffic * timeMultiplier;
 
