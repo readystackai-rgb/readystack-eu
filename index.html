@@ -278,7 +278,7 @@
 
     /* ── Learning Mode: Guided step definitions (placeholder text — final copy pending team review) ── */
     const LEARNING_STEPS = [
-      { key: 'youtube',  title: 'Anchor Video',      description: 'This is where a district begins. Search for a video that frames the market problem.', nextLabel: 'Residents' },
+      { key: 'youtube',  title: 'Instruction Video',      description: 'This is where a district begins. Search for a video that frames the market problem.', nextLabel: 'Residents' },
       { key: 'intro',    title: 'Residents',          description: 'These are the people who will execute the district workload. Review who was identified from the video.', nextLabel: 'Resident Links' },
       { key: 'mapper',   title: 'Resident Links',     description: 'Each resident brings engagement items to the district. This map shows every touchpoint in the audience journey.', nextLabel: 'District Assembly' },
       { key: 'preview',  title: 'District Assembly',   description: 'The district assembles here. Review the hero section, headline, and call-to-action before publishing.', nextLabel: 'District Product' },
@@ -1877,7 +1877,7 @@
                 contentText += `\nTRANSCRIPT:\n${transcript.substring(0, 5000)}`;
             }
             const systemPrompt = `You are a ReadyStack strategist. Your job is to analyze a YouTube video transcript and produce a ReadyStack Narrative.
-        A ReadyStack is a hosted, shareable asset that combines an anchor video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
+        A ReadyStack is a hosted, shareable asset that combines an instruction video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
         Produce the following based strictly on the transcript provided:
         1. Title: A compelling name for this ReadyStack — grounded and descriptive, no hyperbole or cheesy marketing language.
         2. District Name: A short name (3-8 words) for this Dark Market District. This must be a plain-language description of the core problem the district addresses. Rules:
@@ -1956,7 +1956,7 @@
         }
 
         const systemPrompt = `You are a ReadyStack strategist. Your job is to analyze a YouTube video transcript and produce a ReadyStack Narrative.
-        A ReadyStack is a hosted, shareable asset that combines an anchor video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
+        A ReadyStack is a hosted, shareable asset that combines an instruction video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
         Produce the following based strictly on the transcript provided:
         1. Title: A compelling name for this ReadyStack — grounded and descriptive, no hyperbole or cheesy marketing language.
         2. District Name: A short name (3-8 words) for this Dark Market District. This must be a plain-language description of the core problem the district addresses. Rules:
@@ -2645,7 +2645,7 @@
                 </div>
                 <div className="space-y-3 mb-6">
                 {[
-                  { id: 'youtube', label: 'Anchor Video', icon: 'play-circle' },
+                  { id: 'youtube', label: 'Instruction Video', icon: 'play-circle' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
                   ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }]),
@@ -2867,7 +2867,7 @@
             {/* ── TOP STEP NAVIGATION BAR (above everything) ── */}
             {(() => {
               const composeSteps = [
-                { id: 'youtube', label: 'Anchor Video', phase: 'compose' },
+                { id: 'youtube', label: 'Instruction Video', phase: 'compose' },
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
                 { id: 'preview', label: 'District Assembly', phase: 'compose' },
@@ -2921,7 +2921,7 @@
             {activeTab === 'youtube' && (
               <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
                   <div className="space-y-3 mb-6">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">ANCHOR VIDEO<InfoTooltip text="Search YouTube for a video of the problem your audience faces. Your district exists to solve it." /></h3>
+                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">INSTRUCTION VIDEO<InfoTooltip text="Search YouTube for a video of the problem your audience faces. Your district exists to solve it." /></h3>
                   </div>
 
                   {/* ── Platform Selector ── */}
@@ -3291,8 +3291,8 @@
             )}
             {activeTab === 'intro' && (
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
-                <div className="space-y-20">
-                    <div className="space-y-6">
+                <div className="space-y-6">
+                    <div className="space-y-4">
                         <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS<InfoTooltip text="Review district workload, choose roles, and add residents to your district." /></h3>
                         {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'intro' && (
                           <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
@@ -3303,8 +3303,8 @@
                     {/* ── Empty state: no video processed yet ── */}
                     {!videoStory && (
                       <div className="border border-white/[0.06] rounded-2xl bg-[#0f172a]/30 px-8 py-8 text-center">
-                        <p className="text-slate-400 text-sm font-medium">Process an Anchor Video to unlock Tasks, Suggested Roles, and AI-generated district structure.</p>
-                        <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Anchor Video →</button>
+                        <p className="text-slate-400 text-sm font-medium">Process an Instruction Video to unlock Tasks, Suggested Roles, and AI-generated district structure.</p>
+                        <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Instruction Video →</button>
                       </div>
                     )}
 
@@ -3314,7 +3314,7 @@
                         <button onClick={() => setShowTasks(!showTasks)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
                           <div>
                             <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
-                            <p className="text-slate-500 text-xs mt-1">Actions and automations from the Anchor Video</p>
+                            <p className="text-slate-500 text-xs mt-1">Actions and automations from the Instruction Video</p>
                           </div>
                           <svg className={`w-4 h-4 text-slate-400 transition-transform ${showTasks ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
@@ -3948,7 +3948,7 @@
                           <div className="bg-[#0f172a]/60 p-10 rounded-[32px] border border-white/5 shadow-inner inline-block">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-slate-300 mx-auto mb-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
                             <p className="text-slate-300 text-base font-medium">Add participants to your district first, then invite them here.</p>
-                            <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Anchor Video</button>
+                            <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Instruction Video</button>
                           </div>
                         </div>
                       );
@@ -4201,7 +4201,7 @@
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-400 italic text-center py-8">No anchor video defined yet. Go back to Anchor Video to get started.</p>
+                      <p className="text-sm text-gray-400 italic text-center py-8">No instruction video defined yet. Go back to Instruction Video to get started.</p>
                     )}
                   </div>
 
@@ -4435,7 +4435,7 @@
                             </div>
                           ) : (
                             <div className="aspect-video bg-gray-100 rounded flex items-center justify-center">
-                              <p className="text-gray-400 text-sm">No video — add a YouTube URL in Anchor Video</p>
+                              <p className="text-gray-400 text-sm">No video — add a YouTube URL in Instruction Video</p>
                             </div>
                           )}
                           {/* Follow CTA */}
@@ -4453,7 +4453,7 @@
                                 <p key={i} className="text-purple-500 text-sm cursor-pointer hover:text-purple-700 transition-colors">{item}</p>
                               ))
                             ) : (
-                              <p className="text-gray-400 text-sm italic">No checklist items yet — analyze a video in Anchor Video to populate this.</p>
+                              <p className="text-gray-400 text-sm italic">No checklist items yet — analyze a video in Instruction Video to populate this.</p>
                             )}
                           </div>
                         </div>
@@ -4499,7 +4499,7 @@
                                 Generate Task Rows with AI
                               </button>
                               {(!videoStory?.checklist || videoStory.checklist.length === 0) && (
-                                <p className="text-gray-400 text-xs italic mt-3">No checklist items found. Go back to Anchor Video to generate your story.</p>
+                                <p className="text-gray-400 text-xs italic mt-3">No checklist items found. Go back to Instruction Video to generate your story.</p>
                               )}
                             </div>
                           )}
@@ -4577,7 +4577,7 @@
 
                           {/* Empty state after generation */}
                           {taskRows && taskRows.length === 0 && taskRowSource !== 'error' && (
-                            <p className="text-gray-400 text-xs italic text-center py-4">No task rows generated. Try adding more detail to your Anchor Video story.</p>
+                            <p className="text-gray-400 text-xs italic text-center py-4">No task rows generated. Try adding more detail to your Instruction Video story.</p>
                           )}
 
                           {/* Error state */}
