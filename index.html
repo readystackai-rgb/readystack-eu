@@ -281,8 +281,8 @@
       { key: 'youtube',  title: 'Anchor Video',      description: 'This is where a district begins. Search for a video that frames the market problem.', nextLabel: 'Residents' },
       { key: 'intro',    title: 'Residents',          description: 'These are the people who will execute the district workload. Review who was identified from the video.', nextLabel: 'Resident Links' },
       { key: 'mapper',   title: 'Resident Links',     description: 'Each resident brings engagement items to the district. This map shows every touchpoint in the audience journey.', nextLabel: 'District Assembly' },
-      { key: 'preview',  title: 'District Assembly',   description: 'The district assembles here. Review the hero section, headline, and call-to-action before publishing.', nextLabel: 'Front Door' },
-      { key: 'landing',  title: 'Front Door',          description: 'This is what the audience sees. The published district landing page with the hero, video, and call-to-action.', nextLabel: null },
+      { key: 'preview',  title: 'District Assembly',   description: 'The district assembles here. Review the hero section, headline, and call-to-action before publishing.', nextLabel: 'District Product' },
+      { key: 'landing',  title: 'District Product',          description: 'This is what the audience sees. The published district landing page with the hero, video, and call-to-action.', nextLabel: null },
     ];
 
     /* ── GuidedPromptCard: inline card shown during learning mode guided sequence ── */
@@ -2649,7 +2649,7 @@
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
                   ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }]),
-                  ...(isResident ? [] : [{ id: 'landing', label: 'Front Door', icon: 'layout' }])
+                  ...(isResident ? [] : [{ id: 'landing', label: 'District Product', icon: 'layout' }])
                 ].map(step => {
                   const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
@@ -2871,7 +2871,7 @@
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
                 { id: 'preview', label: 'District Assembly', phase: 'compose' },
-                { id: 'landing', label: 'Front Door', phase: 'compose' }
+                { id: 'landing', label: 'District Product', phase: 'compose' }
               ];
               const opsSteps = [
                 { id: 'finance', label: 'District Capital', phase: 'operations' },
@@ -4357,7 +4357,7 @@
                   {/* ── SECTION G: Continue to Landing Page ── */}
                   <div className="text-center py-8 space-y-6">
                     <div>
-                      <button onClick={() => setActiveTab('landing')} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-xs">Continue to Front Door</button>
+                      <button onClick={() => setActiveTab('landing')} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-xs">Continue to District Product</button>
                     </div>
                     <p className="text-xs text-gray-400 font-medium">Preview what your published ReadyStack will look like.</p>
                   </div>
