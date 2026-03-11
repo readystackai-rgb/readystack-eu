@@ -272,17 +272,34 @@
     ];
 
     /* ── GuidedPromptCard: inline card shown during learning mode guided sequence ── */
-    const GuidedPromptCard = ({ step, isIntense, onDismiss }) => {
+    const GuidedPromptCard = ({ step, stepIdx, totalSteps, onPrev, onNext, isIntense, onDismiss }) => {
       if (!step) return null;
+      const hasPrev = stepIdx > 0;
+      const hasNext = stepIdx < totalSteps - 1;
       return (
-        <div className="animate-fade-in mb-6">
-          <div className="relative bg-[#0f172a]/90 border border-amber-500/30 rounded-2xl px-6 py-5 max-w-md shadow-[0_0_30px_rgba(245,158,11,0.08)]" style={{fontFamily:'Inter, system-ui, sans-serif'}}>
+        <div className="animate-fade-in mb-4">
+          <div className="relative bg-[#0f172a]/90 border border-amber-500/30 rounded-2xl px-5 py-4 max-w-sm shadow-[0_0_30px_rgba(245,158,11,0.08)]" style={{fontFamily:'Inter, system-ui, sans-serif'}}>
             <button onClick={onDismiss} className="absolute top-3 right-3 text-slate-500 hover:text-slate-300 transition-colors text-xs">&times;</button>
-            <p className="text-[10px] font-black text-amber-400/70 uppercase tracking-[0.25em] mb-1.5">Learning Mode</p>
-            <h4 className="text-sm font-bold text-white mb-1.5">{step.title}</h4>
-            <p className="text-xs text-slate-300 leading-relaxed">{step.description}</p>
-            {isIntense && <p className="text-xs text-amber-400 font-semibold mt-2 animate-pulse">Explore this section, then click Next to continue →</p>}
-            {step.nextLabel && <p className="text-[10px] text-slate-500 mt-3 uppercase tracking-widest">Next: {step.nextLabel}</p>}
+            <h4 className="text-xs font-bold text-white mb-1">{step.title}</h4>
+            <p className="text-[11px] text-slate-300 leading-relaxed">{step.description}</p>
+            {isIntense && <p className="text-[11px] text-amber-400 font-semibold mt-1.5 animate-pulse">Explore this section, then continue →</p>}
+            <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+              <span className="text-[10px] text-slate-500 tabular-nums">{stepIdx + 1} / {totalSteps}</span>
+              <div className="flex gap-1.5">
+                {hasPrev && (
+                  <button onClick={onPrev} className="flex items-center gap-0.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="m15 18-6-6 6-6"/></svg>
+                    Back
+                  </button>
+                )}
+                {hasNext && (
+                  <button onClick={onNext} className="flex items-center gap-0.5 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 hover:text-amber-300 text-[10px] font-bold uppercase tracking-widest transition-all">
+                    {step.nextLabel || 'Next'}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -620,6 +637,16 @@
       const [isLearningMode, setIsLearningMode] = useState(false); // true when ?mode=learn (fixture-based demo tour)
       const [learningStepIdx, setLearningStepIdx] = useState(0); // current guided step index in LEARNING_STEPS
       const [learningIntense, setLearningIntense] = useState(false); // true after 15s fallback
+
+      // Navigation helpers for GuidedPromptCard carets
+      const goLearningStep = (dir) => {
+        const next = learningStepIdx + dir;
+        if (next >= 0 && next < LEARNING_STEPS.length) {
+          setLearningStepIdx(next);
+          setActiveTab(LEARNING_STEPS[next].key);
+          setLearningIntense(false);
+        }
+      };
       const [dismissedInfoCards, setDismissedInfoCards] = useState({}); // { finance: true, ... } for ops sections
       const isResident = districtRole === 'resident';
       const isCreator = districtRole === 'creator' || !districtRole; // default to creator for backward compat
@@ -1145,6 +1172,7 @@
               if (d.mapping) setMapping(d.mapping);
               if (d.heroFields) setHeroFields(d.heroFields);
               if (d.activeTab) setActiveTab(d.activeTab);
+              setIsSearchPanelOpen(false);   // show selected video, not search bar
               setIsLearningMode(true);
             } catch (e) { console.warn('Learning fixture load failed:', e); }
           })();
@@ -1810,7 +1838,7 @@
         setIsSearchPanelOpen(false);
         // Update YouTube source in mapping with actual video data
         setMapping(prev => {
-          const ytIdx = prev.sources.findIndex(s => s.type === 'youtube');
+          const ytIdx = (prev.sources || []).findIndex(s => s.type === 'youtube');
           const ytSource = {
             ven: 'YouTube',
             lab: (video.snippet?.title || 'Strategy Video').substring(0, 40),
@@ -1820,11 +1848,11 @@
             ga4Count: parseInt(video.statistics?.viewCount) || 18420
           };
           if (ytIdx >= 0) {
-            const next = [...prev.sources];
+            const next = [...(prev.sources || [])];
             next[ytIdx] = ytSource;
             return { ...prev, sources: next };
           }
-          return { ...prev, sources: [ytSource, ...prev.sources] };
+          return { ...prev, sources: [ytSource, ...(prev.sources || [])] };
         });
         // Go straight into full story generation — no intermediate step
         setIsGeneratingStory(true);
@@ -2878,9 +2906,6 @@
 
             {activeTab === 'youtube' && (
               <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
-                  {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'youtube' && (
-                    <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
-                  )}
                   <div className="space-y-3 mb-6">
                       <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">ANCHOR VIDEO<InfoTooltip text="Search YouTube for a video of the problem your audience faces. Your district exists to solve it." /></h3>
                   </div>
@@ -2892,6 +2917,10 @@
                       YouTube
                     </button>
                   </div>
+
+                  {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'youtube' && (
+                    <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                  )}
 
                   <div className="bg-[#020617]/50 p-8 rounded-[32px] border border-white/5 shadow-inner space-y-6">
 
@@ -3248,12 +3277,12 @@
             )}
             {activeTab === 'intro' && (
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
-                {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'intro' && (
-                  <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
-                )}
                 <div className="space-y-20">
                     <div className="space-y-6">
                         <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS<InfoTooltip text="Review district workload, choose roles, and add residents to your district." /></h3>
+                        {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'intro' && (
+                          <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                        )}
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
 
@@ -3601,11 +3630,11 @@
 
             {activeTab === 'mapper' && (
               <div className="space-y-12 animate-fade-in text-left pt-28">
-                {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'mapper' && (
-                  <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
-                )}
                 <div className="space-y-6">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENT LINKS<InfoTooltip text="Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey." /></h3>
+                    {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'mapper' && (
+                      <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                    )}
                 </div>
                 {/* ── District Identity Card — accordion, hidden for residents, invitees & learning mode ── */}
                 {!isResident && !isInviteMode && !isLearningMode && (
@@ -4077,12 +4106,12 @@
 
             {activeTab === 'preview' && (
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
-                {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'preview' && (
-                  <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
-                )}
                 <div className="space-y-12">
                   <div className="space-y-4">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY<InfoTooltip text="Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack." /></h3>
+                    {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'preview' && (
+                      <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                    )}
                   </div>
 
                   {/* ══════════════════════════════════════════════════════════
@@ -4330,12 +4359,12 @@
                ══════════════════════════════════════════════════════════ */}
             {activeTab === 'landing' && (
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
-                {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'landing' && (
-                  <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
-                )}
                 <div className="space-y-12">
                   <div className="space-y-4">
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>FRONT DOOR<InfoTooltip text="This is what your audience will see when you publish. Review it, then send to Studio." /></h3>
+                    {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'landing' && (
+                      <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                    )}
                   </div>
 
                   {/* ── Landing Page Preview Container (white theme) ── */}
