@@ -193,7 +193,14 @@
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Pre-mount loader — replaced automatically when React mounts -->
+    <div id="preloader" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:24px;opacity:1;transition:opacity 0.4s ease">
+      <div style="width:40px;height:40px;border:3px solid rgba(124,140,255,0.15);border-top-color:#7c8cff;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+      <p style="font-family:Poppins,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(148,163,184,0.6);margin:0">Loading Storyteller</p>
+    </div>
+    <style>#preloader{pointer-events:none}@keyframes spin{to{transform:rotate(360deg)}}</style>
+  </div>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -1572,9 +1579,12 @@
           ? 'https://www.readystack.ai/storyteller'
           : window.location.href;
         const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
-        // Google blocks OAuth inside iframes — open in new tab when embedded
+        // Google blocks OAuth inside iframes — open sized popup when embedded
         if (window.parent !== window) {
-          window.open(authUrl, '_blank');
+          const w = 500, h = 650;
+          const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+          const top = Math.round(window.screenY + (window.outerHeight - h) / 2);
+          window.open(authUrl, 'google-auth', `width=${w},height=${h},left=${left},top=${top},menubar=no,toolbar=no,location=yes,status=no`);
         } else {
           window.location.href = authUrl;
         }

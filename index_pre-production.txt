@@ -124,6 +124,42 @@
       100% { box-shadow: 0 0 0 0 rgba(124, 140, 255, 0); }
     }
 
+    /* === LEARNING MODE — GUIDED GLOW SYSTEM === */
+    @keyframes guidedGlow {
+      0%, 100% {
+        box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.3),
+                    0 0 24px 8px rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 14px 4px rgba(245, 158, 11, 0.5),
+                    0 0 36px 14px rgba(245, 158, 11, 0.2);
+        border-color: rgba(245, 158, 11, 0.7);
+      }
+    }
+    @keyframes guidedGlowIntense {
+      0%, 100% {
+        box-shadow: 0 0 12px 4px rgba(245, 158, 11, 0.5),
+                    0 0 36px 14px rgba(245, 158, 11, 0.25);
+        border-color: rgba(245, 158, 11, 0.7);
+      }
+      50% {
+        box-shadow: 0 0 20px 8px rgba(245, 158, 11, 0.7),
+                    0 0 50px 20px rgba(245, 158, 11, 0.35);
+        border-color: rgba(245, 158, 11, 0.9);
+      }
+    }
+    .learning-glow {
+      animation: guidedGlow 2s ease-in-out infinite;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 12px;
+    }
+    .learning-glow-intense {
+      animation: guidedGlowIntense 1.4s ease-in-out infinite;
+      border: 1px solid rgba(245, 158, 11, 0.7);
+      border-radius: 12px;
+    }
+
     /* === DISTRICT INVITATION — NODE GLOW SYSTEM === */
     @keyframes nodeGlow {
       0%, 100% {
@@ -157,7 +193,14 @@
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Pre-mount loader — replaced automatically when React mounts -->
+    <div id="preloader" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:24px;opacity:1;transition:opacity 0.4s ease">
+      <div style="width:40px;height:40px;border:3px solid rgba(124,140,255,0.15);border-top-color:#7c8cff;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+      <p style="font-family:Poppins,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(148,163,184,0.6);margin:0">Loading Storyteller</p>
+    </div>
+    <style>#preloader{pointer-events:none}@keyframes spin{to{transform:rotate(360deg)}}</style>
+  </div>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -166,6 +209,13 @@
   <!-- Wix postMessage param passthrough — must run BEFORE React mounts -->
   <script>
     (function () {
+      // ── Learning Mode redirect: serve walkthrough.html instead of React app ──
+      var sp = new URLSearchParams(window.location.search);
+      if (sp.get('mode') === 'learn') {
+        window.location.replace('walkthrough.html');
+        return;
+      }
+
       // When embedded in a Wix iframe, URL params don't reach this page.
       // The Wix Velo code sends them via postMessage.
       // This block updates the URL with those params so the React app reads them normally.
@@ -176,6 +226,13 @@
         if (event.data && event.data.type === 'wixParams' && !_wixReady) {
           _wixReady = true;
           var p = event.data.params || {};
+
+          // If Wix sends mode=learn, redirect to walkthrough
+          if (p.mode === 'learn') {
+            window.location.replace('walkthrough.html');
+            return;
+          }
+
           var search = '?' + Object.keys(p).map(function (k) {
             return encodeURIComponent(k) + '=' + encodeURIComponent(p[k]);
           }).join('&');
@@ -197,6 +254,108 @@
 
   <script type="text/babel">
     const { useState, useRef, useMemo, useEffect } = React;
+
+    /* ── InfoTooltip: ℹ info icon that reveals subtitle text on hover ── */
+    const InfoTooltip = ({ text }) => {
+      const [show, setShow] = useState(false);
+      const tipRef = useRef(null);
+      return (
+        <span className="relative inline-flex items-center ml-3 align-middle">
+          <button
+            onMouseEnter={() => setShow(true)}
+            onMouseLeave={() => setShow(false)}
+            onClick={() => setShow(!show)}
+            className="text-slate-500 hover:text-slate-300 transition-colors focus:outline-none"
+            aria-label="More info"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+          </button>
+          {show && (
+            <span ref={tipRef} className="absolute left-8 top-1/2 -translate-y-1/2 z-50 bg-[#1e293b] border border-white/10 text-slate-300 text-xs font-medium px-4 py-2.5 rounded-xl shadow-2xl whitespace-nowrap max-w-xs normal-case" style={{whiteSpace:'normal', minWidth:'200px', letterSpacing:'normal', fontFamily:'Inter, system-ui, sans-serif', fontWeight:500}}>
+              {text}
+            </span>
+          )}
+        </span>
+      );
+    };
+
+    /* ── Learning Mode: Guided step definitions (placeholder text — final copy pending team review) ── */
+    const LEARNING_STEPS = [
+      { key: 'youtube',  title: 'Source Video',      description: 'This is where a district begins. Search for a video that frames the market problem.', nextLabel: 'Execution Plan' },
+      { key: 'execplan', title: 'Execution Plan',    description: 'Review the tasks and roles AI generated from your source video. This is the operational blueprint for your district.', nextLabel: 'Residents' },
+      { key: 'intro',    title: 'Residents',          description: 'These are the people who will execute the district workload. Add and manage your participants.', nextLabel: 'Resident Links' },
+      { key: 'mapper',   title: 'Resident Links',     description: 'Each resident brings engagement items to the district. This map shows every touchpoint in the audience journey.', nextLabel: 'District Assembly' },
+      { key: 'preview',  title: 'District Assembly',   description: 'The district assembles here. Review the hero section, headline, and call-to-action before publishing.', nextLabel: 'District Product' },
+      { key: 'landing',  title: 'District Product',          description: 'This is what the audience sees. The published district landing page with the hero, video, and call-to-action.', nextLabel: null },
+    ];
+
+    /* ── GuidedPromptCard: inline card shown during learning mode guided sequence ── */
+    const GuidedPromptCard = ({ step, stepIdx, totalSteps, onPrev, onNext, isIntense, onDismiss }) => {
+      if (!step) return null;
+      const hasPrev = stepIdx > 0;
+      const hasNext = stepIdx < totalSteps - 1;
+      return (
+        <div className="animate-fade-in mb-4">
+          <div className="relative bg-[#0f172a]/90 border border-amber-500/30 rounded-2xl px-5 py-4 max-w-sm shadow-[0_0_30px_rgba(245,158,11,0.08)]" style={{fontFamily:'Inter, system-ui, sans-serif'}}>
+            <button onClick={onDismiss} className="absolute top-3 right-3 text-slate-500 hover:text-slate-300 transition-colors text-xs">&times;</button>
+            <h4 className="text-xs font-bold text-white mb-1">{step.title}</h4>
+            <p className="text-[11px] text-slate-300 leading-relaxed">{step.description}</p>
+            {isIntense && <p className="text-[11px] text-amber-400 font-semibold mt-1.5 animate-pulse">Explore this section, then continue →</p>}
+            <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+              <span className="text-[10px] text-slate-500 tabular-nums">{stepIdx + 1} / {totalSteps}</span>
+              <div className="flex gap-1.5">
+                {hasPrev && (
+                  <button onClick={onPrev} className="flex items-center gap-0.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="m15 18-6-6 6-6"/></svg>
+                    Back
+                  </button>
+                )}
+                {hasNext && (
+                  <button onClick={onNext} className="flex items-center gap-0.5 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 hover:text-amber-300 text-[10px] font-bold uppercase tracking-widest transition-all">
+                    {step.nextLabel || 'Next'}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    /* ── SectionInfoCard: contextual info card shown in Operations sections during learning mode ── */
+    const SectionInfoCard = ({ title, description, onDismiss }) => {
+      const [visible, setVisible] = useState(true);
+      useEffect(() => {
+        const timer = setTimeout(() => { setVisible(false); if (onDismiss) onDismiss(); }, 5000);
+        return () => clearTimeout(timer);
+      }, []);
+      if (!visible) return null;
+      return (
+        <div className="animate-fade-in mb-6 cursor-pointer" onClick={() => { setVisible(false); if (onDismiss) onDismiss(); }}>
+          <div className="bg-[#0f172a]/70 border border-white/[0.08] rounded-xl px-5 py-4 max-w-md" style={{fontFamily:'Inter, system-ui, sans-serif'}}>
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">About this section</p>
+            <h4 className="text-xs font-bold text-white mb-1">{title}</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">{description}</p>
+          </div>
+        </div>
+      );
+    };
+
+    /* ── Operations section info definitions (placeholder text — final copy pending team review) ── */
+    const OPERATIONS_INFO = {
+      finance:     { title: 'District Capital',     description: 'The economic model of the district. Revenue splits, hosted automation fees, and how value flows between founder, residents, and infrastructure.' },
+      observatory: { title: 'District Ecosystem',   description: 'Three network visualizations — relational, cross-pollination, and ecosystem — showing how residents, links, and audiences connect.' },
+      connect:     { title: 'My Residents',          description: 'Manage resident communications. Send invitations, track onboarding status, and coordinate with the district network.' },
+      looker:      { title: 'Looker',                description: 'Embedded Looker dashboard for district performance data and business intelligence.' },
+      g4:          { title: 'GA4',                   description: 'Google Analytics integration. Traffic, engagement, and conversion data for district properties.' },
+      analytics:   { title: 'Analytics',             description: 'Aggregated district analytics. Performance trends, audience insights, and growth metrics across all channels.' },
+    };
+
     const ReadyStackLogo = ({ size = 24, variant = 'light' }) => (
       <div className="flex items-center justify-center overflow-hidden transition-all duration-300">
         <img
@@ -412,6 +571,9 @@
       const [heroFields, setHeroFields] = useState({ headline: '', youtubeUrl: '', ctaLabel: '', ctaUrl: '', mindMapLink: '' });
       const [assemblyStatus, setAssemblyStatus] = useState(null);
       const [assembledReadyStack, setAssembledReadyStack] = useState(null);
+      const [taskRows, setTaskRows] = useState(null);
+      const [isGeneratingTaskRows, setIsGeneratingTaskRows] = useState(false);
+      const [taskRowSource, setTaskRowSource] = useState(null);
       const [playbackProgress, setPlaybackProgress] = useState(0);
       const [isNarrativePlaying, setIsNarrativePlaying] = useState(false);
       const narrativeInterval = useRef(null);
@@ -476,6 +638,14 @@
       const [rosterFilter, setRosterFilter] = useState('All');
       // showRosterPanel removed — pills now populate directly
 
+      // Accordion toggles for Residents tab sections
+      const [showTasks, setShowTasks] = useState(false);
+      const [showRoles, setShowRoles] = useState(false);
+      const [showResidents, setShowResidents] = useState(true);
+      // Accordion toggles for Resident Links tab sections
+      const [showDistrictIdentity, setShowDistrictIdentity] = useState(false);
+      const [showDistrictMap, setShowDistrictMap] = useState(true);
+
       // === INVITATION SYSTEM STATE ===
       const [districtRole, setDistrictRole] = useState(null); // 'creator' | 'resident' | null
       const [residentEmail, setResidentEmail] = useState(null); // authenticated resident's email
@@ -486,6 +656,20 @@
       const [residentSortBy, setResidentSortBy] = useState('recent'); // 'recent' | 'name' | 'status' | 'specialty' | 'company'
       const [inviteExpiryDays, setInviteExpiryDays] = useState(7); // configurable invite link validity (default 7d per Jay)
       const [isInviteMode, setIsInviteMode] = useState(false); // true when arrived via invite URL (pre-auth)
+      const [isLearningMode, setIsLearningMode] = useState(false); // true when ?mode=learn (fixture-based demo tour)
+      const [learningStepIdx, setLearningStepIdx] = useState(0); // current guided step index in LEARNING_STEPS
+      const [learningIntense, setLearningIntense] = useState(false); // true after 15s fallback
+
+      // Navigation helpers for GuidedPromptCard carets
+      const goLearningStep = (dir) => {
+        const next = learningStepIdx + dir;
+        if (next >= 0 && next < LEARNING_STEPS.length) {
+          setLearningStepIdx(next);
+          setActiveTab(LEARNING_STEPS[next].key);
+          setLearningIntense(false);
+        }
+      };
+      const [dismissedInfoCards, setDismissedInfoCards] = useState({}); // { finance: true, ... } for ops sections
       const isResident = districtRole === 'resident';
       const isCreator = districtRole === 'creator' || !districtRole; // default to creator for backward compat
 
@@ -911,6 +1095,16 @@
 
       useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [activeTab]);
 
+      // ── Learning Mode: sync guided step with active tab + 15s intensity timer ──
+      useEffect(() => {
+        if (!isLearningMode) return;
+        const stepIdx = LEARNING_STEPS.findIndex(s => s.key === activeTab);
+        if (stepIdx >= 0) { setLearningStepIdx(stepIdx); setLearningIntense(false); }
+        // 15-second fallback: intensify prompt if user hasn't navigated
+        const timer = setTimeout(() => { if (isLearningMode) setLearningIntense(true); }, 15000);
+        return () => clearTimeout(timer);
+      }, [activeTab, isLearningMode]);
+
       // District Assembly: pre-populate hero fields from upstream data on first tab visit
       useEffect(() => {
         if (activeTab === 'preview' && heroFields.headline === '') {
@@ -962,15 +1156,6 @@
 
       useEffect(() => {
         // ── Wix postMessage fallback: if params arrive after mount, re-run ──
-        const handleWixParams = () => {
-          // Re-read params (URL was updated by the postMessage handler)
-          const freshParams = new URLSearchParams(window.location.search);
-          if (freshParams.get('invite') || freshParams.get('rs_session')) {
-            window.location.reload();  // Cleanest way to re-initialize with new params
-          }
-        };
-        window.addEventListener('wixParamsReady', handleWixParams);
-
         const params    = new URLSearchParams(window.location.search);
         const sessionId = params.get('rs_session');
         const email     = params.get('rs_email');
@@ -980,6 +1165,41 @@
         const urlInviteToken = params.get('invite');
         const urlNodeIdx = params.get('node');
         const isInviteModeUrl = !!urlInviteToken;
+
+        // ── LEARNING MODE: Load fixture data from local learning-district.json ──
+        const urlLearningMode = params.get('mode') === 'learn';
+
+        const handleWixParams = () => {
+          // Re-read params (URL was updated by the postMessage handler)
+          const freshParams = new URLSearchParams(window.location.search);
+          // Only reload if params are NEW — prevents infinite loop after Wix re-sends on iframe reload
+          const hasNewInvite = freshParams.get('invite') && !urlInviteToken;
+          const hasNewSession = freshParams.get('rs_session') && !sessionId;
+          const hasNewLearnMode = freshParams.get('mode') === 'learn' && !urlLearningMode;
+          if (hasNewInvite || hasNewSession || hasNewLearnMode) {
+            window.location.reload();  // Cleanest way to re-initialize with new params
+          }
+        };
+        window.addEventListener('wixParamsReady', handleWixParams);
+        if (urlLearningMode) {
+          (async () => {
+            try {
+              const res = await fetch('./learning-district.json');
+              const d = await res.json();
+              if (d.districtName) setStackLabel(d.districtName);
+              if (d.selectedVideoData) setSelectedVideoData(d.selectedVideoData);
+              if (d.youtubeEmbedUrl) setYoutubeEmbedUrl(d.youtubeEmbedUrl);
+              if (d.videoStory) setVideoStory(d.videoStory);
+              if (d.storyParticipants) setStoryParticipants(d.storyParticipants);
+              if (d.mapping) setMapping(d.mapping);
+              if (d.heroFields) setHeroFields(d.heroFields);
+              if (d.activeTab) setActiveTab(d.activeTab);
+              setIsSearchPanelOpen(false);   // show selected video, not search bar
+              setIsLearningMode(true);
+            } catch (e) { console.warn('Learning fixture load failed:', e); }
+          })();
+          return; // skip normal auth flow
+        }
 
         // ── INVITE MODE (pre-auth): Load district + show District Ecosystem ──
         if (isInviteModeUrl && urlSheet) {
@@ -1019,7 +1239,7 @@
                 if (districtData.districtName) setStackLabel(districtData.districtName);
                 if (districtData.mapping) setMapping(districtData.mapping);
                 if (districtData.storyParticipants) setStoryParticipants(districtData.storyParticipants);
-                if (districtData.videoData) setVideoData(districtData.videoData);
+                if (districtData.videoData) setSelectedVideoData(districtData.videoData);
                 if (districtData.videoStory) setVideoStory(districtData.videoStory);
               }
             }).catch(err => {
@@ -1040,6 +1260,32 @@
           localStorage.setItem('rs_email',   email);
           setRsSession({ sessionId, email });
           window.history.replaceState({}, '', window.location.pathname);
+
+          // ── If this is the OAuth popup tab, send session to the opener iframe via postMessage ──
+          // Chrome's third-party storage partitioning means the Wix iframe has a SEPARATE
+          // localStorage partition from this top-level tab. The storage event won't bridge
+          // the gap, so we use window.opener.postMessage() to send credentials directly.
+          if (window.parent === window && window.opener) {
+            try {
+              window.opener.postMessage({
+                type: 'oauthComplete',
+                sessionId: sessionId,
+                email: email
+              }, '*');
+            } catch (e) { console.warn('postMessage to opener failed:', e); }
+            // Give the message a moment to deliver, then close this tab
+            setTimeout(() => {
+              try { window.close(); } catch(e) {}
+              // If close was blocked, redirect to readystack.ai
+              setTimeout(() => {
+                window.location.href = 'https://www.readystack.ai/storyteller';
+              }, 300);
+            }, 200);
+            return;
+          } else if (window.parent === window) {
+            // Top-level tab but no opener (e.g. user navigated directly with params)
+            // Just continue normal initialization
+          }
 
           // ── Check for pending invite from /join page ──
           const pendingInvite = localStorage.getItem('rs_pending_invite');
@@ -1103,7 +1349,36 @@
           }
         }
 
-        return () => window.removeEventListener('wixParamsReady', handleWixParams);
+        // ── Cross-tab auth detection via postMessage ──
+        // Chrome's third-party storage partitioning gives the Wix iframe a separate
+        // localStorage from top-level GitHub Pages tabs. So the OAuth popup tab sends
+        // the session directly via window.opener.postMessage() instead.
+        const handleAuthMessage = (e) => {
+          if (e.data && e.data.type === 'oauthComplete' && e.data.sessionId && e.data.email) {
+            // Save to the iframe's partitioned localStorage so it persists across reloads
+            localStorage.setItem('rs_session', e.data.sessionId);
+            localStorage.setItem('rs_email',   e.data.email);
+            setRsSession({ sessionId: e.data.sessionId, email: e.data.email });
+          }
+        };
+        window.addEventListener('message', handleAuthMessage);
+
+        // Keep storage event as fallback for direct GitHub Pages access (non-iframe)
+        const handleStorageAuth = (e) => {
+          if (e.key === 'rs_session' && e.newValue && !rsSession) {
+            const storedEmail = localStorage.getItem('rs_email');
+            if (storedEmail) {
+              setRsSession({ sessionId: e.newValue, email: storedEmail });
+            }
+          }
+        };
+        window.addEventListener('storage', handleStorageAuth);
+
+        return () => {
+          window.removeEventListener('wixParamsReady', handleWixParams);
+          window.removeEventListener('message', handleAuthMessage);
+          window.removeEventListener('storage', handleStorageAuth);
+        };
       }, []);
 
       const closeTimeoutRef = useRef(null);
@@ -1295,11 +1570,21 @@
       // Start Google OAuth flow
       const initiateGoogleAuth = async () => {
         persistAppState();
-        const returnUrl   = window.location.href;
+        // When embedded in a Wix iframe, window.location.href returns the Wix file-hosting
+        // URL (filesusr.com) which blocks direct browser navigation. So we always redirect
+        // After OAuth, redirect back to the Wix-hosted Storyteller page so the
+        // session params (rs_session, rs_email) arrive as query params on the
+        // real URL.  The Velo code forwards them into the iframe.
+        const returnUrl = (window.parent !== window)
+          ? 'https://www.readystack.ai/storyteller'
+          : window.location.href;
         const { authUrl } = await callAdvisor('initGoogleAuth', { data: { returnUrl } });
-        // Google blocks OAuth inside iframes — open in new tab when embedded
+        // Google blocks OAuth inside iframes — open sized popup when embedded
         if (window.parent !== window) {
-          window.open(authUrl, '_blank');
+          const w = 500, h = 650;
+          const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+          const top = Math.round(window.screenY + (window.outerHeight - h) / 2);
+          window.open(authUrl, 'google-auth', `width=${w},height=${h},left=${left},top=${top},menubar=no,toolbar=no,location=yes,status=no`);
         } else {
           window.location.href = authUrl;
         }
@@ -1320,7 +1605,9 @@
             const subStatus = await callAdvisor('checkSubscription', {}, overrideSessionId);
             if (subStatus.limit && subStatus.districtCount >= subStatus.limit && !subStatus.subscribed) {
               // Free tier limit reached - redirect to Stripe checkout
-              const returnUrl = window.location.href.split('?')[0];
+              const returnUrl = (window.parent !== window)
+                ? 'https://www.readystack.ai/storyteller'
+                : window.location.href.split('?')[0];
               const { url } = await callAdvisor('createCheckoutSession', {
                 data: { returnUrl }
               }, overrideSessionId);
@@ -1577,7 +1864,7 @@
         setIsSearchPanelOpen(false);
         // Update YouTube source in mapping with actual video data
         setMapping(prev => {
-          const ytIdx = prev.sources.findIndex(s => s.type === 'youtube');
+          const ytIdx = (prev.sources || []).findIndex(s => s.type === 'youtube');
           const ytSource = {
             ven: 'YouTube',
             lab: (video.snippet?.title || 'Strategy Video').substring(0, 40),
@@ -1587,11 +1874,11 @@
             ga4Count: parseInt(video.statistics?.viewCount) || 18420
           };
           if (ytIdx >= 0) {
-            const next = [...prev.sources];
+            const next = [...(prev.sources || [])];
             next[ytIdx] = ytSource;
             return { ...prev, sources: next };
           }
-          return { ...prev, sources: [ytSource, ...prev.sources] };
+          return { ...prev, sources: [ytSource, ...(prev.sources || [])] };
         });
         // Go straight into full story generation — no intermediate step
         setIsGeneratingStory(true);
@@ -1602,10 +1889,10 @@
                 contentText += `\nTRANSCRIPT:\n${transcript.substring(0, 5000)}`;
             }
             const systemPrompt = `You are a ReadyStack strategist. Your job is to analyze a YouTube video transcript and produce a ReadyStack Narrative.
-        A ReadyStack is a hosted, shareable asset that combines an anchor video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
+        A ReadyStack is a hosted, shareable asset that combines an source video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
         Produce the following based strictly on the transcript provided:
         1. Title: A compelling name for this ReadyStack — grounded and descriptive, no hyperbole or cheesy marketing language.
-        2. District Name: A short name (3-8 words) for this Dark Market District. This must be a plain-language description of the core problem the district addresses. Rules:
+        2. District Name: A short name (3-8 words) for this Market District. This must be a plain-language description of the core problem the district addresses. Rules:
            - Grounded and descriptive. Think file names, not headlines.
            - NO hyperbole: never use words like "greatest", "unstoppable", "revolutionary", "ultimate", "game-changing", "cutting-edge", "next-gen", or similar marketing language.
            - NO generic filler: never use "growth engine", "success blueprint", "opportunity", "transformation", or vague business jargon.
@@ -1681,10 +1968,10 @@
         }
 
         const systemPrompt = `You are a ReadyStack strategist. Your job is to analyze a YouTube video transcript and produce a ReadyStack Narrative.
-        A ReadyStack is a hosted, shareable asset that combines an anchor video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
+        A ReadyStack is a hosted, shareable asset that combines an source video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
         Produce the following based strictly on the transcript provided:
         1. Title: A compelling name for this ReadyStack — grounded and descriptive, no hyperbole or cheesy marketing language.
-        2. District Name: A short name (3-8 words) for this Dark Market District. This must be a plain-language description of the core problem the district addresses. Rules:
+        2. District Name: A short name (3-8 words) for this Market District. This must be a plain-language description of the core problem the district addresses. Rules:
            - Grounded and descriptive. Think file names, not headlines.
            - NO hyperbole: never use words like "greatest", "unstoppable", "revolutionary", "ultimate", "game-changing", "cutting-edge", "next-gen", or similar marketing language.
            - NO generic filler: never use "growth engine", "success blueprint", "opportunity", "transformation", or vague business jargon.
@@ -1780,7 +2067,7 @@
         const rsExecuting = [ { ven: 'ReadyStack', lab: 'Copy ReadyStack', platform: 'starting', dedicated: true, internal: true, ga4Count: 3400 }, { ven: 'ReadyStack', lab: 'Upload Data', platform: 'uploads', dedicated: true, internal: true, ga4Count: 1200 }, { id: 'rs-api', ven: 'ReadyStack', lab: 'ReadyStack Activation', platform: 'api_config', dedicated: true, internal: true, ga4Count: 4500 }, { id: 'rs-commerce', ven: 'ReadyStack', lab: 'ReadyStack Checkout', platform: 'commerce', dedicated: true, internal: true, price: 1200, ga4Count: 1200 } ];
         const rsExpanding = [ { ven: 'ReadyStack', lab: 'Shares ReadyStack', platform: 'network_invite', dedicated: true, internal: true, ga4Count: 1200 }, { ven: 'ReadyStack', lab: 'Check ReadyStack Earnings', platform: 'deposits', dedicated: true, internal: true, ga4Count: 2300 }, { ven: 'ReadyStack', lab: 'Schedules ReadyStack Onboarding', platform: 'success', dedicated: true, internal: true, ga4Count: 3400 } ];
 
-        // Angels are managed directly in District Finance — preserve them as-is
+        // Angels are managed directly in District Capital — preserve them as-is
         setMapping(prev => {
             const manualLearning = prev.learning ? prev.learning.filter(p => p.isManual) : [];
             const manualSelecting = prev.selecting ? prev.selecting.filter(p => p.isManual) : [];
@@ -1833,7 +2120,7 @@
         const narrativeScale = obsMode === 'narrative' ? (1 + (playbackProgress * 0.05)) : 1;
         const driftFactor = obsMode === 'narrative' ? (playbackProgress * 2.5) : 0;
         const getStableJitter = (id, amount = 35) => { const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0); return ((hash % 100) / 100 - 0.5) * amount; };
-        const totalMonthlyTraffic = mapping.sources.reduce((acc, s) => acc + (s.ga4Count || 18420), 0);
+        const totalMonthlyTraffic = (mapping.sources || []).reduce((acc, s) => acc + (s.ga4Count || 18420), 0);
         const timeMultiplier = lookerPeriod === '30' ? 1 : (lookerPeriod === '90' ? 3 : 12);
         const scaledTraffic = totalMonthlyTraffic * timeMultiplier;
 
@@ -2220,7 +2507,7 @@
                       >
                         {/* Account info */}
                         <div className="px-4 py-3 border-b border-white/10">
-                          <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">Dark Market District</p>
+                          <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">Market District</p>
                           <p className="text-sm text-white font-medium mt-0.5 truncate">{rsSession.email}</p>
                         </div>
 
@@ -2267,7 +2554,7 @@
               </button>
               <div className="bg-white/10 p-2 rounded-lg flex items-center justify-center border border-white/20"><DistrictSquareIcon size={20} /></div>
               <div className="text-left">
-                <h2 className="text-2xl font-black text-white italic uppercase leading-none tracking-tighter">Dark Market District</h2>
+                <h2 className="text-2xl font-black text-white italic uppercase leading-none tracking-tighter">Market District</h2>
               </div>
             </div>
           </div>
@@ -2278,7 +2565,7 @@
             <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
 
               {/* NEW MY DISTRICTS SECTION — hidden in invite mode */}
-              {!isInviteMode && <div className="mb-6 border-b border-white/10 pb-6">
+              {!isInviteMode && !isLearningMode && <div className="mb-6 border-b border-white/10 pb-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">My Districts</h3>
                   {rsSession && (
@@ -2370,12 +2657,14 @@
                 </div>
                 <div className="space-y-3 mb-6">
                 {[
-                  { id: 'youtube', label: 'Anchor Video', icon: 'play-circle' },
+                  { id: 'youtube', label: 'Source Video', icon: 'play-circle' },
+                  { id: 'execplan', label: 'Execution Plan', icon: 'clipboard' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
-                  ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }])
+                  ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }]),
+                  ...(isResident ? [] : [{ id: 'landing', label: 'District Product', icon: 'layout' }])
                 ].map(step => {
-                  const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
+                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'preview', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
@@ -2437,14 +2726,14 @@
                 {((isResident || isInviteMode) ? [
                   { id: 'observatory', label: 'District Ecosystem', icon: 'git-branch' }
                 ] : [
-                  { id: 'finance', label: 'District Finance', icon: 'dollar-sign' },
+                  { id: 'finance', label: 'District Capital', icon: 'dollar-sign' },
                   { id: 'observatory', label: 'District Ecosystem', icon: 'git-branch' },
                   { id: 'connect', label: 'My Residents', icon: 'send' },
                   { id: 'looker', label: 'Looker', icon: 'bar-chart-2' },
                   { id: 'g4', label: 'GA4', icon: 'activity' },
                   { id: 'analytics', label: 'Analytics', icon: 'trending-up' },
                 ]).map(step => {
-                  const railOrder = ['youtube', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
+                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
@@ -2543,8 +2832,8 @@
 
               {/* ── Work-area action buttons ── */}
               <div className="absolute top-20 right-6 z-[90] flex items-center gap-2">
-                {/* Save District — hidden for residents and invitees */}
-                {!isResident && !isInviteMode && (
+                {/* Save District — hidden for residents, invitees, and learning mode */}
+                {!isResident && !isInviteMode && !isLearningMode && (
                 <button
                   onClick={() => {
                     if (!rsSession) { initiateGoogleAuth(); return; }
@@ -2591,13 +2880,15 @@
             {/* ── TOP STEP NAVIGATION BAR (above everything) ── */}
             {(() => {
               const composeSteps = [
-                { id: 'youtube', label: 'Anchor Video', phase: 'compose' },
+                { id: 'youtube', label: 'Source Video', phase: 'compose' },
+                { id: 'execplan', label: 'Execution Plan', phase: 'compose' },
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
-                { id: 'preview', label: 'District Assembly', phase: 'compose' }
+                { id: 'preview', label: 'District Assembly', phase: 'compose' },
+                { id: 'landing', label: 'District Product', phase: 'compose' }
               ];
               const opsSteps = [
-                { id: 'finance', label: 'District Finance', phase: 'operations' },
+                { id: 'finance', label: 'District Capital', phase: 'operations' },
                 { id: 'observatory', label: 'District Ecosystem', phase: 'operations' },
                 { id: 'connect', label: 'My Residents', phase: 'operations' },
                 { id: 'looker', label: 'Looker', phase: 'operations' },
@@ -2644,8 +2935,7 @@
             {activeTab === 'youtube' && (
               <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
                   <div className="space-y-3 mb-6">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">ANCHOR VIDEO</h3>
-                      <p className="text-slate-300 text-base font-medium">Search YouTube for a video of the problem your audience faces. Your district exists to solve it.</p>
+                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter text-left">SOURCE VIDEO<InfoTooltip text="Search YouTube for a video of the problem your audience faces. Your district exists to solve it." /></h3>
                   </div>
 
                   {/* ── Platform Selector ── */}
@@ -2655,6 +2945,10 @@
                       YouTube
                     </button>
                   </div>
+
+                  {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'youtube' && (
+                    <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                  )}
 
                   <div className="bg-[#020617]/50 p-8 rounded-[32px] border border-white/5 shadow-inner space-y-6">
 
@@ -2673,7 +2967,7 @@
                               <div className="lg:col-span-2 space-y-4 pt-1 text-left">
                                 {videoStory && videoStory.checklist ? (
                                   <div className="animate-fade-in space-y-4">
-                                    <h4 className="text-sm font-bold text-white italic">In this ReadyStack</h4>
+                                    <h4 className="text-sm font-bold text-white italic">Highlights</h4>
                                     <ul className="space-y-3 text-slate-300 text-xs italic">
                                       {videoStory.checklist.map((item, idx) => (
                                         <li key={idx} className="flex items-start gap-2">
@@ -2683,20 +2977,20 @@
                                       ))}
                                     </ul>
                                     <div className="flex gap-2">
-                                      {!isResident && !isInviteMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
-                                      <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
+                                      {!isResident && !isInviteMode && !isLearningMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
+                                      <button onClick={() => setActiveTab('execplan')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
                                 ) : (
                                   <div className="space-y-4">
                                     {isGeneratingStory ? (
                                       <div className="w-full py-4 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-black text-sm uppercase tracking-widest text-center animate-pulse">Drafting Market Story...</div>
-                                    ) : !isResident && !isInviteMode ? (
+                                    ) : !isResident && !isInviteMode && !isLearningMode ? (
                                       <button onClick={generateStoryFromVideo} className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg">Re-Draft Market Story</button>
                                     ) : null}
                                     <div className="flex gap-2">
-                                      {!isResident && !isInviteMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
-                                      <button onClick={() => setActiveTab('intro')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
+                                      {!isResident && !isInviteMode && !isLearningMode && <button onClick={() => setIsSearchPanelOpen(true)} className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Change Video</button>}
+                                      <button onClick={() => setActiveTab('execplan')} className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">OK</button>
                                     </div>
                                   </div>
                                 )}
@@ -3004,25 +3298,44 @@
 
 
                     <div className="pt-12 text-center border-t border-white/5">
-                      <button onClick={() => setActiveTab('intro')} disabled={!youtubeEmbedUrl} className={`px-10 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-xs transition-all border ${!youtubeEmbedUrl ? 'opacity-30 cursor-not-allowed bg-[#020617] border-white/5' : 'bg-white/10 border-white/10 hover:bg-white/15'}`}>Continue to Residents</button>
+                      <button onClick={() => setActiveTab('execplan')} disabled={!youtubeEmbedUrl} className={`px-10 py-4 rounded-xl text-white uppercase font-black tracking-[0.15em] text-xs transition-all border ${!youtubeEmbedUrl ? 'opacity-30 cursor-not-allowed bg-[#020617] border-white/5' : 'bg-white/10 border-white/10 hover:bg-white/15'}`}>Continue to Execution Plan</button>
                     </div>
                   </div>
               </div>
             )}
-            {activeTab === 'intro' && (
+            {/* ══════════════════════════════════════════════════════════════════
+                 EXECUTION PLAN TAB — Tasks + Suggested Roles (AI-generated)
+                 ══════════════════════════════════════════════════════════════════ */}
+            {activeTab === 'execplan' && (
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
-                <div className="space-y-20">
-                    <div className="space-y-6">
-                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS</h3>
-                        <p className="text-slate-300 text-base font-medium">Review the tasks from the video and assemble a district to deepen the learning and help audiences execute lesson.</p>
+                <div className="space-y-6">
+                    <div className="space-y-4">
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>EXECUTION PLAN<InfoTooltip text="Review the tasks and roles AI generated from your source video. This is the operational blueprint for your district." /></h3>
+                        {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'execplan' && (
+                          <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                        )}
                         {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
                     </div>
 
-                    {/* ── TASKS: Actions + Automations from AI analysis ── */}
+                    {/* ── Empty state: no video processed yet ── */}
+                    {!videoStory && (
+                      <div className="border border-white/[0.06] rounded-2xl bg-[#0f172a]/30 px-8 py-8 text-center">
+                        <p className="text-slate-400 text-sm font-medium">Process a Source Video to unlock Tasks, Suggested Roles, and AI-generated district structure.</p>
+                        <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Source Video →</button>
+                      </div>
+                    )}
+
+                    {/* ── TASKS: Actions + Automations from AI analysis (accordion) ── */}
                     {videoStory && (videoStory.checklist || videoStory.automations) && (
-                      <div className="space-y-6">
-                        <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
-                        <p className="text-slate-300 text-sm">Setup tasks and automations derived from your market story. These will populate the District Assembly and JSON export.</p>
+                      <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                        <button onClick={() => setShowTasks(!showTasks)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                          <div>
+                            <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
+                            <p className="text-slate-500 text-xs mt-1">Actions and automations from the Source Video</p>
+                          </div>
+                          <svg className={`w-4 h-4 text-slate-400 transition-transform ${showTasks ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        {showTasks && <div className="px-8 py-6 space-y-4">
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
@@ -3047,14 +3360,21 @@
                             </div>
                           </div>
                         </div>
+                      </div>}
                       </div>
                     )}
 
-                    {/* ── SUGGESTED ROLES: Click to assign to a participant (creator only) ── */}
-                    {!isInviteMode && videoStory && videoStory.network && (
-                      <div className="space-y-4">
-                        <h5 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Suggested Roles</h5>
-                        <p className="text-slate-500 text-xs">Click a role to assign it to a participant slot.</p>
+                    {/* ── SUGGESTED ROLES: accordion (creator only, hidden in learning mode) ── */}
+                    {!isInviteMode && !isLearningMode && videoStory && videoStory.network && (
+                      <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                        <button onClick={() => setShowRoles(!showRoles)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                          <div>
+                            <h5 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Suggested Roles</h5>
+                            <p className="text-slate-500 text-xs mt-1">Click a role to assign it to a resident slot</p>
+                          </div>
+                          <svg className={`w-4 h-4 text-slate-400 transition-transform ${showRoles ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        {showRoles && <div className="px-8 py-6">
                         {(() => {
                           const allRoles = [
                             ...(videoStory.network.partners || []).map(p => ({ name: p })),
@@ -3086,16 +3406,49 @@
                             </div>
                           );
                         })()}
+                      </div>}
                       </div>
                     )}
 
-                    {/* ── CURRENT RESIDENTS (this district) ── */}
-                    <div>
-                        <div className="bg-slate-900/30 p-12 rounded-2xl border border-white/[0.04] text-left">
-                            <div className="flex items-center justify-between mb-10">
-                              <h5 className="text-sm font-bold text-white uppercase tracking-widest" style={{fontFamily:'Poppins,sans-serif'}}>Participants</h5>
-                              <span className="text-xs text-slate-300">{storyParticipants.residents.filter(r => (r.name || '').trim()).length} added</span>
-                            </div>
+                    {/* ── Next: go to Residents ── */}
+                    <div className="text-center py-10"><button onClick={() => setActiveTab('intro')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">Add and manage participants for your district.</p></div>
+                </div>
+              </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════════════
+                 RESIDENTS TAB — Participant table only
+                 ══════════════════════════════════════════════════════════════════ */}
+            {activeTab === 'intro' && (
+              <div className="max-w-7xl mx-auto animate-fade-in pt-28">
+                <div className="space-y-6">
+                    <div className="space-y-4">
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENTS<InfoTooltip text="Add and manage the participants who will execute your district." /></h3>
+                        {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'intro' && (
+                          <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                        )}
+                        {storyError && (<div className="bg-red-500/10 border border-red-500/50 p-4 rounded-2xl text-red-400 text-xs font-black uppercase tracking-widest animate-pulse max-w-lg mx-auto">{storyError}</div>)}
+                    </div>
+
+                    {/* ── Empty state: no participants yet ── */}
+                    {!videoStory && (
+                      <div className="border border-white/[0.06] rounded-2xl bg-[#0f172a]/30 px-8 py-8 text-center">
+                        <p className="text-slate-400 text-sm font-medium">Process a Source Video first, then review your Execution Plan to see suggested roles before adding participants.</p>
+                        <button onClick={() => setActiveTab('execplan')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Execution Plan →</button>
+                      </div>
+                    )}
+
+                    {/* ── CURRENT RESIDENTS (accordion — open by default) ── */}
+                    <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                        <button onClick={() => setShowResidents(!showResidents)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                          <div className="flex items-center gap-4">
+                            <h5 className="text-sm font-bold text-white uppercase tracking-widest" style={{fontFamily:'Poppins,sans-serif'}}>Residents</h5>
+                            <span className="text-xs text-slate-400">{storyParticipants.residents.filter(r => (r.name || '').trim()).length} added</span>
+                          </div>
+                          <svg className={`w-4 h-4 text-slate-400 transition-transform ${showResidents ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        {showResidents && <div>
+                        <div className="bg-slate-900/30 p-12 rounded-2xl border-0 text-left">
 
                             {/* Specialty filter pills with headcount */}
                             <div className="flex flex-wrap gap-3 mb-10">
@@ -3129,7 +3482,7 @@
                                   return (
                                     <div className="flex flex-col items-center justify-center py-8">
                                       <p className="text-slate-300 text-xs mb-3">No suggestions for {rosterFilter.split(' / ')[0]} yet.</p>
-                                      {!isInviteMode && <button onClick={() => setActiveTab('connect')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors underline underline-offset-2">Invite someone</button>}
+                                      {!isInviteMode && !isLearningMode && <button onClick={() => setActiveTab('connect')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors underline underline-offset-2">Invite someone</button>}
                                     </div>
                                   );
                                 }
@@ -3147,36 +3500,37 @@
 
                                 return (
                                   <div className="space-y-3">
-                                    <p className="text-xs text-slate-300 tracking-wide">{isInviteMode ? 'Residents by specialty' : 'Click a name to add'}</p>
+                                    <p className="text-xs text-slate-300 tracking-wide">{(isInviteMode || isLearningMode) ? 'Residents by specialty' : 'Click a name to add'}</p>
                                     <div className="flex flex-wrap gap-2">
                                       {candidates.map((c, ci) => {
                                         const isSelected = activeNames.includes(c.name.toLowerCase());
                                         return (
-                                          <button key={ci} onClick={() => !isInviteMode && addCandidate(c)} disabled={isSelected || isInviteMode}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isSelected ? 'bg-white/5 text-slate-300 cursor-default' : isInviteMode ? 'bg-white/[0.06] text-slate-300 border border-white/[0.06] cursor-default' : 'bg-white/[0.06] text-slate-300 hover:bg-white/10 hover:text-white border border-white/[0.06] hover:border-white/15'}`}>
+                                          <button key={ci} onClick={() => !isInviteMode && !isLearningMode && addCandidate(c)} disabled={isSelected || isInviteMode || isLearningMode}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isSelected ? 'bg-white/5 text-slate-300 cursor-default' : (isInviteMode || isLearningMode) ? 'bg-white/[0.06] text-slate-300 border border-white/[0.06] cursor-default' : 'bg-white/[0.06] text-slate-300 hover:bg-white/10 hover:text-white border border-white/[0.06] hover:border-white/15'}`}>
                                             {c.name}{isSelected ? ' ✓' : ''}
                                           </button>
                                         );
                                       })}
                                     </div>
-                                    {!isInviteMode && <button onClick={() => setActiveTab('connect')} className="text-xs text-slate-300 hover:text-slate-300 transition-colors">Don't see someone? Invite them →</button>}
+                                    {!isInviteMode && !isLearningMode && <button onClick={() => setActiveTab('connect')} className="text-xs text-slate-300 hover:text-slate-300 transition-colors">Don't see someone? Invite them →</button>}
                                   </div>
                                 );
                               }
 
                               // ALL MODE — editable rows
                               return (<>
-                              <div className="flex gap-2 mb-6 px-1">
-                                <span className={`${(isResident || isInviteMode) ? 'w-[30%]' : 'w-[22%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Name</span>
+                              <div className="flex gap-2 mb-6 px-1 items-center">
+                                {!isResident && !isInviteMode && !isLearningMode && <span className="w-8 flex-shrink-0"></span>}
+                                <span className={`${(isResident || isInviteMode || isLearningMode) ? 'w-[30%]' : 'w-[22%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Name</span>
                                 <span className="w-[18%] text-xs font-medium text-slate-300 uppercase tracking-wider">Company</span>
-                                <span className={`${(isResident || isInviteMode) ? 'w-[30%]' : 'w-[25%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Specialty</span>
-                                {!isResident && !isInviteMode && (
+                                <span className={`${(isResident || isInviteMode || isLearningMode) ? 'w-[30%]' : 'w-[25%]'} text-xs font-medium text-slate-300 uppercase tracking-wider`}>Specialty</span>
+                                {!isResident && !isInviteMode && !isLearningMode && (
                                   <span className="w-[17%] text-xs font-medium text-slate-300 uppercase tracking-wider">Email</span>
                                 )}
-                                {!isResident && !isInviteMode && rsSession && rsSheetId && (
+                                {!isResident && !isInviteMode && !isLearningMode && rsSession && rsSheetId && (
                                   <span className="w-[13%] text-xs font-medium text-slate-300 uppercase tracking-wider text-center">Invite</span>
                                 )}
-                                {!isResident && !isInviteMode && (
+                                {!isResident && !isInviteMode && !isLearningMode && (
                                   <span className="w-[5%]"></span>
                                 )}
                               </div>
@@ -3191,7 +3545,7 @@
                                 return (
                                 <div key={i} className={`space-y-1.5 ${isResident && residentEmail && (r.email || '').toLowerCase() === residentEmail.toLowerCase() ? 'ring-1 ring-indigo-500/30 rounded-xl p-2 bg-indigo-500/5' : ''}`}>
                                   <div className="flex gap-2 items-center group">
-                                    {(isResident || isInviteMode) ? (
+                                    {(isResident || isInviteMode || isLearningMode) ? (
                                       <>
                                         <div className="w-[30%] min-w-0 px-4 py-3 text-sm text-white truncate flex items-center gap-2">
                                           {(() => {
@@ -3220,16 +3574,22 @@
                                       </>
                                     ) : (
                                       <>
-                                        {(() => {
-                                          const profile = profilesData.find(p => p.email && r.email && p.email.toLowerCase() === r.email.toLowerCase());
-                                          return profile?.photoUrl ? (
-                                            <img src={profile.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" referrerPolicy="no-referrer" />
-                                          ) : hasName ? (
-                                            <div className="w-7 h-7 rounded-full bg-slate-600 flex items-center justify-center text-[10px] font-bold text-white uppercase flex-shrink-0">
-                                              {(r.name || '?')[0]}
-                                            </div>
-                                          ) : null;
-                                        })()}
+                                        <div className="w-8 flex-shrink-0 flex items-center justify-center">
+                                          {(() => {
+                                            const profile = profilesData.find(p => p.email && r.email && p.email.toLowerCase() === r.email.toLowerCase());
+                                            return profile?.photoUrl ? (
+                                              <img src={profile.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover" referrerPolicy="no-referrer" />
+                                            ) : hasName ? (
+                                              <div className="w-7 h-7 rounded-full bg-slate-600 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                                                {(r.name || '?')[0]}
+                                              </div>
+                                            ) : (
+                                              <div className="w-7 h-7 rounded-full bg-[#64748b]/20 flex items-center justify-center">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-slate-600"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                              </div>
+                                            );
+                                          })()}
+                                        </div>
                                         <input placeholder={`Participant ${i+1}`} value={r.name} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], name: v}; return {...prev, residents: next}; }); }} className={`w-[22%] min-w-0 bg-[#020617]/80 border rounded-lg px-4 py-3 text-sm text-white focus:border-slate-600 outline-none ${r.jobContext && !hasName ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-slate-800/60'}`} />
                                         <input placeholder="company" value={r.company} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], company: v}; return {...prev, residents: next}; }); }} className="w-[18%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm text-slate-300 focus:border-slate-600 outline-none" />
                                         <select value={r.specialty} onChange={(e) => { const v = e.target.value; setStoryParticipants(prev => { const next = [...prev.residents]; next[i] = {...next[i], specialty: v}; return {...prev, residents: next}; }); }} className={`w-[25%] min-w-0 bg-[#020617]/80 border border-slate-800/60 rounded-lg px-4 py-3 text-sm outline-none cursor-pointer focus:border-slate-600 ${r.specialty ? 'text-white' : 'text-slate-300'}`}>
@@ -3309,7 +3669,7 @@
                                 );
                               })}
                               </div>
-                              {!isResident && !isInviteMode && (
+                              {!isResident && !isInviteMode && !isLearningMode && (
                               <div className="pt-4">
                                 <button onClick={() => {
                                   setStoryParticipants(prev => ({
@@ -3326,9 +3686,10 @@
                             })()}
 
                         </div>
+                    </div>}
                     </div>
 
-                    <div className="text-center py-10"><button onClick={() => (isResident || isInviteMode) ? setActiveTab('mapper') : buildStoryDistrict('mapper')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">{isInviteMode ? 'View the District Map.' : 'Confirming your residents unlocks the District Map.'}</p></div>
+                    <div className="text-center py-10"><button onClick={() => (isResident || isInviteMode || isLearningMode) ? setActiveTab('mapper') : buildStoryDistrict('mapper')} className="bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-white/20 px-12 py-4 rounded-lg text-white uppercase font-semibold tracking-[0.15em] text-xs transition-all">Next</button><p className="text-xs text-slate-300 font-medium tracking-wide mt-3">{(isInviteMode || isLearningMode) ? 'View the District Map.' : 'Confirming your residents unlocks the District Map.'}</p></div>
                 </div>
               </div>
             )}
@@ -3336,12 +3697,23 @@
             {activeTab === 'mapper' && (
               <div className="space-y-12 animate-fade-in text-left pt-28">
                 <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENT LINKS</h3>
-                    <p className="text-slate-300 text-base font-medium">Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>RESIDENT LINKS<InfoTooltip text="Map the engagement items each resident brings to your district. Every link is a touchpoint in your audience's journey." /></h3>
+                    {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'mapper' && (
+                      <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                    )}
                 </div>
-                {/* ── District Identity Card — hidden for residents & invitees ── */}
-                {!isResident && !isInviteMode && (
-                <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner">
+                {/* ── District Identity Card — accordion, hidden for residents, invitees & learning mode ── */}
+                {!isResident && !isInviteMode && !isLearningMode && (
+                <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                  <button onClick={() => setShowDistrictIdentity(!showDistrictIdentity)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                    <div>
+                      <h5 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">District Identity</h5>
+                      <p className="text-slate-500 text-xs mt-1">ReadyStack name, landing page URL, and GA4 ID</p>
+                    </div>
+                    <svg className={`w-4 h-4 text-slate-400 transition-transform ${showDistrictIdentity ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  {showDistrictIdentity && <div className="px-8 py-6">
+                  <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner">
                     <div className="grid md:grid-cols-3 gap-6">
                         <div className="space-y-4">
                             <label className="text-xs font-black text-slate-300 uppercase tracking-widest">READYSTACK NAME</label>
@@ -3356,15 +3728,22 @@
                             <input type="text" value={ga4Id} onChange={(e) => setGa4Id(e.target.value)} className="w-full bg-[#020617] border border-slate-800 rounded-xl p-4 text-xs text-white focus:border-indigo-500 outline-none transition-colors" />
                         </div>
                     </div>
+                  </div>
+                  </div>}
                 </div>
                 )}
 
-                {/* ── LINKS: Resident rows × 4 journey columns ── */}
-                <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner space-y-8">
-                    <div className="border-b border-white/5 pb-6">
-                        <h4 className="text-[14px] font-black text-indigo-400 uppercase tracking-[0.2em] italic">DISTRICT MAP</h4>
-                        <p className="text-slate-300 text-sm mt-2">Each participant gets a row. Add links to map their role across the journey.</p>
+                {/* ── LINKS: Resident rows × 4 journey columns (accordion) ── */}
+                <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                  <button onClick={() => setShowDistrictMap(!showDistrictMap)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
+                    <div>
+                      <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>District Map</h5>
+                      <p className="text-slate-500 text-xs mt-1">Each resident gets a row. Add links to map their role across the journey.</p>
                     </div>
+                    <svg className={`w-4 h-4 text-slate-400 transition-transform ${showDistrictMap ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  {showDistrictMap && <div>
+                <div className="bg-[#0f172a] p-10 rounded-[32px] border border-white/5 shadow-inner space-y-8">
 
                     {/* 5-Column Headers: Traffic + 4 Journey Stages */}
                     <div className="grid grid-cols-5 gap-2">
@@ -3394,9 +3773,8 @@
                       </div>
                       <div className="grid grid-cols-5 gap-2 items-start">
                         <div className="text-center py-2">
-                          <p className="text-[10px] font-bold text-white leading-snug">Pays 40% of</p>
-                          <p className="text-[10px] font-bold text-white leading-snug">Hosting Automation Fees</p>
-                          <p className="text-[10px] font-bold text-white leading-snug">to drive WOM</p>
+                          <p className="text-[10px] font-bold text-white leading-snug">Capital</p>
+                          <p className="text-[10px] font-bold text-white leading-snug">word-of-mouth</p>
                         </div>
                         {[
                           { key: 'learning', color: '#ff2a1a' },
@@ -3450,7 +3828,7 @@
                             <div className="flex items-center gap-3 mb-4">
                               <p className="text-sm font-bold text-white">{displayName}</p>
                               {resident.jobContext && (resident.name || '').trim() && <span className="text-xs font-semibold text-indigo-400 italic">{resident.jobContext}</span>}
-                              {!isResident && !isInviteMode && (<div className="relative">
+                              {!isResident && !isInviteMode && !isLearningMode && (<div className="relative">
                                 <button
                                   onClick={() => setMapEditingItem(mapEditingItem === 'dropdown-'+origIdx ? null : 'dropdown-'+origIdx)}
                                   className="bg-[#020617] border border-indigo-500/40 rounded-lg px-3 py-1.5 text-[10px] text-indigo-300 outline-none cursor-pointer hover:border-indigo-400 hover:text-indigo-200 transition-colors flex items-center gap-1"
@@ -3530,10 +3908,10 @@
                                       onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-t-'+ti ? null : origIdx+'-t-'+ti)}>
                                       <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-white"></span>
                                       <span className="text-[10px] text-white font-medium flex-1 truncate">{item.label}</span>
-                                      {!isResident && !isInviteMode && <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
+                                      {!isResident && !isInviteMode && !isLearningMode && <button onClick={(e) => { e.stopPropagation(); const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources.splice(item.srcIdx, 1); updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
                                         className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                     </div>
-                                    {mapEditingItem === origIdx+'-t-'+ti && !isResident && !isInviteMode && (
+                                    {mapEditingItem === origIdx+'-t-'+ti && !isResident && !isInviteMode && !isLearningMode && (
                                       <input autoFocus placeholder="https://..." value={item.url || ''} onChange={(e) => { const updated = [...storyParticipants.residents]; const sources = [...(updated[origIdx].trafficSources || [])]; sources[item.srcIdx] = { ...sources[item.srcIdx], url: e.target.value }; updated[origIdx] = { ...updated[origIdx], trafficSources: sources }; setStoryParticipants({ ...storyParticipants, residents: updated }); }}
                                         onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                         className="mt-1 w-full bg-[#020617] border border-slate-700 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none focus:border-indigo-500" />
@@ -3560,10 +3938,10 @@
                                           onClick={() => setMapEditingItem(mapEditingItem === origIdx+'-'+q.key+'-'+ii ? null : origIdx+'-'+q.key+'-'+ii)}>
                                           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.pat ? q.color : q.color + '60' }}></span>
                                           <span className="text-[10px] font-medium flex-1 truncate" style={{ color: item.pat ? '#e2e8f0' : '#cbd5e1' }}>{item.label}{!item.pat && <span className="text-[8px] text-amber-400/70 ml-1">needs link</span>}</span>
-                                          {!isResident && !isInviteMode && <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
+                                          {!isResident && !isInviteMode && !isLearningMode && <button onClick={(e) => { e.stopPropagation(); setMapping(prev => { const next = [...(prev[q.key] || [])]; next.splice(item.stageIdx, 1); return { ...prev, [q.key]: next }; }); }}
                                             className="text-slate-700 hover:text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>}
                                         </div>
-                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && !isResident && !isInviteMode && (
+                                        {mapEditingItem === origIdx+'-'+q.key+'-'+ii && !isResident && !isInviteMode && !isLearningMode && (
                                           <input autoFocus placeholder="https://..." value={item.pat || ''} onChange={(e) => { handlePatternUpdate(q.key, item.stageIdx, 'pat', e.target.value); }}
                                             onBlur={() => setMapEditingItem(null)} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
                                             className="mt-1 w-full bg-[#020617] border rounded-lg px-2.5 py-1.5 text-[10px] text-slate-300 outline-none" style={{ borderColor: q.color + '40' }} />
@@ -3580,6 +3958,8 @@
                     })()}
 
                 </div>
+                </div>}
+                </div>
 
                 <div className="py-12 text-center">
                     <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Assembly'}</button>
@@ -3590,10 +3970,12 @@
             {/* ── MY RESIDENTS TAB ── */}
             {activeTab === 'connect' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
+                {isLearningMode && !dismissedInfoCards.connect && (
+                  <SectionInfoCard title={OPERATIONS_INFO.connect.title} description={OPERATIONS_INFO.connect.description} onDismiss={() => setDismissedInfoCards(p => ({...p, connect: true}))} />
+                )}
                 <div className="space-y-12">
                   <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">MY RESIDENTS</h3>
-                    <p className="text-slate-300 text-base font-medium">Track who you've invited and their onboarding status.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">MY RESIDENTS<InfoTooltip text="Track who you've invited and their onboarding status." /></h3>
                   </div>
 
                   {(() => {
@@ -3618,7 +4000,7 @@
                           <div className="bg-[#0f172a]/60 p-10 rounded-[32px] border border-white/5 shadow-inner inline-block">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-slate-300 mx-auto mb-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
                             <p className="text-slate-300 text-base font-medium">Add participants to your district first, then invite them here.</p>
-                            <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Anchor Video</button>
+                            <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Source Video</button>
                           </div>
                         </div>
                       );
@@ -3792,8 +4174,10 @@
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
                 <div className="space-y-12">
                   <div className="space-y-4">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY</h3>
-                    <p className="text-slate-300 text-base font-medium">Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY<InfoTooltip text="Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack." /></h3>
+                    {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'preview' && (
+                      <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                    )}
                   </div>
 
                   {/* ══════════════════════════════════════════════════════════
@@ -3840,7 +4224,7 @@
                         <div className="flex gap-3">
                           <button className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">Copy</button>
                           {heroFields.mindMapLink && <button onClick={() => window.open(heroFields.mindMapLink, '_blank')} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">Mind Map</button>}
-                          <button className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors">Share for 40% Lifetime Income</button>
+                          <button className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors">Share for 40% Recurring Income</button>
                         </div>
                         {/* Two-column: video left + checklist right */}
                         <div className="flex gap-6">
@@ -3855,7 +4239,7 @@
                             )}
                           </div>
                           <div className="w-5/12">
-                            <p className="text-lg font-medium text-gray-900 mb-3">In this ReadyStack</p>
+                            <p className="text-lg font-medium text-gray-900 mb-3">Highlights</p>
                             {videoStory.checklist && videoStory.checklist.length > 0 ? (
                               <div className="space-y-1">
                                 {videoStory.checklist.map((item, i) => (
@@ -3869,7 +4253,7 @@
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-400 italic text-center py-8">No anchor video defined yet. Go back to Anchor Video to get started.</p>
+                      <p className="text-sm text-gray-400 italic text-center py-8">No source video defined yet. Go back to Source Video to get started.</p>
                     )}
                   </div>
 
@@ -4022,32 +4406,354 @@
                     )}
                   </div>
 
-                  {/* ── SECTION G: Compose Phase Gate (white theme) ── */}
+                  {/* ── SECTION G: Continue to Landing Page ── */}
+                  <div className="text-center py-8 space-y-6">
+                    <div>
+                      <button onClick={() => setActiveTab('landing')} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-xs">Continue to District Product</button>
+                    </div>
+                    <p className="text-xs text-gray-400 font-medium">Preview what your published ReadyStack will look like.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════
+                 STEP 5: FRONT DOOR
+                 Mirrors the live ReadyStack Preview at content.bridgemailsystem.com
+                 White theme scoped to this block only
+                 Data: heroFields, videoStory, storyParticipants, youtubeEmbedUrl, mapping
+               ══════════════════════════════════════════════════════════ */}
+            {activeTab === 'landing' && (
+              <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
+                <div className="space-y-12">
+                  <div className="space-y-4">
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>FRONT DOOR<InfoTooltip text="This is what your audience will see when you publish. Review it, then send to Studio." /></h3>
+                    {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'landing' && (
+                      <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                    )}
+                  </div>
+
+                  {/* ── Landing Page Preview Container (white theme) ── */}
+                  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+
+                    {/* ── Section 1: Header Bar ── */}
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-slate-900 to-slate-800">
+                      <div className="flex items-center gap-3">
+                        <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#7c3aed"/>
+                          <path d="M8 14l2-2 2 2 4-4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <div>
+                          <span className="text-white font-bold text-sm" style={{fontFamily:'Poppins,sans-serif'}}>ReadyStack</span>
+                          <span className="text-slate-400 text-xs ml-2 italic">Ideas worth running</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400 border border-slate-600 rounded px-3 py-1.5 font-medium">Show Me Around</span>
+                        <span className="text-xs text-slate-400 border border-slate-600 rounded px-3 py-1.5 font-medium">Earnings</span>
+                        <span className="text-xs text-slate-400 border border-slate-600 rounded px-3 py-1.5 font-medium">Login</span>
+                      </div>
+                    </div>
+
+                    {/* ── Section 2: Title ── */}
+                    <div className="px-8 pt-6 pb-2">
+                      <h2 className="text-2xl font-medium text-gray-900" style={{fontFamily:'Inter,sans-serif'}}>{heroFields.headline || videoStory?.title || 'Untitled ReadyStack'}</h2>
+                      <div className="mt-1 border-b border-gray-200"></div>
+                    </div>
+
+                    {/* ── Section 3: Action Buttons Row ── */}
+                    <div className="px-8 py-3 flex items-center gap-3">
+                      <button className="inline-flex items-center gap-2 px-4 py-2 rounded border-2 border-cyan-500 text-cyan-600 text-xs font-bold uppercase tracking-wider hover:bg-cyan-50 transition-colors">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        Copy
+                      </button>
+                      <button className="inline-flex items-center gap-2 px-4 py-2 rounded border-2 border-cyan-500 text-cyan-600 text-xs font-bold uppercase tracking-wider hover:bg-cyan-50 transition-colors">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="2"/><circle cx="20" cy="6" r="2"/><circle cx="4" cy="18" r="2"/><circle cx="20" cy="18" r="2"/><line x1="6" y1="6" x2="9" y2="10"/><line x1="18" y1="6" x2="15" y2="10"/><line x1="6" y1="18" x2="9" y2="14"/><line x1="18" y1="18" x2="15" y2="14"/></svg>
+                        Mind Map
+                      </button>
+                      <button className="inline-flex items-center gap-2 px-5 py-2 rounded text-white text-xs font-bold uppercase tracking-wider" style={{background:'linear-gradient(135deg, #10b981, #7c3aed)'}}>
+                        Share for 40% Recurring Income
+                      </button>
+                    </div>
+
+                    {/* ── Section 4: Main Content (two-column) ── */}
+                    <div className="px-8 py-4">
+                      <div className="flex gap-8">
+                        {/* Left Column: Video + Follow CTA */}
+                        <div className="w-7/12 space-y-4">
+                          {(heroFields.youtubeUrl || youtubeEmbedUrl) ? (
+                            <div className="aspect-video bg-black rounded overflow-hidden">
+                              <iframe src={heroFields.youtubeUrl || youtubeEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen title="ReadyStack Video"></iframe>
+                            </div>
+                          ) : (
+                            <div className="aspect-video bg-gray-100 rounded flex items-center justify-center">
+                              <p className="text-gray-400 text-sm">No video — add a YouTube URL in Source Video</p>
+                            </div>
+                          )}
+                          {/* Follow CTA */}
+                          <button className="w-full py-3 rounded text-white text-sm font-bold tracking-wide" style={{background:'linear-gradient(135deg, #6366f1, #7c3aed)'}}>
+                            {heroFields.ctaLabel || (storyParticipants.residents[0]?.name ? `Follow ${storyParticipants.residents[0].name}` : 'Follow Creator')}
+                          </button>
+                        </div>
+
+                        {/* Right Column: "Highlights" checklist */}
+                        <div className="w-5/12">
+                          <h3 className="text-lg font-normal text-gray-800 mb-4" style={{fontFamily:'Inter,sans-serif'}}>Highlights</h3>
+                          <div className="space-y-3">
+                            {videoStory?.checklist && videoStory.checklist.length > 0 ? (
+                              videoStory.checklist.map((item, i) => (
+                                <p key={i} className="text-purple-500 text-sm cursor-pointer hover:text-purple-700 transition-colors">{item}</p>
+                              ))
+                            ) : (
+                              <p className="text-gray-400 text-sm italic">No checklist items yet — analyze a video in Source Video to populate this.</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── Section 5: Collapsible Accordions ── */}
+                    <div className="px-8 py-4 space-y-2 border-t border-gray-100">
+
+                      {/* Tasks and Agents — 7-Column Table */}
+                      <details className="group" open>
+                        <summary className="flex items-center justify-between py-3 cursor-pointer">
+                          <div className="flex items-center gap-2 text-purple-600 font-bold text-sm hover:text-purple-800 transition-colors">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 transition-transform group-open:rotate-90"><path d="M9 18l6-6-6-6"/></svg>
+                            Tasks and Agents
+                          </div>
+                          {taskRowSource && <span className="text-[10px] text-gray-400 italic">Generated by {taskRowSource === 'claude' ? 'Claude' : taskRowSource === 'gemini-fallback' ? 'Gemini' : 'local data'}</span>}
+                        </summary>
+                        <div className="pb-4 space-y-4">
+
+                          {/* Generate button — shown when no taskRows yet */}
+                          {!taskRows && !isGeneratingTaskRows && (
+                            <div className="text-center py-6">
+                              <button onClick={async () => {
+                                setIsGeneratingTaskRows(true);
+                                try {
+                                  const result = await callAdvisor('generateTaskRows', {
+                                    districtData: { videoStory, storyParticipants, mapping, heroFields }
+                                  });
+                                  let text = result.text;
+                                  text = text.replace(/```json|```/g, '').trim();
+                                  const parsed = JSON.parse(text);
+                                  setTaskRows(parsed.taskRows || parsed);
+                                  setTaskRowSource(result.source || 'claude');
+                                } catch (err) {
+                                  console.error('Task row generation failed:', err);
+                                  setTaskRows([]);
+                                  setTaskRowSource('error');
+                                } finally {
+                                  setIsGeneratingTaskRows(false);
+                                }
+                              }} disabled={!videoStory?.checklist || videoStory.checklist.length === 0} className="px-6 py-3 bg-purple-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                                Generate Task Rows with AI
+                              </button>
+                              {(!videoStory?.checklist || videoStory.checklist.length === 0) && (
+                                <p className="text-gray-400 text-xs italic mt-3">No checklist items found. Go back to Source Video to generate your story.</p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Loading state */}
+                          {isGeneratingTaskRows && (
+                            <div className="text-center py-8">
+                              <div className="inline-block w-6 h-6 border-2 border-purple-300 border-t-purple-600 rounded-full animate-spin mb-3"></div>
+                              <p className="text-gray-500 text-xs font-medium">Generating execution matrix...</p>
+                            </div>
+                          )}
+
+                          {/* Task rows table */}
+                          {taskRows && taskRows.length > 0 && (
+                            <div className="space-y-6">
+                              {taskRows.map((row, rowIdx) => (
+                                <div key={rowIdx} className="border border-gray-200 rounded-lg overflow-hidden">
+                                  <div className="bg-purple-50 px-4 py-3 border-b border-purple-100">
+                                    <span className="text-xs font-black text-purple-700 uppercase tracking-wider">{row.actionItem}</span>
+                                  </div>
+                                  <div className="overflow-x-auto">
+                                    <table className="w-full text-xs">
+                                      <thead>
+                                        <tr className="bg-gray-50 border-b border-gray-200">
+                                          <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Task</th>
+                                          <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Trigger App</th>
+                                          <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Action App</th>
+                                          <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Setup</th>
+                                          <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Tutorial</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {(row.subtasks || []).map((sub, subIdx) => (
+                                          <tr key={subIdx} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                            <td className="px-3 py-2.5 font-medium text-gray-800">{sub.todo}</td>
+                                            <td className="px-3 py-2.5">{sub.triggerUrl ? <a href={sub.triggerUrl} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">{sub.triggerApp}</a> : <span className="text-gray-500">{sub.triggerApp || '—'}</span>}</td>
+                                            <td className="px-3 py-2.5">{sub.actionUrl ? <a href={sub.actionUrl} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">{sub.actionApp}</a> : <span className="text-gray-500">{sub.actionApp || 'Manual'}</span>}</td>
+                                            <td className="px-3 py-2.5">{sub.setupLink ? <a href={sub.setupLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Setup</a> : <span className="text-gray-300">—</span>}</td>
+                                            <td className="px-3 py-2.5">{sub.tutorialLink ? <a href={sub.tutorialLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Tutorial</a> : <span className="text-gray-300">—</span>}</td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              ))}
+
+                              {/* Regenerate button */}
+                              <div className="text-center pt-2">
+                                <button onClick={async () => {
+                                  setIsGeneratingTaskRows(true);
+                                  setTaskRows(null);
+                                  try {
+                                    const result = await callAdvisor('generateTaskRows', {
+                                      districtData: { videoStory, storyParticipants, mapping, heroFields }
+                                    });
+                                    let text = result.text;
+                                    text = text.replace(/```json|```/g, '').trim();
+                                    const parsed = JSON.parse(text);
+                                    setTaskRows(parsed.taskRows || parsed);
+                                    setTaskRowSource(result.source || 'claude');
+                                  } catch (err) {
+                                    console.error('Task row regeneration failed:', err);
+                                    setTaskRows([]);
+                                    setTaskRowSource('error');
+                                  } finally {
+                                    setIsGeneratingTaskRows(false);
+                                  }
+                                }} className="text-xs text-purple-500 hover:text-purple-700 font-bold uppercase tracking-wider transition-colors">
+                                  Regenerate
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Empty state after generation */}
+                          {taskRows && taskRows.length === 0 && taskRowSource !== 'error' && (
+                            <p className="text-gray-400 text-xs italic text-center py-4">No task rows generated. Try adding more detail to your Source Video story.</p>
+                          )}
+
+                          {/* Error state */}
+                          {taskRowSource === 'error' && (
+                            <div className="text-center py-4">
+                              <p className="text-red-400 text-xs font-medium mb-2">Task row generation failed. Please try again.</p>
+                              <button onClick={() => { setTaskRows(null); setTaskRowSource(null); }} className="text-xs text-purple-500 hover:text-purple-700 font-bold uppercase tracking-wider">Retry</button>
+                            </div>
+                          )}
+
+                        </div>
+                      </details>
+
+                      {/* Add or Remove contacts through Zapier */}
+                      <details className="group">
+                        <summary className="flex items-center gap-2 py-3 cursor-pointer text-purple-600 font-bold text-sm hover:text-purple-800 transition-colors">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 transition-transform group-open:rotate-90"><path d="M9 18l6-6-6-6"/></svg>
+                          Add or Remove contacts through Zapier
+                        </summary>
+                        <div className="pl-6 pb-4">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3 py-2 px-4 rounded border border-green-200 bg-green-50">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-green-600"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                              <span className="text-green-700 text-xs font-bold">Add Contacts to Workflow</span>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-green-600 ml-auto"><path d="M6 9l6 6 6-6"/></svg>
+                            </div>
+                            <div className="flex items-center gap-3 py-2 px-4 rounded border border-red-200 bg-red-50">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-red-600"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                              <span className="text-red-700 text-xs font-bold">Remove from Workflow</span>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-red-600 ml-auto"><path d="M6 9l6 6 6-6"/></svg>
+                            </div>
+                            <p className="text-gray-400 text-xs italic mt-2">Zapier integrations will be configured in Studio after publishing.</p>
+                          </div>
+                        </div>
+                      </details>
+
+                      {/* Hosted Automation Flow */}
+                      <details className="group">
+                        <summary className="flex items-center justify-between py-3 cursor-pointer">
+                          <div className="flex items-center gap-2 text-purple-600 font-bold text-sm hover:text-purple-800 transition-colors">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 transition-transform group-open:rotate-90"><path d="M9 18l6-6-6-6"/></svg>
+                            Hosted Automation Flow
+                          </div>
+                          <span className="text-xs text-white bg-purple-600 px-4 py-1.5 rounded font-bold tracking-wider">Schedule Free Onboarding</span>
+                        </summary>
+                        <div className="pl-6 pb-4">
+                          <div className="space-y-3 py-2">
+                            <div className="flex items-center gap-3 py-3 px-4 rounded border border-gray-200 bg-gray-50">
+                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Step 1:</span>
+                              <span className="text-xs text-gray-600">H2H automation steps will appear here after publishing</span>
+                            </div>
+                            <div className="flex items-center gap-3 py-3 px-4 rounded border border-gray-200 bg-gray-50">
+                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Step 2:</span>
+                              <span className="text-xs text-gray-600">Conditional paths, email/alert triggers, and timing rules</span>
+                            </div>
+                            <div className="flex items-center gap-3 py-3 px-4 rounded border border-gray-200 bg-gray-50">
+                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Step 3:</span>
+                              <span className="text-xs text-gray-600">Zapier triggers and scoring updates</span>
+                            </div>
+                            <p className="text-gray-400 text-xs italic mt-2">The Hosted Automation Flow will be fully configured in Studio.</p>
+                          </div>
+                        </div>
+                      </details>
+                    </div>
+
+                  </div>
+
+                  {/* ── Section 6: Send to Studio Gate ── */}
                   <div className="text-center py-8 space-y-6">
                     <div className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-green-50 border border-green-200">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-green-600"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
                       <span className="text-green-600 text-sm font-bold uppercase tracking-wider">Compose phase complete</span>
                     </div>
+                    <p className="text-gray-600 text-sm font-medium">This is what your ReadyStack will look like when published.</p>
                     <div>
-                      <button onClick={() => setActiveTab('finance')} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-xs">Continue to Operations</button>
+                      <button onClick={() => { /* stubbed — future: package JSON and send to Studio */ }} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-10 py-4 rounded-lg hover:bg-purple-700 transition-colors text-sm shadow-lg">Send to Studio</button>
                     </div>
-                    <p className="text-xs text-gray-400 font-medium">Your composed district will ship as JSON to ReadyStack when you're ready.</p>
+                    <p className="text-xs text-gray-400 font-medium">Your ReadyStack will be published at content.bridgemailsystem.com</p>
+                    <div className="pt-4">
+                      <button onClick={() => setActiveTab('finance')} className="text-xs text-purple-600 font-bold uppercase tracking-wider hover:text-purple-800 transition-colors">Continue to Operations →</button>
+                    </div>
                   </div>
+
                 </div>
               </div>
             )}
 
             {activeTab === 'finance' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
+                {isLearningMode && !dismissedInfoCards.finance && (
+                  <SectionInfoCard title={OPERATIONS_INFO.finance.title} description={OPERATIONS_INFO.finance.description} onDismiss={() => setDismissedInfoCards(p => ({...p, finance: true}))} />
+                )}
                 <div className="space-y-12">
                   <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT FINANCE</h3>
-                    <p className="text-slate-300 text-base font-medium">Manage angel participation and view your district revenue snapshot.</p>
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter">DISTRICT CAPITAL<InfoTooltip text="A district is an economy container — media, capital, and execution." /></h3>
+                  </div>
+
+                  {/* The Revenue Engine — 20/40/40 split display */}
+                  <div className="p-10 rounded-[32px] bg-[#0f172a]/60 border border-white/5 shadow-2xl">
+                    <h4 className="text-xs font-black text-white/70 uppercase tracking-widest mb-2">THE REVENUE ENGINE</h4>
+                    <p className="text-slate-400 text-sm mb-8">Every hosted automation fee a district generates is split three ways.</p>
+                    <div className="grid grid-cols-3 gap-6">
+                      <div className="bg-[#020617] rounded-xl p-6 border border-amber-500/20 text-center">
+                        <p className="text-xs font-black text-amber-400 uppercase tracking-widest mb-3">Founder's Share</p>
+                        <p className="text-4xl font-black text-white mb-3">20%</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">The founder owns 20% of every hosted automation fee — recurring, as long as participants stay active.</p>
+                      </div>
+                      <div className="bg-[#020617] rounded-xl p-6 border border-indigo-500/20 text-center">
+                        <p className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-3">Resident's Share</p>
+                        <p className="text-4xl font-black text-white mb-3">40%</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">The network grows it. Residents own 40% of fees generated through sharing — revenue scales with the district's reach.</p>
+                      </div>
+                      <div className="bg-[#020617] rounded-xl p-6 border border-slate-700/30 text-center">
+                        <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">ReadyStack</p>
+                        <p className="text-4xl font-black text-white mb-3">40%</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">Scaled infrastructure, operations, onboarding, payments, and the sharing incentives that grow the district.</p>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Angel Investors — full form */}
                   <div className="p-12 rounded-[40px] bg-amber-500/5 border border-amber-500/20 shadow-2xl text-left">
-                    <h4 className="text-amber-400 text-[12px] font-black uppercase tracking-[0.3em] mb-12 italic text-left">ANGEL INVESTORS</h4>
+                    <h4 className="text-amber-400 text-[12px] font-black uppercase tracking-[0.3em] mb-3 italic text-left">ANGEL INVESTORS</h4>
+                    <p className="text-slate-400 text-xs mb-8 text-left">Optional. ReadyStack underwrites your district by default — angels bring capital, credibility, and deal flow.</p>
                     <div className="space-y-8 text-left">
                       {(mapping.angels || []).map((a, scoutIdx) => (
                         <div key={scoutIdx} className="bg-[#0f172a] p-10 rounded-3xl border border-slate-800 shadow-xl space-y-8 text-left">
@@ -4066,6 +4772,11 @@
                                 <button onClick={() => removePattern('angels', scoutIdx)} className="text-slate-300 hover:text-red-500 flex justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg></button>
                               </div>
                            </div>
+                           <div className="text-xs text-slate-400 italic px-2 text-left">
+                             {a.platform === 'observer' && 'Scouts with a front-row seat. They observe district performance and identify standout companies from real data — not cold pitches.'}
+                             {a.platform === 'awareness' && 'Co-creators who bring capital and can participate in equity as the district entity forms. Active participants in where capital flows.'}
+                             {a.platform === 'seed' && 'Funded companies documented as part of the district story. Their presence creates a halo effect across all participants.'}
+                           </div>
                            {a.platform === 'seed' && (<div className="pl-8 border-l-2 border-emerald-500/20 space-y-6 text-left"><h5 className="text-xs font-black text-emerald-400 uppercase tracking-widest italic text-left">Startup Allocations</h5><div className="flex flex-wrap gap-3 text-left">{a.startups?.map((startupVen, startupIdx) => (
                                <div key={startupIdx} className="flex items-center gap-2 bg-[#0a0f1e] border border-emerald-500/30 rounded-full pl-4 pr-2 py-1.5 shadow-inner text-left">
                                    <select className="bg-transparent text-white text-xs outline-none font-bold italic uppercase tracking-tight text-left" value={startupVen} onChange={(e) => updateScoutStartup(scoutIdx, startupIdx, e.target.value)}>
@@ -4079,9 +4790,9 @@
                     </div>
                   </div>
 
-                  {/* Revenue Snapshot */}
+                  {/* Revenue Snapshot — Summary Cards */}
                   <div className="bg-[#0f172a]/60 p-8 rounded-[32px] border border-white/5 shadow-inner text-left">
-                    <h5 className="text-xs font-black text-white/70 uppercase tracking-widest mb-6">DISTRICT REVENUE SNAPSHOT</h5>
+                    <h5 className="text-xs font-black text-white/70 uppercase tracking-widest mb-6">DISTRICT OVERVIEW</h5>
                     <div className="grid grid-cols-3 gap-6">
                       <div className="bg-[#020617] rounded-xl p-6 border border-white/5 text-center">
                         <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-2">Residents</p>
@@ -4098,6 +4809,61 @@
                     </div>
                   </div>
 
+                  {/* Section A: District Revenue */}
+                  <div className="bg-[#0f172a]/60 p-8 rounded-[32px] border border-white/5 shadow-inner text-left">
+                    <h5 className="text-xs font-black text-white/70 uppercase tracking-widest mb-2">DISTRICT REVENUE</h5>
+                    <p className="text-slate-500 text-xs mb-6">60% of hosted automation fees — owned by you and your network.</p>
+                    <p className="text-4xl font-black text-white">${(() => { const count = storyParticipants.residents.filter(r => (r.name || '').trim()).length; return (count * 97 * 0.60 * 12).toLocaleString(); })()}<span className="text-sm text-slate-500 font-medium ml-2">/ year (estimated)</span></p>
+                  </div>
+
+                  {/* Section B: Snapshot of Revenue (per participant) */}
+                  <div className="bg-[#0f172a]/60 p-8 rounded-[32px] border border-white/5 shadow-inner text-left">
+                    <h5 className="text-xs font-black text-white/70 uppercase tracking-widest mb-2">ESTIMATED SNAPSHOT OF REVENUE</h5>
+                    <p className="text-slate-500 text-xs mb-6">Per-participant contribution based on hosted automation fees.</p>
+                    <div className="space-y-3">
+                      {storyParticipants.residents.filter(r => (r.name || '').trim()).length > 0 ? (
+                        storyParticipants.residents.filter(r => (r.name || '').trim()).map((r, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-2 border-b border-slate-800/50">
+                            <span className="text-sm text-amber-400 font-bold">{r.specialty ? 'Partner' : 'Resident'}: <span className="text-white uppercase">{r.name}</span></span>
+                            <span className="text-sm font-mono text-white">${(97 * 12).toLocaleString()}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-slate-600 text-xs italic">No residents added yet. Add residents in the Residents step to see revenue projections.</p>
+                      )}
+                      {storyParticipants.residents.filter(r => (r.name || '').trim()).length > 0 && (
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-600">
+                          <span className="text-xs font-black text-white uppercase tracking-widest">Total Snapshot ARR</span>
+                          <span className="text-lg font-black text-white">${(storyParticipants.residents.filter(r => (r.name || '').trim()).length * 97 * 12).toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-slate-600 text-[10px] mt-4">Based on standard hosted automation fee of $97/mo per active participant. Actual results depend on district activity.</p>
+                  </div>
+
+                  {/* Section C: Capital Summary */}
+                  <div className="bg-[#0f172a]/60 p-8 rounded-[32px] border border-white/5 shadow-inner text-left">
+                    <h5 className="text-xs font-black text-white/70 uppercase tracking-widest mb-6">CAPITAL SUMMARY</h5>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-2 border-b border-slate-800/50">
+                        <span className="text-xs font-black text-slate-300 uppercase tracking-widest">Investment In</span>
+                        <span className="text-sm font-mono text-white">{(mapping.angels || []).filter(a => a.platform === 'seed').reduce((sum, a) => sum + (a.amount || 0), 0) > 0 ? '$' + (mapping.angels || []).filter(a => a.platform === 'seed').reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString() : 'No active investments'}</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-slate-800/50">
+                        <span className="text-xs font-black text-slate-300 uppercase tracking-widest">Pending Investment</span>
+                        <span className="text-sm font-mono text-white">{(mapping.angels || []).filter(a => a.platform === 'observer').reduce((sum, a) => sum + (a.amount || 0), 0) > 0 ? '$' + (mapping.angels || []).filter(a => a.platform === 'observer').reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString() : 'No pending capital'}</span>
+                      </div>
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-600">
+                        <span className="text-xs font-black text-white uppercase tracking-widest">District Revenue (Annual)</span>
+                        <span className="text-lg font-black text-white">${(() => { const count = storyParticipants.residents.filter(r => (r.name || '').trim()).length; return (count * 97 * 0.60 * 12).toLocaleString(); })()}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-white uppercase tracking-widest">Capital on Board</span>
+                        <span className="text-lg font-black text-white">${(mapping.angels || []).reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="text-center py-12"><button onClick={() => setActiveTab('observatory')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">NEXT</button><p className="text-xs text-slate-300 font-bold uppercase tracking-widest opacity-60 italic leading-none mt-6">Continue to District Ecosystem.</p></div>
                 </div>
               </div>
@@ -4105,10 +4871,12 @@
 
             {activeTab === 'observatory' && (
               <div className="space-y-8 animate-fade-in font-sans text-left relative pt-28">
+                {isLearningMode && !dismissedInfoCards.observatory && (
+                  <SectionInfoCard title={OPERATIONS_INFO.observatory.title} description={OPERATIONS_INFO.observatory.description} onDismiss={() => setDismissedInfoCards(p => ({...p, observatory: true}))} />
+                )}
                 {/* Title */}
                 <div className="space-y-2">
-                  <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ECOSYSTEM</h3>
-                  <p className="text-slate-300 text-base font-medium">Visualize your district ecosystem in motion.</p>
+                  <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ECOSYSTEM<InfoTooltip text="Visualize your district ecosystem in motion." /></h3>
                 </div>
 
                 {/* Row 1: Tab Switcher */}
@@ -4358,6 +5126,9 @@
 
             {activeTab === 'looker' && !isResident && (
               <div className="space-y-12 animate-fade-in text-left font-sans pt-20">
+                {isLearningMode && !dismissedInfoCards.looker && (
+                  <SectionInfoCard title={OPERATIONS_INFO.looker.title} description={OPERATIONS_INFO.looker.description} onDismiss={() => setDismissedInfoCards(p => ({...p, looker: true}))} />
+                )}
                 <div className="flex justify-between items-center border-b border-white/5 pb-10">
                     <div className="flex bg-white/5 px-6 py-3 rounded-2xl border border-white/10 shadow-inner"><span className="text-xs font-black text-slate-300 uppercase tracking-widest mr-3 opacity-60">Reporting Period:</span><span className="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Jan 01, 2026 - Jan 31, 2026</span></div>
                     <div className="flex items-center gap-6 text-left"><div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 shadow-inner">{[{ id: '30', label: '30 DAYS' }, { id: '90', label: '90 DAYS' }, { id: '365', label: 'ANNUAL' }].map(p => (<button key={p.id} onClick={() => setLookerPeriod(p.id)} className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${lookerPeriod === p.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-300 hover:text-slate-300'}`}>{p.label}</button>))}</div></div>
@@ -4391,6 +5162,9 @@
 
             {activeTab === 'g4' && !isResident && (
               <div className="bg-white rounded-[40px] shadow-2xl overflow-hidden animate-fade-in text-left font-sans pt-20">
+                {isLearningMode && !dismissedInfoCards.g4 && (
+                  <div className="px-10 pt-4"><SectionInfoCard title={OPERATIONS_INFO.g4.title} description={OPERATIONS_INFO.g4.description} onDismiss={() => setDismissedInfoCards(p => ({...p, g4: true}))} /></div>
+                )}
                 <div className="bg-[#f8f9fa] border-b border-slate-200 px-10 py-6 flex justify-between items-center">
                   <div className="flex items-center gap-4"><i data-lucide="table" className="w-6 h-6 text-indigo-600"></i><h4 className="text-[#3c4043] font-bold text-lg tracking-tight leading-none uppercase italic">GA4 Registry Log</h4></div>
                   <div className="bg-white/10 p-2 rounded-lg flex items-center justify-center border border-white/20"><DistrictSquareIcon size={20} /></div>
@@ -4409,6 +5183,9 @@
             {/* ── ANALYTICS TAB ── */}
             {activeTab === 'analytics' && !isResident && (
               <div className="space-y-10 animate-fade-in text-left font-sans pt-20">
+                {isLearningMode && !dismissedInfoCards.analytics && (
+                  <SectionInfoCard title={OPERATIONS_INFO.analytics.title} description={OPERATIONS_INFO.analytics.description} onDismiss={() => setDismissedInfoCards(p => ({...p, analytics: true}))} />
+                )}
                 {/* Period selector */}
                 <div className="flex justify-between items-center border-b border-white/5 pb-8">
                   <div className="flex items-center gap-4">
