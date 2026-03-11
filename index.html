@@ -1110,7 +1110,7 @@
         const handleWixParams = () => {
           // Re-read params (URL was updated by the postMessage handler)
           const freshParams = new URLSearchParams(window.location.search);
-          if (freshParams.get('invite') || freshParams.get('rs_session')) {
+          if (freshParams.get('invite') || freshParams.get('rs_session') || freshParams.get('mode') === 'learn') {
             window.location.reload();  // Cleanest way to re-initialize with new params
           }
         };
