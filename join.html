@@ -214,7 +214,7 @@
     }
 
     // ── Initialize on page load ──
-    function init() {
+    async function init() {
       const params = new URLSearchParams(window.location.search);
       const token  = params.get('t');
 
@@ -252,20 +252,58 @@
         return;
       }
 
-      const result = decodeTokenPayload(token);
+      // ── Route: short-code (≤8 chars) → backend lookup; longer → legacy HMAC decode ──
+      let payload;
 
-      if (result.error === 'expired') {
-        showExpired(result.data || {}, token);
-        return;
-      }
+      if (token.length <= 8) {
+        // NEW: Short-code flow — call lookupInvite endpoint
+        try {
+          const inviteData = await callAdvisor('lookupInvite', { data: { code: token } });
 
-      if (result.error) {
-        showError('This invitation link isn\'t valid. Check with the person who invited you.');
-        return;
+          if (inviteData.error) {
+            showError('This invitation link isn\'t valid. Check with the person who invited you.');
+            return;
+          }
+
+          if (inviteData.status === 'expired') {
+            showExpired(inviteData, token);
+            return;
+          }
+
+          if (inviteData.status === 'revoked') {
+            showError('This invitation has been revoked. Contact the district creator for a new link.');
+            return;
+          }
+
+          if (inviteData.status === 'accepted') {
+            showError('This invitation has already been used. Contact the district creator if you need access.');
+            return;
+          }
+
+          payload = inviteData;
+        } catch (e) {
+          console.error('lookupInvite failed:', e);
+          showError('Unable to load invitation. Please try again.');
+          return;
+        }
+      } else {
+        // LEGACY: HMAC token — decode locally
+        const result = decodeTokenPayload(token);
+
+        if (result.error === 'expired') {
+          showExpired(result.data || {}, token);
+          return;
+        }
+
+        if (result.error) {
+          showError('This invitation link isn\'t valid. Check with the person who invited you.');
+          return;
+        }
+
+        payload = result.data;
       }
 
       // Render the landing page
-      const payload = result.data;
       const creatorName = payload.creatorName || '';
       document.getElementById('district-name').textContent = (payload.districtName || 'District').toUpperCase();
       document.getElementById('invite-role').textContent = payload.role || payload.participantName || 'Resident';
@@ -315,14 +353,18 @@
       btn.disabled = true;
 
       try {
-        await callAdvisor('requestNewInvite', {
-          data: {
-            inviteToken: _expiredPayload._token,
-            participantName: _expiredPayload.participantName || '',
-            sheetId: _expiredPayload.sheetId || '',
-            creatorEmail: _expiredPayload.creatorEmail || ''
-          }
-        });
+        const reqData = {
+          participantName: _expiredPayload.participantName || '',
+          sheetId: _expiredPayload.sheetId || '',
+          creatorEmail: _expiredPayload.creatorEmail || ''
+        };
+        // Send code for short-code invites, inviteToken for legacy
+        if (_expiredPayload._token && _expiredPayload._token.length <= 8) {
+          reqData.code = _expiredPayload._token;
+        } else {
+          reqData.inviteToken = _expiredPayload._token;
+        }
+        await callAdvisor('requestNewInvite', { data: reqData });
 
         // Show confirmation
         document.getElementById('expired-action').classList.add('hidden');
@@ -414,8 +456,15 @@
       document.getElementById('expired-page').classList.add('hidden');
 
       try {
+        const acceptData = { email: email };
+        // Send code for short-code invites, inviteToken for legacy
+        if (token.length <= 8) {
+          acceptData.code = token;
+        } else {
+          acceptData.inviteToken = token;
+        }
         const result = await callAdvisor('acceptInvite', {
-          data: { inviteToken: token, email: email }
+          data: acceptData
         }, sessionId);
 
         if (result.success) {
@@ -448,48 +497,34 @@
       document.getElementById('error-message').textContent = message;
     }
 
-    // ── Wix postMessage param passthrough ──
-    // When embedded in a Wix iframe, URL params don't reach this page.
-    // The Wix Velo code sends them via postMessage instead.
+    // ── Wix postMessage param passthrough (LEGACY) ──
+    // Kept for backward compatibility with any old Velo code that uses postMessage.
+    // New Velo code (v2) sets iframe src directly, so ?t= is already in the URL.
     let _wixParamsReceived = false;
 
     window.addEventListener('message', function (event) {
-      // Accept params from Wix parent (filesusr.com or readystack.ai)
       if (event.data && event.data.type === 'wixParams' && !_wixParamsReceived) {
         _wixParamsReceived = true;
         const p = event.data.params || {};
-
-        // Build a fake search string from the Wix params
         const search = '?' + Object.entries(p).map(
           ([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)
         ).join('&');
-
-        // Replace the URL so the rest of the code can read params normally
         window.history.replaceState({}, '', window.location.pathname + search);
-
-        // Now run init with the params in place
         init();
       }
     });
 
-    // Tell Wix parent we're ready to receive params
-    if (window.parent !== window) {
-      window.parent.postMessage({ type: 'ready' }, '*');
-    }
-
     // ── Run on load ──
-    // If we already have a ?t= param (GitHub Pages direct access), run immediately.
-    // If not, wait briefly for Wix postMessage. If nothing arrives, run anyway
-    // (will show "invalid" error, which is correct for no-token visits).
+    // With the new Velo v2 code, ?t= is always in the URL (set via iframe src).
+    // Run immediately if we have params. Brief fallback wait for legacy postMessage.
     const _urlParams = new URLSearchParams(window.location.search);
     if (_urlParams.get('t') || _urlParams.get('rs_session')) {
-      // Params already in URL — run now
       init();
     } else {
-      // No params — wait for Wix postMessage, with a timeout fallback
+      // No params — brief wait for legacy postMessage, then run anyway
       setTimeout(function () {
         if (!_wixParamsReceived) {
-          init();  // No message came — run with whatever we have
+          init();
         }
       }, 1500);
     }
