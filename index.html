@@ -2303,7 +2303,7 @@
         return { items, flows: allFlows, scaledTraffic, hangtimeVal: 4.5, searchingVal: 1.2, finance: { districtDividendsAmount: Math.round(rsGrossRevenue * 0.6), snapshotRevenueItems, totalSnapshotARR: snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0), investmentInItems: (mapping.angels || []).filter(a => a.platform !== 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), pendingInvestmentItems: (mapping.angels || []).filter(a => a.platform === 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), totalFinanceCapital: Math.round(rsGrossRevenue * 0.6) + snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0) }, counts: { buying: Math.round(scaledTraffic * 0.005), sharing: Math.round(scaledTraffic * 0.003), retention: Math.round(scaledTraffic * 0.004) }, probs: { buying: 82, sharing: 64, retention: 71 } };
       }, [mapping, lookerPeriod, obsMode, playbackProgress, flowTab, storyParticipants]);
 
-/* ========== [M:300] JSX — return() open, outer wrapper, header bar ========== */
+{/* ========== [M:300] JSX — return() open, outer wrapper, header bar ========== */}
       return (
 
         <div className="min-h-screen w-full bg-[#020617] text-slate-300 font-sans text-[13px] animate-fade-in text-left">
@@ -2468,7 +2468,7 @@
               <div className="flex items-center space-x-3">
                 <a href="https://www.readystack.ai/pricing" target="_top" className="text-xs font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors" style={{ fontFamily: 'Poppins, sans-serif', textDecoration: 'none' }}>Pricing</a>
 
-/* ========== [M:301] JSX — Creator Pill, profile popover, auth UI ========== */
+{/* ========== [M:301] JSX — Creator Pill, profile popover, auth UI ========== */}
                 {/* ── Creator Pill (28px avatar + name) ── */}
                 {creatorProfile && rsSession && (
                   <div className="relative">
@@ -2618,7 +2618,7 @@
             {/* LEFT ONBOARDING RAIL */}
             <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
 
-/* ========== [M:302] JSX — My Districts section ========== */
+{/* ========== [M:302] JSX — My Districts section ========== */}
               {/* NEW MY DISTRICTS SECTION — hidden in invite mode */}
               {!isInviteMode && !isLearningMode && <div className="mb-6 border-b border-white/10 pb-6">
                 <div className="flex items-center justify-between mb-3">
@@ -2703,7 +2703,7 @@
 
               {/* progress bar removed */}
 
-/* ========== [M:303] JSX — Left Rail (Compose + Operations tabs) ========== */
+{/* ========== [M:303] JSX — Left Rail (Compose + Operations tabs) ========== */}
               {/* ── LEFT RAIL: COMPOSE + OPERATIONS ── */}
               <div className="flex-grow whitespace-nowrap overflow-hidden">
 
@@ -2932,7 +2932,7 @@
                 </button>
               </div>
 
-/* ========== [M:304] JSX — Top step navigation bar ========== */
+{/* ========== [M:304] JSX — Top step navigation bar ========== */}
             {/* ── TOP STEP NAVIGATION BAR (above everything) ── */}
             {(() => {
               const composeSteps = [
@@ -2962,7 +2962,7 @@
                 <div className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between px-10 py-3 border-b border-white/5 bg-[#0f172a]/80 backdrop-blur-sm rounded-t-[40px]">
                   <div className="flex items-center gap-3 min-w-[200px]">
                     {prev ? (
-/* ========== [M:307] JSX — Intro/Residents tab ========== */
+{/* ========== [M:307] JSX — Intro/Residents tab ========== */}
                       <button onClick={() => { if (activeTab === 'intro') { buildStoryDistrict(prev.id); } else { setActiveTab(prev.id); } }}
                         className="flex items-center gap-1.5 text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wider transition-all group">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
@@ -2988,7 +2988,7 @@
               );
             })()}
 
-/* ========== [M:305] JSX — YouTube tab (Define Market Story) ========== */
+{/* ========== [M:305] JSX — YouTube tab (Define Market Story) ========== */}
             {activeTab === 'youtube' && (
               <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
                   <div className="space-y-3 mb-6">
@@ -3337,7 +3337,7 @@
             {/* ══════════════════════════════════════════════════════════════════
                  ACTION PLAN TAB — Tasks + Suggested Roles (AI-generated)
                  ══════════════════════════════════════════════════════════════════ */}
-/* ========== [M:306] JSX — ExecPlan tab (Tasks & Agents) ========== */
+{/* ========== [M:306] JSX — ExecPlan tab (Tasks & Agents) ========== */}
             {activeTab === 'execplan' && (
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-6">
@@ -3726,7 +3726,7 @@
               </div>
             )}
 
-/* ========== [M:308] JSX — Mapper tab (Resident Links) ========== */
+{/* ========== [M:308] JSX — Mapper tab (Resident Links) ========== */}
             {activeTab === 'mapper' && (
               <div className="space-y-12 animate-fade-in text-left pt-28">
                 <div className="space-y-6">
@@ -4007,7 +4007,7 @@
             )}
 
             {/* ── MY RESIDENTS TAB ── */}
-/* ========== [M:309] JSX — Connect tab (My Residents) ========== */
+{/* ========== [M:309] JSX — Connect tab (My Residents) ========== */}
             {activeTab === 'connect' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 {isLearningMode && !dismissedInfoCards.connect && (
@@ -4218,8 +4218,8 @@
                  White theme scoped to this block only
                  Data: heroFields, videoStory, storyParticipants, youtubeEmbedUrl, mapping
                ══════════════════════════════════════════════════════════ */}
-/* ========== [M:310] JSX — Preview/Landing tab (District Product) ========== */
-/* ========== [M:311] JSX — Landing tab ========== */
+{/* ========== [M:310] JSX — Preview/Landing tab (District Product) ========== */}
+{/* ========== [M:311] JSX — Landing tab ========== */}
             {activeTab === 'landing' && (
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
                 <div className="space-y-12">
@@ -4740,7 +4740,7 @@
               </div>
             )}
 
-/* ========== [M:312] JSX — Finance tab ========== */
+{/* ========== [M:312] JSX — Finance tab ========== */}
             {activeTab === 'finance' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 {isLearningMode && !dismissedInfoCards.finance && (
@@ -4893,7 +4893,7 @@
               </div>
             )}
 
-/* ========== [M:313] JSX — Observatory tab ========== */
+{/* ========== [M:313] JSX — Observatory tab ========== */}
             {activeTab === 'observatory' && (
               <div className="space-y-8 animate-fade-in font-sans text-left relative pt-28">
                 {isLearningMode && !dismissedInfoCards.observatory && (
@@ -5149,7 +5149,7 @@
             )}
 
 
-/* ========== [M:314] JSX — Looker / G4 / Analytics tabs ========== */
+{/* ========== [M:314] JSX — Looker / G4 / Analytics tabs ========== */}
             {activeTab === 'looker' && !isResident && (
               <div className="space-y-12 animate-fade-in text-left font-sans pt-20">
                 {isLearningMode && !dismissedInfoCards.looker && (
@@ -5440,7 +5440,7 @@
         </div>
       );
     };
-/* ========== [M:315] JSX — ReactDOM.render, closing brackets ========== */
+{/* ========== [M:315] JSX — ReactDOM.render, closing brackets ========== */}
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
