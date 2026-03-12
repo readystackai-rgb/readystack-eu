@@ -1,5 +1,5 @@
 {
-  "districtName": "Dark Market District",
+  "districtName": "Market District",
   "selectedVideoData": {
     "title": "How to Build a Magnetic Brand that Sells Itself ft. Seth Godin",
     "channel": "The 505 Podcast",
@@ -10,7 +10,7 @@
   "youtubeEmbedUrl": "https://www.youtube.com/embed/SbHDPJNYHek",
   "videoStory": {
     "title": "Building Brands on Trust and Smallest Viable Audiences",
-    "districtName": "Dark Market District",
+    "districtName": "Market District",
     "problem": "Creators, marketers, and businesses often expend significant effort chasing broad attention and high view counts, mistakenly believing these metrics equate to influence, sales, or brand loyalty. This leads to ineffective marketing strategies focused on hype and generic content, failing to build trust or resonate deeply with any specific audience. The gap between understanding niche marketing principles and executing on them remains unaddressed by existing media formats.",
     "resident": "Marketers, entrepreneurs, content creators, and small business owners struggling with brand differentiation and effective audience engagement, seeking to build a loyal customer base rather than chasing viral trends or broad reach.",
     "network": {
@@ -134,7 +134,7 @@
     "ctaUrl": "",
     "mindMapLink": ""
   },
-  "stackLabel": "Dark Market District",
+  "stackLabel": "Market District",
   "activeTab": "youtube",
   "suggestedRoles": [
     "Branding & Identity Designers",
