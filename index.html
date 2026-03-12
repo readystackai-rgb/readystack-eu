@@ -5370,21 +5370,44 @@
                     <input
                       readOnly
                       value={inviteModalData.url}
-                      className="flex-1 bg-transparent text-xs text-slate-300 font-mono outline-none truncate"
-                      onClick={(e) => e.target.select()}
+                      id="invite-url-input"
+                      className="flex-1 bg-transparent text-xs text-slate-300 font-mono outline-none"
+                      style={{userSelect:'all',WebkitUserSelect:'all'}}
+                      onClick={(e) => { e.target.focus(); e.target.select(); }}
                     />
                     <button
-                      onClick={async () => {
-                        const textToCopy = inviteModalData.url;
+                      onClick={() => {
                         const btn = document.getElementById('copy-invite-btn');
+                        const input = document.getElementById('invite-url-input');
                         let success = false;
-                        if (navigator.clipboard && navigator.clipboard.writeText) {
-                          try { await navigator.clipboard.writeText(textToCopy); success = true; } catch (_) {}
+
+                        // Select the visible input text — works in cross-origin iframes
+                        if (input) {
+                          input.focus();
+                          input.setSelectionRange(0, input.value.length);
+                          try { success = document.execCommand('copy'); } catch (_) {}
                         }
-                        if (!success) {
-                          try { const ta = document.createElement('textarea'); ta.value = textToCopy; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0'; document.body.appendChild(ta); ta.focus(); ta.select(); success = document.execCommand('copy'); document.body.removeChild(ta); } catch (_) { success = false; }
+
+                        // Fallback: Clipboard API (works on standalone pages)
+                        if (!success && navigator.clipboard && navigator.clipboard.writeText) {
+                          navigator.clipboard.writeText(inviteModalData.url).then(() => {
+                            if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2500); }
+                          }).catch(() => {
+                            if (btn) { btn.textContent = 'Ctrl+C to copy'; setTimeout(() => { btn.textContent = 'Copy'; }, 4000); }
+                          });
+                          return;
                         }
-                        if (btn) { btn.textContent = success ? 'Copied!' : 'Select & copy manually'; setTimeout(() => { btn.textContent = 'Copy'; }, 2500); }
+
+                        if (btn) {
+                          if (success) {
+                            btn.textContent = 'Copied!';
+                            setTimeout(() => { btn.textContent = 'Copy'; }, 2500);
+                          } else {
+                            // Text is selected in the input — tell user to Ctrl+C
+                            btn.textContent = 'Ctrl+C to copy';
+                            setTimeout(() => { btn.textContent = 'Copy'; }, 4000);
+                          }
+                        }
                       }}
                       id="copy-invite-btn"
                       className="px-4 py-2 bg-indigo-500 text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-indigo-400 transition-colors shrink-0"
