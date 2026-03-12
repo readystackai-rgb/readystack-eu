@@ -304,9 +304,8 @@
       { key: 'youtube',  title: 'Source Video',      description: 'This is where a district begins. Search for a video that frames the market problem.', nextLabel: 'Action Plan' },
       { key: 'execplan', title: 'Action Plan',    description: 'Review the tasks and roles AI generated from your source video. This is the operational blueprint for your district.', nextLabel: 'Residents' },
       { key: 'intro',    title: 'Residents',          description: 'These are the people who will execute the district workload. Add and manage your participants.', nextLabel: 'Resident Links' },
-      { key: 'mapper',   title: 'Resident Links',     description: 'Each resident brings engagement items to the district. This map shows every touchpoint in the audience journey.', nextLabel: 'District Assembly' },
-      { key: 'preview',  title: 'District Assembly',   description: 'The district assembles here. Review the hero section, headline, and call-to-action before publishing.', nextLabel: 'District Product' },
-      { key: 'landing',  title: 'District Product',          description: 'This is what the audience sees. The published district landing page with the hero, video, and call-to-action.', nextLabel: null },
+      { key: 'mapper',   title: 'Resident Links',     description: 'Each resident brings engagement items to the district. This map shows every touchpoint in the audience journey.', nextLabel: 'District Product' },
+      { key: 'landing',  title: 'District Product',          description: 'Your complete district — edit settings, preview the published page, configure tasks, automations, and email flows.', nextLabel: null },
     ];
 
     /* ── GuidedPromptCard: inline card shown during learning mode guided sequence ── */
@@ -582,9 +581,12 @@
       const [isGeneratingStory, setIsGeneratingStory] = useState(false);
 
       const [videoStory, setVideoStory] = useState(null);
-      // District Assembly (Step 4) state
+      // District Product editing state
       const [expandedAgent, setExpandedAgent] = useState(0);
       const [heroFields, setHeroFields] = useState({ headline: '', youtubeUrl: '', ctaLabel: '', ctaUrl: '', mindMapLink: '' });
+      const [showHeroEditor, setShowHeroEditor] = useState(false);
+      const [hafSteps, setHafSteps] = useState([]);
+      const [hafExpandedStep, setHafExpandedStep] = useState(null);
       const [assemblyStatus, setAssemblyStatus] = useState(null);
       const [assembledReadyStack, setAssembledReadyStack] = useState(null);
       const [taskRows, setTaskRows] = useState(null);
@@ -1123,9 +1125,9 @@
         return () => clearTimeout(timer);
       }, [activeTab, isLearningMode]);
 
-      // District Assembly: pre-populate hero fields from upstream data on first tab visit
+      // District Product: pre-populate hero fields from upstream data on first tab visit
       useEffect(() => {
-        if (activeTab === 'preview' && heroFields.headline === '') {
+        if (activeTab === 'landing' && heroFields.headline === '') {
           setHeroFields({
             headline: videoStory?.title || '',
             youtubeUrl: youtubeEmbedUrl || '',
@@ -2698,10 +2700,9 @@
                   { id: 'execplan', label: 'Action Plan', icon: 'check-square' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
-                  ...(isResident ? [] : [{ id: 'preview', label: 'District Assembly', icon: 'list' }]),
                   ...(isResident ? [] : [{ id: 'landing', label: 'District Product', icon: 'layout' }])
                 ].map(step => {
-                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'preview', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
+                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
@@ -2770,7 +2771,7 @@
                   { id: 'g4', label: 'GA4', icon: 'activity' },
                   { id: 'analytics', label: 'Analytics', icon: 'trending-up' },
                 ]).map(step => {
-                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'preview', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
+                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
@@ -2921,7 +2922,6 @@
                 { id: 'execplan', label: 'Action Plan', phase: 'compose' },
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
-                { id: 'preview', label: 'District Assembly', phase: 'compose' },
                 { id: 'landing', label: 'District Product', phase: 'compose' }
               ];
               const opsSteps = [
@@ -3401,7 +3401,7 @@
                                   onClick={() => {
                                     setStoryParticipants(prev => {
                                       const next = [...prev.residents];
-                                      const emptyIdx = next.findIndex(r => !(r.name || '').trim() && !r.jobContext);
+                                      const emptyIdx = next.findIndex(r => !r.jobContext);
                                       if (emptyIdx === -1) {
                                         next.push({ name: '', company: '', specialty: '', email: '', source: 'ai', status: 'assigned', jobContext: role.name, jobType: '' });
                                       } else {
@@ -3836,7 +3836,7 @@
                         const isExpanded = expandedResidents[ri] !== undefined ? expandedResidents[ri] : ri === 0;
                         const toggleResident = () => setExpandedResidents(prev => ({ ...prev, [ri]: !isExpanded }));
                         return (
-                          <div key={ri} className="bg-slate-900/30 rounded-2xl border border-white/[0.04] overflow-hidden">
+                          <div key={ri} className="bg-slate-900/30 rounded-2xl border border-white/[0.04] overflow-visible relative">
                             {/* Header: Name + toggle chevron + Add Button */}
                             <div className="flex items-center gap-3 p-5 cursor-pointer select-none" onClick={toggleResident}>
                               <svg className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -3853,9 +3853,9 @@
                                 {/* Dropdown */}
                                 {mapEditingItem === 'dropdown-'+origIdx && (
                                   <div className="absolute top-full left-0 mt-1 z-50 bg-[#0f172a] border border-slate-600 rounded-xl shadow-2xl w-64 max-h-80 overflow-y-auto">
-                                    {/* TRAFFIC */}
+                                    {/* TRAFFIC SOURCE */}
                                     <div className="px-3 pt-3 pb-1">
-                                      <p className="text-[9px] font-bold text-white uppercase tracking-widest border-b border-slate-600 pb-1.5">Traffic</p>
+                                      <p className="text-[9px] font-bold text-white uppercase tracking-widest border-b border-slate-600 pb-1.5">Traffic Source</p>
                                     </div>
                                     {TRAFFIC_SOURCE_OPTIONS.map(o => (
                                       <button key={'t-'+o.value} className="w-full text-left px-4 py-1.5 text-[11px] text-slate-300 hover:bg-indigo-500/20 hover:text-white transition-colors" onClick={() => {
@@ -3979,7 +3979,7 @@
                 </div>
 
                 <div className="py-12 text-center">
-                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Assembly'}</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'landing')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Product'}</button>
                 </div>
               </div>
             )}
@@ -4180,259 +4180,14 @@
                   })()}
 
                   <div className="text-center py-12">
-                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'preview')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Assembly'}</button>
+                    <button onClick={() => setActiveTab((isResident || isInviteMode) ? 'observatory' : 'landing')} className="brand-glow-btn bg-[#020617] px-16 py-5 rounded-xl text-white uppercase font-black tracking-[0.2em] text-[12px] shadow-2xl">{(isResident || isInviteMode) ? 'Continue to District Ecosystem' : 'Continue to District Product'}</button>
                   </div>
                 </div>
               </div>
             )}
 
 
-            {activeTab === 'preview' && (
-              <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
-                <div className="space-y-12">
-                  <div className="space-y-4">
-                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT ASSEMBLY<InfoTooltip text="Your composed district assembled in the Studio layout — tasks, agents, and automations ready to ship as JSON to ReadyStack." /></h3>
-                    {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'preview' && (
-                      <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
-                    )}
-                  </div>
-
-                  {/* ══════════════════════════════════════════════════════════
-                       DISTRICT ASSEMBLY — WHITE THEME CONTENT AREA
-                       Sections A–G per TASKS_AND_AGENTS_UX_SPEC.md v3
-                       White theme scoped to this block only
-                     ══════════════════════════════════════════════════════════ */}
-
-                  {/* ── SECTION A: Hero Editing Fields ── */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">ReadyStack Settings</p>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">Headline</label>
-                        <input type="text" value={heroFields.headline} onChange={e => setHeroFields({...heroFields, headline: e.target.value})} placeholder="Enter your ReadyStack headline" className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-lg font-medium py-2 focus:border-purple-500 focus:outline-none transition-colors" />
-                      </div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">YouTube URL</label>
-                          <input type="text" value={heroFields.youtubeUrl} onChange={e => setHeroFields({...heroFields, youtubeUrl: e.target.value})} placeholder="https://youtube.com/..." className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">CTA Label</label>
-                          <input type="text" value={heroFields.ctaLabel} onChange={e => setHeroFields({...heroFields, ctaLabel: e.target.value})} placeholder="Follow..." className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">CTA URL</label>
-                          <input type="text" value={heroFields.ctaUrl} onChange={e => setHeroFields({...heroFields, ctaUrl: e.target.value})} placeholder="https://..." className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1 block">Mind Map Link</label>
-                        <input type="text" value={heroFields.mindMapLink} onChange={e => setHeroFields({...heroFields, mindMapLink: e.target.value})} placeholder="https://miro.com/... or any diagram URL" className="w-full border-b border-gray-200 bg-transparent text-gray-900 text-sm py-2 focus:border-purple-500 focus:outline-none transition-colors" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ── SECTION B: ReadyStack Card ── */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
-                    {videoStory ? (
-                      <div className="space-y-6">
-                        <p className="text-xl font-medium text-gray-900">{heroFields.headline || videoStory.title || 'Untitled'}</p>
-                        {/* Action buttons */}
-                        <div className="flex gap-3">
-                          <button className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">Copy</button>
-                          {heroFields.mindMapLink && <button onClick={() => window.open(heroFields.mindMapLink, '_blank')} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">Mind Map</button>}
-                          <button className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors">Share for 40% Recurring Income</button>
-                        </div>
-                        {/* Two-column: video left + checklist right */}
-                        <div className="flex gap-6">
-                          <div className="w-7/12 space-y-4">
-                            {(heroFields.youtubeUrl || youtubeEmbedUrl) && (
-                              <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
-                                <iframe src={heroFields.youtubeUrl || youtubeEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen title="Market Story Video"></iframe>
-                              </div>
-                            )}
-                            {heroFields.ctaLabel && (
-                              <button onClick={() => heroFields.ctaUrl && window.open(heroFields.ctaUrl, '_blank')} className="bg-purple-600 text-white font-bold uppercase tracking-wider text-xs py-3 rounded-lg w-full hover:bg-purple-700 transition-colors">{heroFields.ctaLabel}</button>
-                            )}
-                          </div>
-                          <div className="w-5/12">
-                            <p className="text-lg font-medium text-gray-900 mb-3">Action Items</p>
-                            {videoStory.checklist && videoStory.checklist.length > 0 ? (
-                              <div className="space-y-1">
-                                {videoStory.checklist.map((item, i) => (
-                                  <p key={i} className="text-sm text-purple-600 leading-relaxed py-1">• {item}</p>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-sm text-gray-400 italic">No checklist items generated yet.</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-400 italic text-center py-8">No source video defined yet. Go back to Source Video to get started.</p>
-                    )}
-                  </div>
-
-                  {/* ── SECTION C: Tasks and Agents Accordion ── */}
-                  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    {videoStory && videoStory.automations && videoStory.automations.length > 0 ? (
-                      <div>
-                        {videoStory.automations.map((auto, i) => (
-                          <div key={i} className={`border-b border-gray-100 ${expandedAgent === i ? 'bg-white' : 'hover:bg-gray-50'} transition-colors`}>
-                            <button onClick={() => setExpandedAgent(expandedAgent === i ? -1 : i)} className="w-full px-6 py-4 flex items-center justify-between cursor-pointer">
-                              <span className="text-sm font-medium text-purple-600 text-left">{auto.trigger || `Automation ${i + 1}`}</span>
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-4 h-4 text-gray-400 transition-transform ${expandedAgent === i ? 'rotate-180' : ''}`}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                            </button>
-                            {expandedAgent === i && (
-                              <div className="px-6 pb-4">
-                                <div className="bg-gray-50 p-3 rounded-lg">
-                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Action</p>
-                                  <p className="text-xs text-gray-600">{auto.action || 'No action defined'}</p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        {/* Zapier placeholder */}
-                        <div className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                          <div className="px-6 py-4 flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-400">Add or Remove contacts through Zapier</span>
-                            <span className="text-[10px] text-gray-300 uppercase tracking-wider">Configure in Studio</span>
-                          </div>
-                        </div>
-                        {/* HAF placeholder */}
-                        <div className="hover:bg-gray-50 transition-colors">
-                          <div className="px-6 py-4 flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-400">Hosted Automation Flow</span>
-                            <span className="text-[10px] text-gray-300 uppercase tracking-wider">Configure in Studio</span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-400 italic py-8 text-center">No automations generated from your market story. These will appear after your video is analyzed.</p>
-                    )}
-                  </div>
-
-                  {/* ── SECTION D: Residents ── */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    {(() => {
-                      const filled = storyParticipants.residents.filter(r => (r.name || '').trim());
-                      return (
-                        <div>
-                          <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">Residents <span className="text-gray-400">({filled.length})</span></p>
-                          {filled.length === 0 ? (
-                            <p className="text-sm text-gray-400 italic text-center py-4">No residents added yet.</p>
-                          ) : (
-                            <div className="grid grid-cols-3 gap-3">
-                              {filled.map((r, i) => (
-                                <div key={i} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                                  <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 font-bold text-sm flex items-center justify-center">{(r.name || '?')[0].toUpperCase()}</div>
-                                    <p className="text-sm font-medium text-gray-900">{r.name}</p>
-                                  </div>
-                                  {(r.company || r.specialty) && <p className="text-xs text-gray-500">{[r.company, r.specialty].filter(Boolean).join(' / ')}</p>}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  {/* ── SECTION E: Links by Journey Stage ── */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">Journey Map</p>
-                    {(() => {
-                      const stages = [
-                        { key: 'learning', label: 'Learning', color: '#ff2a1a' },
-                        { key: 'selecting', label: 'Selecting', color: '#ffd666' },
-                        { key: 'executing', label: 'Executing', color: '#48c9b0' },
-                        { key: 'expanding', label: 'Expanding', color: '#7c8cff' }
-                      ];
-                      const hasAny = stages.some(s => (mapping[s.key] || []).length > 0);
-                      if (!hasAny) return <p className="text-sm text-gray-400 italic text-center py-4">No links mapped yet.</p>;
-                      return (
-                        <div className="grid grid-cols-4 gap-4">
-                          {stages.map(stage => {
-                            const links = mapping[stage.key] || [];
-                            const labels = links.slice(0, 3).map(l => l.lab || l.ven || 'Link');
-                            const extra = links.length > 3 ? links.length - 3 : 0;
-                            return (
-                              <div key={stage.key} className="bg-white border border-gray-100 rounded-lg p-4" style={{borderTop: `2px solid ${stage.color}`}}>
-                                <p className="text-3xl font-bold text-gray-900">{links.length}</p>
-                                <p className="text-xs text-gray-500 mb-3">{links.length === 1 ? 'link' : 'links'}</p>
-                                <p className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">{stage.label}</p>
-                                <div className="space-y-1">
-                                  {labels.map((lab, i) => (
-                                    <span key={i} className="inline-block text-xs text-gray-600 bg-gray-50 rounded px-2 py-1 mr-1 mb-1">{lab}</span>
-                                  ))}
-                                  {extra > 0 && <span className="text-xs text-purple-500">+{extra} more</span>}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  {/* ── SECTION F: AI Assembly Pipeline ── */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4">AI Assembly</p>
-                    {/* Status bar */}
-                    <div className="flex flex-wrap gap-4 mb-6">
-                      <span className="text-xs text-gray-500">{videoStory ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>}Video analyzed</span>
-                      <span className="text-xs text-gray-500">{storyParticipants.residents.filter(r => (r.name||'').trim()).length > 0 ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>}{storyParticipants.residents.filter(r => (r.name||'').trim()).length} residents</span>
-                      <span className="text-xs text-gray-500">{(() => { const c = ['learning','selecting','executing','expanding'].reduce((s,k) => s + (mapping[k]||[]).length, 0); return c > 0 ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>; })()}{['learning','selecting','executing','expanding'].reduce((s,k) => s + (mapping[k]||[]).length, 0)} links</span>
-                      <span className="text-xs text-gray-500">{videoStory?.automations?.length > 0 ? <span className="text-green-500 mr-1">✓</span> : <span className="text-gray-300 mr-1">○</span>}{videoStory?.automations?.length || 0} triggers</span>
-                    </div>
-                    {/* Assembly action */}
-                    {assemblyStatus === 'complete' && assembledReadyStack ? (
-                      <div className="space-y-3">
-                        <p className="text-sm text-green-600 font-medium">✓ ReadyStack assembled — {assembledReadyStack.taskCount || 0} tasks, {assembledReadyStack.automationCount || 0} automations, {assembledReadyStack.linkCount || 0} links</p>
-                        <div className="flex gap-3">
-                          <button onClick={() => { alert(JSON.stringify(assembledReadyStack, null, 2)); }} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors">View JSON Preview</button>
-                          <button onClick={() => { setAssemblyStatus(null); setAssembledReadyStack(null); }} className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors">Re-assemble</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setAssemblyStatus('processing');
-                          // Stub: simulate AI assembly (replace with real API call when provider confirmed)
-                          setTimeout(() => {
-                            const linkCount = ['learning','selecting','executing','expanding'].reduce((s,k) => s + (mapping[k]||[]).length, 0);
-                            setAssembledReadyStack({
-                              taskCount: videoStory?.checklist?.length || 0,
-                              automationCount: videoStory?.automations?.length || 0,
-                              linkCount,
-                              residents: storyParticipants.residents.filter(r => (r.name||'').trim()).map(r => r.name),
-                              headline: heroFields.headline,
-                              assembled: true
-                            });
-                            setAssemblyStatus('complete');
-                          }, 1500);
-                        }}
-                        disabled={assemblyStatus === 'processing'}
-                        className={`font-bold uppercase tracking-wider text-xs px-8 py-3 rounded-lg transition-colors ${assemblyStatus === 'processing' ? 'bg-purple-300 text-white cursor-wait' : 'bg-purple-600 text-white hover:bg-purple-700'}`}
-                      >
-                        {assemblyStatus === 'processing' ? 'Assembling...' : 'Assemble ReadyStack'}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* ── SECTION G: Continue to Landing Page ── */}
-                  <div className="text-center py-8 space-y-6">
-                    <div>
-                      <button onClick={() => setActiveTab('landing')} className="bg-purple-600 text-white font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-xs">Continue to District Product</button>
-                    </div>
-                    <p className="text-xs text-gray-400 font-medium">Preview what your published ReadyStack will look like.</p>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* District Assembly tab removed — merged into District Product (Change 1, 2026-03-11) */}
 
             {/* ══════════════════════════════════════════════════════════
                  STEP 5: DISTRICT PRODUCT
@@ -4447,6 +4202,44 @@
                     <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>DISTRICT PRODUCT<InfoTooltip text="This is what your audience will see when you publish. Review it, then send to Studio." /></h3>
                     {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'landing' && (
                       <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                    )}
+                  </div>
+
+                  {/* ── Collapsible Hero Editor (Change 2) ── */}
+                  <div className="bg-slate-900/40 rounded-xl border border-white/[0.06] overflow-hidden">
+                    <button onClick={() => setShowHeroEditor(!showHeroEditor)} className="w-full flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-white/[0.02] transition-colors">
+                      <div className="flex items-center gap-3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-purple-400"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Edit Settings</span>
+                        {!showHeroEditor && heroFields.headline && <span className="text-xs text-slate-500 ml-3 truncate max-w-xs">{heroFields.headline}</span>}
+                      </div>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-4 h-4 text-slate-500 transition-transform ${showHeroEditor ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    {showHeroEditor && (
+                      <div className="px-6 pb-6 space-y-4 border-t border-white/[0.04]">
+                        <div className="pt-4">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Headline</label>
+                          <input type="text" value={heroFields.headline} onChange={e => setHeroFields({...heroFields, headline: e.target.value})} placeholder="Enter your ReadyStack headline" className="w-full bg-slate-800/50 border border-white/[0.06] rounded-lg text-white text-sm px-4 py-2.5 focus:border-purple-500 focus:outline-none transition-colors placeholder:text-slate-600" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">YouTube URL</label>
+                            <input type="text" value={heroFields.youtubeUrl} onChange={e => setHeroFields({...heroFields, youtubeUrl: e.target.value})} placeholder="https://youtube.com/..." className="w-full bg-slate-800/50 border border-white/[0.06] rounded-lg text-white text-sm px-4 py-2.5 focus:border-purple-500 focus:outline-none transition-colors placeholder:text-slate-600" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">CTA Label</label>
+                            <input type="text" value={heroFields.ctaLabel} onChange={e => setHeroFields({...heroFields, ctaLabel: e.target.value})} placeholder="Follow..." className="w-full bg-slate-800/50 border border-white/[0.06] rounded-lg text-white text-sm px-4 py-2.5 focus:border-purple-500 focus:outline-none transition-colors placeholder:text-slate-600" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">CTA URL</label>
+                            <input type="text" value={heroFields.ctaUrl} onChange={e => setHeroFields({...heroFields, ctaUrl: e.target.value})} placeholder="https://..." className="w-full bg-slate-800/50 border border-white/[0.06] rounded-lg text-white text-sm px-4 py-2.5 focus:border-purple-500 focus:outline-none transition-colors placeholder:text-slate-600" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Mind Map Link</label>
+                          <input type="text" value={heroFields.mindMapLink} onChange={e => setHeroFields({...heroFields, mindMapLink: e.target.value})} placeholder="https://miro.com/... or any diagram URL" className="w-full bg-slate-800/50 border border-white/[0.06] rounded-lg text-white text-sm px-4 py-2.5 focus:border-purple-500 focus:outline-none transition-colors placeholder:text-slate-600" />
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -4532,14 +4325,17 @@
                     {/* ── Section 5: Collapsible Accordions ── */}
                     <div className="px-8 py-4 space-y-2 border-t border-gray-100">
 
-                      {/* Tasks and Agents — 7-Column Table */}
+                      {/* Tasks and Agents — Studio-style Hierarchical Groups (Change 3) */}
                       <details className="group" open>
                         <summary className="flex items-center justify-between py-3 cursor-pointer">
                           <div className="flex items-center gap-2 text-purple-600 font-bold text-sm hover:text-purple-800 transition-colors">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 transition-transform group-open:rotate-90"><path d="M9 18l6-6-6-6"/></svg>
                             Tasks and Agents
                           </div>
-                          {taskRowSource && <span className="text-[10px] text-gray-400 italic">Generated by {taskRowSource === 'claude' ? 'Claude' : taskRowSource === 'gemini-fallback' ? 'Gemini' : 'local data'}</span>}
+                          <div className="flex items-center gap-3">
+                            {taskRowSource && <span className="text-[10px] text-gray-400 italic">Generated by {taskRowSource === 'claude' ? 'Claude' : taskRowSource === 'gemini-fallback' ? 'Gemini' : 'local data'}</span>}
+                            {taskRows && taskRows.length > 0 && <button onClick={(e) => { e.preventDefault(); setTaskRows([...taskRows, { actionItem: 'New Task Group', subtasks: [{ todo: '', triggerApp: '', actionApp: '', setupLink: '', tutorialLink: '' }] }]); }} className="text-blue-500 hover:text-blue-700 transition-colors" title="Add Task Group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>}
+                          </div>
                         </summary>
                         <div className="pb-4 space-y-4">
 
@@ -4565,7 +4361,7 @@
                                   setIsGeneratingTaskRows(false);
                                 }
                               }} disabled={!videoStory?.checklist || videoStory.checklist.length === 0} className="px-6 py-3 bg-purple-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-                                Generate Task Rows with AI
+                                Generate Task Groups with AI
                               </button>
                               {(!videoStory?.checklist || videoStory.checklist.length === 0) && (
                                 <p className="text-gray-400 text-xs italic mt-3">No checklist items found. Go back to Source Video to generate your story.</p>
@@ -4581,14 +4377,21 @@
                             </div>
                           )}
 
-                          {/* Task rows table */}
+                          {/* Hierarchical Task Groups */}
                           {taskRows && taskRows.length > 0 && (
-                            <div className="space-y-6">
+                            <div className="space-y-4">
                               {taskRows.map((row, rowIdx) => (
                                 <div key={rowIdx} className="border border-gray-200 rounded-lg overflow-hidden">
-                                  <div className="bg-purple-50 px-4 py-3 border-b border-purple-100">
-                                    <span className="text-xs font-black text-purple-700 uppercase tracking-wider">{row.actionItem}</span>
+                                  {/* Group Header — Studio-style purple bar with controls */}
+                                  <div className="bg-purple-50 px-4 py-3 border-b border-purple-100 flex items-center justify-between">
+                                    <input type="text" value={row.actionItem} onChange={e => { const next = [...taskRows]; next[rowIdx] = { ...next[rowIdx], actionItem: e.target.value }; setTaskRows(next); }} className="text-xs font-black text-purple-700 uppercase tracking-wider bg-transparent border-none focus:outline-none focus:bg-white focus:px-2 focus:rounded transition-all flex-1 mr-3" />
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                      <button onClick={() => { const next = [...taskRows]; next[rowIdx] = { ...next[rowIdx], subtasks: [...(next[rowIdx].subtasks || []), { todo: '', triggerApp: '', actionApp: '', setupLink: '', tutorialLink: '' }] }; setTaskRows(next); }} className="text-blue-500 hover:text-blue-700" title="Add sub-task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                                      <button onClick={() => { const next = taskRows.filter((_, i) => i !== rowIdx); setTaskRows(next); }} className="text-red-400 hover:text-red-600" title="Delete group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                                      {rowIdx > 0 && <button onClick={() => { const next = [...taskRows]; [next[rowIdx - 1], next[rowIdx]] = [next[rowIdx], next[rowIdx - 1]]; setTaskRows(next); }} className="text-gray-400 hover:text-gray-600" title="Move up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="18 15 12 9 6 15"/></svg></button>}
+                                    </div>
                                   </div>
+                                  {/* Sub-task table */}
                                   <div className="overflow-x-auto">
                                     <table className="w-full text-xs">
                                       <thead>
@@ -4598,16 +4401,18 @@
                                           <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Action App</th>
                                           <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Setup</th>
                                           <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Tutorial</th>
+                                          <th className="w-8"></th>
                                         </tr>
                                       </thead>
                                       <tbody>
                                         {(row.subtasks || []).map((sub, subIdx) => (
                                           <tr key={subIdx} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                            <td className="px-3 py-2.5 font-medium text-gray-800">{sub.todo}</td>
-                                            <td className="px-3 py-2.5">{sub.triggerUrl ? <a href={sub.triggerUrl} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">{sub.triggerApp}</a> : <span className="text-gray-500">{sub.triggerApp || '—'}</span>}</td>
-                                            <td className="px-3 py-2.5">{sub.actionUrl ? <a href={sub.actionUrl} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">{sub.actionApp}</a> : <span className="text-gray-500">{sub.actionApp || 'Manual'}</span>}</td>
-                                            <td className="px-3 py-2.5">{sub.setupLink ? <a href={sub.setupLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Setup</a> : <span className="text-gray-300">—</span>}</td>
-                                            <td className="px-3 py-2.5">{sub.tutorialLink ? <a href={sub.tutorialLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Tutorial</a> : <span className="text-gray-300">—</span>}</td>
+                                            <td className="px-3 py-2"><input type="text" value={sub.todo || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, todo: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-gray-800 text-xs font-medium focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="Task name..." /></td>
+                                            <td className="px-3 py-2"><input type="text" value={sub.triggerApp || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, triggerApp: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-gray-500 text-xs focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="—" /></td>
+                                            <td className="px-3 py-2"><input type="text" value={sub.actionApp || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, actionApp: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-gray-500 text-xs focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="Manual" /></td>
+                                            <td className="px-3 py-2"><input type="text" value={sub.setupLink || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, setupLink: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-blue-500 text-xs focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="—" /></td>
+                                            <td className="px-3 py-2"><input type="text" value={sub.tutorialLink || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, tutorialLink: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-blue-500 text-xs focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="—" /></td>
+                                            <td className="px-1 py-2"><button onClick={() => { const next = [...taskRows]; next[rowIdx].subtasks = next[rowIdx].subtasks.filter((_, i) => i !== subIdx); setTaskRows([...next]); }} className="text-gray-300 hover:text-red-400 transition-colors" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
                                           </tr>
                                         ))}
                                       </tbody>
@@ -4616,8 +4421,12 @@
                                 </div>
                               ))}
 
-                              {/* Regenerate button */}
-                              <div className="text-center pt-2">
+                              {/* Add Task Group + Regenerate */}
+                              <div className="flex items-center justify-between pt-2">
+                                <button onClick={() => setTaskRows([...taskRows, { actionItem: 'New Task Group', subtasks: [{ todo: '', triggerApp: '', actionApp: '', setupLink: '', tutorialLink: '' }] }])} className="text-xs text-blue-500 hover:text-blue-700 font-bold uppercase tracking-wider transition-colors flex items-center gap-1">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                  Add Task Group
+                                </button>
                                 <button onClick={async () => {
                                   setIsGeneratingTaskRows(true);
                                   setTaskRows(null);
@@ -4638,7 +4447,7 @@
                                     setIsGeneratingTaskRows(false);
                                   }
                                 }} className="text-xs text-purple-500 hover:text-purple-700 font-bold uppercase tracking-wider transition-colors">
-                                  Regenerate
+                                  Regenerate with AI
                                 </button>
                               </div>
                             </div>
@@ -4646,13 +4455,16 @@
 
                           {/* Empty state after generation */}
                           {taskRows && taskRows.length === 0 && taskRowSource !== 'error' && (
-                            <p className="text-gray-400 text-xs italic text-center py-4">No task rows generated. Try adding more detail to your Source Video story.</p>
+                            <div className="text-center py-6">
+                              <p className="text-gray-400 text-xs italic mb-3">No task groups generated yet.</p>
+                              <button onClick={() => setTaskRows([{ actionItem: 'New Task Group', subtasks: [{ todo: '', triggerApp: '', actionApp: '', setupLink: '', tutorialLink: '' }] }])} className="text-xs text-blue-500 hover:text-blue-700 font-bold uppercase tracking-wider transition-colors">+ Add First Task Group</button>
+                            </div>
                           )}
 
                           {/* Error state */}
                           {taskRowSource === 'error' && (
                             <div className="text-center py-4">
-                              <p className="text-red-400 text-xs font-medium mb-2">Task row generation failed. Please try again.</p>
+                              <p className="text-red-400 text-xs font-medium mb-2">Task group generation failed. Please try again.</p>
                               <button onClick={() => { setTaskRows(null); setTaskRowSource(null); }} className="text-xs text-purple-500 hover:text-purple-700 font-bold uppercase tracking-wider">Retry</button>
                             </div>
                           )}
@@ -4683,7 +4495,7 @@
                         </div>
                       </details>
 
-                      {/* Hosted Automation Flow */}
+                      {/* Hosted Automation Flow — Studio-matching structure (Change 4) */}
                       <details className="group">
                         <summary className="flex items-center justify-between py-3 cursor-pointer">
                           <div className="flex items-center gap-2 text-purple-600 font-bold text-sm hover:text-purple-800 transition-colors">
@@ -4692,21 +4504,177 @@
                           </div>
                           <span className="text-xs text-white bg-purple-600 px-4 py-1.5 rounded font-bold tracking-wider">Schedule Free Onboarding</span>
                         </summary>
-                        <div className="pl-6 pb-4">
-                          <div className="space-y-3 py-2">
-                            <div className="flex items-center gap-3 py-3 px-4 rounded border border-gray-200 bg-gray-50">
-                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Step 1:</span>
-                              <span className="text-xs text-gray-600">H2H automation steps will appear here after publishing</span>
+                        <div className="pl-2 pb-4 pt-2">
+                          {/* Initialize HAF steps from automations if empty */}
+                          {hafSteps.length === 0 && videoStory?.automations?.length > 0 && (() => {
+                            const seed = videoStory.automations.map((a, i) => ({
+                              title: a.trigger || `Step ${i + 1}`,
+                              paths: [{ title: '', conditions: [{ field: 'Customer', matchType: 'contains', value: '' }], actions: { sendEmail: false, sendAlert: i === 0, updateScore: false, addTag: i === 0, addToFlow: false, zapierTrigger: false, doNothing: false }, flowControl: 'next' }]
+                            }));
+                            setTimeout(() => setHafSteps(seed), 0);
+                            return null;
+                          })()}
+
+                          {/* Data-Driven Workflow Steps header */}
+                          <div className="flex items-center justify-between mb-3 px-2">
+                            <div className="flex items-center gap-2">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-blue-500"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                              <span className="text-xs font-bold text-gray-600">Data-Driven Workflow Steps</span>
                             </div>
-                            <div className="flex items-center gap-3 py-3 px-4 rounded border border-gray-200 bg-gray-50">
-                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Step 2:</span>
-                              <span className="text-xs text-gray-600">Conditional paths, email/alert triggers, and timing rules</span>
+                            <button onClick={() => setHafSteps([...hafSteps, { title: `Step ${hafSteps.length + 1}`, paths: [{ title: '', conditions: [{ field: 'Customer', matchType: 'contains', value: '' }], actions: { sendEmail: false, sendAlert: false, updateScore: false, addTag: false, addToFlow: false, zapierTrigger: false, doNothing: false }, flowControl: 'next' }] }])} className="text-blue-500 hover:text-blue-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Step
+                            </button>
+                          </div>
+
+                          {hafSteps.length === 0 && (
+                            <div className="text-center py-6">
+                              <p className="text-gray-400 text-xs italic mb-3">No automation steps yet. Steps will be seeded from your video analysis or you can add manually.</p>
+                              <button onClick={() => setHafSteps([{ title: 'Step 1', paths: [{ title: '', conditions: [{ field: 'Customer', matchType: 'contains', value: '' }], actions: { sendEmail: false, sendAlert: false, updateScore: false, addTag: false, addToFlow: false, zapierTrigger: false, doNothing: false }, flowControl: 'next' }] }])} className="text-xs text-blue-500 hover:text-blue-700 font-bold uppercase tracking-wider">+ Add First Step</button>
                             </div>
-                            <div className="flex items-center gap-3 py-3 px-4 rounded border border-gray-200 bg-gray-50">
-                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Step 3:</span>
-                              <span className="text-xs text-gray-600">Zapier triggers and scoring updates</span>
-                            </div>
-                            <p className="text-gray-400 text-xs italic mt-2">The Hosted Automation Flow will be fully configured in Studio.</p>
+                          )}
+
+                          {/* Steps */}
+                          <div className="space-y-3">
+                            {hafSteps.map((step, si) => (
+                              <div key={si} className="border border-gray-200 rounded-lg overflow-hidden">
+                                {/* Step header */}
+                                <div className="bg-blue-50 px-4 py-2.5 flex items-center justify-between border-b border-blue-100">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-blue-400 bg-blue-100 rounded px-1.5 py-0.5">{si + 1}</span>
+                                    <span className="text-xs font-bold text-gray-500">Step:</span>
+                                    <input type="text" value={step.title} onChange={e => { const n = [...hafSteps]; n[si] = { ...n[si], title: e.target.value }; setHafSteps(n); }} className="text-xs text-blue-600 font-medium bg-transparent border-none focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" />
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <button onClick={() => setHafExpandedStep(hafExpandedStep === si ? null : si)} className="text-gray-400 hover:text-gray-600"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-3.5 h-3.5 transition-transform ${hafExpandedStep === si ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"/></svg></button>
+                                    <button onClick={() => setHafSteps(hafSteps.filter((_, i) => i !== si))} className="text-red-300 hover:text-red-500"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                                  </div>
+                                </div>
+
+                                {/* Expanded path content */}
+                                {hafExpandedStep === si && step.paths.map((path, pi) => (
+                                  <div key={pi} className="px-4 py-3 bg-white border-b border-gray-100 space-y-3">
+                                    {/* Path header */}
+                                    <div className="flex items-center gap-2 bg-gray-50 rounded px-3 py-2">
+                                      <span className="text-[10px] font-bold text-gray-400">Path {pi + 1}</span>
+                                      <input type="text" value={path.title} onChange={e => { const n = [...hafSteps]; n[si].paths[pi] = { ...path, title: e.target.value }; setHafSteps(n); }} placeholder="Path title" className="text-xs text-gray-500 bg-transparent border-none focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all flex-1" />
+                                    </div>
+
+                                    {/* Conditions */}
+                                    <div className="space-y-2 pl-2">
+                                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">If <span className="text-blue-500">Any</span> of the conditions met below</p>
+                                      {path.conditions.map((cond, ci) => (
+                                        <div key={ci} className="flex items-center gap-2">
+                                          <select value={cond.field} onChange={e => { const n = [...hafSteps]; n[si].paths[pi].conditions[ci] = { ...cond, field: e.target.value }; setHafSteps(n); }} className="text-xs border border-gray-200 rounded px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-purple-400">
+                                            <option>Customer</option><option>Data Sharpener</option><option>Email</option><option>First Name</option><option>Last Name</option><option>Company</option><option>Industry</option><option>Lead Score</option>
+                                          </select>
+                                          <select value={cond.matchType} onChange={e => { const n = [...hafSteps]; n[si].paths[pi].conditions[ci] = { ...cond, matchType: e.target.value }; setHafSteps(n); }} className="text-xs border border-gray-200 rounded px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-purple-400">
+                                            <option>contains</option><option>equal to</option><option>not equal to</option><option>starts with</option><option>ends with</option><option>is empty</option><option>is not empty</option><option>greater than</option><option>less than</option>
+                                          </select>
+                                          <input type="text" value={cond.value} onChange={e => { const n = [...hafSteps]; n[si].paths[pi].conditions[ci] = { ...cond, value: e.target.value }; setHafSteps(n); }} placeholder="Match value" className="text-xs border border-gray-200 rounded px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-purple-400 flex-1" />
+                                          <button onClick={() => { const n = [...hafSteps]; n[si].paths[pi].conditions = n[si].paths[pi].conditions.filter((_, i) => i !== ci); setHafSteps(n); }} className="text-red-300 hover:text-red-500"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                                        </div>
+                                      ))}
+                                      <button onClick={() => { const n = [...hafSteps]; n[si].paths[pi].conditions.push({ field: 'Customer', matchType: 'contains', value: '' }); setHafSteps(n); }} className="text-[10px] text-blue-500 hover:text-blue-700 font-bold">+ Add Condition</button>
+                                    </div>
+
+                                    {/* Advanced Filter type buttons */}
+                                    <div className="flex flex-wrap gap-2 pl-2">
+                                      {[{l:'Email Activity',c:'#8B9F3B'},{l:'Lists',c:'#8B9F3B'},{l:'Form Submission',c:'#8B9F3B'},{l:'Web Activity',c:'#8B9F3B'},{l:'Lead Score',c:'#8B9F3B'},{l:'Tags',c:'#8B9F3B'},{l:'Basic Filter',c:'#8B9F3B'}].map((ft, fi) => (
+                                        <button key={fi} className="text-[9px] font-bold text-white uppercase tracking-wider px-2.5 py-1 rounded-full transition-opacity hover:opacity-80" style={{backgroundColor: ft.c}} title={`Add ${ft.l} filter`}>{ft.l}</button>
+                                      ))}
+                                    </div>
+
+                                    {/* Actions — 7 checkboxes matching Studio */}
+                                    <div className="border-t border-gray-100 pt-3 mt-2">
+                                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">Perform the following Action(s)</p>
+                                      <div className="flex items-center justify-center gap-4 flex-wrap">
+                                        {[
+                                          { key: 'sendEmail', label: 'Send Email', icon: '✉', color: '#3b82f6' },
+                                          { key: 'sendAlert', label: 'Send Alert', icon: '🔔', color: '#f59e0b' },
+                                          { key: 'updateScore', label: 'Update Score', icon: '⭐', color: '#6b7280' },
+                                          { key: 'addTag', label: 'Add Tag', icon: '🏷', color: '#10b981' },
+                                          { key: 'addToFlow', label: 'Add to Flow', icon: '➕', color: '#6b7280' },
+                                          { key: 'zapierTrigger', label: 'Zapier Trigger', icon: '⚡', color: '#f97316' },
+                                          { key: 'doNothing', label: 'Do Nothing', icon: '🚫', color: '#ef4444' }
+                                        ].map(act => (
+                                          <label key={act.key} className="flex flex-col items-center gap-1 cursor-pointer select-none">
+                                            <input type="checkbox" checked={path.actions[act.key] || false} onChange={e => { const n = [...hafSteps]; n[si].paths[pi].actions = { ...path.actions, [act.key]: e.target.checked }; setHafSteps(n); }} className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                            <span className="text-[9px] text-gray-500 font-medium text-center leading-tight">{act.label}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* Flow Control */}
+                                    <div className="flex items-center gap-2 pl-2 pt-1">
+                                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Then:</span>
+                                      <select value={path.flowControl} onChange={e => { const n = [...hafSteps]; n[si].paths[pi] = { ...path, flowControl: e.target.value }; setHafSteps(n); }} className="text-xs border border-gray-200 rounded px-2 py-1 bg-white text-gray-600 focus:outline-none focus:border-purple-400">
+                                        <option value="next">Go To Next Step</option>
+                                        <option value="end">End</option>
+                                        {hafSteps.map((s, idx) => idx !== si ? <option key={idx} value={`goto-${idx}`}>Go To Step {idx + 1}</option> : null)}
+                                      </select>
+                                    </div>
+
+                                    {/* Email Creation Panel (Change 5) — shown when Send Email is checked */}
+                                    {path.actions.sendEmail && (
+                                      <div className="border-t border-blue-100 bg-blue-50/50 rounded-lg mt-3 p-4 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-lg">✉</span>
+                                            <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Create Message</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-gray-400">Dispatch Type</span>
+                                            <select className="text-[10px] border border-gray-200 rounded px-2 py-1 bg-white text-gray-600 focus:outline-none">
+                                              <option>Instantly</option><option>Delayed</option><option>Scheduled</option>
+                                            </select>
+                                          </div>
+                                        </div>
+                                        {/* Subject + From fields */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                          <div>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">Subject</label>
+                                            <input type="text" placeholder="Enter subject line..." className="w-full text-xs border border-gray-200 rounded px-3 py-2 bg-white text-gray-700 focus:outline-none focus:border-blue-400" />
+                                          </div>
+                                          <div>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">From Name</label>
+                                            <input type="text" placeholder="Readystack" defaultValue={heroFields.headline ? heroFields.headline.split(' ')[0] : 'Readystack'} className="w-full text-xs border border-gray-200 rounded px-3 py-2 bg-white text-gray-700 focus:outline-none focus:border-blue-400" />
+                                          </div>
+                                        </div>
+                                        {/* Template Picker — 5 layout thumbnails */}
+                                        <div>
+                                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Choose Layout</label>
+                                          <div className="flex gap-2">
+                                            {[
+                                              { name: '1 Column', w: 'w-full' },
+                                              { name: '1-2 Col', w: 'w-1/2' },
+                                              { name: '1-2-1', w: 'w-1/3' },
+                                              { name: '1-3 Col', w: 'w-1/4' },
+                                              { name: 'Blank', w: '' }
+                                            ].map((tmpl, ti) => (
+                                              <button key={ti} className="flex-1 border border-gray-200 rounded-lg p-2 hover:border-blue-400 hover:bg-blue-50 transition-colors group cursor-pointer">
+                                                <div className="bg-gray-100 rounded h-12 mb-1.5 flex flex-col items-center justify-center gap-0.5 group-hover:bg-blue-100 transition-colors">
+                                                  {tmpl.name === 'Blank' ? (
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-gray-300"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                                  ) : (
+                                                    <><div className="w-3/4 h-1 bg-gray-300 rounded-full"></div><div className="w-1/2 h-1 bg-gray-300 rounded-full"></div><div className="w-2/3 h-1 bg-gray-300 rounded-full"></div></>
+                                                  )}
+                                                </div>
+                                                <p className="text-[8px] text-gray-500 text-center font-medium">{tmpl.name}</p>
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </div>
+                                        {/* Open in Studio link */}
+                                        <div className="text-right">
+                                          <span className="text-[10px] text-purple-500 font-bold uppercase tracking-wider cursor-pointer hover:text-purple-700 transition-colors">Open Full Editor in Studio →</span>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </details>
