@@ -4540,6 +4540,10 @@
                                 {/* Step header */}
                                 <div className="bg-blue-50 px-4 py-2.5 flex items-center justify-between border-b border-blue-100">
                                   <div className="flex items-center gap-2">
+                                    {/* Drag handle */}
+                                    <span className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 flex-shrink-0" title="Drag to reorder step">
+                                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+                                    </span>
                                     <span className="text-[10px] font-bold text-blue-400 bg-blue-100 rounded px-1.5 py-0.5">{si + 1}</span>
                                     <span className="text-xs font-bold text-gray-500">Step:</span>
                                     <input type="text" value={step.title} onChange={e => { const n = [...hafSteps]; n[si] = { ...n[si], title: e.target.value }; setHafSteps(n); }} className="text-xs text-blue-600 font-medium bg-transparent border-none focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" />
@@ -4673,6 +4677,15 @@
                                     )}
                                   </div>
                                 ))}
+                                {/* Add Path button */}
+                                {hafExpandedStep === si && (
+                                  <div className="px-4 py-2.5 bg-gray-50/50 border-t border-gray-100">
+                                    <button onClick={() => { const n = [...hafSteps]; n[si].paths.push({ title: '', conditions: [{ field: 'Customer', matchType: 'contains', value: '' }], actions: { sendEmail: false, sendAlert: false, updateScore: false, addTag: false, addToFlow: false, zapierTrigger: false, doNothing: false }, flowControl: 'next' }); setHafSteps(n); }} className="text-[10px] text-purple-500 hover:text-purple-700 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                      Add Path
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
