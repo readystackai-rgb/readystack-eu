@@ -1,3 +1,4 @@
+/* ========== [M:100] HTML — DOCTYPE, head, meta, Tailwind import ========== */
 <!DOCTYPE html>
 <!-- Deployed via ReadyStack AI Ops | 2026-03-01 03:33 UTC -->
 <html lang="en">
@@ -6,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ReadyStack Engagement Utility</title>
   <script src="https://cdn.tailwindcss.com"></script>
+/* ========== [M:0] CSS — Global styles, Tailwind overrides, custom classes ========== */
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;700;900&display=swap');
 
@@ -191,6 +193,7 @@
       }
     }
   </style>
+/* ========== [M:101] HTML — Body open, preloader, script imports ========== */
 </head>
 <body>
   <div id="root">
@@ -208,6 +211,7 @@
 
   <!-- Wix postMessage param passthrough — must run BEFORE React mounts -->
   <script>
+/* ========== [M:102] HTML/JS — Vanilla JS postMessage/URL handler ========== */
     (function () {
       // ── Learning Mode redirect: serve walkthrough.html instead of React app ──
       var sp = new URLSearchParams(window.location.search);
@@ -272,6 +276,7 @@
     const { useState, useRef, useMemo, useEffect } = React;
 
     /* ── InfoTooltip: ℹ info icon that reveals subtitle text on hover ── */
+/* ========== [M:400] COMPONENTS — Small components: InfoTooltip, GuidedPromptCard, icons, charts ========== */
     const InfoTooltip = ({ text }) => {
       const [show, setShow] = useState(false);
       const tipRef = useRef(null);
@@ -535,6 +540,7 @@
       { id: 'expanding', label: 'EXPANDING', color: '#7c8cff' }
     ];
 
+/* ========== [M:200] JS — App() open, config constants, data arrays ========== */
     const App = () => {
 
 
@@ -648,6 +654,7 @@
       const [draggedItem, setDraggedItem] = useState(null);
       const [deletingDistrictId, setDeletingDistrictId] = useState(null);
 
+/* ========== [M:201] JS — State: Phase 1A roster, residents ========== */
       // === PHASE 1A: Master Roster + Resident System ===
       const [masterRoster, setMasterRoster] = useState(() => {
         try { const saved = localStorage.getItem('rs_master_roster'); return saved ? JSON.parse(saved) : []; } catch(e) { return []; }
@@ -666,6 +673,7 @@
       // Per-participant show/hide in District Map (null = first only expanded)
       const [expandedResidents, setExpandedResidents] = useState({});
 
+/* ========== [M:202] JS — State: Invitation system, profiles, mapping ========== */
       // === INVITATION SYSTEM STATE ===
       const [districtRole, setDistrictRole] = useState(null); // 'creator' | 'resident' | null
       const [residentEmail, setResidentEmail] = useState(null); // authenticated resident's email
@@ -693,6 +701,7 @@
       const isResident = districtRole === 'resident';
       const isCreator = districtRole === 'creator' || !districtRole; // default to creator for backward compat
 
+/* ========== [M:203] JS — State: Universal Profiles, remaining useState ========== */
       // === UNIVERSAL USER PROFILES STATE ===
       const [profilesData, setProfilesData] = useState([]); // array of { userId, name, email, photoUrl, bio, websiteUrl }
       const [creatorProfile, setCreatorProfile] = useState(null); // { name, email, photoUrl, bio, websiteUrl } for header pill
@@ -1113,6 +1122,7 @@
       const GOOGLE_CSE_CX = "56ffa52e2f9eb4318"; // Programmable Search Engine CX ID
       const CLOUD_FUNCTION_URL = "https://us-central1-gen-lang-client-0769430147.cloudfunctions.net/advisor";
 
+/* ========== [M:204] JS — useEffect hooks (boot, scroll, init) ========== */
       useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [activeTab]);
 
       // ── Learning Mode: sync guided step with active tab + 15s intensity timer ──
@@ -1189,6 +1199,7 @@
         // ── LEARNING MODE: Load fixture data from local learning-district.json ──
         const urlLearningMode = params.get('mode') === 'learn';
 
+/* ========== [M:205] JS — Handler functions (fetch, save, toggle, CRUD) ========== */
         const handleWixParams = () => {
           // Re-read params (URL was updated by the postMessage handler)
           const freshParams = new URLSearchParams(window.location.search);
@@ -1588,6 +1599,7 @@
       const persistAppState = () => {
         const snapshot = {};
         if (selectedVideoData) snapshot.selectedVideoData = selectedVideoData;
+/* ========== [M:206] JS — Handlers continued (invite, profile, analytics) ========== */
         if (youtubeEmbedUrl) snapshot.youtubeEmbedUrl = youtubeEmbedUrl;
         if (videoStory) snapshot.videoStory = videoStory;
         if (stackLabel && stackLabel !== 'ReadyStack Campaign') snapshot.stackLabel = stackLabel;
@@ -1988,6 +2000,7 @@
       };
 
       const resolveMetadataById = async (id) => {
+/* ========== [M:207] JS — Remaining logic, drag/drop, helpers ========== */
         try {
             const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${id}&key=${ytApiKey}`;
             const data = await fetchWithRetry(url);
@@ -2151,7 +2164,7 @@
       const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
       const handleDrop = (e, stageId, dropIndex) => { e.preventDefault(); if (!draggedItem || draggedItem.stageId !== stageId || draggedItem.index === dropIndex) return; setMapping(prev => { const next = [...(prev[stageId] || [])]; const [removed] = next.splice(draggedItem.index, 1); next.splice(dropIndex, 0, removed); return { ...prev, [stageId]: next }; }); setDraggedItem(null); };
 
-      const copyUrl = (text, id) => { const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); setUrlCopied(id); setTimeout(() => setUrlCopied(null), 2000); };
+      const copyUrl = async (text, id) => { let ok = false; if (navigator.clipboard && navigator.clipboard.writeText) { try { await navigator.clipboard.writeText(text); ok = true; } catch (_) {} } if (!ok) { try { const el = document.createElement('textarea'); el.value = text; el.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none'; document.body.appendChild(el); el.focus(); el.select(); ok = document.execCommand('copy'); document.body.removeChild(el); } catch (_) { ok = false; } } if (ok) { setUrlCopied(id); setTimeout(() => setUrlCopied(null), 2000); } };
 
       const nodes = useMemo(() => {
         const items = []; const centerX = 600;
@@ -2290,6 +2303,7 @@
         return { items, flows: allFlows, scaledTraffic, hangtimeVal: 4.5, searchingVal: 1.2, finance: { districtDividendsAmount: Math.round(rsGrossRevenue * 0.6), snapshotRevenueItems, totalSnapshotARR: snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0), investmentInItems: (mapping.angels || []).filter(a => a.platform !== 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), pendingInvestmentItems: (mapping.angels || []).filter(a => a.platform === 'observer').map(a => ({ label: a.lab, amount: a.amount || 0 })), totalFinanceCapital: Math.round(rsGrossRevenue * 0.6) + snapshotRevenueItems.reduce((acc, i) => acc + i.amount, 0) }, counts: { buying: Math.round(scaledTraffic * 0.005), sharing: Math.round(scaledTraffic * 0.003), retention: Math.round(scaledTraffic * 0.004) }, probs: { buying: 82, sharing: 64, retention: 71 } };
       }, [mapping, lookerPeriod, obsMode, playbackProgress, flowTab, storyParticipants]);
 
+/* ========== [M:300] JSX — return() open, outer wrapper, header bar ========== */
       return (
 
         <div className="min-h-screen w-full bg-[#020617] text-slate-300 font-sans text-[13px] animate-fade-in text-left">
@@ -2454,6 +2468,7 @@
               <div className="flex items-center space-x-3">
                 <a href="https://www.readystack.ai/pricing" target="_top" className="text-xs font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors" style={{ fontFamily: 'Poppins, sans-serif', textDecoration: 'none' }}>Pricing</a>
 
+/* ========== [M:301] JSX — Creator Pill, profile popover, auth UI ========== */
                 {/* ── Creator Pill (28px avatar + name) ── */}
                 {creatorProfile && rsSession && (
                   <div className="relative">
@@ -2603,6 +2618,7 @@
             {/* LEFT ONBOARDING RAIL */}
             <div className={`flex-shrink-0 bg-[#0f172a]/80 flex flex-col shadow-2xl sticky top-28 z-10 text-left transition-all duration-300 overflow-hidden ${isRailOpen ? 'w-72 p-6 border border-white/5 rounded-[32px] opacity-100 mr-8' : 'w-0 p-0 border-0 opacity-0 mr-0'}`}>
 
+/* ========== [M:302] JSX — My Districts section ========== */
               {/* NEW MY DISTRICTS SECTION — hidden in invite mode */}
               {!isInviteMode && !isLearningMode && <div className="mb-6 border-b border-white/10 pb-6">
                 <div className="flex items-center justify-between mb-3">
@@ -2687,6 +2703,7 @@
 
               {/* progress bar removed */}
 
+/* ========== [M:303] JSX — Left Rail (Compose + Operations tabs) ========== */
               {/* ── LEFT RAIL: COMPOSE + OPERATIONS ── */}
               <div className="flex-grow whitespace-nowrap overflow-hidden">
 
@@ -2915,6 +2932,7 @@
                 </button>
               </div>
 
+/* ========== [M:304] JSX — Top step navigation bar ========== */
             {/* ── TOP STEP NAVIGATION BAR (above everything) ── */}
             {(() => {
               const composeSteps = [
@@ -2944,6 +2962,7 @@
                 <div className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between px-10 py-3 border-b border-white/5 bg-[#0f172a]/80 backdrop-blur-sm rounded-t-[40px]">
                   <div className="flex items-center gap-3 min-w-[200px]">
                     {prev ? (
+/* ========== [M:307] JSX — Intro/Residents tab ========== */
                       <button onClick={() => { if (activeTab === 'intro') { buildStoryDistrict(prev.id); } else { setActiveTab(prev.id); } }}
                         className="flex items-center gap-1.5 text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wider transition-all group">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
@@ -2969,6 +2988,7 @@
               );
             })()}
 
+/* ========== [M:305] JSX — YouTube tab (Define Market Story) ========== */
             {activeTab === 'youtube' && (
               <div className="animate-fade-in space-y-6 text-left pt-28 pb-10">
                   <div className="space-y-3 mb-6">
@@ -3317,6 +3337,7 @@
             {/* ══════════════════════════════════════════════════════════════════
                  ACTION PLAN TAB — Tasks + Suggested Roles (AI-generated)
                  ══════════════════════════════════════════════════════════════════ */}
+/* ========== [M:306] JSX — ExecPlan tab (Tasks & Agents) ========== */
             {activeTab === 'execplan' && (
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-6">
@@ -3705,6 +3726,7 @@
               </div>
             )}
 
+/* ========== [M:308] JSX — Mapper tab (Resident Links) ========== */
             {activeTab === 'mapper' && (
               <div className="space-y-12 animate-fade-in text-left pt-28">
                 <div className="space-y-6">
@@ -3985,6 +4007,7 @@
             )}
 
             {/* ── MY RESIDENTS TAB ── */}
+/* ========== [M:309] JSX — Connect tab (My Residents) ========== */
             {activeTab === 'connect' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 {isLearningMode && !dismissedInfoCards.connect && (
@@ -4195,6 +4218,8 @@
                  White theme scoped to this block only
                  Data: heroFields, videoStory, storyParticipants, youtubeEmbedUrl, mapping
                ══════════════════════════════════════════════════════════ */}
+/* ========== [M:310] JSX — Preview/Landing tab (District Product) ========== */
+/* ========== [M:311] JSX — Landing tab ========== */
             {activeTab === 'landing' && (
               <div className="max-w-5xl mx-auto animate-fade-in pt-28 pb-10">
                 <div className="space-y-12">
@@ -4715,6 +4740,7 @@
               </div>
             )}
 
+/* ========== [M:312] JSX — Finance tab ========== */
             {activeTab === 'finance' && !isResident && (
               <div className="max-w-4xl mx-auto animate-fade-in pt-28">
                 {isLearningMode && !dismissedInfoCards.finance && (
@@ -4867,6 +4893,7 @@
               </div>
             )}
 
+/* ========== [M:313] JSX — Observatory tab ========== */
             {activeTab === 'observatory' && (
               <div className="space-y-8 animate-fade-in font-sans text-left relative pt-28">
                 {isLearningMode && !dismissedInfoCards.observatory && (
@@ -5122,6 +5149,7 @@
             )}
 
 
+/* ========== [M:314] JSX — Looker / G4 / Analytics tabs ========== */
             {activeTab === 'looker' && !isResident && (
               <div className="space-y-12 animate-fade-in text-left font-sans pt-20">
                 {isLearningMode && !dismissedInfoCards.looker && (
@@ -5346,10 +5374,17 @@
                       onClick={(e) => e.target.select()}
                     />
                     <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(inviteModalData.url);
+                      onClick={async () => {
+                        const textToCopy = inviteModalData.url;
                         const btn = document.getElementById('copy-invite-btn');
-                        if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+                        let success = false;
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                          try { await navigator.clipboard.writeText(textToCopy); success = true; } catch (_) {}
+                        }
+                        if (!success) {
+                          try { const ta = document.createElement('textarea'); ta.value = textToCopy; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0'; document.body.appendChild(ta); ta.focus(); ta.select(); success = document.execCommand('copy'); document.body.removeChild(ta); } catch (_) { success = false; }
+                        }
+                        if (btn) { btn.textContent = success ? 'Copied!' : 'Select & copy manually'; setTimeout(() => { btn.textContent = 'Copy'; }, 2500); }
                       }}
                       id="copy-invite-btn"
                       className="px-4 py-2 bg-indigo-500 text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-indigo-400 transition-colors shrink-0"
@@ -5382,6 +5417,7 @@
         </div>
       );
     };
+/* ========== [M:315] JSX — ReactDOM.render, closing brackets ========== */
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
