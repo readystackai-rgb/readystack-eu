@@ -1461,7 +1461,7 @@
               sheetId: rsSheetId,
               participantRow: participantIndex,
               districtName: stackLabel || 'My District',
-              participantName: participant.name.trim(),
+              participantName: participant.name.trim().split(/\s+/)[0],
               role: participant.specialty || 'Participant',
               company: participant.company || '',
               expiryDays: inviteExpiryDays
