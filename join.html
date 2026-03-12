@@ -186,8 +186,10 @@
     function decodeTokenPayload(token) {
       try {
         const parts = token.split('.');
-        if (parts.length !== 2) throw new Error('Invalid token format');
-        const payload = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+        if (parts.length < 2) throw new Error('Invalid token format');
+        // 2-part HMAC token: parts[0] is payload; 3-part JWT: parts[1] is payload
+        const payloadB64 = parts.length === 2 ? parts[0] : parts[1];
+        const payload = JSON.parse(atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')));
         // Client-side expiry check for UX (server rechecks)
         if (payload.exp && Date.now() > payload.exp) {
           return { error: 'expired', data: payload };
