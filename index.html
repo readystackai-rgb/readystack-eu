@@ -272,6 +272,12 @@
     const { useState, useRef, useMemo, useEffect } = React;
 
     /* ── InfoTooltip: ℹ info icon that reveals subtitle text on hover ── */
+    const ClaudeLogo = ({ size = 16, color = '#D4A574' }) => (
+      <svg width={size} height={size} viewBox="0 0 16 16" fill={color} xmlns="http://www.w3.org/2000/svg" style={{flexShrink:0}}>
+        <path d="m3.127 10.604 3.135-1.76.053-.153-.053-.085H6.11l-.525-.032-1.791-.048-1.554-.065-1.505-.08-.38-.081L0 7.832l.036-.234.32-.214.455.04 1.009.069 1.513.105 1.097.064 1.626.17h.259l.036-.105-.089-.065-.068-.064-1.566-1.062-1.695-1.121-.887-.646-.48-.327-.243-.306-.104-.67.435-.48.585.04.15.04.593.456 1.267.981 1.654 1.218.242.202.097-.068.012-.049-.109-.181-.9-1.626-.96-1.655-.428-.686-.113-.411a2 2 0 0 1-.068-.484l.496-.674L4.446 0l.662.089.279.242.411.94.666 1.48 1.033 2.014.302.597.162.553.06.17h.105v-.097l.085-1.134.157-1.392.154-1.792.052-.504.25-.605.497-.327.387.186.319.456-.045.294-.19 1.23-.37 1.93-.243 1.29h.142l.161-.16.654-.868 1.097-1.372.484-.545.565-.601.363-.287h.686l.505.751-.226.775-.707.895-.585.759-.839 1.13-.524.904.048.072.125-.012 1.897-.403 1.024-.186 1.223-.21.553.258.06.263-.218.536-1.307.323-1.533.307-2.284.54-.028.02.032.04 1.029.098.44.024h1.077l2.005.15.525.346.315.424-.053.323-.807.411-3.631-.863-.872-.218h-.12v.073l.726.71 1.331 1.202 1.667 1.55.084.383-.214.302-.226-.032-1.464-1.101-.565-.497-1.28-1.077h-.084v.113l.295.432 1.557 2.34.08.718-.112.234-.404.141-.444-.08-.911-1.28-.94-1.44-.759-1.291-.093.053-.448 4.821-.21.246-.484.186-.403-.307-.214-.496.214-.98.258-1.28.21-1.016.19-1.263.112-.42-.008-.028-.092.012-.953 1.307-1.448 1.957-1.146 1.227-.274.109-.477-.247.045-.44.266-.39 1.586-2.018.956-1.25.617-.723-.004-.105h-.036l-4.212 2.736-.75.096-.324-.302.04-.496.154-.162 1.267-.871z"/>
+      </svg>
+    );
+
     const InfoTooltip = ({ text }) => {
       const [show, setShow] = useState(false);
       const tipRef = useRef(null);
@@ -302,10 +308,11 @@
     /* ── Learning Mode: Guided step definitions (placeholder text — final copy pending team review) ── */
     const LEARNING_STEPS = [
       { key: 'youtube',  title: 'Source Video',      description: 'This is where a district begins. Search for a video that frames the market problem.', nextLabel: 'Action Plan' },
-      { key: 'execplan', title: 'Action Plan',    description: 'Review the tasks and roles AI generated from your source video. This is the operational blueprint for your district.', nextLabel: 'Residents' },
+      { key: 'execplan', title: 'Action Plan',    description: 'Five types of work — Jobs to Be Done, Claude Skills, Claude Agents, Always Running, and Connections — generated from your source video.', nextLabel: 'Residents' },
       { key: 'intro',    title: 'Residents',          description: 'These are the people who will execute the district workload. Add and manage your participants.', nextLabel: 'Resident Links' },
       { key: 'mapper',   title: 'Resident Links',     description: 'Each resident brings engagement items to the district. This map shows every touchpoint in the audience journey.', nextLabel: 'District Product' },
-      { key: 'landing',  title: 'District Product',          description: 'Your complete district — edit settings, preview the published page, configure tasks, automations, and email flows.', nextLabel: null },
+      { key: 'landing',  title: 'District Product',          description: 'Your complete district — edit settings, preview the published page, configure work types, connections, and email flows.', nextLabel: 'Share ReadyStack' },
+  { key: 'readystack',  title: 'Share District ReadyStack',  description: 'Publish your district as a search-optimized ReadyStack page. Paste your content.bridge share URL to embed your tracked commerce page.', nextLabel: null },
     ];
 
     /* ── GuidedPromptCard: inline card shown during learning mode guided sequence ── */
@@ -581,6 +588,217 @@
       const [isGeneratingStory, setIsGeneratingStory] = useState(false);
 
       const [videoStory, setVideoStory] = useState(null);
+
+      // ── Content editing state (Edit/Save/Undo/Redo + AI Review) ──
+      const [isContentEditing, setIsContentEditing] = useState(false);
+      const [contentHistory, setContentHistory] = useState([]);   // undo stack
+      const [contentFuture, setContentFuture] = useState([]);     // redo stack
+      const [aiReviewingSection, setAiReviewingSection] = useState(null); // which section is being AI-reviewed
+      const [contentEditSnapshot, setContentEditSnapshot] = useState(null); // per-section baseline for diff detection
+      const [saveWarning, setSaveWarning] = useState(null); // content-quality floor warning message
+
+      // Helper: get the content string for a section (used for diff comparison)
+      const getSectionContent = (story, section) => {
+        if (!story) return '';
+        const fieldMap = {
+          summary: ['title', 'narrative'],
+          problem: ['problem'],
+          resident: ['resident'],
+          actions: ['checklist']
+        };
+        const fields = fieldMap[section] || [];
+        return fields.map(f => {
+          const val = story[f];
+          if (Array.isArray(val)) {
+            return val.map(item => typeof item === 'object' ? JSON.stringify(item) : item).join('\n');
+          }
+          return val || '';
+        }).join('\n\n');
+      };
+
+      // Helper: check if a section has been modified since editing started
+      const sectionHasChanges = (section) => {
+        if (!contentEditSnapshot || !videoStory) return false;
+        return contentEditSnapshot[section] !== getSectionContent(videoStory, section);
+      };
+
+      const startEditing = () => {
+        // Snapshot current state for undo
+        setContentHistory(prev => [...prev, JSON.parse(JSON.stringify(videoStory))]);
+        setContentFuture([]);
+        // Capture per-section baselines for diff detection
+        const snapshot = {};
+        ['summary', 'problem', 'resident', 'actions'].forEach(s => {
+          snapshot[s] = getSectionContent(videoStory, s);
+        });
+        setContentEditSnapshot(snapshot);
+        setIsContentEditing(true);
+      };
+
+      const saveEditing = () => {
+        // Content-quality floor check (#20's recommendation)
+        // Don't let edits break required fields that feed the landing page schema
+        const warnings = [];
+        if (!videoStory?.title?.trim()) warnings.push('Title is empty — this feeds the page <h1> and schema markup.');
+        if (!videoStory?.narrative?.trim()) warnings.push('Executive Summary narrative is empty — this feeds the intro paragraph for AEO citation.');
+        if (!videoStory?.problem?.trim()) warnings.push('Core Problem is empty — this feeds the landing page intro text.');
+        if (!videoStory?.checklist || videoStory.checklist.filter(c => typeof c === 'string' ? c.trim() : c).length === 0) {
+          warnings.push('All Action Items are empty — this breaks HowTo schema markup on the landing page.');
+        }
+        if (warnings.length > 0) {
+          setSaveWarning(warnings);
+          return; // Block save until they fix or force-save
+        }
+        setSaveWarning(null);
+        setIsContentEditing(false);
+        setContentEditSnapshot(null);
+        triggerSave();
+      };
+
+      const forceSaveEditing = () => {
+        // Owner override — save despite quality warnings
+        setSaveWarning(null);
+        setIsContentEditing(false);
+        setContentEditSnapshot(null);
+        triggerSave();
+      };
+
+      const cancelEditing = () => {
+        // Revert to last snapshot
+        if (contentHistory.length > 0) {
+          const lastState = contentHistory[contentHistory.length - 1];
+          setVideoStory(lastState);
+          setContentHistory(prev => prev.slice(0, -1));
+        }
+        setIsContentEditing(false);
+        setContentEditSnapshot(null);
+      };
+
+      const undoEdit = () => {
+        if (contentHistory.length === 0) return;
+        const prev = contentHistory[contentHistory.length - 1];
+        setContentFuture(f => [...f, JSON.parse(JSON.stringify(videoStory))]);
+        setVideoStory(prev);
+        setContentHistory(h => h.slice(0, -1));
+      };
+
+      const redoEdit = () => {
+        if (contentFuture.length === 0) return;
+        const next = contentFuture[contentFuture.length - 1];
+        setContentHistory(h => [...h, JSON.parse(JSON.stringify(videoStory))]);
+        setVideoStory(next);
+        setContentFuture(f => f.slice(0, -1));
+      };
+
+      const requestAiReview = async (section) => {
+        setAiReviewingSection(section);
+        try {
+          const fieldMap = {
+            summary: { fields: ['title', 'narrative'], label: 'Executive Summary' },
+            problem: { fields: ['problem'], label: 'Core Problem' },
+            resident: { fields: ['resident'], label: 'Ideal Resident' },
+            actions: { fields: ['checklist'], label: 'Action Items' }
+          };
+          const spec = fieldMap[section];
+          if (!spec) return;
+          const contentToReview = spec.fields.map(f => {
+            const val = videoStory[f];
+            return Array.isArray(val) ? val.join('\n') : (val || '');
+          }).join('\n\n');
+          // Prompt lives server-side — only send content + section label
+          const response = await fetch(CLOUD_FUNCTION_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ task: 'aiReviewServer', sectionLabel: spec.label, userQuery: contentToReview })
+          });
+          const result = await response.json();
+          let text = (result.text || '').replace(/```json|```/g, '').trim();
+          const review = JSON.parse(text);
+          // Store review results on videoStory for display
+          setVideoStory(prev => ({...prev, [`_aiReview_${section}`]: review}));
+        } catch (err) {
+          console.error('AI Review error:', err);
+        } finally {
+          setAiReviewingSection(null);
+        }
+      };
+
+      // Accept a single AI suggestion — swap original text with suggested text in the relevant field(s)
+      const acceptSuggestion = (section, suggestionIndex) => {
+        const fieldMap = {
+          summary: ['title', 'narrative'],
+          problem: ['problem'],
+          resident: ['resident'],
+          actions: ['checklist']
+        };
+        const fields = fieldMap[section] || [];
+        const review = videoStory[`_aiReview_${section}`];
+        if (!review || !review.suggestions?.[suggestionIndex]) return;
+        const suggestion = review.suggestions[suggestionIndex];
+
+        // Push current state to undo stack before accepting
+        setContentHistory(prev => [...prev, JSON.parse(JSON.stringify(videoStory))]);
+        setContentFuture([]);
+
+        setVideoStory(prev => {
+          const next = { ...prev };
+          // Try to find and replace the original text in the relevant fields
+          fields.forEach(f => {
+            const val = next[f];
+            if (Array.isArray(val)) {
+              next[f] = val.map(item => {
+                if (typeof item === 'string' && item.includes(suggestion.original)) {
+                  return item.replace(suggestion.original, suggestion.suggested);
+                } else if (typeof item === 'object' && item.text && item.text.includes(suggestion.original)) {
+                  return { ...item, text: item.text.replace(suggestion.original, suggestion.suggested) };
+                }
+                return item;
+              });
+            } else if (typeof val === 'string' && val.includes(suggestion.original)) {
+              next[f] = val.replace(suggestion.original, suggestion.suggested);
+            }
+          });
+          // Mark this suggestion as accepted in the review results
+          const reviewKey = `_aiReview_${section}`;
+          const updatedReview = { ...next[reviewKey] };
+          updatedReview.suggestions = updatedReview.suggestions.map((s, i) =>
+            i === suggestionIndex ? { ...s, _status: 'accepted' } : s
+          );
+          next[reviewKey] = updatedReview;
+          return next;
+        });
+      };
+
+      // Dismiss a single AI suggestion — mark it without applying
+      const dismissSuggestion = (section, suggestionIndex) => {
+        setVideoStory(prev => {
+          const reviewKey = `_aiReview_${section}`;
+          const review = prev[reviewKey];
+          if (!review) return prev;
+          const updatedReview = { ...review };
+          updatedReview.suggestions = updatedReview.suggestions.map((s, i) =>
+            i === suggestionIndex ? { ...s, _status: 'dismissed' } : s
+          );
+          return { ...prev, [reviewKey]: updatedReview };
+        });
+      };
+
+      // Check if all suggestions in a section have been handled
+      const allSuggestionsHandled = (section) => {
+        const review = videoStory?.[`_aiReview_${section}`];
+        if (!review?.suggestions?.length) return false;
+        return review.suggestions.every(s => s._status === 'accepted' || s._status === 'dismissed');
+      };
+
+      // Clear review results for a section
+      const clearReview = (section) => {
+        setVideoStory(prev => {
+          const next = { ...prev };
+          delete next[`_aiReview_${section}`];
+          return next;
+        });
+      };
+
       // District Product editing state
       const [expandedAgent, setExpandedAgent] = useState(0);
       const [heroFields, setHeroFields] = useState({ headline: '', youtubeUrl: '', ctaLabel: '', ctaUrl: '', mindMapLink: '' });
@@ -592,6 +810,16 @@
       const [taskRows, setTaskRows] = useState(null);
       const [isGeneratingTaskRows, setIsGeneratingTaskRows] = useState(false);
       const [taskRowSource, setTaskRowSource] = useState(null);
+      const [catalogStats, setCatalogStats] = useState(null);
+
+      // Skill type → color mapping for catalog-aware rendering (5-category model)
+      const SKILL_TYPE_COLORS = {
+        manual: { dot: 'bg-sky-400', text: 'text-sky-600', bg: 'bg-sky-50', label: 'Jobs to Be Done' },
+        skill: { dot: 'bg-violet-400', text: 'text-violet-600', bg: 'bg-violet-50', label: 'Claude Skills', hasClaude: true },
+        agent: { dot: 'bg-rose-400', text: 'text-rose-600', bg: 'bg-rose-50', label: 'Claude Agents', hasClaude: true },
+        automation: { dot: 'bg-emerald-400', text: 'text-emerald-600', bg: 'bg-emerald-50', label: 'Always Running' },
+        connector: { dot: 'bg-amber-400', text: 'text-amber-600', bg: 'bg-amber-50', label: 'Connections' }
+      };
       const [playbackProgress, setPlaybackProgress] = useState(0);
       const [isNarrativePlaying, setIsNarrativePlaying] = useState(false);
       const narrativeInterval = useRef(null);
@@ -647,6 +875,14 @@
       const [showUserMenu, setShowUserMenu] = useState(false);
       const [draggedItem, setDraggedItem] = useState(null);
       const [deletingDistrictId, setDeletingDistrictId] = useState(null);
+
+      // === SHARE DISTRICT READYSTACK RAIL STATE ===
+      const [rsEmbedUrl, setRsEmbedUrl] = useState('');
+      const [rsIntroText, setRsIntroText] = useState('');
+      const [rsMetaDescription, setRsMetaDescription] = useState('');
+      const [rsPublishing, setRsPublishing] = useState(false);
+      const [rsPublished, setRsPublished] = useState(false);
+      const [rsPublishedUrl, setRsPublishedUrl] = useState('');
 
       // === PHASE 1A: Master Roster + Resident System ===
       const [masterRoster, setMasterRoster] = useState(() => {
@@ -1668,7 +1904,10 @@
               videoStory   : videoStory || null,
               storyParticipants,
               angelChoices,
-              angelAmounts
+              angelAmounts,
+              rsEmbedUrl   : rsEmbedUrl || '',
+              rsIntroText  : rsIntroText || '',
+              rsMetaDescription: rsMetaDescription || ''
             }
           }, overrideSessionId);
           if (result.sheetId) {
@@ -1754,6 +1993,9 @@
           }
           if (state.angelChoices) setAngelChoices(state.angelChoices);
           if (state.angelAmounts) setAngelAmounts(state.angelAmounts);
+          if (state.rsEmbedUrl) setRsEmbedUrl(state.rsEmbedUrl);
+          if (state.rsIntroText) setRsIntroText(state.rsIntroText);
+          if (state.rsMetaDescription) setRsMetaDescription(state.rsMetaDescription);
 
           // Rebuild master roster with newly loaded district data
           setMasterRoster(prev => {
@@ -1927,40 +2169,13 @@
             if (transcript) {
                 contentText += `\nTRANSCRIPT:\n${transcript.substring(0, 5000)}`;
             }
-            const systemPrompt = `You are a ReadyStack strategist. Your job is to analyze a YouTube video transcript and produce a ReadyStack Narrative.
-        A ReadyStack is a hosted, shareable asset that combines an source video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
-        Produce the following based strictly on the transcript provided:
-        1. Title: A compelling name for this ReadyStack — grounded and descriptive, no hyperbole or cheesy marketing language.
-        2. District Name: A short name (3-8 words) for this Market District. This must be a plain-language description of the core problem the district addresses. Rules:
-           - Grounded and descriptive. Think file names, not headlines.
-           - NO hyperbole: never use words like "greatest", "unstoppable", "revolutionary", "ultimate", "game-changing", "cutting-edge", "next-gen", or similar marketing language.
-           - NO generic filler: never use "growth engine", "success blueprint", "opportunity", "transformation", or vague business jargon.
-           - Good examples: "B2B Cold Outreach Fatigue", "Creator Monetization Without Ads", "Agency Client Churn in SaaS", "Dark Buying Signal Blindness"
-           - Bad examples: "The Ultimate Growth Machine", "Revolutionary Marketing Platform", "Unstoppable Revenue Engine"
-        3. Problem: One paragraph on the core problem being solved and who feels it.
-        4. Resident: The ideal resident profile (who should own/deploy this).
-        5. Network: 3 Partners, 3 Customers, 3 Guests.
-        6. Checklist: 5-6 specific, actionable steps to take after watching.
-        7. Automations: 3-5 automations with Trigger, Action, and Outcome.
-        8. Narrative: 2-3 paragraphs telling the story of how this ReadyStack turns ideas into a compounding commercial asset.
-
-        You MUST return ONLY a valid JSON object matching this exact schema, with no markdown formatting:
-        {
-          "districtName": "string",
-          "title": "string",
-          "problem": "string",
-          "resident": "string",
-          "network": { "partners": ["string"], "customers": ["string"], "targets": ["string"] },
-          "checklist": ["string"],
-          "automations": [{ "trigger": "string", "action": "string", "outcome": "string" }],
-          "narrative": "string"
-        }`;
+            // Prompt lives server-side (IP protection) — only send content + prompt key
             const response = await fetch(CLOUD_FUNCTION_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                  task: 'generateStory',
-                  systemPrompt: systemPrompt,
+                  task: 'generateStoryServer',
+                  promptKey: 'generateStoryCompact',
                   userQuery: contentText
               })
             });
@@ -1980,7 +2195,10 @@
               problem: "The API failed to return the brief. This usually happens due to key limits or missing backend handlers.",
               resident: "Growth Operator",
               network: { partners: ["Platform"], customers: ["Creators"], targets: ["Agencies"] },
-              checklist: ["Check API Key", "Review Console Logs"],
+              checklist: [{ text: "Check API Key", assignedTo: "", assignedRole: "" }, { text: "Review Console Logs", assignedTo: "", assignedRole: "" }],
+              skills: [{ text: "Weekly Engagement Report — summarizes resident activity, content performance, and growth metrics", providedBy: "" }, { text: "Email Copy Generator — generates subject lines and body copy from district voice and audience segments", providedBy: "" }],
+              agents: [{ text: "District Health Monitor — tracks resident engagement and flags inactive members for re-engagement", providedBy: "" }, { text: "Resident Chat Panel — answers resident questions from district context and creator content", providedBy: "" }],
+              alwaysRunning: ["Health check monitor on API endpoints"],
               automations: [{ trigger: "Form Submit", action: "Send Email", outcome: "Lead Nurture" }],
               narrative: "This narrative acts as a placeholder when the intelligence layer is disconnected. Ensure your keys are active to parse the transcript strategy."
             });
@@ -2006,44 +2224,14 @@
             contentText += `\nTRANSCRIPT:\n${transcript.substring(0, 5000)}`;
         }
 
-        const systemPrompt = `You are a ReadyStack strategist. Your job is to analyze a YouTube video transcript and produce a ReadyStack Narrative.
-        A ReadyStack is a hosted, shareable asset that combines an source video, a checklist of actions, automations, a network of Partners/Customers/Targets, and a revenue model.
-        Produce the following based strictly on the transcript provided:
-        1. Title: A compelling name for this ReadyStack — grounded and descriptive, no hyperbole or cheesy marketing language.
-        2. District Name: A short name (3-8 words) for this Market District. This must be a plain-language description of the core problem the district addresses. Rules:
-           - Grounded and descriptive. Think file names, not headlines.
-           - NO hyperbole: never use words like "greatest", "unstoppable", "revolutionary", "ultimate", "game-changing", "cutting-edge", "next-gen", or similar marketing language.
-           - NO generic filler: never use "growth engine", "success blueprint", "opportunity", "transformation", or vague business jargon.
-           - Good examples: "B2B Cold Outreach Fatigue", "Creator Monetization Without Ads", "Agency Client Churn in SaaS", "Dark Buying Signal Blindness"
-           - Bad examples: "The Ultimate Growth Machine", "Revolutionary Marketing Platform", "Unstoppable Revenue Engine"
-        3. Problem: One paragraph on the core problem being solved and who feels it.
-        4. Resident: The ideal resident profile (who should own/deploy this).
-        5. Network: 3 Partners, 3 Customers, 3 Guests.
-        6. Checklist: 5-6 specific, actionable steps to take after watching.
-        7. Automations: 3-5 automations with Trigger, Action, and Outcome.
-        8. Narrative: 2-3 paragraphs telling the story of how this ReadyStack turns ideas into a compounding commercial asset.
-        9. CTAs: 3 suggested call-to-action options.
-
-        You MUST return ONLY a valid JSON object matching this exact schema, with no markdown formatting:
-        {
-          "districtName": "string",
-          "title": "string",
-          "problem": "string",
-          "resident": "string",
-          "network": { "partners": ["string"], "customers": ["string"], "targets": ["string"] },
-          "checklist": ["string"],
-          "automations": [{ "trigger": "string", "action": "string", "outcome": "string" }],
-          "narrative": "string",
-          "ctas": ["string"]
-        }`;
-
+        // Prompt lives server-side (IP protection) — only send content + prompt key
         try {
           const response = await fetch(CLOUD_FUNCTION_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                task: 'generateStory',
-                systemPrompt: systemPrompt,
+                task: 'generateStoryServer',
+                promptKey: 'generateStoryFull',
                 userQuery: contentText
             })
           });
@@ -2066,7 +2254,10 @@
             problem: "The API failed to return the brief. This usually happens due to key limits or missing backend handlers.",
             resident: "Growth Operator",
             network: { partners: ["Platform"], customers: ["Creators"], targets: ["Agencies"] },
-            checklist: ["Check API Key", "Review Console Logs"],
+            checklist: [{ text: "Check API Key", assignedTo: "", assignedRole: "" }, { text: "Review Console Logs", assignedTo: "", assignedRole: "" }],
+            skills: [{ text: "Weekly Engagement Report — summarizes resident activity, content performance, and growth metrics", providedBy: "" }, { text: "Email Copy Generator — generates subject lines and body copy from district voice and audience segments", providedBy: "" }],
+            agents: [{ text: "District Health Monitor — tracks resident engagement and flags inactive members for re-engagement", providedBy: "" }, { text: "Resident Chat Panel — answers resident questions from district context and creator content", providedBy: "" }],
+            alwaysRunning: ["Health check monitor on API endpoints"],
             automations: [{ trigger: "Form Submit", action: "Send Email", outcome: "Lead Nurture" }],
             narrative: "This narrative acts as a placeholder when the intelligence layer is disconnected. Ensure your keys are active to parse the transcript strategy.",
             ctas: ["Retry Analysis"]
@@ -2700,9 +2891,10 @@
                   { id: 'execplan', label: 'Action Plan', icon: 'check-square' },
                   { id: 'intro', label: 'Residents', icon: 'users' },
                   { id: 'mapper', label: 'Resident Links', icon: 'link' },
-                  ...(isResident ? [] : [{ id: 'landing', label: 'District Product', icon: 'layout' }])
+                  ...(isResident ? [] : [{ id: 'landing', label: 'District Product', icon: 'layout' }]),
+                  ...(isResident ? [] : [{ id: 'readystack', label: 'Share ReadyStack', icon: 'share-2' }])
                 ].map(step => {
-                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
+                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'landing', 'readystack', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
@@ -2771,7 +2963,7 @@
                   { id: 'g4', label: 'GA4', icon: 'activity' },
                   { id: 'analytics', label: 'Analytics', icon: 'trending-up' },
                 ]).map(step => {
-                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'landing', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
+                  const railOrder = ['youtube', 'execplan', 'intro', 'mapper', 'landing', 'readystack', 'finance', 'observatory', 'connect', 'looker', 'g4', 'analytics'];
                   const isActive = activeTab === step.id;
                   const currentIndex = railOrder.indexOf(activeTab);
                   const stepIndex = railOrder.indexOf(step.id);
@@ -2903,7 +3095,7 @@
                 </a>
                 {/* Share */}
                 <button
-                  onClick={() => alert('Share feature coming soon')}
+                  onClick={() => setActiveTab('readystack')}
                   className="bg-[#020617] border border-white/10 p-2 rounded-xl text-slate-300 hover:text-blue-400 transition-all hover:border-blue-500/30 shadow-2xl"
                   title="Share District"
                 >
@@ -2922,7 +3114,8 @@
                 { id: 'execplan', label: 'Action Plan', phase: 'compose' },
                 { id: 'intro', label: 'Residents', phase: 'compose' },
                 { id: 'mapper', label: 'Resident Links', phase: 'compose' },
-                { id: 'landing', label: 'District Product', phase: 'compose' }
+                { id: 'landing', label: 'District Product', phase: 'compose' },
+                { id: 'readystack', label: 'Share ReadyStack', phase: 'compose' }
               ];
               const opsSteps = [
                 { id: 'finance', label: 'District Capital', phase: 'operations' },
@@ -3009,7 +3202,7 @@
                                       {videoStory.checklist.map((item, idx) => (
                                         <li key={idx} className="flex items-start gap-2">
                                           <div className="w-1 h-1 rounded-full bg-white/30 mt-1.5 flex-shrink-0"></div>
-                                          <span>{item}</span>
+                                          <span>{typeof item === 'object' ? (item.text || '') : item}</span>
                                         </li>
                                       ))}
                                     </ul>
@@ -3035,37 +3228,277 @@
                             </div>
 
                             {videoStory && (
-                              <div className="bg-white/[0.02] border border-white/5 p-10 rounded-2xl animate-fade-in space-y-8 text-left">
+                              <div className="bg-white/[0.02] border border-white/5 rounded-2xl animate-fade-in text-left">
+                                {/* ── Edit / Save / Undo / Redo Toolbar ── */}
+                                {!isInviteMode && !isResident && (
+                                  <div className="flex items-center justify-between px-10 py-4 border-b border-white/5">
+                                    <div className="flex items-center gap-3">
+                                      {!isContentEditing ? (
+                                        <button onClick={startEditing} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 font-black text-xs uppercase tracking-widest transition-all border border-indigo-500/30">
+                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                          Edit
+                                        </button>
+                                      ) : (
+                                        <>
+                                          <button onClick={saveEditing} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            Save
+                                          </button>
+                                          <button onClick={cancelEditing} className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Cancel</button>
+                                        </>
+                                      )}
+                                    </div>
+                                    {isContentEditing && (
+                                      <div className="flex items-center gap-2">
+                                        <button onClick={undoEdit} disabled={contentHistory.length === 0} className={`p-2 rounded-lg transition-all border border-white/5 ${contentHistory.length === 0 ? 'opacity-20 cursor-not-allowed' : 'bg-white/5 hover:bg-white/10 text-slate-300'}`} title="Undo">
+                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                                        </button>
+                                        <button onClick={redoEdit} disabled={contentFuture.length === 0} className={`p-2 rounded-lg transition-all border border-white/5 ${contentFuture.length === 0 ? 'opacity-20 cursor-not-allowed' : 'bg-white/5 hover:bg-white/10 text-slate-300'}`} title="Redo">
+                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"></path></svg>
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Content-quality floor warning */}
+                                {saveWarning && (
+                                  <div className="mx-10 mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                                    <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Save Blocked — Required Fields Empty</p>
+                                    {saveWarning.map((w, i) => (
+                                      <p key={i} className="text-xs text-amber-200/80">{w}</p>
+                                    ))}
+                                    <div className="flex gap-3 pt-2">
+                                      <button onClick={() => setSaveWarning(null)} className="px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-slate-300 text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all">Go Back & Fix</button>
+                                      <button onClick={forceSaveEditing} className="px-3 py-1.5 rounded bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 text-[10px] font-black uppercase tracking-widest border border-amber-500/20 transition-all">Save Anyway</button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="p-10 space-y-8">
+                                {/* ── Executive Summary ── */}
                                 <div className="space-y-4 border-b border-white/5 pb-6">
-                                  <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">Executive Summary</p>
-                                  <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter">{videoStory.title}</h4>
-                                  <p className="text-xs text-slate-300 italic leading-relaxed">{videoStory.narrative}</p>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">Executive Summary</p>
+                                    {isContentEditing && (
+                                      <button onClick={() => requestAiReview('summary')} disabled={aiReviewingSection === 'summary' || !sectionHasChanges('summary')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/15 hover:bg-purple-600/25 text-purple-300 text-[10px] font-black uppercase tracking-widest transition-all border border-purple-500/20 disabled:opacity-40">
+                                        {aiReviewingSection === 'summary' ? 'Reviewing...' : !sectionHasChanges('summary') ? 'No Changes' : 'AI Review'}
+                                      </button>
+                                    )}
+                                  </div>
+                                  {isContentEditing ? (
+                                    <>
+                                      <input
+                                        type="text"
+                                        value={videoStory.title || ''}
+                                        onChange={(e) => setVideoStory(prev => ({...prev, title: e.target.value}))}
+                                        className="w-full text-2xl font-black text-white uppercase italic tracking-tighter bg-transparent border-b border-white/10 focus:border-indigo-500/50 outline-none pb-1 transition-colors"
+                                        placeholder="ReadyStack title..."
+                                      />
+                                      <textarea
+                                        value={videoStory.narrative || ''}
+                                        onChange={(e) => setVideoStory(prev => ({...prev, narrative: e.target.value}))}
+                                        rows={4}
+                                        className="w-full text-xs text-slate-300 italic leading-relaxed bg-transparent border border-white/10 focus:border-indigo-500/50 rounded-lg p-3 outline-none resize-y transition-colors"
+                                        placeholder="Executive summary narrative..."
+                                      />
+                                      {videoStory._aiReview_summary && (
+                                        <div className="bg-purple-500/5 border border-purple-500/15 rounded-lg p-4 space-y-3">
+                                          <div className="flex items-center justify-between">
+                                            <p className="text-[10px] font-black text-purple-300 uppercase tracking-widest">AI Suggestions</p>
+                                            {allSuggestionsHandled('summary') && (
+                                              <button onClick={() => clearReview('summary')} className="text-[10px] font-black text-emerald-400 uppercase tracking-widest hover:text-emerald-300 transition-colors">
+                                                Review Complete — Clear
+                                              </button>
+                                            )}
+                                          </div>
+                                          {videoStory._aiReview_summary.suggestions?.map((s, i) => (
+                                            <div key={i} className={`text-xs space-y-1 p-2 rounded-lg transition-all ${s._status === 'accepted' ? 'bg-emerald-500/10 border border-emerald-500/20' : s._status === 'dismissed' ? 'opacity-40' : ''}`}>
+                                              {s._status === 'accepted' ? (
+                                                <p className="text-emerald-400 text-[10px] font-black uppercase tracking-widest">Accepted</p>
+                                              ) : s._status === 'dismissed' ? (
+                                                <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">Dismissed</p>
+                                              ) : null}
+                                              <p className="text-slate-500 line-through">{s.original}</p>
+                                              <p className="text-purple-200">{s.suggested}</p>
+                                              <p className="text-slate-500 italic text-[10px]">{s.reason}</p>
+                                              {!s._status && (
+                                                <div className="flex gap-2 pt-1">
+                                                  <button onClick={() => acceptSuggestion('summary', i)} className="px-3 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 transition-all">Accept</button>
+                                                  <button onClick={() => dismissSuggestion('summary', i)} className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all">Dismiss</button>
+                                                </div>
+                                              )}
+                                            </div>
+                                          ))}
+                                          {videoStory._aiReview_summary.overallNote && <p className="text-xs text-purple-300/70 italic">{videoStory._aiReview_summary.overallNote}</p>}
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter">{videoStory.title}</h4>
+                                      <p className="text-xs text-slate-300 italic leading-relaxed">{videoStory.narrative}</p>
+                                    </>
+                                  )}
                                 </div>
+
+                                {/* ── Core Problem ── */}
                                 <div className="space-y-4">
-                                  <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Core Problem</p>
-                                  <p className="text-xs text-slate-300 leading-relaxed">{videoStory.problem}</p>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Core Problem</p>
+                                    {isContentEditing && (
+                                      <button onClick={() => requestAiReview('problem')} disabled={aiReviewingSection === 'problem' || !sectionHasChanges('problem')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/15 hover:bg-purple-600/25 text-purple-300 text-[10px] font-black uppercase tracking-widest transition-all border border-purple-500/20 disabled:opacity-40">
+                                        {aiReviewingSection === 'problem' ? 'Reviewing...' : !sectionHasChanges('problem') ? 'No Changes' : 'AI Review'}
+                                      </button>
+                                    )}
+                                  </div>
+                                  {isContentEditing ? (
+                                    <>
+                                      <textarea
+                                        value={videoStory.problem || ''}
+                                        onChange={(e) => setVideoStory(prev => ({...prev, problem: e.target.value}))}
+                                        rows={3}
+                                        className="w-full text-xs text-slate-300 leading-relaxed bg-transparent border border-white/10 focus:border-indigo-500/50 rounded-lg p-3 outline-none resize-y transition-colors"
+                                        placeholder="Describe the core problem..."
+                                      />
+                                      {videoStory._aiReview_problem && (
+                                        <div className="bg-purple-500/5 border border-purple-500/15 rounded-lg p-4 space-y-3">
+                                          <div className="flex items-center justify-between">
+                                            <p className="text-[10px] font-black text-purple-300 uppercase tracking-widest">AI Suggestions</p>
+                                            {allSuggestionsHandled('problem') && (
+                                              <button onClick={() => clearReview('problem')} className="text-[10px] font-black text-emerald-400 uppercase tracking-widest hover:text-emerald-300 transition-colors">
+                                                Review Complete — Clear
+                                              </button>
+                                            )}
+                                          </div>
+                                          {videoStory._aiReview_problem.suggestions?.map((s, i) => (
+                                            <div key={i} className={`text-xs space-y-1 p-2 rounded-lg transition-all ${s._status === 'accepted' ? 'bg-emerald-500/10 border border-emerald-500/20' : s._status === 'dismissed' ? 'opacity-40' : ''}`}>
+                                              {s._status === 'accepted' ? (
+                                                <p className="text-emerald-400 text-[10px] font-black uppercase tracking-widest">Accepted</p>
+                                              ) : s._status === 'dismissed' ? (
+                                                <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">Dismissed</p>
+                                              ) : null}
+                                              <p className="text-slate-500 line-through">{s.original}</p>
+                                              <p className="text-purple-200">{s.suggested}</p>
+                                              <p className="text-slate-500 italic text-[10px]">{s.reason}</p>
+                                              {!s._status && (
+                                                <div className="flex gap-2 pt-1">
+                                                  <button onClick={() => acceptSuggestion('problem', i)} className="px-3 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 transition-all">Accept</button>
+                                                  <button onClick={() => dismissSuggestion('problem', i)} className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all">Dismiss</button>
+                                                </div>
+                                              )}
+                                            </div>
+                                          ))}
+                                          {videoStory._aiReview_problem.overallNote && <p className="text-xs text-purple-300/70 italic">{videoStory._aiReview_problem.overallNote}</p>}
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <p className="text-xs text-slate-300 leading-relaxed">{videoStory.problem}</p>
+                                  )}
                                 </div>
+
+                                {/* ── Ideal Resident ── */}
                                 <div className="space-y-4">
-                                  <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Ideal Resident</p>
-                                  <p className="text-xs text-slate-300 leading-relaxed">{videoStory.resident}</p>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Ideal Resident</p>
+                                    {isContentEditing && (
+                                      <button onClick={() => requestAiReview('resident')} disabled={aiReviewingSection === 'resident' || !sectionHasChanges('resident')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/15 hover:bg-purple-600/25 text-purple-300 text-[10px] font-black uppercase tracking-widest transition-all border border-purple-500/20 disabled:opacity-40">
+                                        {aiReviewingSection === 'resident' ? 'Reviewing...' : !sectionHasChanges('resident') ? 'No Changes' : 'AI Review'}
+                                      </button>
+                                    )}
+                                  </div>
+                                  {isContentEditing ? (
+                                    <>
+                                      <textarea
+                                        value={videoStory.resident || ''}
+                                        onChange={(e) => setVideoStory(prev => ({...prev, resident: e.target.value}))}
+                                        rows={3}
+                                        className="w-full text-xs text-slate-300 leading-relaxed bg-transparent border border-white/10 focus:border-indigo-500/50 rounded-lg p-3 outline-none resize-y transition-colors"
+                                        placeholder="Describe the ideal resident..."
+                                      />
+                                      {videoStory._aiReview_resident && (
+                                        <div className="bg-purple-500/5 border border-purple-500/15 rounded-lg p-4 space-y-3">
+                                          <div className="flex items-center justify-between">
+                                            <p className="text-[10px] font-black text-purple-300 uppercase tracking-widest">AI Suggestions</p>
+                                            {allSuggestionsHandled('resident') && (
+                                              <button onClick={() => clearReview('resident')} className="text-[10px] font-black text-emerald-400 uppercase tracking-widest hover:text-emerald-300 transition-colors">
+                                                Review Complete — Clear
+                                              </button>
+                                            )}
+                                          </div>
+                                          {videoStory._aiReview_resident.suggestions?.map((s, i) => (
+                                            <div key={i} className={`text-xs space-y-1 p-2 rounded-lg transition-all ${s._status === 'accepted' ? 'bg-emerald-500/10 border border-emerald-500/20' : s._status === 'dismissed' ? 'opacity-40' : ''}`}>
+                                              {s._status === 'accepted' ? (
+                                                <p className="text-emerald-400 text-[10px] font-black uppercase tracking-widest">Accepted</p>
+                                              ) : s._status === 'dismissed' ? (
+                                                <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">Dismissed</p>
+                                              ) : null}
+                                              <p className="text-slate-500 line-through">{s.original}</p>
+                                              <p className="text-purple-200">{s.suggested}</p>
+                                              <p className="text-slate-500 italic text-[10px]">{s.reason}</p>
+                                              {!s._status && (
+                                                <div className="flex gap-2 pt-1">
+                                                  <button onClick={() => acceptSuggestion('resident', i)} className="px-3 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 transition-all">Accept</button>
+                                                  <button onClick={() => dismissSuggestion('resident', i)} className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all">Dismiss</button>
+                                                </div>
+                                              )}
+                                            </div>
+                                          ))}
+                                          {videoStory._aiReview_resident.overallNote && <p className="text-xs text-purple-300/70 italic">{videoStory._aiReview_resident.overallNote}</p>}
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <p className="text-xs text-slate-300 leading-relaxed">{videoStory.resident}</p>
+                                  )}
                                 </div>
+
+                                {/* ── Network Map Seed (no AI Review — relationship data, not prose) ── */}
                                 <div className="space-y-4">
                                   <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Network Map Seed</p>
                                   <div className="grid md:grid-cols-3 gap-4">
-                                    <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
-                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Consumed By</p>
-                                      <ul className="space-y-2">{videoStory.network?.customers?.map((c, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{c}</span></li>)}</ul>
-                                    </div>
-                                    <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
-                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Solutions</p>
-                                      <ul className="space-y-2">{videoStory.network?.partners?.map((p, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{p}</span></li>)}</ul>
-                                    </div>
-                                    <div className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
-                                      <p className="text-xs font-black text-white/40 uppercase mb-4">Services</p>
-                                      <ul className="space-y-2">{videoStory.network?.targets?.map((t, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{t}</span></li>)}</ul>
-                                    </div>
+                                    {[
+                                      { key: 'customers', label: 'Consumed By' },
+                                      { key: 'partners', label: 'Solutions' },
+                                      { key: 'targets',  label: 'Services' }
+                                    ].map(({ key, label }) => (
+                                      <div key={key} className="bg-[#0f172a]/50 p-6 rounded-xl border border-white/5">
+                                        <p className="text-xs font-black text-white/40 uppercase mb-4">{label}</p>
+                                        {isContentEditing ? (
+                                          <div className="space-y-2">
+                                            {(videoStory.network?.[key] || []).map((item, i) => (
+                                              <div key={i} className="flex items-center gap-1.5">
+                                                <span className="text-white/20 shrink-0">-</span>
+                                                <input
+                                                  type="text"
+                                                  value={item}
+                                                  onChange={(e) => {
+                                                    const updated = [...(videoStory.network?.[key] || [])];
+                                                    updated[i] = e.target.value;
+                                                    setVideoStory(prev => ({...prev, network: {...prev.network, [key]: updated}}));
+                                                  }}
+                                                  className="flex-1 text-xs text-slate-300 bg-transparent border-b border-white/10 focus:border-indigo-500/50 outline-none pb-0.5 transition-colors"
+                                                />
+                                                <button onClick={() => {
+                                                  const updated = (videoStory.network?.[key] || []).filter((_, idx) => idx !== i);
+                                                  setVideoStory(prev => ({...prev, network: {...prev.network, [key]: updated}}));
+                                                }} className="text-white/20 hover:text-red-400 transition-colors text-xs">×</button>
+                                              </div>
+                                            ))}
+                                            <button onClick={() => {
+                                              const updated = [...(videoStory.network?.[key] || []), ''];
+                                              setVideoStory(prev => ({...prev, network: {...prev.network, [key]: updated}}));
+                                            }} className="text-xs text-indigo-400/60 hover:text-indigo-400 transition-colors mt-2">+ Add</button>
+                                          </div>
+                                        ) : (
+                                          <ul className="space-y-2">{(videoStory.network?.[key] || []).map((item, i) => <li key={i} className="text-xs text-slate-300 flex items-start gap-1.5"><span className="text-white/20 mt-0.5">-</span><span>{item}</span></li>)}</ul>
+                                        )}
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
+                              </div>
                               </div>
                             )}
                           </div>
@@ -3321,7 +3754,7 @@
               <div className="max-w-7xl mx-auto animate-fade-in pt-28">
                 <div className="space-y-6">
                     <div className="space-y-4">
-                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>ACTION PLAN<InfoTooltip text="Review the tasks and roles AI generated from your source video. This is the operational blueprint for your district." /></h3>
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>ACTION PLAN<InfoTooltip text="Five types of work generated from your source video: Jobs to Be Done (tasks that need delegation), Claude Skills (AI capabilities on demand), Claude Agents (autonomous AI), Always Running (background processes), and Connections (trigger workflows)." /></h3>
                         {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'execplan' && (
                           <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
                         )}
@@ -3331,44 +3764,487 @@
                     {/* ── Empty state: no video processed yet ── */}
                     {!videoStory && (
                       <div className="border border-white/[0.06] rounded-2xl bg-[#0f172a]/30 px-8 py-8 text-center">
-                        <p className="text-slate-400 text-sm font-medium">Process a Source Video to unlock Tasks, Suggested Roles, and AI-generated district structure.</p>
+                        <p className="text-slate-400 text-sm font-medium">Process a Source Video to generate Jobs to Be Done, Claude Skills, Claude Agents, Always Running, and Connections — plus suggested roles for your district.</p>
                         <button onClick={() => setActiveTab('youtube')} className="mt-4 text-xs font-black text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors">Go to Source Video →</button>
                       </div>
                     )}
 
-                    {/* ── TASKS: Actions + Automations from AI analysis (accordion) ── */}
-                    {videoStory && (videoStory.checklist || videoStory.automations) && (
+                    {/* ── FIVE WORK TYPES: Jobs to Be Done, Skills, Agents, Always Running, Connections ── */}
+                    {videoStory && (videoStory.checklist || videoStory.automations || videoStory.skills || videoStory.aiWork || videoStory.agents || videoStory.alwaysRunning) && (
                       <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
                         <button onClick={() => setShowTasks(!showTasks)} className="w-full flex items-center justify-between px-8 py-5 bg-[#0f172a]/40 hover:bg-[#0f172a]/60 transition-colors text-left">
                           <div>
-                            <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Tasks</h5>
-                            <p className="text-slate-500 text-xs mt-1">Actions and automations from the Source Video</p>
+                            <h5 className="text-sm font-black text-indigo-400 uppercase tracking-[0.2em]" style={{fontFamily:'Poppins,sans-serif'}}>Work Index</h5>
+                            <p className="text-slate-500 text-xs mt-1">Five types of work generated from the Source Video</p>
                           </div>
-                          <svg className={`w-4 h-4 text-slate-400 transition-transform ${showTasks ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                        {showTasks && <div className="px-8 py-6 space-y-4">
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Actions</p>
-                            <ul className="space-y-3">
-                              {(videoStory.checklist || []).map((c, i) => (
-                                <li key={i} className="text-xs text-slate-300 flex items-start gap-2 bg-[#0f172a]/30 p-3 rounded-lg border border-white/5">
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 text-white/30 shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                  <span>{c}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div className="space-y-4">
-                            <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Automations</p>
-                            <div className="space-y-3">
-                              {(videoStory.automations || []).map((a, i) => (
-                                <div key={i} className="bg-[#0f172a]/50 p-3 rounded-lg border border-white/5 text-xs space-y-1">
-                                  <div className="flex gap-1.5"><span className="font-black text-white/30 w-14 shrink-0">TRIGGER</span> <span className="text-slate-300">{a.trigger}</span></div>
-                                  <div className="flex gap-1.5"><span className="font-black text-white/30 w-14 shrink-0">ACTION</span> <span className="text-slate-300">{a.action}</span></div>
-                                </div>
-                              ))}
+                          <div className="flex items-center gap-3">
+                            <div className="hidden md:flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-sky-400/60"></span>
+                              <span className="w-2 h-2 rounded-full bg-violet-400/60"></span>
+                              <span className="w-2 h-2 rounded-full bg-rose-400/60"></span>
+                              <span className="w-2 h-2 rounded-full bg-emerald-400/60"></span>
+                              <span className="w-2 h-2 rounded-full bg-amber-400/60"></span>
                             </div>
+                            <svg className={`w-4 h-4 text-slate-400 transition-transform ${showTasks ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                          </div>
+                        </button>
+                        {showTasks && <div className="px-8 py-6 space-y-6">
+                        {/* ── Edit / Save toolbar for Work Index ── */}
+                        {!isInviteMode && !isResident && (
+                          <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                            <div className="flex items-center gap-3">
+                              {!isContentEditing ? (
+                                <button onClick={startEditing} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 font-black text-xs uppercase tracking-widest transition-all border border-indigo-500/30">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                  Edit
+                                </button>
+                              ) : (
+                                <>
+                                  <button onClick={saveEditing} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 font-black text-xs uppercase tracking-widest transition-all border border-emerald-500/30">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    Save
+                                  </button>
+                                  <button onClick={cancelEditing} className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 font-black text-xs uppercase tracking-widest transition-all border border-white/5">Cancel</button>
+                                </>
+                              )}
+                            </div>
+                            {isContentEditing && (
+                              <div className="flex items-center gap-2">
+                                <button onClick={undoEdit} disabled={contentHistory.length === 0} className={`p-2 rounded-lg transition-all border border-white/5 ${contentHistory.length === 0 ? 'opacity-20 cursor-not-allowed' : 'bg-white/5 hover:bg-white/10 text-slate-300'}`} title="Undo">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                                </button>
+                                <button onClick={redoEdit} disabled={contentFuture.length === 0} className={`p-2 rounded-lg transition-all border border-white/5 ${contentFuture.length === 0 ? 'opacity-20 cursor-not-allowed' : 'bg-white/5 hover:bg-white/10 text-slate-300'}`} title="Redo">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"></path></svg>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <div className="grid md:grid-cols-2 gap-6">
+
+                          {/* ── JOBS TO BE DONE — Delegation board (checklist) ── */}
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+                                <p className="text-xs font-black text-sky-300 uppercase tracking-widest">Jobs to Be Done</p>
+                              </div>
+                              {isContentEditing && (
+                                <button onClick={() => requestAiReview('actions')} disabled={aiReviewingSection === 'actions' || !sectionHasChanges('actions')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/15 hover:bg-purple-600/25 text-purple-300 text-[10px] font-black uppercase tracking-widest transition-all border border-purple-500/20 disabled:opacity-40">
+                                  {aiReviewingSection === 'actions' ? 'Reviewing...' : !sectionHasChanges('actions') ? 'No Changes' : 'AI Review'}
+                                </button>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-500 -mt-2">Tasks that need delegation — person, app, or the creator</p>
+                            {isContentEditing ? (
+                              <div className="space-y-3">
+                                {(videoStory.checklist || []).map((c, i) => {
+                                  const itemText = typeof c === 'object' ? (c.text || '') : (c || '');
+                                  const itemAssigned = typeof c === 'object' ? (c.assignedTo || '') : '';
+                                  const itemRole = typeof c === 'object' ? (c.assignedRole || '') : '';
+                                  return (
+                                  <div key={i} className="bg-sky-500/5 p-3 rounded-lg border border-sky-500/10 space-y-2">
+                                    <div className="flex items-start gap-2">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 text-sky-400/40 shrink-0 mt-1.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                      <input
+                                        type="text"
+                                        value={itemText}
+                                        onChange={(e) => {
+                                          const updated = [...(videoStory.checklist || [])];
+                                          const existing = typeof updated[i] === 'object' ? updated[i] : { text: updated[i] || '' };
+                                          updated[i] = { ...existing, text: e.target.value };
+                                          setVideoStory(prev => ({...prev, checklist: updated}));
+                                        }}
+                                        className="flex-1 text-xs text-slate-300 bg-transparent border-b border-white/10 focus:border-sky-500/50 outline-none pb-0.5 transition-colors"
+                                        placeholder="Task description"
+                                      />
+                                      <button onClick={() => {
+                                        const updated = (videoStory.checklist || []).filter((_, idx) => idx !== i);
+                                        setVideoStory(prev => ({...prev, checklist: updated}));
+                                      }} className="text-white/20 hover:text-red-400 transition-colors text-xs shrink-0">×</button>
+                                    </div>
+                                    <div className="flex items-center gap-3 pl-5">
+                                      <div className="flex items-center gap-1.5 flex-1">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-sky-400/30 shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        <input
+                                          type="text"
+                                          value={itemAssigned}
+                                          onChange={(e) => {
+                                            const updated = [...(videoStory.checklist || [])];
+                                            const existing = typeof updated[i] === 'object' ? updated[i] : { text: updated[i] || '' };
+                                            updated[i] = { ...existing, assignedTo: e.target.value };
+                                            setVideoStory(prev => ({...prev, checklist: updated}));
+                                          }}
+                                          className="flex-1 text-[10px] text-sky-200/70 bg-transparent border-b border-white/5 focus:border-sky-500/30 outline-none pb-0.5 transition-colors"
+                                          placeholder="Who will do it?"
+                                        />
+                                      </div>
+                                      <div className="flex items-center gap-1.5 flex-1">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-sky-400/30 shrink-0"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                        <input
+                                          type="text"
+                                          value={itemRole}
+                                          onChange={(e) => {
+                                            const updated = [...(videoStory.checklist || [])];
+                                            const existing = typeof updated[i] === 'object' ? updated[i] : { text: updated[i] || '' };
+                                            updated[i] = { ...existing, assignedRole: e.target.value };
+                                            setVideoStory(prev => ({...prev, checklist: updated}));
+                                          }}
+                                          className="flex-1 text-[10px] text-sky-200/70 bg-transparent border-b border-white/5 focus:border-sky-500/30 outline-none pb-0.5 transition-colors"
+                                          placeholder="Role / specialty"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  );
+                                })}
+                                <button onClick={() => {
+                                  const updated = [...(videoStory.checklist || []), { text: '', assignedTo: '', assignedRole: '' }];
+                                  setVideoStory(prev => ({...prev, checklist: updated}));
+                                }} className="text-xs text-sky-400/60 hover:text-sky-400 transition-colors">+ Add job</button>
+                                {videoStory._aiReview_actions && (
+                                  <div className="bg-purple-500/5 border border-purple-500/15 rounded-lg p-4 space-y-3 mt-3">
+                                    <div className="flex items-center justify-between">
+                                      <p className="text-[10px] font-black text-purple-300 uppercase tracking-widest">AI Suggestions</p>
+                                      {allSuggestionsHandled('actions') && (
+                                        <button onClick={() => clearReview('actions')} className="text-[10px] font-black text-emerald-400 uppercase tracking-widest hover:text-emerald-300 transition-colors">
+                                          Review Complete — Clear
+                                        </button>
+                                      )}
+                                    </div>
+                                    {videoStory._aiReview_actions.suggestions?.map((s, i) => (
+                                      <div key={i} className={`text-xs space-y-1 p-2 rounded-lg transition-all ${s._status === 'accepted' ? 'bg-emerald-500/10 border border-emerald-500/20' : s._status === 'dismissed' ? 'opacity-40' : ''}`}>
+                                        {s._status === 'accepted' ? (
+                                          <p className="text-emerald-400 text-[10px] font-black uppercase tracking-widest">Accepted</p>
+                                        ) : s._status === 'dismissed' ? (
+                                          <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">Dismissed</p>
+                                        ) : null}
+                                        <p className="text-slate-500 line-through">{s.original}</p>
+                                        <p className="text-purple-200">{s.suggested}</p>
+                                        <p className="text-slate-500 italic text-[10px]">{s.reason}</p>
+                                        {!s._status && (
+                                          <div className="flex gap-2 pt-1">
+                                            <button onClick={() => acceptSuggestion('actions', i)} className="px-3 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 transition-all">Accept</button>
+                                            <button onClick={() => dismissSuggestion('actions', i)} className="px-3 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all">Dismiss</button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                    {videoStory._aiReview_actions.overallNote && <p className="text-xs text-purple-300/70 italic">{videoStory._aiReview_actions.overallNote}</p>}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <ul className="space-y-3">
+                                {(videoStory.checklist || []).map((c, i) => {
+                                  const itemText = typeof c === 'object' ? (c.text || '') : (c || '');
+                                  const itemAssigned = typeof c === 'object' ? (c.assignedTo || '') : '';
+                                  const itemRole = typeof c === 'object' ? (c.assignedRole || '') : '';
+                                  return (
+                                  <li key={i} className="text-xs text-slate-300 bg-sky-500/5 p-3 rounded-lg border border-sky-500/10">
+                                    <div className="flex items-start gap-2">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 text-sky-400/40 shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                      <span>{itemText}</span>
+                                    </div>
+                                    {itemAssigned && (
+                                      <div className="flex items-center gap-1.5 mt-1.5 pl-5">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5 text-sky-400/30 shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        <span className="text-[10px] text-sky-300/60">{itemAssigned}{itemRole ? ` · ${itemRole}` : ''}</span>
+                                      </div>
+                                    )}
+                                  </li>
+                                  );
+                                })}
+                              </ul>
+                            )}
+                          </div>
+
+                          {/* ── CLAUDE SKILLS — Claude skills that execute specific tasks ── */}
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-violet-400"></span>
+                              <ClaudeLogo size={14} color="#c4b5fd" />
+                              <p className="text-xs font-black text-violet-300 uppercase tracking-widest">Claude Skills</p>
+                            </div>
+                            <p className="text-[10px] text-slate-500 -mt-2">AI capabilities that execute specific tasks on demand</p>
+                            {isContentEditing ? (
+                              <div className="space-y-3">
+                                {(videoStory.skills || videoStory.aiWork || []).map((item, i) => {
+                                  const skillText = typeof item === 'object' ? (item.text || '') : (item || '');
+                                  const skillProvider = typeof item === 'object' ? (item.providedBy || '') : '';
+                                  return (
+                                  <div key={i} className="bg-violet-500/5 p-3 rounded-lg border border-violet-500/10 space-y-2">
+                                    <div className="flex items-start gap-2">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-violet-400/40 shrink-0 mt-1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                      <input
+                                        type="text"
+                                        value={skillText}
+                                        onChange={(e) => {
+                                          const current = [...(videoStory.skills || videoStory.aiWork || [])];
+                                          const existing = typeof current[i] === 'object' ? current[i] : { text: current[i] || '' };
+                                          current[i] = { ...existing, text: e.target.value };
+                                          setVideoStory(prev => ({...prev, skills: current}));
+                                        }}
+                                        className="flex-1 text-xs text-slate-300 bg-transparent border-b border-white/10 focus:border-violet-500/50 outline-none pb-0.5 transition-colors"
+                                        placeholder="Skill name — description"
+                                      />
+                                      <button onClick={() => {
+                                        const current = (videoStory.skills || videoStory.aiWork || []).filter((_, idx) => idx !== i);
+                                        setVideoStory(prev => ({...prev, skills: current}));
+                                      }} className="text-white/20 hover:text-red-400 transition-colors text-xs shrink-0">×</button>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 pl-5">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-violet-400/30 shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                      <input
+                                        type="text"
+                                        value={skillProvider}
+                                        onChange={(e) => {
+                                          const current = [...(videoStory.skills || videoStory.aiWork || [])];
+                                          const existing = typeof current[i] === 'object' ? current[i] : { text: current[i] || '' };
+                                          current[i] = { ...existing, providedBy: e.target.value };
+                                          setVideoStory(prev => ({...prev, skills: current}));
+                                        }}
+                                        className="flex-1 text-[10px] text-violet-200/70 bg-transparent border-b border-white/5 focus:border-violet-500/30 outline-none pb-0.5 transition-colors"
+                                        placeholder="Who provides it? (Claude Developer)"
+                                      />
+                                    </div>
+                                  </div>
+                                  );
+                                })}
+                                <button onClick={() => {
+                                  const current = videoStory.skills || videoStory.aiWork || [];
+                                  setVideoStory(prev => ({...prev, skills: [...current, { text: '', providedBy: '' }]}));
+                                }} className="text-xs text-violet-400/60 hover:text-violet-400 transition-colors">+ Add skill</button>
+                              </div>
+                            ) : (videoStory.skills || videoStory.aiWork || []).length > 0 ? (
+                              <ul className="space-y-3">
+                                {(videoStory.skills || videoStory.aiWork || []).map((item, i) => {
+                                  const skillText = typeof item === 'object' ? (item.text || '') : (item || '');
+                                  const skillProvider = typeof item === 'object' ? (item.providedBy || '') : '';
+                                  return (
+                                  <li key={i} className="text-xs text-slate-300 bg-violet-500/5 p-3 rounded-lg border border-violet-500/10">
+                                    <div className="flex items-start gap-2">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-violet-400/40 shrink-0 mt-0.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                      <span>{skillText}</span>
+                                    </div>
+                                    {skillProvider && (
+                                      <div className="flex items-center gap-1.5 mt-1.5 pl-5">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5 text-violet-400/30 shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        <span className="text-[10px] text-violet-300/60">{skillProvider}</span>
+                                      </div>
+                                    )}
+                                  </li>
+                                  );
+                                })}
+                              </ul>
+                            ) : (
+                              <div className="bg-violet-500/5 border border-violet-500/10 rounded-lg p-4 text-center">
+                                <p className="text-[10px] text-violet-300/50 uppercase tracking-widest font-black">Coming with catalog integration</p>
+                                <p className="text-xs text-slate-500 mt-1">Claude Skills from the catalog will populate here</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="border-t border-white/[0.04] my-8"></div>
+                        <div className="grid md:grid-cols-3 gap-6">
+
+                          {/* ── CLAUDE AGENTS — Autonomous AI doing ongoing work ── */}
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+                              <ClaudeLogo size={14} color="#fda4af" />
+                              <p className="text-xs font-black text-rose-300 uppercase tracking-widest">Claude Agents</p>
+                            </div>
+                            <p className="text-[10px] text-slate-500 -mt-2">Autonomous AI that works independently</p>
+                            {isContentEditing ? (
+                              <div className="space-y-3">
+                                {(videoStory.agents || []).map((item, i) => {
+                                  const agentText = typeof item === 'object' ? (item.text || '') : (item || '');
+                                  const agentProvider = typeof item === 'object' ? (item.providedBy || '') : '';
+                                  return (
+                                  <div key={i} className="bg-rose-500/5 p-3 rounded-lg border border-rose-500/10 space-y-2">
+                                    <div className="flex items-start gap-2">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-rose-400/40 shrink-0 mt-1.5"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+                                      <input
+                                        type="text"
+                                        value={agentText}
+                                        onChange={(e) => {
+                                          const updated = [...(videoStory.agents || [])];
+                                          const existing = typeof updated[i] === 'object' ? updated[i] : { text: updated[i] || '' };
+                                          updated[i] = { ...existing, text: e.target.value };
+                                          setVideoStory(prev => ({...prev, agents: updated}));
+                                        }}
+                                        className="flex-1 text-xs text-slate-300 bg-transparent border-b border-white/10 focus:border-rose-500/50 outline-none pb-0.5 transition-colors"
+                                        placeholder="Agent name — description"
+                                      />
+                                      <button onClick={() => {
+                                        const updated = (videoStory.agents || []).filter((_, idx) => idx !== i);
+                                        setVideoStory(prev => ({...prev, agents: updated}));
+                                      }} className="text-white/20 hover:text-red-400 transition-colors text-xs shrink-0">×</button>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 pl-5">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-rose-400/30 shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                      <input
+                                        type="text"
+                                        value={agentProvider}
+                                        onChange={(e) => {
+                                          const updated = [...(videoStory.agents || [])];
+                                          const existing = typeof updated[i] === 'object' ? updated[i] : { text: updated[i] || '' };
+                                          updated[i] = { ...existing, providedBy: e.target.value };
+                                          setVideoStory(prev => ({...prev, agents: updated}));
+                                        }}
+                                        className="flex-1 text-[10px] text-rose-200/70 bg-transparent border-b border-white/5 focus:border-rose-500/30 outline-none pb-0.5 transition-colors"
+                                        placeholder="Who provides it? (Claude Developer)"
+                                      />
+                                    </div>
+                                  </div>
+                                  );
+                                })}
+                                <button onClick={() => {
+                                  const updated = [...(videoStory.agents || []), { text: '', providedBy: '' }];
+                                  setVideoStory(prev => ({...prev, agents: updated}));
+                                }} className="text-xs text-rose-400/60 hover:text-rose-400 transition-colors">+ Add agent</button>
+                              </div>
+                            ) : (videoStory.agents && videoStory.agents.length > 0) ? (
+                              <ul className="space-y-3">
+                                {videoStory.agents.map((item, i) => {
+                                  const agentText = typeof item === 'object' ? (item.text || '') : (item || '');
+                                  const agentProvider = typeof item === 'object' ? (item.providedBy || '') : '';
+                                  return (
+                                  <li key={i} className="text-xs text-slate-300 bg-rose-500/5 p-3 rounded-lg border border-rose-500/10">
+                                    <div className="flex items-start gap-2">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-rose-400/40 shrink-0 mt-0.5"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+                                      <span>{agentText}</span>
+                                    </div>
+                                    {agentProvider && (
+                                      <div className="flex items-center gap-1.5 mt-1.5 pl-5">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5 text-rose-400/30 shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        <span className="text-[10px] text-rose-300/60">{agentProvider}</span>
+                                      </div>
+                                    )}
+                                  </li>
+                                  );
+                                })}
+                              </ul>
+                            ) : (
+                              <div className="bg-rose-500/5 border border-rose-500/10 rounded-lg p-4 text-center">
+                                <p className="text-[10px] text-rose-300/50 uppercase tracking-widest font-black">Coming with catalog integration</p>
+                                <p className="text-xs text-slate-500 mt-1">Claude Agents from the catalog will populate here</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* ── ALWAYS RUNNING — Platform automations (Makesbridge) ── */}
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                              <p className="text-xs font-black text-emerald-300 uppercase tracking-widest">Always Running</p>
+                            </div>
+                            <p className="text-[10px] text-slate-500 -mt-2">Background processes that run continuously <span className="text-emerald-500/40">· Powered by Makesbridge</span></p>
+                            {isContentEditing ? (
+                              <div className="space-y-3">
+                                {(videoStory.alwaysRunning || []).map((item, i) => (
+                                  <div key={i} className="flex items-start gap-2 bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/10">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-emerald-400/40 shrink-0 mt-1.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+                                    <input
+                                      type="text"
+                                      value={item}
+                                      onChange={(e) => {
+                                        const updated = [...(videoStory.alwaysRunning || [])];
+                                        updated[i] = e.target.value;
+                                        setVideoStory(prev => ({...prev, alwaysRunning: updated}));
+                                      }}
+                                      className="flex-1 text-xs text-slate-300 bg-transparent border-b border-white/10 focus:border-emerald-500/50 outline-none pb-0.5 transition-colors"
+                                    />
+                                    <button onClick={() => {
+                                      const updated = (videoStory.alwaysRunning || []).filter((_, idx) => idx !== i);
+                                      setVideoStory(prev => ({...prev, alwaysRunning: updated}));
+                                    }} className="text-white/20 hover:text-red-400 transition-colors text-xs shrink-0">×</button>
+                                  </div>
+                                ))}
+                                <button onClick={() => {
+                                  const updated = [...(videoStory.alwaysRunning || []), ''];
+                                  setVideoStory(prev => ({...prev, alwaysRunning: updated}));
+                                }} className="text-xs text-emerald-400/60 hover:text-emerald-400 transition-colors">+ Add background process</button>
+                              </div>
+                            ) : (videoStory.alwaysRunning && videoStory.alwaysRunning.length > 0) ? (
+                              <ul className="space-y-3">
+                                {videoStory.alwaysRunning.map((item, i) => (
+                                  <li key={i} className="text-xs text-slate-300 flex items-start gap-2 bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/10">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 text-emerald-400/40 shrink-0 mt-0.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+                                    <span>{item}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-4 text-center">
+                                <p className="text-[10px] text-emerald-300/50 uppercase tracking-widest font-black">Coming with catalog integration</p>
+                                <p className="text-xs text-slate-500 mt-1">Platform automations will populate here</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* ── CONNECTIONS — Trigger workflows (automations) ── */}
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                              <p className="text-xs font-black text-amber-300 uppercase tracking-widest">Connections</p>
+                            </div>
+                            <p className="text-[10px] text-slate-500 -mt-2">Trigger workflows — when X happens, do Y</p>
+                            {isContentEditing ? (
+                              <div className="space-y-3">
+                                {(videoStory.automations || []).map((a, i) => (
+                                  <div key={i} className="bg-amber-500/5 p-3 rounded-lg border border-amber-500/10 text-xs space-y-1">
+                                    <div className="flex gap-1.5 items-center">
+                                      <span className="font-black text-amber-400/40 w-14 shrink-0">TRIGGER</span>
+                                      <input
+                                        type="text"
+                                        value={a.trigger}
+                                        onChange={(e) => {
+                                          const updated = [...(videoStory.automations || [])];
+                                          updated[i] = {...updated[i], trigger: e.target.value};
+                                          setVideoStory(prev => ({...prev, automations: updated}));
+                                        }}
+                                        className="flex-1 text-slate-300 bg-transparent border-b border-white/10 focus:border-amber-500/50 outline-none pb-0.5 transition-colors"
+                                      />
+                                    </div>
+                                    <div className="flex gap-1.5 items-center">
+                                      <span className="font-black text-amber-400/40 w-14 shrink-0">ACTION</span>
+                                      <input
+                                        type="text"
+                                        value={a.action}
+                                        onChange={(e) => {
+                                          const updated = [...(videoStory.automations || [])];
+                                          updated[i] = {...updated[i], action: e.target.value};
+                                          setVideoStory(prev => ({...prev, automations: updated}));
+                                        }}
+                                        className="flex-1 text-slate-300 bg-transparent border-b border-white/10 focus:border-amber-500/50 outline-none pb-0.5 transition-colors"
+                                      />
+                                    </div>
+                                    <div className="flex justify-end">
+                                      <button onClick={() => {
+                                        const updated = (videoStory.automations || []).filter((_, idx) => idx !== i);
+                                        setVideoStory(prev => ({...prev, automations: updated}));
+                                      }} className="text-white/20 hover:text-red-400 transition-colors text-xs">Remove</button>
+                                    </div>
+                                  </div>
+                                ))}
+                                <button onClick={() => {
+                                  const updated = [...(videoStory.automations || []), { trigger: '', action: '', outcome: '' }];
+                                  setVideoStory(prev => ({...prev, automations: updated}));
+                                }} className="text-xs text-amber-400/60 hover:text-amber-400 transition-colors">+ Add connection</button>
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                {(videoStory.automations || []).map((a, i) => (
+                                  <div key={i} className="bg-amber-500/5 p-3 rounded-lg border border-amber-500/10 text-xs space-y-1">
+                                    <div className="flex gap-1.5"><span className="font-black text-amber-400/40 w-14 shrink-0">TRIGGER</span> <span className="text-slate-300">{a.trigger}</span></div>
+                                    <div className="flex gap-1.5"><span className="font-black text-amber-400/40 w-14 shrink-0">ACTION</span> <span className="text-slate-300">{a.action}</span></div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>}
@@ -3387,33 +4263,47 @@
                         </button>
                         {showRoles && <div className="px-8 py-6">
                         {(() => {
+                          // Normalize roles — handle both old string format and new { role, specialty } objects
+                          const normalizeRole = (item, category) => {
+                            if (typeof item === 'string') return { role: item, specialty: '', category };
+                            return { role: item.role || item.name || '', specialty: item.specialty || '', category };
+                          };
                           const allRoles = [
-                            ...(videoStory.network.partners || []).map(p => ({ name: p })),
-                            ...(videoStory.network.customers || []).map(c => ({ name: c })),
-                            ...(videoStory.network.targets || []).map(t => ({ name: t }))
+                            ...(videoStory.network.partners || []).map(p => normalizeRole(p, 'Partner')),
+                            ...(videoStory.network.customers || []).map(c => normalizeRole(c, 'Customer')),
+                            ...(videoStory.network.targets || []).map(t => normalizeRole(t, 'Guest'))
                           ];
-                          const unassigned = allRoles.filter(role => !storyParticipants.residents.some(r => r.jobContext === role.name));
+                          const unassigned = allRoles.filter(r => !storyParticipants.residents.some(res => res.jobContext === r.role));
                           if (unassigned.length === 0) return <p className="text-emerald-400 text-xs font-medium">All roles assigned.</p>;
                           return (
-                            <div className="flex flex-wrap gap-3 pt-1">
-                              {unassigned.map((role, idx) => (
-                                <button key={idx}
-                                  onClick={() => {
-                                    setStoryParticipants(prev => {
-                                      const next = [...prev.residents];
-                                      const emptyIdx = next.findIndex(r => !r.jobContext);
-                                      if (emptyIdx === -1) {
-                                        next.push({ name: '', company: '', specialty: '', email: '', source: 'ai', status: 'assigned', jobContext: role.name, jobType: '' });
-                                      } else {
-                                        next[emptyIdx] = { name: '', company: '', specialty: '', email: '', source: 'ai', status: 'assigned', jobContext: role.name, jobType: '' };
-                                      }
-                                      return { ...prev, residents: next };
-                                    });
-                                  }}
-                                  className="px-4 py-2 rounded-lg text-xs font-semibold transition-all border bg-indigo-500/10 text-indigo-300 border-indigo-500/15 hover:brightness-125 cursor-pointer">
-                                  {role.name}
-                                </button>
-                              ))}
+                            <div className="space-y-4">
+                              {['Partner', 'Customer', 'Guest'].map(cat => {
+                                const catRoles = unassigned.filter(r => r.category === cat);
+                                if (catRoles.length === 0) return null;
+                                return (
+                                  <div key={cat}>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">{cat}s</p>
+                                    <div className="flex flex-wrap gap-3">
+                                      {catRoles.map((role, idx) => (
+                                        <button key={idx}
+                                          onClick={() => {
+                                            setStoryParticipants(prev => {
+                                              const next = [...prev.residents];
+                                              const emptyIdx = next.findIndex(r => !r.jobContext);
+                                              const entry = { name: '', company: '', specialty: role.specialty || '', email: '', source: 'ai', status: 'assigned', jobContext: role.role, jobType: role.category };
+                                              if (emptyIdx === -1) { next.push(entry); } else { next[emptyIdx] = entry; }
+                                              return { ...prev, residents: next };
+                                            });
+                                          }}
+                                          className="group px-4 py-2.5 rounded-lg text-xs font-semibold transition-all border bg-indigo-500/10 text-indigo-300 border-indigo-500/15 hover:brightness-125 cursor-pointer text-left">
+                                          <span className="block">{role.role}</span>
+                                          {role.specialty && <span className="block text-[9px] font-bold text-slate-500 mt-0.5 group-hover:text-slate-400">{role.specialty}</span>}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           );
                         })()}
@@ -4312,7 +5202,7 @@
                           <div className="space-y-3">
                             {videoStory?.checklist && videoStory.checklist.length > 0 ? (
                               videoStory.checklist.map((item, i) => (
-                                <p key={i} className="text-purple-500 text-sm cursor-pointer hover:text-purple-700 transition-colors">{item}</p>
+                                <p key={i} className="text-purple-500 text-sm cursor-pointer hover:text-purple-700 transition-colors">{typeof item === 'object' ? (item.text || '') : item}</p>
                               ))
                             ) : (
                               <p className="text-gray-400 text-sm italic">No checklist items yet — analyze a video in Source Video to populate this.</p>
@@ -4352,6 +5242,7 @@
                                   text = text.replace(/```json|```/g, '').trim();
                                   const parsed = JSON.parse(text);
                                   setTaskRows(parsed.taskRows || parsed);
+                                  if (parsed.catalogStats) setCatalogStats(parsed.catalogStats);
                                   setTaskRowSource(result.source || 'claude');
                                 } catch (err) {
                                   console.error('Task row generation failed:', err);
@@ -4378,6 +5269,23 @@
                           )}
 
                           {/* Hierarchical Task Groups */}
+                          {/* Catalog Stats Summary Bar */}
+                          {catalogStats && taskRows && taskRows.length > 0 && (
+                            <div className="flex items-center gap-4 px-4 py-2.5 bg-gray-50 rounded-lg border border-gray-200 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                              <span>{catalogStats.totalSubtasks || 0} subtasks</span>
+                              <span className="text-emerald-600">{catalogStats.catalogMatched || 0} catalog-matched</span>
+                              <span className="text-gray-400">{catalogStats.aiInferred || 0} AI-inferred</span>
+                              {catalogStats.bySkillType && (
+                                <span className="flex items-center gap-2 ml-auto">
+                                  {Object.entries(catalogStats.bySkillType).filter(([,v]) => v > 0).map(([type, count]) => {
+                                    const colors = SKILL_TYPE_COLORS[type] || { dot: 'bg-gray-400', label: type };
+                                    return <span key={type} className="flex items-center gap-1"><span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`}></span>{count} {colors.label}</span>;
+                                  })}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
                           {taskRows && taskRows.length > 0 && (
                             <div className="space-y-4">
                               {taskRows.map((row, rowIdx) => (
@@ -4386,7 +5294,7 @@
                                   <div className="bg-purple-50 px-4 py-3 border-b border-purple-100 flex items-center justify-between">
                                     <input type="text" value={row.actionItem} onChange={e => { const next = [...taskRows]; next[rowIdx] = { ...next[rowIdx], actionItem: e.target.value }; setTaskRows(next); }} className="text-xs font-black text-purple-700 uppercase tracking-wider bg-transparent border-none focus:outline-none focus:bg-white focus:px-2 focus:rounded transition-all flex-1 mr-3" />
                                     <div className="flex items-center gap-2 flex-shrink-0">
-                                      <button onClick={() => { const next = [...taskRows]; next[rowIdx] = { ...next[rowIdx], subtasks: [...(next[rowIdx].subtasks || []), { todo: '', triggerApp: '', actionApp: '', setupLink: '', tutorialLink: '' }] }; setTaskRows(next); }} className="text-blue-500 hover:text-blue-700" title="Add sub-task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                                      <button onClick={() => { const next = [...taskRows]; next[rowIdx] = { ...next[rowIdx], subtasks: [...(next[rowIdx].subtasks || []), { todo: '', triggerApp: '', actionApp: '', setupLink: '', tutorialLink: '', skillType: 'manual', catalogRef: null }] }; setTaskRows(next); }} className="text-blue-500 hover:text-blue-700" title="Add sub-task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                                       <button onClick={() => { const next = taskRows.filter((_, i) => i !== rowIdx); setTaskRows(next); }} className="text-red-400 hover:text-red-600" title="Delete group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
                                       {rowIdx > 0 && <button onClick={() => { const next = [...taskRows]; [next[rowIdx - 1], next[rowIdx]] = [next[rowIdx], next[rowIdx - 1]]; setTaskRows(next); }} className="text-gray-400 hover:text-gray-600" title="Move up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><polyline points="18 15 12 9 6 15"/></svg></button>}
                                     </div>
@@ -4396,6 +5304,7 @@
                                     <table className="w-full text-xs">
                                       <thead>
                                         <tr className="bg-gray-50 border-b border-gray-200">
+                                          <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider w-12">Type</th>
                                           <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Task</th>
                                           <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Trigger App</th>
                                           <th className="text-left px-3 py-2 font-bold text-gray-500 uppercase tracking-wider">Action App</th>
@@ -4406,8 +5315,25 @@
                                       </thead>
                                       <tbody>
                                         {(row.subtasks || []).map((sub, subIdx) => (
-                                          <tr key={subIdx} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                            <td className="px-3 py-2"><input type="text" value={sub.todo || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, todo: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-gray-800 text-xs font-medium focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="Task name..." /></td>
+                                          <tr key={subIdx} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${sub.catalogRef ? '' : ''}`}>
+                                            <td className="px-3 py-2 text-center">
+                                              {(() => {
+                                                const st = sub.skillType || 'manual';
+                                                const colors = SKILL_TYPE_COLORS[st] || { dot: 'bg-gray-300', label: st };
+                                                return (
+                                                  <div className="flex flex-col items-center gap-0.5" title={`${colors.label}${sub.catalogRef ? ' (Catalog)' : ' (AI-inferred)'}`}>
+                                                    <span className={`w-2.5 h-2.5 rounded-full ${colors.dot} ${sub.catalogRef ? 'ring-2 ring-offset-1 ring-emerald-300' : ''}`}></span>
+                                                    <span className={`text-[8px] font-bold uppercase tracking-wider ${colors.text}`}>{st}</span>
+                                                  </div>
+                                                );
+                                              })()}
+                                            </td>
+                                            <td className="px-3 py-2">
+                                              <div className="flex items-center gap-1.5">
+                                                <input type="text" value={sub.todo || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, todo: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-gray-800 text-xs font-medium focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="Task name..." />
+                                                {sub.catalogRef && <span className="shrink-0 text-[7px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200" title={`Catalog: ${sub.catalogRef}`}>Verified</span>}
+                                              </div>
+                                            </td>
                                             <td className="px-3 py-2"><input type="text" value={sub.triggerApp || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, triggerApp: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-gray-500 text-xs focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="—" /></td>
                                             <td className="px-3 py-2"><input type="text" value={sub.actionApp || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, actionApp: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-gray-500 text-xs focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="Manual" /></td>
                                             <td className="px-3 py-2"><input type="text" value={sub.setupLink || ''} onChange={e => { const next = [...taskRows]; next[rowIdx].subtasks[subIdx] = { ...sub, setupLink: e.target.value }; setTaskRows([...next]); }} className="w-full bg-transparent border-none text-blue-500 text-xs focus:outline-none focus:bg-white focus:px-1 focus:rounded transition-all" placeholder="—" /></td>
@@ -4438,6 +5364,7 @@
                                     text = text.replace(/```json|```/g, '').trim();
                                     const parsed = JSON.parse(text);
                                     setTaskRows(parsed.taskRows || parsed);
+                                    if (parsed.catalogStats) setCatalogStats(parsed.catalogStats);
                                     setTaskRowSource(result.source || 'claude');
                                   } catch (err) {
                                     console.error('Task row regeneration failed:', err);
@@ -4707,8 +5634,230 @@
                     </div>
                     <p className="text-xs text-gray-400 font-medium">Your ReadyStack will be published at content.bridgemailsystem.com</p>
                     <div className="pt-4">
-                      <button onClick={() => setActiveTab('finance')} className="text-xs text-purple-600 font-bold uppercase tracking-wider hover:text-purple-800 transition-colors">Continue to Operations →</button>
+                      <button onClick={() => setActiveTab('readystack')} className="text-xs text-purple-600 font-bold uppercase tracking-wider hover:text-purple-800 transition-colors">Continue to Share ReadyStack →</button>
                     </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════════
+                SHARE DISTRICT READYSTACK RAIL
+                Compose phase final step — district owner pastes their
+                content.bridge URL to create a public Resident Landing Page
+                at district.readystack.ai/[district-slug]/[resident-slug]
+            ══════════════════════════════════════════════════════════════ */}
+            {activeTab === 'readystack' && !isResident && (
+              <div className="max-w-4xl mx-auto animate-fade-in pt-28 pb-10">
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-4xl font-black text-white uppercase tracking-tighter" style={{fontFamily:'Poppins,sans-serif'}}>SHARE DISTRICT READYSTACK<InfoTooltip text="Publish your district as a search-optimized page on district.readystack.ai. Paste your content.bridge share URL to embed your tracked commerce page." /></h3>
+                    {isLearningMode && LEARNING_STEPS[learningStepIdx]?.key === 'readystack' && (
+                      <GuidedPromptCard step={LEARNING_STEPS[learningStepIdx]} stepIdx={learningStepIdx} totalSteps={LEARNING_STEPS.length} onPrev={() => goLearningStep(-1)} onNext={() => goLearningStep(1)} isIntense={learningIntense} onDismiss={() => setLearningIntense(false)} />
+                    )}
+                  </div>
+
+                  {/* ── Published success banner ── */}
+                  {rsPublished && rsPublishedUrl && (
+                    <div className="border border-emerald-500/30 bg-emerald-500/5 rounded-2xl p-6 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-emerald-400"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        <span className="text-sm font-black text-emerald-400 uppercase tracking-widest">Published</span>
+                      </div>
+                      <p className="text-slate-300 text-sm">Your ReadyStack page is live at:</p>
+                      <a href={rsPublishedUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 text-sm font-bold hover:text-indigo-300 break-all transition-colors">{rsPublishedUrl}</a>
+                      <p className="text-slate-500 text-xs">This page is indexed by Google, Perplexity, and ChatGPT. Share it anywhere — search authority accrues to your district.</p>
+                    </div>
+                  )}
+
+                  {/* ── Step 1: Embed URL ── */}
+                  <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                    <div className="px-8 py-5 bg-[#0f172a]/40 border-b border-white/[0.04]">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-black">1</span>
+                        <div>
+                          <h5 className="text-sm font-black text-white uppercase tracking-[0.15em]" style={{fontFamily:'Poppins,sans-serif'}}>Paste Your Share URL</h5>
+                          <p className="text-slate-500 text-xs mt-0.5">From your ReadyStack content.bridge page — this is the tracked commerce URL unique to you.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-8 py-6 space-y-4">
+                      <div className="flex gap-3">
+                        <input
+                          type="url"
+                          value={rsEmbedUrl}
+                          onChange={e => { setRsEmbedUrl(e.target.value); setRsPublished(false); }}
+                          placeholder="https://content.bridgemailsystem.com/pms/wf/..."
+                          className="flex-1 bg-[#020617] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors font-mono"
+                        />
+                      </div>
+                      {rsEmbedUrl && !rsEmbedUrl.includes('content.bridgemailsystem.com/pms/wf/') && (
+                        <p className="text-red-400 text-xs font-bold">URL must be a content.bridgemailsystem.com/pms/wf/ share link.</p>
+                      )}
+                      {rsEmbedUrl && rsEmbedUrl.includes('content.bridgemailsystem.com/pms/wf/') && (
+                        <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-[#020617]">
+                          <div className="px-4 py-2 border-b border-white/[0.04] flex items-center gap-2">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-slate-500"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Preview</span>
+                          </div>
+                          <iframe src={rsEmbedUrl} title="ReadyStack Preview" className="w-full border-0" style={{height: '500px'}} sandbox="allow-scripts allow-same-origin allow-forms allow-popups" referrerPolicy="no-referrer-when-downgrade" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ── Step 2: Page Details ── */}
+                  <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                    <div className="px-8 py-5 bg-[#0f172a]/40 border-b border-white/[0.04]">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-black">2</span>
+                        <div>
+                          <h5 className="text-sm font-black text-white uppercase tracking-[0.15em]" style={{fontFamily:'Poppins,sans-serif'}}>Page Details</h5>
+                          <p className="text-slate-500 text-xs mt-0.5">These populate the search-optimized landing page at district.readystack.ai.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-8 py-6 space-y-5">
+                      {/* District & Resident info (auto-populated) */}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">District Name</label>
+                          <div className="bg-[#020617] border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300">{stackLabel || 'My District'}</div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Resident Name</label>
+                          <div className="bg-[#020617] border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300">{rsSession?.email || 'Not signed in'}</div>
+                        </div>
+                      </div>
+                      {/* Intro text */}
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Intro Paragraph <span className="text-slate-600">(40-80 words — what this page is about)</span></label>
+                        <textarea
+                          value={rsIntroText}
+                          onChange={e => setRsIntroText(e.target.value)}
+                          placeholder="Write 2-3 sentences about what visitors will learn from this district content..."
+                          rows={3}
+                          className="w-full bg-[#020617] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors resize-none"
+                        />
+                        <p className="text-[10px] text-slate-600">{rsIntroText.trim().split(/\s+/).filter(Boolean).length} words</p>
+                      </div>
+                      {/* Meta description */}
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Meta Description <span className="text-slate-600">(max 160 chars — shown in Google results)</span></label>
+                        <input
+                          type="text"
+                          value={rsMetaDescription}
+                          onChange={e => setRsMetaDescription(e.target.value.slice(0, 160))}
+                          placeholder="Action-oriented summary of what visitors will learn..."
+                          className="w-full bg-[#020617] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-indigo-500/50 focus:outline-none transition-colors"
+                        />
+                        <p className="text-[10px] text-slate-600">{rsMetaDescription.length}/160</p>
+                      </div>
+                      {/* Search preview */}
+                      {rsMetaDescription && (
+                        <div className="border border-white/[0.06] rounded-xl p-4 bg-white/[0.02] space-y-1">
+                          <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">Google Search Preview</p>
+                          <p className="text-blue-400 text-sm font-medium truncate">{rsSession?.email || 'Resident'}: {videoStory?.title || 'District Topic'} | ReadyStack District</p>
+                          <p className="text-emerald-400/80 text-xs truncate">district.readystack.ai › {(stackLabel || 'my-district').toLowerCase().replace(/\s+/g, '-')} › {(rsSession?.email || 'resident').split('@')[0].toLowerCase()}</p>
+                          <p className="text-slate-400 text-xs leading-relaxed">{rsMetaDescription || 'No description set.'}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ── Step 3: Publish ── */}
+                  <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
+                    <div className="px-8 py-5 bg-[#0f172a]/40 border-b border-white/[0.04]">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-black">3</span>
+                        <div>
+                          <h5 className="text-sm font-black text-white uppercase tracking-[0.15em]" style={{fontFamily:'Poppins,sans-serif'}}>Publish</h5>
+                          <p className="text-slate-500 text-xs mt-0.5">Creates your search-optimized page with embedded commerce tracking.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-8 py-6 space-y-4">
+                      {(() => {
+                        const isValidUrl = rsEmbedUrl.includes('content.bridgemailsystem.com/pms/wf/');
+                        const hasIntro = rsIntroText.trim().split(/\s+/).filter(Boolean).length >= 10;
+                        const hasMeta = rsMetaDescription.length >= 20;
+                        const canPublish = isValidUrl && hasIntro && hasMeta;
+                        const districtSlug = (stackLabel || 'my-district').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                        const residentSlug = (rsSession?.email || 'resident').split('@')[0].toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                        const pageUrl = `https://district.readystack.ai/${districtSlug}/${residentSlug}`;
+                        return (
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${isValidUrl ? 'bg-emerald-400' : 'bg-slate-600'}`} />
+                                <span className={`text-xs ${isValidUrl ? 'text-emerald-400' : 'text-slate-500'}`}>Valid content.bridge URL</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${hasIntro ? 'bg-emerald-400' : 'bg-slate-600'}`} />
+                                <span className={`text-xs ${hasIntro ? 'text-emerald-400' : 'text-slate-500'}`}>Intro paragraph (10+ words)</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${hasMeta ? 'bg-emerald-400' : 'bg-slate-600'}`} />
+                                <span className={`text-xs ${hasMeta ? 'text-emerald-400' : 'text-slate-500'}`}>Meta description (20+ chars)</span>
+                              </div>
+                            </div>
+                            <div className="text-xs text-slate-500 font-mono break-all">
+                              Page URL: {pageUrl}
+                            </div>
+                            <button
+                              disabled={!canPublish || rsPublishing}
+                              onClick={async () => {
+                                setRsPublishing(true);
+                                try {
+                                  const response = await fetch(CLOUD_FUNCTION_URL, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      task: 'publishLandingPage',
+                                      districtSlug,
+                                      residentSlug,
+                                      residentName: rsSession?.email?.split('@')[0] || 'Resident',
+                                      districtName: stackLabel || 'My District',
+                                      topicTitle: videoStory?.title || 'District ReadyStack',
+                                      embedUrl: rsEmbedUrl,
+                                      introText: rsIntroText,
+                                      metaDescription: rsMetaDescription,
+                                      youtubeId: youtubeEmbedUrl ? new URL(youtubeEmbedUrl).pathname.split('/').pop() : '',
+                                      videoTitle: videoStory?.title || '',
+                                      videoDuration: '',
+                                      actionItems: (videoStory?.checklist || []).map(item => ({ title: typeof item === 'object' ? (item.text || '') : item, description: '', assignedTo: typeof item === 'object' ? (item.assignedTo || '') : '', assignedRole: typeof item === 'object' ? (item.assignedRole || '') : '' })),
+                                      topicTags: [],
+                                      published: true,
+                                      sheetId: rsSheetId
+                                    })
+                                  });
+                                  if (response.ok) {
+                                    setRsPublished(true);
+                                    setRsPublishedUrl(pageUrl);
+                                  } else {
+                                    const err = await response.text();
+                                    alert('Publish failed: ' + err);
+                                  }
+                                } catch (e) {
+                                  alert('Publish error: ' + e.message);
+                                } finally {
+                                  setRsPublishing(false);
+                                }
+                              }}
+                              className="w-full py-4 rounded-xl text-sm font-black uppercase tracking-widest transition-all shadow-lg disabled:opacity-30 disabled:cursor-not-allowed bg-indigo-600 hover:bg-indigo-500 text-white"
+                            >
+                              {rsPublishing ? 'Publishing...' : rsPublished ? 'Republish ReadyStack Page' : 'Publish ReadyStack Page'}
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* ── Continue to Operations ── */}
+                  <div className="text-center pt-4">
+                    <button onClick={() => setActiveTab('finance')} className="text-xs text-indigo-400 font-bold uppercase tracking-widest hover:text-indigo-300 transition-colors">Continue to Operations →</button>
                   </div>
 
                 </div>
