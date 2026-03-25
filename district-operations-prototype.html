@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>District Operations — Compose View Prototype</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#020617; color:#e2e8f0; min-height:100vh; }
+
+  .app { display:flex; min-height:100vh; }
+
+  /* ── Rail ── */
+  .rail { width:220px; background:#0f172a; border-right:1px solid rgba(255,255,255,0.06); padding:20px 12px; position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:10; }
+  .rail-label { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.2em; color:#22d3ee; margin:20px 0 8px 8px; }
+  .tab { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#64748b; cursor:pointer; margin-bottom:3px; transition:all 0.15s; }
+  .tab:hover { background:rgba(255,255,255,0.04); color:#94a3b8; }
+  .tab.active { background:rgba(52,211,153,0.1); color:#6ee7b7; border:1px solid rgba(52,211,153,0.2); }
+  .tab .ck { color:#4ade80; font-size:13px; width:16px; }
+  .tab-num { font-size:9px; color:#475569; font-weight:700; width:14px; text-align:center; }
+
+  /* ── Main ── */
+  .main { margin-left:220px; flex:1; padding:28px 36px; max-width:960px; }
+
+  /* ── Header ── */
+  .page-head { margin-bottom:28px; }
+  .page-title { font-size:32px; font-weight:900; text-transform:uppercase; letter-spacing:-0.02em; color:white; }
+  .page-sub { font-size:13px; color:#64748b; margin-top:6px; line-height:1.5; }
+
+  /* ── Edit toolbar ── */
+  .toolbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.06); margin-bottom:24px; }
+  .toolbar-left { display:flex; gap:8px; }
+  .btn-edit { display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; border:1px solid; cursor:pointer; transition:all 0.15s; }
+  .btn-edit-primary { background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.3); color:#a5b4fc; }
+  .btn-run-blend { background:linear-gradient(135deg,#4f46e5,#7c3aed); border-color:rgba(124,58,237,0.5); color:white; }
+
+  /* ── Operational Summary ── */
+  .ops-summary {
+    background:rgba(15,23,42,0.5);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:20px;
+    padding:24px 28px;
+    margin-bottom:24px;
+  }
+  .ops-summary-label {
+    font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.2em; color:#34d399; margin-bottom:10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .ops-summary-label .dot { width:6px; height:6px; border-radius:50%; background:#34d399; }
+  .ops-summary p { font-size:14px; line-height:1.75; color:#cbd5e1; }
+
+  /* ── Section header ── */
+  .section-head {
+    display:flex; align-items:center; gap:10px; margin:28px 0 14px;
+  }
+  .section-head-line { flex:1; height:1px; background:rgba(255,255,255,0.06); }
+  .section-head-text { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.2em; color:#94a3b8; white-space:nowrap; }
+  .section-count { font-size:10px; color:#475569; font-weight:600; }
+
+  /* ── Contributor Cards ── */
+  .contributor-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .contributor-card {
+    background:rgba(15,23,42,0.4);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:16px;
+    padding:18px 20px;
+    transition:all 0.15s;
+  }
+  .contributor-card:hover { border-color:rgba(255,255,255,0.1); }
+  .contributor-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .contributor-identity { display:flex; align-items:center; gap:10px; }
+  .contributor-avatar {
+    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:900; color:white;
+  }
+  .contributor-name { font-size:13px; font-weight:700; color:#e2e8f0; }
+  .contributor-company { font-size:10px; color:#64748b; margin-top:1px; }
+  .role-badge {
+    font-size:8px; font-weight:900; text-transform:uppercase; letter-spacing:0.12em;
+    padding:3px 8px; border-radius:4px; white-space:nowrap;
+  }
+  .role-strategy { background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.2); }
+  .role-leadgen { background:rgba(52,211,153,0.15); color:#6ee7b7; border:1px solid rgba(52,211,153,0.2); }
+  .role-content { background:rgba(251,191,36,0.15); color:#fcd34d; border:1px solid rgba(251,191,36,0.2); }
+  .role-automation { background:rgba(236,72,153,0.15); color:#f9a8d4; border:1px solid rgba(236,72,153,0.2); }
+  .contributor-desc { font-size:12px; color:#94a3b8; line-height:1.6; margin-bottom:10px; }
+  .contributor-links { display:flex; flex-direction:column; gap:4px; }
+  .ops-link {
+    display:flex; align-items:center; gap:8px; padding:6px 10px;
+    background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04);
+    border-radius:8px; font-size:11px; color:#94a3b8; transition:all 0.15s; cursor:pointer;
+  }
+  .ops-link:hover { background:rgba(255,255,255,0.05); color:#e2e8f0; }
+  .ops-link-icon { width:14px; height:14px; color:#475569; flex-shrink:0; }
+  .ops-link-type { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#475569; margin-left:auto; }
+  .from-ops-lane {
+    font-size:7px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+    padding:1px 5px; border-radius:3px; background:rgba(52,211,153,0.1); color:#6ee7b7;
+    border:1px solid rgba(52,211,153,0.15);
+  }
+
+  /* ── Jobs to Be Done ── */
+  .jtbd-list { display:flex; flex-direction:column; gap:8px; }
+  .jtbd-item {
+    background:rgba(56,189,248,0.03);
+    border:1px solid rgba(56,189,248,0.08);
+    border-radius:12px;
+    padding:14px 18px;
+    cursor:pointer;
+    transition:all 0.15s;
+  }
+  .jtbd-item:hover { background:rgba(56,189,248,0.06); }
+  .jtbd-top { display:flex; align-items:flex-start; gap:10px; }
+  .jtbd-check { width:14px; height:14px; border-radius:4px; border:2px solid rgba(56,189,248,0.25); flex-shrink:0; margin-top:2px; }
+  .jtbd-text { font-size:13px; color:#e2e8f0; flex:1; line-height:1.5; }
+  .jtbd-meta { display:flex; align-items:center; gap:10px; margin-top:8px; padding-left:24px; flex-wrap:wrap; }
+  .jtbd-owner {
+    display:flex; align-items:center; gap:4px;
+    font-size:10px; color:#64748b;
+  }
+  .jtbd-owner-dot { width:5px; height:5px; border-radius:50%; }
+  .jtbd-method {
+    font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+    padding:2px 7px; border-radius:4px;
+  }
+  .method-manual { background:rgba(100,116,139,0.15); color:#94a3b8; }
+  .method-app { background:rgba(56,189,248,0.12); color:#7dd3fc; }
+  .method-agent { background:rgba(167,139,250,0.12); color:#c4b5fd; border:1px solid rgba(167,139,250,0.2); }
+  .jtbd-source { font-size:9px; color:#475569; font-style:italic; }
+
+  /* ── Execution Paths ── */
+  .exec-path {
+    background:rgba(15,23,42,0.3);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:14px;
+    padding:16px 20px;
+    margin-bottom:8px;
+  }
+  .exec-path-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .exec-path-title { font-size:12px; font-weight:700; color:#e2e8f0; }
+  .exec-path-contributor { font-size:10px; color:#64748b; }
+  .exec-path-desc { font-size:12px; color:#94a3b8; line-height:1.6; margin-bottom:10px; }
+  .exec-path-links { display:flex; gap:6px; flex-wrap:wrap; }
+  .exec-link {
+    display:flex; align-items:center; gap:5px;
+    padding:4px 10px; border-radius:6px;
+    font-size:10px; font-weight:600;
+    background:rgba(99,102,241,0.08); color:#a5b4fc;
+    border:1px solid rgba(99,102,241,0.15);
+    cursor:pointer; transition:all 0.15s;
+  }
+  .exec-link:hover { background:rgba(99,102,241,0.15); }
+  .exec-link-tool { background:rgba(52,211,153,0.08); color:#6ee7b7; border-color:rgba(52,211,153,0.15); }
+  .exec-link-tool:hover { background:rgba(52,211,153,0.15); }
+  .exec-link-signup { background:rgba(251,191,36,0.08); color:#fcd34d; border-color:rgba(251,191,36,0.15); }
+  .exec-link-signup:hover { background:rgba(251,191,36,0.15); }
+
+  /* ── Adjacent Editorial ── */
+  .adj-editorial {
+    background:rgba(167,139,250,0.03);
+    border:1px solid rgba(167,139,250,0.08);
+    border-radius:12px;
+    padding:14px 18px;
+    margin-bottom:8px;
+  }
+  .adj-editorial-top { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .adj-editorial-type {
+    font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+    padding:2px 7px; border-radius:4px;
+    background:rgba(167,139,250,0.12); color:#c4b5fd;
+  }
+  .adj-editorial-title { font-size:12px; font-weight:600; color:#e2e8f0; }
+  .adj-editorial-desc { font-size:11px; color:#94a3b8; line-height:1.5; padding-left:0; }
+  .adj-editorial-contributor { font-size:10px; color:#64748b; margin-top:4px; }
+
+  /* ── Continue button ── */
+  .continue-btn {
+    display:block; width:100%; max-width:500px; margin:32px auto 0;
+    padding:16px; background:#020617; border:1px solid rgba(255,255,255,0.1);
+    border-radius:12px; color:white; font-size:11px; font-weight:900;
+    text-transform:uppercase; letter-spacing:0.2em; text-align:center; cursor:pointer;
+  }
+
+  /* ── Ops lane indicator ── */
+  .lane-indicator {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:9px; font-weight:700; color:#34d399;
+    padding:3px 8px; border-radius:4px;
+    background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.12);
+  }
+
+  /* ── Empty / info strip ── */
+  .info-strip {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px; border-radius:8px;
+    background:rgba(251,191,36,0.05); border:1px solid rgba(251,191,36,0.1);
+    font-size:11px; color:#fbbf24; margin-bottom:20px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Rail ── -->
+  <nav class="rail">
+    <div style="font-size:14px;font-weight:900;color:white;margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:18px;">🦊</span> ReadyStack
+    </div>
+    <div class="rail-label">Compose</div>
+    <div class="tab"><span class="ck">✓</span><span class="tab-num">1</span> Residents</div>
+    <div class="tab"><span class="ck">✓</span><span class="tab-num">2</span> Feature Video</div>
+    <div class="tab"><span class="ck">✓</span><span class="tab-num">3</span> Source Library</div>
+    <div class="tab"><span class="ck">✓</span><span class="tab-num">4</span> Market Story</div>
+    <div class="tab active"><span class="ck">✓</span><span class="tab-num">5</span> District Operations</div>
+    <div class="tab"><span class="tab-num">6</span> Resident Solutions</div>
+    <div class="tab"><span class="tab-num">7</span> Skills & Agents</div>
+    <div class="tab"><span class="tab-num">8</span> District ReadyStack</div>
+    <div class="tab"><span class="tab-num">9</span> Resident Landing Page</div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <!-- Header -->
+    <div class="page-head">
+      <div class="page-title">District Operations</div>
+      <div class="page-sub">How the work gets done — key contributors, jobs to be done, and execution paths. Fed from the Operations lane of your Source Library.</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn-edit btn-edit-primary">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+        <span class="lane-indicator">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Operations Lane · 8 sources assigned
+        </span>
+      </div>
+      <button class="btn-edit btn-run-blend">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Compile Operations
+      </button>
+    </div>
+
+    <div class="info-strip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      This page is generated from links you assigned to "Operations" in the Source Library. Add more sources to enrich it.
+    </div>
+
+    <!-- ═══ OPERATIONAL SUMMARY ═══ -->
+    <div class="ops-summary">
+      <div class="ops-summary-label"><span class="dot"></span> Operational Summary</div>
+      <p>This district executes through a combination of brand strategy consulting, automated lead enrichment, and community-driven content distribution. Three key contributors handle the pipeline from audience identification through conversion — Jane Smith architects the brand positioning, Tom Park automates the discovery and enrichment process, and Sarah Chen manages the content distribution network that drives organic reach.</p>
+    </div>
+
+    <!-- ═══ KEY CONTRIBUTORS ═══ -->
+    <div class="section-head">
+      <span class="section-head-text">Key Contributors</span>
+      <div class="section-head-line"></div>
+      <span class="section-count">3 contributors</span>
+    </div>
+
+    <div class="contributor-grid">
+
+      <!-- Jane Smith -->
+      <div class="contributor-card">
+        <div class="contributor-top">
+          <div class="contributor-identity">
+            <div class="contributor-avatar" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);">JS</div>
+            <div>
+              <div class="contributor-name">Jane Smith</div>
+              <div class="contributor-company">Apex Consulting</div>
+            </div>
+          </div>
+          <span class="role-badge role-strategy">Brand Strategy</span>
+        </div>
+        <div class="contributor-desc">Architects brand positioning frameworks and messaging systems. Provides the strategic foundation that the rest of the district executes against.</div>
+        <div class="contributor-links">
+          <div class="ops-link">
+            <svg class="ops-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Brand Positioning Canvas — Miro Template
+            <span class="from-ops-lane">ops</span>
+          </div>
+          <div class="ops-link">
+            <svg class="ops-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Strategy Session Booking — Calendly
+            <span class="ops-link-type">signup</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tom Park -->
+      <div class="contributor-card">
+        <div class="contributor-top">
+          <div class="contributor-identity">
+            <div class="contributor-avatar" style="background:linear-gradient(135deg,#059669,#10b981);">TP</div>
+            <div>
+              <div class="contributor-name">Tom Park</div>
+              <div class="contributor-company">Greenfield Labs</div>
+            </div>
+          </div>
+          <span class="role-badge role-leadgen">Lead Gen</span>
+        </div>
+        <div class="contributor-desc">Runs the automated discovery and enrichment pipeline. Uses Apollo.io and custom agents to identify, qualify, and route leads into the district's hosted automation flow.</div>
+        <div class="contributor-links">
+          <div class="ops-link">
+            <svg class="ops-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Apollo.io Lead Enrichment Setup Guide
+            <span class="from-ops-lane">ops</span>
+          </div>
+          <div class="ops-link">
+            <svg class="ops-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Lead Scoring Automation — Google Sheets Template
+            <span class="from-ops-lane">ops</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sarah Chen -->
+      <div class="contributor-card">
+        <div class="contributor-top">
+          <div class="contributor-identity">
+            <div class="contributor-avatar" style="background:linear-gradient(135deg,#d97706,#f59e0b);">SC</div>
+            <div>
+              <div class="contributor-name">Sarah Chen</div>
+              <div class="contributor-company">Amplify Media</div>
+            </div>
+          </div>
+          <span class="role-badge role-content">Content Distribution</span>
+        </div>
+        <div class="contributor-desc">Manages cross-platform content distribution and community engagement. Turns the district's Market Story into organic reach through strategic publishing and collaboration.</div>
+        <div class="contributor-links">
+          <div class="ops-link">
+            <svg class="ops-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Content Calendar — Notion Template
+            <span class="from-ops-lane">ops</span>
+          </div>
+          <div class="ops-link">
+            <svg class="ops-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            Distribution Playbook — YouTube
+            <span class="from-ops-lane">ops</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ JOBS TO BE DONE ═══ -->
+    <div class="section-head">
+      <span class="section-head-text">Jobs to Be Done</span>
+      <div class="section-head-line"></div>
+      <span class="section-count">5 jobs · extracted from narrative</span>
+    </div>
+
+    <div class="jtbd-list">
+
+      <div class="jtbd-item">
+        <div class="jtbd-top">
+          <div class="jtbd-check"></div>
+          <div class="jtbd-text">Define core brand message and positioning framework for the district</div>
+        </div>
+        <div class="jtbd-meta">
+          <span class="jtbd-owner"><span class="jtbd-owner-dot" style="background:#818cf8;"></span> Jane Smith · Apex Consulting</span>
+          <span class="jtbd-method method-manual">Manual</span>
+          <span class="jtbd-method method-agent">⚡ Brand Strategy Agent</span>
+          <span class="jtbd-source">← extracted from Market Story § Executive Summary</span>
+        </div>
+      </div>
+
+      <div class="jtbd-item">
+        <div class="jtbd-top">
+          <div class="jtbd-check"></div>
+          <div class="jtbd-text">Identify and qualify 20 niche experts in the trust-based marketing space</div>
+        </div>
+        <div class="jtbd-meta">
+          <span class="jtbd-owner"><span class="jtbd-owner-dot" style="background:#34d399;"></span> Tom Park · Greenfield Labs</span>
+          <span class="jtbd-method method-app">Apollo.io</span>
+          <span class="jtbd-method method-agent">⚡ Lead Enrichment Agent</span>
+          <span class="jtbd-source">← extracted from Market Story § Who Can Deliver</span>
+        </div>
+      </div>
+
+      <div class="jtbd-item">
+        <div class="jtbd-top">
+          <div class="jtbd-check"></div>
+          <div class="jtbd-text">Build and launch the content distribution pipeline across 3 platforms</div>
+        </div>
+        <div class="jtbd-meta">
+          <span class="jtbd-owner"><span class="jtbd-owner-dot" style="background:#f59e0b;"></span> Sarah Chen · Amplify Media</span>
+          <span class="jtbd-method method-app">Notion</span>
+          <span class="jtbd-method method-manual">Manual</span>
+          <span class="jtbd-source">← extracted from Market Story § Core Problem</span>
+        </div>
+      </div>
+
+      <div class="jtbd-item">
+        <div class="jtbd-top">
+          <div class="jtbd-check"></div>
+          <div class="jtbd-text">Configure the hosted automation flow for new resident onboarding</div>
+        </div>
+        <div class="jtbd-meta">
+          <span class="jtbd-owner"><span class="jtbd-owner-dot" style="background:#34d399;"></span> Tom Park · Greenfield Labs</span>
+          <span class="jtbd-method method-app">Makesbridge HAF</span>
+          <span class="jtbd-source">← extracted from Market Story § Market Gap</span>
+        </div>
+      </div>
+
+      <div class="jtbd-item">
+        <div class="jtbd-top">
+          <div class="jtbd-check"></div>
+          <div class="jtbd-text">Establish trust measurement framework — move beyond vanity metrics</div>
+        </div>
+        <div class="jtbd-meta">
+          <span class="jtbd-owner"><span class="jtbd-owner-dot" style="background:#818cf8;"></span> Jane Smith · Apex Consulting</span>
+          <span class="jtbd-method method-manual">Manual</span>
+          <span class="jtbd-source">← extracted from Market Story § Core Problem</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ EXECUTION PATHS ═══ -->
+    <div class="section-head">
+      <span class="section-head-text">Execution Paths</span>
+      <div class="section-head-line"></div>
+      <span class="section-count">3 paths</span>
+    </div>
+
+    <div class="exec-path">
+      <div class="exec-path-header">
+        <span class="exec-path-title">Brand Positioning Pipeline</span>
+        <span class="exec-path-contributor">Jane Smith → District-wide</span>
+      </div>
+      <div class="exec-path-desc">Start with Jane's brand positioning canvas to establish the strategic foundation, then use the Brand Strategy Agent to translate it into messaging that flows through the Market Story and outbound communications.</div>
+      <div class="exec-path-links">
+        <span class="exec-link">📋 Miro Canvas</span>
+        <span class="exec-link exec-link-signup">📅 Book Strategy Session</span>
+        <span class="exec-link exec-link-tool">⚡ Brand Strategy Agent</span>
+      </div>
+    </div>
+
+    <div class="exec-path">
+      <div class="exec-path-header">
+        <span class="exec-path-title">Lead Discovery & Enrichment</span>
+        <span class="exec-path-contributor">Tom Park → Hosted Automation</span>
+      </div>
+      <div class="exec-path-desc">Apollo.io identifies niche experts, the Lead Enrichment Agent qualifies and scores them, then contacts are routed into the Makesbridge hosted automation flow for automated nurture sequencing.</div>
+      <div class="exec-path-links">
+        <span class="exec-link exec-link-tool">🔍 Apollo.io Setup</span>
+        <span class="exec-link exec-link-tool">📊 Scoring Sheet</span>
+        <span class="exec-link exec-link-tool">⚡ Lead Enrichment Agent</span>
+        <span class="exec-link">🔄 HAF Config</span>
+      </div>
+    </div>
+
+    <div class="exec-path">
+      <div class="exec-path-header">
+        <span class="exec-path-title">Content Distribution Network</span>
+        <span class="exec-path-contributor">Sarah Chen → 3 Platforms</span>
+      </div>
+      <div class="exec-path-desc">The distribution playbook shows how the Market Story and resident content get syndicated across YouTube, LinkedIn, and email. Sarah's content calendar coordinates timing and ensures consistent messaging.</div>
+      <div class="exec-path-links">
+        <span class="exec-link">📝 Content Calendar</span>
+        <span class="exec-link">🎬 Distribution Playbook</span>
+        <span class="exec-link exec-link-signup">📧 Email Setup</span>
+      </div>
+    </div>
+
+    <!-- ═══ ADJACENT EDITORIAL ═══ -->
+    <div class="section-head">
+      <span class="section-head-text">Adjacent Editorial</span>
+      <div class="section-head-line"></div>
+      <span class="section-count">Operational content with editorial value</span>
+    </div>
+
+    <div class="adj-editorial">
+      <div class="adj-editorial-top">
+        <span class="adj-editorial-type">How-To</span>
+        <span class="adj-editorial-title">How to Build a Lead Scoring Model for Trust-Based Districts</span>
+      </div>
+      <div class="adj-editorial-desc">Tom's guide to configuring lead scores that measure genuine engagement over vanity metrics. Covers the Makesbridge score rules, threshold-based routing, and how the enrichment agent feeds qualified leads into the automation flow.</div>
+      <div class="adj-editorial-contributor">Tom Park · Greenfield Labs · from Operations lane</div>
+    </div>
+
+    <div class="adj-editorial">
+      <div class="adj-editorial-top">
+        <span class="adj-editorial-type">Case Study</span>
+        <span class="adj-editorial-title">From 0 to 500 Organic Subscribers in 90 Days</span>
+      </div>
+      <div class="adj-editorial-desc">Sarah's breakdown of the distribution strategy that grew a trust-based brand community from scratch. Covers the cross-platform publishing cadence, collaboration triggers, and the role of the Market Story in driving initial discovery.</div>
+      <div class="adj-editorial-contributor">Sarah Chen · Amplify Media · from Operations lane</div>
+    </div>
+
+    <!-- Continue -->
+    <button class="continue-btn">Continue to Resident Solutions</button>
+
+  </main>
+</div>
+</body>
+</html>
