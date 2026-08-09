@@ -127,8 +127,33 @@ They are different domains; there is no shared schema.
   it in via a docs PR.
 - **Production divergence** (see §2) is the single biggest source of confusion here.
 
-## 8. Related docs
+## 9. Where the backend actually is (correction to §4)
+
+§4 is incomplete and, for anything involving money, misleading. Three separate backends
+exist:
+
+1. **The `advisor` Cloud Function** — §4 lists five tasks. This repo actually calls ~22; the
+   missing ones go through the `callAdvisor('name', …)` helper rather than raw `fetch`, and
+   cover invites, auth, persistence and Stripe checkout.
+2. **The Makesbridge/BridgeMail Java API** — where copying and money live: `WorkflowAPI.jsp`
+   (`copyToUser`, `mintShareLink`), `JobContainer.billForReadyStack()` (the 20/40/40 split),
+   Stripe Connect payouts. Nothing about revenue can be changed from this repo.
+3. **The live studio bundle** — `district.readystack.ai/dist/bundle.js`, source not in this
+   repo or the `readystackai-rgb` org, calling tasks that do not exist here
+   (`mintSharerCopyLink`, `copyDistrictReadyStack`, `getReadyStackByHandle`).
+
+If a task concerns sharing, copying, attribution or payouts, start with
+[`docs/SHARE-ATTRIBUTION.md`](docs/SHARE-ATTRIBUTION.md) — not with `index.html`.
+
+## 10. Related docs
 
 - [`README.md`](README.md) — human-facing entry point / quick start.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — deeper notes on the runtime,
   the `advisor` backend contract, and the District data model.
+- [`docs/SHARE-ATTRIBUTION.md`](docs/SHARE-ATTRIBUTION.md) — the 20/40/40 model, chain
+  semantics, and who does not get paid.
+- [`docs/API-SHARE-CHAIN.md`](docs/API-SHARE-CHAIN.md) — endpoint contracts.
+- [`docs/DB-MIGRATIONS.md`](docs/DB-MIGRATIONS.md) — schema and deployment order.
+- [`docs/FRONTEND-SHARE-WIRING.md`](docs/FRONTEND-SHARE-WIRING.md) — what the studio bundle
+  and the page publisher must do.
+- [`docs/KNOWN-BLOCKERS.md`](docs/KNOWN-BLOCKERS.md) — defects found in the settlement path.
