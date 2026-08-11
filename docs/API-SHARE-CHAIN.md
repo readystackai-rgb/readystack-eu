@@ -58,8 +58,12 @@ Body may carry `handle` / `shareCode` instead of query params.
 side, not in this API. Canonical form:
 
 ```
-https://pages.readystack.ai/{districtSlug}/{handle}/s/{shareCode}/
+https://pages.readystack.ai/{handle}?s={shareCode}
 ```
+
+The handle is the whole path — clean for SEO — and attribution rides in the query string.
+A link with `?s=` stripped still resolves and still copies; the 40% falls to the owner of the
+page that was copied.
 
 Notes:
 - **Idempotent** per `(workflow, sharer, inbound code)` — the same person sharing the same

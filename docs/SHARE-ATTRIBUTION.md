@@ -43,16 +43,22 @@ centrally without rewriting rows that are meant to be immutable.
 All identity comparisons are trimmed and case-insensitive — `Faneem` and `faneem` are one
 person.
 
+The 40% goes to the **last person to share or be copied**, resolved in this order and
+skipping any candidate who is the copier themselves:
+
+1. the sharer behind the `?s=` code the copier arrived through;
+2. otherwise the **owner of the page that was copied** — under handle-per-copy, that person
+   published it, so they are the "copy person";
+3. otherwise nobody.
+
 | Rule | Effect |
 |---|---|
 | Copier **is** the origin founder | No founder fee, no referral fee. The copy and chain are still recorded. |
-| Sharer **is** the copier | No referral fee — and **no fallback** to the person above them in the chain. |
-| Copier already appears **anywhere** in the chain | No referral fee. Catches the loop the rule above would miss. |
+| Sharer **is** the copier | The 40% falls through to the page's owner; suppressed only if that is also the copier. Recorded as `SHARER_IS_COPIER`. |
 | Sharer already in the inbound chain, at mint time | The link re-roots at their existing node instead of adding a hop. Cycles collapse rather than extend. |
 
-The "no fallback" point matters: the pre-existing behaviour fell back to the parent
-workflow's owner whenever an explicit sharer was absent, which is precisely how a self-share
-leaked a payment to whoever was above.
+So copying through your own link earns *you* nothing, while the person whose page you copied
+still earns — the fee is re-routed, never silently voided.
 
 ## The worked scenario
 
@@ -69,6 +75,10 @@ payFounder     false          <- copier is the founder
 paySharer      false          <- copier is the founder
 blockReason    COPIER_IS_FOUNDER
 ```
+
+Each copy carries its **own handle**, chosen by the copier, so every sharer's page is a
+distinct URL. The copier is never mistaken for the founder: the founder is resolved by
+walking `parentWfId` to the root of the chain, however many handles sit in between.
 
 Paid on a $100.00 fee: founder **$0.00**, sharer **$0.00**, platform **$100.00**.
 
