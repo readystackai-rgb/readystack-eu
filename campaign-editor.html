@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ReadyStack — Campaign Body Editor</title>
+
+  <!-- Same CDN-only, build-less stack as index.html: React 18 UMD + Babel standalone + Tailwind Play. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- GrapesJS + its newsletter preset. Chosen over porting the legacy MEE editor because
+       MEE is 6.3k lines of Backbone/RequireJS/jQuery-UI and cannot load in this app.
+       The newsletter preset matters for one specific reason: it can export CSS-inlined
+       HTML, which is what email clients need. -->
+  <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" />
+
+  <style>
+    body { margin: 0; background: #0f172a; }
+    /* GrapesJS ships a light chrome; tone it to match the dark studio shell. */
+    .gjs-one-bg { background-color: #1e293b; }
+    .gjs-two-color { color: #e2e8f0; }
+    .gjs-four-color, .gjs-four-color-h:hover { color: #38bdf8; }
+    #gjs { border: none; }
+    .editor-wrap { height: calc(100vh - 148px); min-height: 420px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/grapesjs"></script>
+  <script src="https://unpkg.com/grapesjs-preset-newsletter"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    // ---------------------------------------------------------------------------
+    // Config
+    // ---------------------------------------------------------------------------
+    // The API base is configurable because this page is served from a different
+    // origin than the JSP suite during development. See the CORS note in the banner
+    // below: cross-origin calls need CampaignAPI.jsp to answer OPTIONS and send
+    // Access-Control-* headers, which today only PublicAPI.jsp does.
+    const DEFAULT_API_BASE = 'https://mks.bridgemailsystem.com/pms';
+    const STORE_KEY = 'rs.campaignEditor.config';
+
+    function loadConfig() {
+      try {
+        const raw = sessionStorage.getItem(STORE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) { /* private window, or storage blocked */ }
+      return { apiBase: DEFAULT_API_BASE, token: '', campaignId: '' };
+    }
+
+    function saveConfig(cfg) {
+      try {
+        // sessionStorage, not localStorage: the bearer token dies with the tab.
+        sessionStorage.setItem(STORE_KEY, JSON.stringify(cfg));
+      } catch (e) { /* non-fatal */ }
+    }
+
+    // ---------------------------------------------------------------------------
+    // API
+    // ---------------------------------------------------------------------------
+    // CampaignAPI.jsp answers {"status":"success",...} or {"status":"error","message":...}.
+    // A failure that never reaches the JSP (CORS, DNS, offline) surfaces as a TypeError
+    // from fetch with no response to read, so it is translated into something a person
+    // can act on rather than "Failed to fetch".
+    async function callApi(cfg, action, { method = 'GET', params = {}, body = null } = {}) {
+      const qs = new URLSearchParams(Object.assign({ action }, params));
+      const url = `${cfg.apiBase.replace(/\/+$/, '')}/events/CampaignAPI.jsp?${qs}`;
+
+      const headers = {};
+      if (cfg.token) headers['Authorization'] = `Bearer ${cfg.token}`;
+      if (body) headers['Content-Type'] = 'application/json';
+
+      let res;
+      try {
+        res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+      } catch (networkErr) {
+        throw new Error(
+          'Could not reach the API. If this page is not served from the same origin as ' +
+          'the JSP suite, the browser blocked the request: CampaignAPI.jsp does not yet ' +
+          'answer CORS preflight. See the banner above.'
+        );
+      }
+
+      const text = await res.text();
+      let json = null;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        // A login redirect or container error page — HTML, not JSON.
+        throw new Error(`Expected JSON, got ${res.status}. The session may have expired or the URL may be wrong.`);
+      }
+
+      if (!res.ok || json.status === 'error') {
+        throw new Error(json.message || `Request failed (${res.status}).`);
+      }
+      return json;
+    }
+
+    // ---------------------------------------------------------------------------
+    // Plain-text derivation
+    // ---------------------------------------------------------------------------
+    // CampaignAPI stores an HTML body and a plain-text body as a pair. The editor only
+    // produces HTML, so the text alternative is derived here rather than left stale:
+    // an empty plain text fails action=validate for a text campaign and reads as a blank
+    // email in clients that prefer text.
+    function htmlToPlainText(html) {
+      const doc = new DOMParser().parseFromString(html || '', 'text/html');
+      doc.querySelectorAll('style, script').forEach(function (n) { n.remove(); });
+      // Keep link targets — a text-only reader otherwise loses every call to action.
+      doc.querySelectorAll('a').forEach(function (a) {
+        const href = a.getAttribute('href');
+        const label = (a.textContent || '').trim();
+        if (href && label && !href.startsWith('mailto:') && href !== label) {
+          a.textContent = `${label} (${href})`;
+        }
+      });
+      doc.querySelectorAll('br').forEach(function (br) { br.replaceWith('\n'); });
+      doc.querySelectorAll('p, div, tr, h1, h2, h3, h4, li').forEach(function (el) {
+        el.append('\n');
+      });
+      return (doc.body.textContent || '')
+        .replace(/[ \t\u00a0]+/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .split('\n').map(function (l) { return l.trim(); }).join('\n')
+        .trim();
+    }
+
+    // ---------------------------------------------------------------------------
+    // UI atoms
+    // ---------------------------------------------------------------------------
+    function Field({ label, value, onChange, placeholder, type = 'text', className = '' }) {
+      return (
+        <label className={`flex flex-col gap-1 ${className}`}>
+          <span className="text-[11px] uppercase tracking-wide text-slate-400">{label}</span>
+          <input
+            type={type}
+            value={value}
+            placeholder={placeholder}
+            onChange={function (e) { onChange(e.target.value); }}
+            className="bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-sm text-slate-100
+                       placeholder:text-slate-600 focus:outline-none focus:border-sky-500"
+          />
+        </label>
+      );
+    }
+
+    function Banner({ kind, children, onClose }) {
+      const tone = {
+        error: 'bg-rose-950/70 border-rose-800 text-rose-200',
+        ok: 'bg-emerald-950/70 border-emerald-800 text-emerald-200',
+        warn: 'bg-amber-950/60 border-amber-800/70 text-amber-200',
+      }[kind] || 'bg-slate-800 border-slate-700 text-slate-200';
+
+      return (
+        <div className={`border rounded px-3 py-2 text-sm flex items-start gap-3 ${tone}`}>
+          <div className="flex-1">{children}</div>
+          {onClose && (
+            <button onClick={onClose} className="opacity-60 hover:opacity-100 text-xs">dismiss</button>
+          )}
+        </div>
+      );
+    }
+
+    // ---------------------------------------------------------------------------
+    // Editor
+    // ---------------------------------------------------------------------------
+    function BodyEditor({ initialHtml, onReady }) {
+      const holder = useRef(null);
+      const editorRef = useRef(null);
+
+      useEffect(function () {
+        if (!holder.current || editorRef.current) return;
+
+        // The preset's UMD bundle assigns itself to window["grapesjs-preset-newsletter"] —
+        // a hyphenated key — and does NOT self-register under a plugin name, so passing the
+        // string 'gjs-preset-newsletter' loads nothing: no blocks, and no
+        // 'gjs-get-inlined-html' command, which Save depends on. Pass the function, and
+        // give it its options directly rather than through pluginsOpts.
+        const presetNewsletter = window['grapesjs-preset-newsletter'];
+        if (typeof presetNewsletter !== 'function') {
+          onReady(null, 'The newsletter preset failed to load from unpkg. Check the network tab; without it there are no email blocks and no CSS inliner.');
+          return;
+        }
+
+        const editor = grapesjs.init({
+          container: holder.current,
+          height: '100%',
+          width: 'auto',
+          storageManager: false,           // saving goes through CampaignAPI, not GrapesJS
+          plugins: [
+            function (ed) { return presetNewsletter(ed, { modalTitleImport: 'Import campaign HTML' }); },
+          ],
+          assetManager: {
+            // Uploads are not wired: the legacy image library lives behind the old
+            // session. Pasting an absolute image URL works today.
+            upload: false,
+            uploadText: 'Paste an image URL in the field above',
+          },
+        });
+
+        editorRef.current = editor;
+        onReady(editor);
+
+        return function () {
+          try { editor.destroy(); } catch (e) { /* already torn down */ }
+          editorRef.current = null;
+        };
+      }, []);
+
+      // Load campaign HTML once the editor exists, and again whenever a different
+      // campaign is loaded.
+      useEffect(function () {
+        const editor = editorRef.current;
+        if (!editor) return;
+        editor.setComponents(initialHtml || '');
+      }, [initialHtml]);
+
+      return <div ref={holder} id="gjs" className="editor-wrap" />;
+    }
+
+    // ---------------------------------------------------------------------------
+    // App
+    // ---------------------------------------------------------------------------
+    function App() {
+      const [cfg, setCfg] = useState(loadConfig);
+      const [campaign, setCampaign] = useState(null);
+      const [html, setHtml] = useState('');
+      const [busy, setBusy] = useState(false);
+      const [error, setError] = useState('');
+      const [notice, setNotice] = useState('');
+      const editorRef = useRef(null);
+
+      useEffect(function () { saveConfig(cfg); }, [cfg]);
+
+      const set = useCallback(function (key, value) {
+        setCfg(function (prev) { return Object.assign({}, prev, { [key]: value }); });
+      }, []);
+
+      async function load() {
+        setError(''); setNotice(''); setBusy(true);
+        try {
+          const json = await callApi(cfg, 'get', { params: { campaignId: cfg.campaignId } });
+          const c = json.campaign || {};
+          setCampaign(c);
+          // originalHtmlText is the authored source. htmlText is the processed,
+          // link-tracked output the send pipeline generates — read-only, never edit it.
+          setHtml((c.body && c.body.originalHtmlText) || '');
+          setNotice(`Loaded "${c.campaignName || c.campaignId}" (status ${c.status}).`);
+        } catch (e) {
+          setError(e.message);
+          setCampaign(null);
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      async function save() {
+        const editor = editorRef.current;
+        if (!editor || !campaign) return;
+        setError(''); setNotice(''); setBusy(true);
+        try {
+          // Inlined HTML: email clients strip <style> blocks, so the preset's inliner
+          // is what makes the output actually render in a mail client.
+          const htmlBody = editor.runCommand('gjs-get-inlined-html');
+          const plainBody = htmlToPlainText(htmlBody);
+
+          await callApi(cfg, 'update', {
+            method: 'POST',
+            params: { campaignId: campaign.campaignId },
+            body: { htmlBody: htmlBody, plainBody: plainBody },
+          });
+          setNotice(`Saved ${htmlBody.length.toLocaleString()} characters of HTML and ${plainBody.length.toLocaleString()} of plain text.`);
+        } catch (e) {
+          setError(e.message);
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      const canLoad = cfg.apiBase && cfg.campaignId && !busy;
+      const notEditable = campaign && campaign.isEditable === false;
+
+      return (
+        <div className="min-h-screen text-slate-100">
+          <header className="px-5 py-3 border-b border-slate-800 bg-slate-900">
+            <div className="flex items-baseline gap-3">
+              <h1 className="text-base font-semibold">Campaign Body Editor</h1>
+              <span className="text-xs text-slate-500">
+                CampaignAPI.jsp · action=get / action=update
+              </span>
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 md:grid-cols-[1fr_1fr_200px_auto] gap-3 items-end">
+              <Field label="API base" value={cfg.apiBase} onChange={function (v) { set('apiBase', v); }}
+                     placeholder={DEFAULT_API_BASE} />
+              <Field label="Bearer token" type="password" value={cfg.token}
+                     onChange={function (v) { set('token', v); }}
+                     placeholder="from AuthAPI.jsp?action=login" />
+              <Field label="Campaign ID" value={cfg.campaignId}
+                     onChange={function (v) { set('campaignId', v); }} placeholder="encoded id" />
+              <div className="flex gap-2">
+                <button onClick={load} disabled={!canLoad}
+                        className="px-3 py-1.5 rounded text-sm bg-sky-600 hover:bg-sky-500
+                                   disabled:opacity-40 disabled:hover:bg-sky-600">
+                  {busy ? 'Working…' : 'Load'}
+                </button>
+                <button onClick={save} disabled={!campaign || busy || notEditable}
+                        className="px-3 py-1.5 rounded text-sm bg-emerald-600 hover:bg-emerald-500
+                                   disabled:opacity-40 disabled:hover:bg-emerald-600">
+                  Save
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              {error && <Banner kind="error" onClose={function () { setError(''); }}>{error}</Banner>}
+              {notice && <Banner kind="ok" onClose={function () { setNotice(''); }}>{notice}</Banner>}
+              {notEditable && (
+                <Banner kind="warn">
+                  This campaign is <strong>{campaign.status}</strong> — Pending and Completed campaigns
+                  reject edits, and a Scheduled one must be unscheduled first.
+                </Banner>
+              )}
+              <Banner kind="warn">
+                <strong>Cross-origin note.</strong> Saving sends <code>Authorization</code> and
+                <code> Content-Type: application/json</code>, both of which trigger a CORS preflight.
+                <code> CampaignAPI.jsp</code> does not answer <code>OPTIONS</code> and sends no
+                <code> Access-Control-*</code> headers — only <code>PublicAPI.jsp</code> does. Until that
+                is added, serve this page from the same origin as the JSP suite (drop it under
+                <code> /pms/</code>) or run it behind a dev proxy.
+              </Banner>
+            </div>
+          </header>
+
+          {campaign ? (
+            <BodyEditor
+              initialHtml={html}
+              onReady={function (ed, loadError) {
+                editorRef.current = ed;
+                if (loadError) setError(loadError);
+              }}
+            />
+          ) : (
+            <div className="px-5 py-16 text-center text-slate-500 text-sm">
+              Enter a campaign ID and press <span className="text-slate-300">Load</span> to edit its body.
+              <div className="mt-2 text-xs text-slate-600">
+                IDs come from <code>CampaignAPI.jsp?action=list</code>; tokens from <code>AuthAPI.jsp?action=login</code>.
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
